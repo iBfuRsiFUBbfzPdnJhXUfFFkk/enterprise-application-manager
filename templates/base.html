@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Architecture Portal{% endblock %}</title>
+
+</head>
+<body>
+<nav>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/application">Applications</a></li>
+        <li><a href="/person">People</a></li>
+        {% block navigation %}
+        {% endblock %}
+    </ul>
+</nav>
+
+<div>
+    {% block content %}
+    {% endblock %}
+</div>
+
+<footer>
+    <p>&copy; 2025 WNI</p>
+</footer>
+
+<script src="https://unpkg.com/htmx.org@1.8.4"></script>
+</body>
+</html>

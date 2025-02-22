@@ -1,0 +1,22 @@
+{% extends 'base_application.html' %}
+{% block title %}Applications{% endblock %}
+{% block content %}
+    <table>
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>Acronym</td>
+            <td>Display Name</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for application in applications %}
+            <tr>
+                <td>{{ application.id }}</td>
+                <td>{{ application.acronym }}</td>
+                <td>{{ application.display_label }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

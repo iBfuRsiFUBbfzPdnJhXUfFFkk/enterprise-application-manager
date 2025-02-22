@@ -1,0 +1,11 @@
+{% extends 'base_person.html' %}
+{% block title %}Person New{% endblock %}
+{% block content %}
+    <h1>Add a New Person</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}
