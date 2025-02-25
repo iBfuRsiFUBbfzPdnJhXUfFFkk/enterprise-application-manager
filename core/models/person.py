@@ -12,6 +12,7 @@ class Person(Comment):
     is_employee = create_generic_boolean(default=True)
     is_stakeholder = create_generic_boolean()
     link_gitlab_username = create_generic_varchar()
+    link_sharepoint_profile = create_generic_varchar()
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
     type_job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
