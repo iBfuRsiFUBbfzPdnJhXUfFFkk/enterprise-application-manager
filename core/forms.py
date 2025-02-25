@@ -1,14 +1,15 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, DateInput
 
 from core.models import Application, Person
 
 
 class ApplicationForm(ModelForm):
     class Meta:
-        model = Application
         fields = '__all__'
+        model = Application
+        widgets = {'date_launch': DateInput(attrs={'type': 'date'})}
 
 class PersonForm(ModelForm):
     class Meta:
-        model = Person
         fields = '__all__'
+        model = Person
