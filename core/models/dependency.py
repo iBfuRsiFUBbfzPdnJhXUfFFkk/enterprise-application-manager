@@ -31,3 +31,6 @@ class Dependency(Comment):
 
     def __str__(self):
         return f"{self.dependency_name} v{self.version}"
+
+    class Meta:
+        verbose_name_plural = "Dependencies"

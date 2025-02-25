@@ -48,3 +48,6 @@ class Person(Comment):
 
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.job_level} {self.job_title}"
+
+    class Meta:
+        verbose_name_plural = "People"
