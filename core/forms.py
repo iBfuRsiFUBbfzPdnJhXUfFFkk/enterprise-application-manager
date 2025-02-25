@@ -43,3 +43,8 @@ class ReleaseBundleForm(ModelForm):
     class Meta:
         fields = '__all__'
         model = ReleaseBundle
+        widgets = {
+            'date_code_freeze': DateInput(attrs={'type': 'date'}),
+            'date_demo': DateInput(attrs={'type': 'date'}),
+            'date_release': DateInput(attrs={'type': 'date'}),
+        }
