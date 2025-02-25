@@ -18,7 +18,13 @@
         {% for application in applications %}
             <tr>
                 <td>{{ application.acronym }}</td>
-                <td>{{ application.name }}</td>
+                <td>
+                    {% if application.is_legacy %}
+                        {{ application.name }} (LEGACY)
+                    {% else %}
+                        {{ application.name }}
+                    {% endif %}
+                </td>
                 <td>
                     {% if application.application_group_platform %}
                         {{ application.application_group_platform.acronym }}

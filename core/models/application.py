@@ -24,6 +24,7 @@ class Application(Comment, Name):
     application_upstream_dependencies = create_generic_m2m(to='self')
     date_launch = create_generic_date()
     is_externally_facing = create_generic_boolean()
+    is_legacy = create_generic_boolean()
     link_development_server = create_generic_varchar()
     link_gitlab_repository = create_generic_varchar()
     link_production_server = create_generic_varchar()
