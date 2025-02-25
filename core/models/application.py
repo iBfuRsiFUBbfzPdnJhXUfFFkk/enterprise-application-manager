@@ -26,6 +26,7 @@ class Application(Comment, Name):
     link_production_server = create_generic_varchar()
     link_production_server_external = create_generic_varchar()
     link_staging_server = create_generic_varchar()
+    name_aliases = create_generic_varchar()
     peak_userbase = create_generic_integer()
     person_architect = create_generic_fk(related_name='applications_as_architect', to=Person)
     person_developers = create_generic_m2m(related_name='applications_developer_of', to=Person)
