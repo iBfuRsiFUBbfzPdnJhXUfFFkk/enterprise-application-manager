@@ -1,6 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from core.forms import ApplicationForm
+from core.forms.application_form import ApplicationForm
 from core.views.generic.generic_add_view import generic_add_view
 
 

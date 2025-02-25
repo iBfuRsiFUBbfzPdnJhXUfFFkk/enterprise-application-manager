@@ -1,6 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from core.forms import DatabaseForm
+from core.forms.database_form import DatabaseForm
 from core.views.generic.generic_add_view import generic_add_view
 
 

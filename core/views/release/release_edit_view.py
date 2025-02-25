@@ -1,6 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from core.forms import ReleaseForm
+from core.forms.release_form import ReleaseForm
 from core.models.release import Release
 from core.views.generic.generic_edit_view import generic_edit_view
 

@@ -1,6 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
-from core.forms import ReleaseBundleForm
+from core.forms.release_bundle_form import ReleaseBundleForm
 from core.models.release_bundle import ReleaseBundle
 from core.views.generic.generic_edit_view import generic_edit_view
 

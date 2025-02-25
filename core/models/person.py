@@ -8,7 +8,9 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 
 class Person(Comment):
     is_active = create_generic_boolean(default=True)
+    is_developer = create_generic_boolean()
     is_employee = create_generic_boolean(default=True)
+    is_stakeholder = create_generic_boolean()
     link_gitlab_username = create_generic_varchar()
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
