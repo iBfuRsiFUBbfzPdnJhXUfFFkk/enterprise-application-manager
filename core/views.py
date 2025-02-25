@@ -15,7 +15,6 @@ def generic_add_view(
         form_cls: type[ModelForm],
         request: HttpRequest,
         success_route: str,
-        template_name: str,
 ) -> HttpResponse:
     method: str | None = request.method
     immutable_query_dict = request.POST
@@ -27,7 +26,7 @@ def generic_add_view(
     else:
         form: ModelForm[Model] = form_cls()
     context: Mapping[str, Any] = {'form': form}
-    return render(context=context, request=request, template_name=template_name)
+    return render(context=context, request=request, template_name='generic_add.html')
 
 
 def generic_edit_view(
@@ -36,7 +35,6 @@ def generic_edit_view(
         model_id: int,
         request: HttpRequest,
         success_route: str,
-        template_name: str,
 ) -> HttpResponse:
     method: str | None = request.method
     immutable_query_dict = request.POST
@@ -49,7 +47,7 @@ def generic_edit_view(
     else:
         form: ModelForm = form_cls(instance=model_instance)
     context: Mapping[str, Any] = {'form': form}
-    return render(context=context, request=request, template_name=template_name)
+    return render(context=context, request=request, template_name='generic_edit.html')
 
 
 def generic_view(
@@ -89,7 +87,6 @@ def application_edit_view(request: HttpRequest, application_id: int) -> HttpResp
         model_id=application_id,
         request=request,
         success_route='application',
-        template_name='application_edit.html',
     )
 
 
@@ -98,7 +95,6 @@ def application_add_view(request: HttpRequest) -> HttpResponse:
         form_cls=ApplicationForm,
         request=request,
         success_route='application',
-        template_name='application_add.html',
     )
 
 
@@ -121,7 +117,6 @@ def person_edit_view(request: HttpRequest, person_id: int) -> HttpResponse:
         model_id=person_id,
         request=request,
         success_route='person',
-        template_name='person_edit.html',
     )
 
 
@@ -130,7 +125,6 @@ def person_add_view(request: HttpRequest) -> HttpResponse:
         form_cls=PersonForm,
         request=request,
         success_route='person',
-        template_name='person_add.html',
     )
 
 
@@ -152,7 +146,6 @@ def database_edit_view(request: HttpRequest, database_id: int) -> HttpResponse:
         model_id=database_id,
         request=request,
         success_route='database',
-        template_name='database_edit.html',
     )
 
 
@@ -161,5 +154,4 @@ def database_add_view(request: HttpRequest) -> HttpResponse:
         form_cls=DatabaseForm,
         request=request,
         success_route='database',
-        template_name='database_add.html',
     )

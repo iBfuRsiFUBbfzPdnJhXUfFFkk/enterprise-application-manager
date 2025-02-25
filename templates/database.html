@@ -1,7 +1,7 @@
 {% extends 'base_database.html' %}
 {% block title %}Databases{% endblock %}
 {% block content %}
-    <table>
+    <table id="data-table" class="display">
         <thead>
         <tr>
             <td>Application</td>
@@ -27,4 +27,9 @@
         {% endfor %}
         </tbody>
     </table>
+    <script>
+        $(document).ready(function() {
+            $('#data-table').DataTable();
+        });
+    </script>
 {% endblock %}

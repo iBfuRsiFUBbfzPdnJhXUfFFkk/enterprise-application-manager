@@ -1,7 +1,7 @@
 {% extends 'base_application.html' %}
 {% block title %}Applications{% endblock %}
 {% block content %}
-    <table>
+    <table id="data-table" class="display">
         <thead>
         <tr>
             <td>Acronym</td>
@@ -21,4 +21,9 @@
         {% endfor %}
         </tbody>
     </table>
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable();
+        });
+    </script>
 {% endblock %}

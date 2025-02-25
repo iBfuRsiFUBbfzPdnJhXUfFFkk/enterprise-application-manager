@@ -1,8 +1,5 @@
-{% extends 'base_database.html' %}
-{% block title %}Database Edit{% endblock %}
+{% extends 'base.html' %}
 {% block content %}
-    <h1>Edit Database</h1>
-
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
