@@ -14,7 +14,7 @@
             <tr>
                 <td>{{ application.acronym }}</td>
                 <td>{{ application.name }}</td>
-                <td>{{ application.type_platform }}</td>
+                <td>{{ application.type_platform_target }}</td>
                 <td><a href="{% url 'application_edit' model_id=application.id %}">Edit</a></td>
             </tr>
         {% endfor %}
