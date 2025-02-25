@@ -1,15 +1,7 @@
 from django.db.models import Model, CharField, ForeignKey, DO_NOTHING, ManyToManyField, BooleanField
 from django.db.models.fields import DateField, IntegerField
 
-
-class Display(Model):
-    display_label = CharField(blank=True, max_length=255, null=True)
-
-    class Meta:
-        abstract = True
-
-
-class Person(Display):
+class Person(Model):
     JOB_LEVEL_JUNIOR = "Junior"
     JOB_LEVEL_MID_LEVEL = "Mid-Level"
     JOB_LEVEL_SENIOR = "Senior"
@@ -53,7 +45,7 @@ class Person(Display):
         return f"{self.name_last} {self.name_first} - {self.job_level} {self.job_title}"
 
 
-class Application(Display):
+class Application(Model):
     PLATFORM_BACKGROUND_TASK = "Background Task"
     PLATFORM_CHROME_PLUGIN = "Chrome Plugin"
     PLATFORM_IOS = "IOS"
@@ -125,6 +117,7 @@ class Application(Display):
         "blank": True,
         "to": 'self',
     })
+    application_name = CharField(blank=True, max_length=255, null=True)
     application_upstream_dependencies = ManyToManyField(**{
         "blank": True,
         "to": 'self',
@@ -190,4 +183,71 @@ class Application(Display):
     type_platform = CharField(blank=True, choices=PLATFORM_CHOICES, max_length=255, null=True)
 
     def __str__(self):
-        return f"{self.display_label} ({self.acronym})"
+        return f"{self.application_name} ({self.acronym})"
+
+
+class ReleaseBundle(Model):
+    bundle_name = CharField(blank=True, max_length=255, null=True)
+    date_code_freeze = DateField(blank=True, null=True)
+    date_demo = DateField(blank=True, null=True)
+    date_release = DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.bundle_name}"
+
+class Release(Model):
+    SIGN_OFF_APPROVED = "Approved"
+    SIGN_OFF_DENIED = "Denied"
+    SIGN_OFF_PENDING = "Pending"
+
+    SIGN_OFF_CHOICES = [
+        (SIGN_OFF_APPROVED, SIGN_OFF_APPROVED),
+        (SIGN_OFF_DENIED, SIGN_OFF_DENIED),
+        (SIGN_OFF_PENDING, SIGN_OFF_PENDING),
+    ]
+
+    application = ForeignKey(**{
+        "blank": True,
+        "null": True,
+        "on_delete": DO_NOTHING,
+        "related_name": 'releases',
+        "to": Application,
+    })
+    release_bundle = ForeignKey(**{
+        "blank": True,
+        "null": True,
+        "on_delete": DO_NOTHING,
+        "related_name": 'releases',
+        "to": ReleaseBundle,
+    })
+    software_version = CharField(blank=True, max_length=255, null=True)
+    type_product_owner_sign_off = CharField(blank=True, choices=SIGN_OFF_CHOICES, max_length=255, null=True)
+
+    def __str__(self):
+        return f"{self.application.acronym} v{self.software_version}"
+
+class Dependency(Model):
+    DEPENDENCY_TYPE_CHOICES_FRAMEWORK = "Framework"
+    DEPENDENCY_TYPE_CHOICES_LANGUAGE = "Language"
+    DEPENDENCY_TYPE_CHOICES_PACKAGE = "Package"
+    DEPENDENCY_TYPE_CHOICES_PROTOCOL = "Protocol"
+    DEPENDENCY_TYPE_CHOICES_STANDARD = "Standard"
+
+    DEPENDENCY_TYPE_CHOICES = [
+        (DEPENDENCY_TYPE_CHOICES_FRAMEWORK, DEPENDENCY_TYPE_CHOICES_FRAMEWORK),
+        (DEPENDENCY_TYPE_CHOICES_LANGUAGE, DEPENDENCY_TYPE_CHOICES_LANGUAGE),
+        (DEPENDENCY_TYPE_CHOICES_PACKAGE, DEPENDENCY_TYPE_CHOICES_PACKAGE),
+        (DEPENDENCY_TYPE_CHOICES_PROTOCOL, DEPENDENCY_TYPE_CHOICES_PROTOCOL),
+        (DEPENDENCY_TYPE_CHOICES_STANDARD, DEPENDENCY_TYPE_CHOICES_STANDARD),
+    ]
+
+    applications = ManyToManyField(**{
+        "blank": True,
+        "to": Application,
+    })
+    dependency_name = CharField(blank=True, max_length=255, null=True)
+    version = CharField(blank=True, max_length=255, null=True)
+    type_dependency = CharField(blank=True, choices=DEPENDENCY_TYPE_CHOICES, max_length=255, null=True)
+
+    def __str__(self):
+        return f"{self.dependency_name} v{self.version}"

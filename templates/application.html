@@ -4,9 +4,8 @@
     <table>
         <thead>
         <tr>
-            <td>ID</td>
             <td>Acronym</td>
-            <td>Display Name</td>
+            <td>Name</td>
             <td>Platform</td>
             <td>Edit</td>
         </tr>
@@ -14,9 +13,8 @@
         <tbody>
         {% for application in applications %}
             <tr>
-                <td>{{ application.id }}</td>
                 <td>{{ application.acronym }}</td>
-                <td>{{ application.display_label }}</td>
+                <td>{{ application.application_name }}</td>
                 <td>{{ application.type_platform }}</td>
                 <td><a href="{% url 'application_edit' application_id=application.id %}">Edit</a></td>
             </tr>
