@@ -7,6 +7,9 @@
             <td>Name</td>
             <td>Platform</td>
             <td>Edit</td>
+            <td>Development</td>
+            <td>Staging</td>
+            <td>Production</td>
         </tr>
         </thead>
         <tbody>
@@ -16,6 +19,33 @@
                 <td>{{ application.name }}</td>
                 <td>{{ application.type_platform_target }}</td>
                 <td><a href="{% url 'application_edit' model_id=application.id %}">Edit</a></td>
+                <td>
+                    {% if person.link_development_server %}
+                        <a href="{{ person.link_development_server }}" target="_blank">
+                            DEVELOPMENT
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if person.link_staging_server %}
+                        <a href="{{ person.link_staging_server }}" target="_blank">
+                            STAGING
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if person.link_production_server %}
+                        <a href="{{ person.link_production_server }}" target="_blank">
+                            PRODUCTION
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
