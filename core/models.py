@@ -38,8 +38,8 @@ class Person(Display):
         (JOB_TITLE_SOFTWARE_ARCHITECT, JOB_TITLE_SOFTWARE_ARCHITECT),
     ]
 
-    job_level = CharField(choices=JOB_LEVEL_CHOICES, max_length=25, null=True)
-    job_title = CharField(choices=JOB_TITLE_CHOICES, max_length=25, null=True)
+    job_level = CharField(blank=True, choices=JOB_LEVEL_CHOICES, max_length=25, null=True)
+    job_title = CharField(blank=True, choices=JOB_TITLE_CHOICES, max_length=25, null=True)
     link_gitlab_username = CharField(max_length=255, null=True)
     name_first = CharField(max_length=255, null=True)
     name_last = CharField(max_length=255, null=True)
@@ -49,6 +49,24 @@ class Person(Display):
 
 
 class Application(Display):
+    PLATFORM_BACKGROUND_TASK = "Background Task"
+    PLATFORM_CHROME_PLUGIN = "Chrome Plugin"
+    PLATFORM_IOS = "IOS"
+    PLATFORM_MICROSOFT_EXCEL = "Microsoft Excel"
+    PLATFORM_MICROSOFT_EXCEL_VBA = "Microsoft Excel + Visual Basic for Applications"
+    PLATFORM_MICROSOFT_WORD = "Microsoft Word"
+    PLATFORM_WEB = "WEB"
+
+    PLATFORM_CHOICES = [
+        (PLATFORM_BACKGROUND_TASK, PLATFORM_BACKGROUND_TASK),
+        (PLATFORM_CHROME_PLUGIN, PLATFORM_CHROME_PLUGIN),
+        (PLATFORM_IOS, PLATFORM_IOS),
+        (PLATFORM_MICROSOFT_EXCEL, PLATFORM_MICROSOFT_EXCEL),
+        (PLATFORM_MICROSOFT_EXCEL_VBA, PLATFORM_MICROSOFT_EXCEL_VBA),
+        (PLATFORM_MICROSOFT_WORD, PLATFORM_MICROSOFT_WORD),
+        (PLATFORM_WEB, PLATFORM_WEB),
+    ]
+
     acronym = CharField(max_length=255, null=True)
     person_architect = ForeignKey(**{
         "blank": True,
@@ -96,6 +114,7 @@ class Application(Display):
         "related_name": 'applications_as_scrum_master',
         "to": Person,
     })
+    type_platform = CharField(blank=True, choices=PLATFORM_CHOICES, max_length=255, null=True)
 
     def __str__(self):
         return f"{self.display_label} ({self.acronym})"
