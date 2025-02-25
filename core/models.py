@@ -3,7 +3,7 @@ from django.db.models.fields import DateField, IntegerField
 
 
 class Display(Model):
-    display_label = CharField(max_length=255, null=True)
+    display_label = CharField(blank=True, max_length=255, null=True)
 
     class Meta:
         abstract = True
@@ -23,6 +23,7 @@ class Person(Display):
     JOB_TITLE_PROJECT_MANAGER = "Project Manager"
     JOB_TITLE_SCRUM_MASTER = "Scrum Master"
     JOB_TITLE_SOFTWARE_ARCHITECT = "Software Architect"
+    JOB_TITLE_SOFTWARE_SUPPORT_SPECIALIST = "Software Support Specialist"
 
     JOB_LEVEL_CHOICES = [
         (JOB_LEVEL_JUNIOR, JOB_LEVEL_JUNIOR),
@@ -39,10 +40,11 @@ class Person(Display):
         (JOB_TITLE_PROJECT_MANAGER, JOB_TITLE_PROJECT_MANAGER),
         (JOB_TITLE_SCRUM_MASTER, JOB_TITLE_SCRUM_MASTER),
         (JOB_TITLE_SOFTWARE_ARCHITECT, JOB_TITLE_SOFTWARE_ARCHITECT),
+        (JOB_TITLE_SOFTWARE_SUPPORT_SPECIALIST, JOB_TITLE_SOFTWARE_SUPPORT_SPECIALIST),
     ]
 
-    job_level = CharField(blank=True, choices=JOB_LEVEL_CHOICES, max_length=25, null=True)
-    job_title = CharField(blank=True, choices=JOB_TITLE_CHOICES, max_length=25, null=True)
+    job_level = CharField(blank=True, choices=JOB_LEVEL_CHOICES, max_length=255, null=True)
+    job_title = CharField(blank=True, choices=JOB_TITLE_CHOICES, max_length=255, null=True)
     link_gitlab_username = CharField(blank=True, max_length=255, null=True)
     name_first = CharField(blank=True, max_length=255, null=True)
     name_last = CharField(blank=True, max_length=255, null=True)
