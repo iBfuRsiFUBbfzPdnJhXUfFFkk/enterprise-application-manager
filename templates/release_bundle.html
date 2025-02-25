@@ -1,21 +1,17 @@
-{% extends 'base_application.html' %}
+{% extends 'base_release_bundle.html' %}
 {% block content %}
     <table id="data-table" class="display">
         <thead>
         <tr>
-            <td>Acronym</td>
             <td>Name</td>
-            <td>Platform</td>
             <td>Edit</td>
         </tr>
         </thead>
         <tbody>
-        {% for application in applications %}
+        {% for release_bundle in release_bundles %}
             <tr>
-                <td>{{ application.acronym }}</td>
-                <td>{{ application.name }}</td>
-                <td>{{ application.type_platform }}</td>
-                <td><a href="{% url 'application_edit' model_id=application.id %}">Edit</a></td>
+                <td>{{ release_bundle.name }}</td>
+                <td><a href="{% url 'release_bundle_edit' model_id=release_bundle.id %}">Edit</a></td>
             </tr>
         {% endfor %}
         </tbody>

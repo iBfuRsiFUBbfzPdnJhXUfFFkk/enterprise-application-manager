@@ -7,5 +7,5 @@ from core.views.database.database_view import database_view
 urlpatterns_database: list[URLPattern | URLResolver] = [
     path(name="database", route="database", view=database_view),
     path(name="database_new", route="database/new", view=database_add_view),
-    path(name="database_edit", route="database/edit/<int:database_id>", view=database_edit_view),
+    path(name="database_edit", route="database/edit/<int:model_id>", view=database_edit_view),
 ]
