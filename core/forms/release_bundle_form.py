@@ -1,18 +1,13 @@
-from django.forms import ModelForm, DateInput, DateField
+from django.forms import ModelForm
 
+from core.forms.common.generic_date_field import generic_date_field
 from core.models.release_bundle import ReleaseBundle
 
 
 class ReleaseBundleForm(ModelForm):
-    date_code_freeze = DateField(
-        widget=DateInput(attrs={'type': 'date'}),
-    )
-    date_demo = DateField(
-        widget=DateInput(attrs={'type': 'date'}),
-    )
-    date_release = DateField(
-        widget=DateInput(attrs={'type': 'date'}),
-    )
+    date_code_freeze = generic_date_field()
+    date_demo = generic_date_field()
+    date_release = generic_date_field()
 
     class Meta:
         fields = '__all__'
