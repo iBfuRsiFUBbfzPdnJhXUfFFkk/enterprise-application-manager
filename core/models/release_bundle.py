@@ -1,14 +1,13 @@
-from django.db.models import CharField
-from django.db.models.fields import DateField
-
 from core.models.common.comment import Comment
+from core.models.common.create_generic_date import create_generic_date
+from core.models.common.create_generic_varchar import create_generic_varchar
 
 
 class ReleaseBundle(Comment):
-    bundle_name = CharField(blank=True, max_length=255, null=True)
-    date_code_freeze = DateField(blank=True, null=True)
-    date_demo = DateField(blank=True, null=True)
-    date_release = DateField(blank=True, null=True)
+    bundle_name = create_generic_varchar()
+    date_code_freeze = create_generic_date()
+    date_demo = create_generic_date()
+    date_release = create_generic_date()
 
     def __str__(self):
         return f"{self.bundle_name}"

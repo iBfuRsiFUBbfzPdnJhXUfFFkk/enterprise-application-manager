@@ -1,7 +1,8 @@
-from django.db.models import CharField, ForeignKey, DO_NOTHING
-
 from core.models.application import Application
 from core.models.common.comment import Comment
+from core.models.common.create_generic_enum import create_generic_enum
+from core.models.common.create_generic_fk import create_generic_fk
+from core.models.common.create_generic_varchar import create_generic_varchar
 
 
 class Database(Comment):
@@ -35,18 +36,12 @@ class Database(Comment):
         (DATABASE_TYPE_RELATIONAL, DATABASE_TYPE_RELATIONAL),
     ]
 
-    application = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'databases',
-        "to": Application,
-    })
-    database_name = CharField(blank=True, max_length=255, null=True)
-    version = CharField(blank=True, max_length=255, null=True)
-    type_database_environment = CharField(blank=True, choices=DATABASE_ENVIRONMENT_CHOICES, max_length=255, null=True)
-    type_database_flavor = CharField(blank=True, choices=DATABASE_FLAVOR_CHOICES, max_length=255, null=True)
-    type_database_storage_model = CharField(blank=True, choices=DATABASE_TYPE_CHOICES, max_length=255, null=True)
+    application = create_generic_fk(related_name='databases', to=Application)
+    database_name = create_generic_varchar()
+    type_database_environment = create_generic_enum(choices=DATABASE_ENVIRONMENT_CHOICES)
+    type_database_flavor = create_generic_enum(choices=DATABASE_FLAVOR_CHOICES)
+    type_database_storage_model = create_generic_enum(choices=DATABASE_TYPE_CHOICES)
+    version = create_generic_varchar()
 
     def __str__(self):
         return f"{self.application.acronym} - {self.type_database_environment} - v{self.version}"

@@ -1,7 +1,9 @@
-from django.db.models import CharField, ManyToManyField, BooleanField
-
 from core.models.application import Application
 from core.models.common.comment import Comment
+from core.models.common.create_generic_boolean import create_generic_boolean
+from core.models.common.create_generic_enum import create_generic_enum
+from core.models.common.create_generic_m2m import create_generic_m2m
+from core.models.common.create_generic_varchar import create_generic_varchar
 
 
 class Dependency(Comment):
@@ -21,14 +23,11 @@ class Dependency(Comment):
         (DEPENDENCY_TYPE_CHOICES_STANDARD, DEPENDENCY_TYPE_CHOICES_STANDARD),
     ]
 
-    applications = ManyToManyField(**{
-        "blank": True,
-        "to": Application,
-    })
-    dependency_name = CharField(blank=True, max_length=255, null=True)
-    is_heavy = BooleanField(blank=True, default=False, null=True)
-    version = CharField(blank=True, max_length=255, null=True)
-    type_dependency = CharField(blank=True, choices=DEPENDENCY_TYPE_CHOICES, max_length=255, null=True)
+    applications = create_generic_m2m(to=Application)
+    dependency_name = create_generic_varchar()
+    is_heavy = create_generic_boolean()
+    type_dependency = create_generic_enum(choices=DEPENDENCY_TYPE_CHOICES)
+    version = create_generic_varchar()
 
     def __str__(self):
         return f"{self.dependency_name} v{self.version}"

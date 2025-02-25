@@ -1,7 +1,8 @@
-from django.db.models import CharField, ForeignKey, DO_NOTHING
-
 from core.models.application import Application
 from core.models.common.comment import Comment
+from core.models.common.create_generic_enum import create_generic_enum
+from core.models.common.create_generic_fk import create_generic_fk
+from core.models.common.create_generic_varchar import create_generic_varchar
 from core.models.release_bundle import ReleaseBundle
 
 
@@ -16,22 +17,10 @@ class Release(Comment):
         (SIGN_OFF_PENDING, SIGN_OFF_PENDING),
     ]
 
-    application = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'releases',
-        "to": Application,
-    })
-    release_bundle = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'releases',
-        "to": ReleaseBundle,
-    })
-    version = CharField(blank=True, max_length=255, null=True)
-    type_product_owner_sign_off = CharField(blank=True, choices=SIGN_OFF_CHOICES, max_length=255, null=True)
+    application = create_generic_fk(related_name='releases', to=Application)
+    release_bundle = create_generic_fk(related_name='releases', to=ReleaseBundle)
+    type_product_owner_sign_off = create_generic_enum(choices=SIGN_OFF_CHOICES)
+    version = create_generic_varchar()
 
     def __str__(self):
         return f"{self.application.acronym} v{self.version}"

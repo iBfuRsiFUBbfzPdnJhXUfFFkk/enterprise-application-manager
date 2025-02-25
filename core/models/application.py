@@ -1,6 +1,11 @@
-from django.db.models import CharField, ManyToManyField, DateField, BooleanField, IntegerField, ForeignKey, DO_NOTHING
-
 from core.models.common.comment import Comment
+from core.models.common.create_generic_boolean import create_generic_boolean
+from core.models.common.create_generic_date import create_generic_date
+from core.models.common.create_generic_enum import create_generic_enum
+from core.models.common.create_generic_fk import create_generic_fk
+from core.models.common.create_generic_integer import create_generic_integer
+from core.models.common.create_generic_m2m import create_generic_m2m
+from core.models.common.create_generic_varchar import create_generic_varchar
 from core.models.person import Person
 
 
@@ -71,75 +76,30 @@ class Application(Comment):
         (LIFECYCLE_REJECTED, LIFECYCLE_REJECTED),
     ]
 
-    acronym = CharField(blank=True, max_length=255, null=True)
-    application_downstream_dependencies = ManyToManyField(**{
-        "blank": True,
-        "to": 'self',
-    })
-    application_name = CharField(blank=True, max_length=255, null=True)
-    application_upstream_dependencies = ManyToManyField(**{
-        "blank": True,
-        "to": 'self',
-    })
-    date_launch = DateField(blank=True, null=True)
-    is_externally_facing = BooleanField(blank=True, default=False, null=True)
-    link_development_server = CharField(blank=True, max_length=255, null=True)
-    link_staging_server = CharField(blank=True, max_length=255, null=True)
-    link_production_server = CharField(blank=True, max_length=255, null=True)
-    link_production_server_external = CharField(blank=True, max_length=255, null=True)
-    link_gitlab_repository = CharField(blank=True, max_length=255, null=True)
-    peak_userbase = IntegerField(blank=True, null=True)
-    person_architect = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'applications_as_architect',
-        "to": Person,
-    })
-    person_developers = ManyToManyField(**{
-        "blank": True,
-        "to": Person,
-    })
-    person_lead_developer = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'applications_as_lead_developer',
-        "to": Person,
-    })
-    person_product_manager = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'applications_as_product_manager',
-        "to": Person,
-    })
-    person_product_owner = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'applications_as_product_owner',
-        "to": Person,
-    })
-    person_project_manager = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'applications_as_project_manager',
-        "to": Person,
-    })
-    person_scrum_master = ForeignKey(**{
-        "blank": True,
-        "null": True,
-        "on_delete": DO_NOTHING,
-        "related_name": 'applications_as_scrum_master',
-        "to": Person,
-    })
-    type_authorization = CharField(blank=True, choices=AUTHORIZATION_TYPE_CHOICES, max_length=255, null=True)
-    type_authentication = CharField(blank=True, choices=AUTHENTICATION_TYPE_CHOICES, max_length=255, null=True)
-    type_deployment_medium = CharField(blank=True, choices=DEPLOYMENT_MEDIUM_CHOICES, max_length=255, null=True)
-    type_lifecycle = CharField(blank=True, choices=LIFECYCLE_CHOICES, max_length=255, null=True)
-    type_platform = CharField(blank=True, choices=PLATFORM_CHOICES, max_length=255, null=True)
+    acronym = create_generic_varchar()
+    application_downstream_dependencies = create_generic_m2m(to='self')
+    application_name = create_generic_varchar()
+    application_upstream_dependencies = create_generic_m2m(to='self')
+    date_launch = create_generic_date()
+    is_externally_facing = create_generic_boolean()
+    link_development_server = create_generic_varchar()
+    link_gitlab_repository = create_generic_varchar()
+    link_production_server = create_generic_varchar()
+    link_production_server_external = create_generic_varchar()
+    link_staging_server = create_generic_varchar()
+    peak_userbase = create_generic_integer()
+    person_architect = create_generic_fk(related_name='applications_as_architect', to=Person)
+    person_developers = create_generic_m2m(to=Person)
+    person_lead_developer = create_generic_fk(related_name='applications_as_lead_developer', to=Person)
+    person_product_manager = create_generic_fk(related_name='applications_as_product_manager', to=Person)
+    person_product_owner = create_generic_fk(related_name='applications_as_product_owner', to=Person)
+    person_project_manager = create_generic_fk(related_name='applications_as_project_manager', to=Person)
+    person_scrum_master = create_generic_fk(related_name='applications_as_scrum_master', to=Person)
+    type_authentication = create_generic_enum(choices=AUTHENTICATION_TYPE_CHOICES)
+    type_authorization = create_generic_enum(choices=AUTHORIZATION_TYPE_CHOICES)
+    type_deployment_medium = create_generic_enum(choices=DEPLOYMENT_MEDIUM_CHOICES)
+    type_lifecycle = create_generic_enum(choices=LIFECYCLE_CHOICES)
+    type_platform = create_generic_enum(choices=PLATFORM_CHOICES)
 
     def __str__(self):
         return f"{self.application_name} ({self.acronym})"
