@@ -1,0 +1,30 @@
+{% extends 'base_database.html' %}
+{% block title %}Databases{% endblock %}
+{% block content %}
+    <table>
+        <thead>
+        <tr>
+            <td>Application</td>
+            <td>Environment</td>
+            <td>Name</td>
+            <td>Version</td>
+            <td>Storage Model</td>
+            <td>Flavor</td>
+            <td>Edit</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for database in databases %}
+            <tr>
+                <td>{{ database.application.application_name }}</td>
+                <td>{{ database.type_database_environment }}</td>
+                <td>{{ database.database_name }}</td>
+                <td>{{ database.version }}</td>
+                <td>{{ database.type_database_storage_model }}</td>
+                <td>{{ database.type_database_flavor }}</td>
+                <td><a href="{% url 'database_edit' database_id=database.id %}">Edit</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

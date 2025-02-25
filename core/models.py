@@ -269,8 +269,20 @@ class Database(Comment):
     DATABASE_TYPE_DOCUMENT = "Document"
     DATABASE_TYPE_RELATIONAL = "Relational"
 
-    DATABASE_FLAVOR_MARIADB = "MARIADB"
+    DATABASE_FLAVOR_MARIADB = "MariaDB"
     DATABASE_FLAVOR_POSTGRESQL = "PostgreSQL"
+
+    DATABASE_ENVIRONMENT_LOCAL = "Local"
+    DATABASE_ENVIRONMENT_DEVELOPMENT = "Development"
+    DATABASE_ENVIRONMENT_STAGING = "Staging"
+    DATABASE_ENVIRONMENT_PRODUCTION = "Production"
+
+    DATABASE_ENVIRONMENT_CHOICES = [
+        (DATABASE_ENVIRONMENT_LOCAL, DATABASE_ENVIRONMENT_LOCAL),
+        (DATABASE_ENVIRONMENT_DEVELOPMENT, DATABASE_ENVIRONMENT_DEVELOPMENT),
+        (DATABASE_ENVIRONMENT_STAGING, DATABASE_ENVIRONMENT_STAGING),
+        (DATABASE_ENVIRONMENT_PRODUCTION, DATABASE_ENVIRONMENT_PRODUCTION),
+    ]
 
     DATABASE_FLAVOR_CHOICES = [
         (DATABASE_FLAVOR_MARIADB, DATABASE_FLAVOR_MARIADB),
@@ -292,8 +304,9 @@ class Database(Comment):
     })
     database_name = CharField(blank=True, max_length=255, null=True)
     version = CharField(blank=True, max_length=255, null=True)
+    type_database_environment = CharField(blank=True, choices=DATABASE_ENVIRONMENT_CHOICES, max_length=255, null=True)
     type_database_flavor = CharField(blank=True, choices=DATABASE_FLAVOR_CHOICES, max_length=255, null=True)
     type_database_storage_model = CharField(blank=True, choices=DATABASE_TYPE_CHOICES, max_length=255, null=True)
 
     def __str__(self):
-        return f"{self.application.acronym} v{self.version}"
+        return f"{self.application.acronym} - {self.type_database_environment} - v{self.version}"

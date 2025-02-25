@@ -1,6 +1,6 @@
 from django.forms import ModelForm, DateInput
 
-from core.models import Application, Person
+from core.models import Application, Person, Database
 
 
 class ApplicationForm(ModelForm):
@@ -13,3 +13,8 @@ class PersonForm(ModelForm):
     class Meta:
         fields = '__all__'
         model = Person
+
+class DatabaseForm(ModelForm):
+    class Meta:
+        fields = '__all__'
+        model = Database
