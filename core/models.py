@@ -290,6 +290,7 @@ class Database(Comment):
         "related_name": 'databases',
         "to": Application,
     })
+    database_name = CharField(blank=True, max_length=255, null=True)
     version = CharField(blank=True, max_length=255, null=True)
     type_database_flavor = CharField(blank=True, choices=DATABASE_FLAVOR_CHOICES, max_length=255, null=True)
     type_database_storage_model = CharField(blank=True, choices=DATABASE_TYPE_CHOICES, max_length=255, null=True)
