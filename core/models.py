@@ -1,7 +1,14 @@
 from django.db.models import Model, CharField, ForeignKey, DO_NOTHING, ManyToManyField, BooleanField
-from django.db.models.fields import DateField, IntegerField
+from django.db.models.fields import DateField, IntegerField, TextField
 
-class Person(Model):
+
+class Comment(Model):
+    comment = TextField(blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+class Person(Comment):
     JOB_LEVEL_JUNIOR = "Junior"
     JOB_LEVEL_MID_LEVEL = "Mid-Level"
     JOB_LEVEL_SENIOR = "Senior"
@@ -45,7 +52,7 @@ class Person(Model):
         return f"{self.name_last} {self.name_first} - {self.job_level} {self.job_title}"
 
 
-class Application(Model):
+class Application(Comment):
     PLATFORM_BACKGROUND_TASK = "Background Task"
     PLATFORM_CHROME_PLUGIN = "Chrome Plugin"
     PLATFORM_IOS = "IOS"
@@ -186,7 +193,7 @@ class Application(Model):
         return f"{self.application_name} ({self.acronym})"
 
 
-class ReleaseBundle(Model):
+class ReleaseBundle(Comment):
     bundle_name = CharField(blank=True, max_length=255, null=True)
     date_code_freeze = DateField(blank=True, null=True)
     date_demo = DateField(blank=True, null=True)
@@ -195,7 +202,7 @@ class ReleaseBundle(Model):
     def __str__(self):
         return f"{self.bundle_name}"
 
-class Release(Model):
+class Release(Comment):
     SIGN_OFF_APPROVED = "Approved"
     SIGN_OFF_DENIED = "Denied"
     SIGN_OFF_PENDING = "Pending"
@@ -226,7 +233,7 @@ class Release(Model):
     def __str__(self):
         return f"{self.application.acronym} v{self.software_version}"
 
-class Dependency(Model):
+class Dependency(Comment):
     DEPENDENCY_TYPE_CHOICES_FRAMEWORK = "Framework"
     DEPENDENCY_TYPE_CHOICES_LANGUAGE = "Language"
     DEPENDENCY_TYPE_CHOICES_PACKAGE = "Package"
