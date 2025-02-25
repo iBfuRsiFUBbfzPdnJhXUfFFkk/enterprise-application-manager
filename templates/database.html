@@ -6,7 +6,6 @@
         <tr>
             <td>Application</td>
             <td>Environment</td>
-            <td>Name</td>
             <td>Version</td>
             <td>Storage Model</td>
             <td>Flavor</td>
@@ -16,9 +15,8 @@
         <tbody>
         {% for database in databases %}
             <tr>
-                <td>{{ database.application.application_name }}</td>
+                <td>{{ database.application.name }}</td>
                 <td>{{ database.type_database_environment }}</td>
-                <td>{{ database.database_name }}</td>
                 <td>{{ database.version }}</td>
                 <td>{{ database.type_database_storage_model }}</td>
                 <td>{{ database.type_database_flavor }}</td>

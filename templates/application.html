@@ -14,7 +14,7 @@
         {% for application in applications %}
             <tr>
                 <td>{{ application.acronym }}</td>
-                <td>{{ application.application_name }}</td>
+                <td>{{ application.name }}</td>
                 <td>{{ application.type_platform }}</td>
                 <td><a href="{% url 'application_edit' application_id=application.id %}">Edit</a></td>
             </tr>

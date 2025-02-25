@@ -1,4 +1,5 @@
 from core.models.common.abstract.comment import Comment
+from core.models.common.abstract.name import Name
 from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_CHOICES
 from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CHOICES
 from core.models.common.enums.deployment_medium_choices import DEPLOYMENT_MEDIUM_CHOICES
@@ -14,10 +15,9 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 from core.models.person import Person
 
 
-class Application(Comment):
+class Application(Comment, Name):
     acronym = create_generic_varchar()
     application_downstream_dependencies = create_generic_m2m(to='self')
-    application_name = create_generic_varchar()
     application_upstream_dependencies = create_generic_m2m(to='self')
     date_launch = create_generic_date()
     is_externally_facing = create_generic_boolean()
@@ -41,4 +41,4 @@ class Application(Comment):
     type_platform = create_generic_enum(choices=PLATFORM_CHOICES)
 
     def __str__(self):
-        return f"{self.application_name} ({self.acronym})"
+        return f"{self.name} ({self.acronym})"
