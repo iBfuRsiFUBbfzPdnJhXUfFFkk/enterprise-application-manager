@@ -1,6 +1,6 @@
-from core.models.common.comment import Comment
-from core.models.common.create_generic_date import create_generic_date
-from core.models.common.create_generic_varchar import create_generic_varchar
+from core.models.common.abstract.comment import Comment
+from core.models.common.field_factories.create_generic_date import create_generic_date
+from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 
 
 class ReleaseBundle(Comment):

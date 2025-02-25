@@ -1,81 +1,20 @@
-from core.models.common.comment import Comment
-from core.models.common.create_generic_boolean import create_generic_boolean
-from core.models.common.create_generic_date import create_generic_date
-from core.models.common.create_generic_enum import create_generic_enum
-from core.models.common.create_generic_fk import create_generic_fk
-from core.models.common.create_generic_integer import create_generic_integer
-from core.models.common.create_generic_m2m import create_generic_m2m
-from core.models.common.create_generic_varchar import create_generic_varchar
+from core.models.common.abstract.comment import Comment
+from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_CHOICES
+from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CHOICES
+from core.models.common.enums.deployment_medium_choices import DEPLOYMENT_MEDIUM_CHOICES
+from core.models.common.enums.lifecycle_choices import LIFECYCLE_CHOICES
+from core.models.common.enums.platform_choices import PLATFORM_CHOICES
+from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
+from core.models.common.field_factories.create_generic_date import create_generic_date
+from core.models.common.field_factories.create_generic_enum import create_generic_enum
+from core.models.common.field_factories.create_generic_fk import create_generic_fk
+from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
+from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.person import Person
 
 
 class Application(Comment):
-    PLATFORM_BACKGROUND_TASK = "Background Task"
-    PLATFORM_CHROME_PLUGIN = "Chrome Plugin"
-    PLATFORM_IOS = "IOS"
-    PLATFORM_MICROSOFT_EXCEL = "Microsoft Excel"
-    PLATFORM_MICROSOFT_EXCEL_VBA = "Microsoft Excel + Visual Basic for Applications"
-    PLATFORM_MICROSOFT_WORD = "Microsoft Word"
-    PLATFORM_WEB = "WEB"
-
-    LIFECYCLE_ACTIVE = "Active"
-    LIFECYCLE_APPROVAL = "Awaiting Approval"
-    LIFECYCLE_DEPRECATED = "Deprecated"
-    LIFECYCLE_DEVELOPMENT = "In Development"
-    LIFECYCLE_HYPER_CARE = "Hyper Care"
-    LIFECYCLE_IDEA = "Idea Submission"
-    LIFECYCLE_IN_DEPRECATION = "In Deprecation Period"
-    LIFECYCLE_LIMITED_SUPPORT = "Limited Support"
-    LIFECYCLE_PLANNING = "In Planning"
-    LIFECYCLE_REJECTED = "Approval Rejected"
-
-    DEPLOYMENT_MEDIUM_CLOUD_AKS = "Cloud - Azure Kubernetes Service (AKS)"
-    DEPLOYMENT_MEDIUM_CLOUD_DIVIO = "Cloud - Divio"
-    DEPLOYMENT_MEDIUM_ON_PREMISES_IIS = "On-Premises - Windows Internet Information Services (IIS)"
-    DEPLOYMENT_MEDIUM_ON_PREMISES_LINUX = "On-Premises - Debian Linux"
-
-    AUTHENTICATION_TYPE_AD = "Active Directory (AD)"
-    AUTHENTICATION_TYPE_CUSTOM = "Custom"
-
-    AUTHORIZATION_TYPE_AD = "Active Directory (AD)"
-    AUTHORIZATION_TYPE_CUSTOM = "Custom"
-
-    AUTHORIZATION_TYPE_CHOICES = [
-        (AUTHORIZATION_TYPE_AD, AUTHORIZATION_TYPE_AD),
-        (AUTHORIZATION_TYPE_CUSTOM, AUTHORIZATION_TYPE_CUSTOM),
-    ]
-    AUTHENTICATION_TYPE_CHOICES = [
-        (AUTHENTICATION_TYPE_AD, AUTHENTICATION_TYPE_AD),
-        (AUTHORIZATION_TYPE_CUSTOM, AUTHORIZATION_TYPE_CUSTOM),
-    ]
-    DEPLOYMENT_MEDIUM_CHOICES = [
-        (DEPLOYMENT_MEDIUM_CLOUD_AKS, DEPLOYMENT_MEDIUM_CLOUD_AKS),
-        (DEPLOYMENT_MEDIUM_CLOUD_DIVIO, DEPLOYMENT_MEDIUM_CLOUD_DIVIO),
-        (DEPLOYMENT_MEDIUM_ON_PREMISES_IIS, DEPLOYMENT_MEDIUM_ON_PREMISES_IIS),
-        (DEPLOYMENT_MEDIUM_ON_PREMISES_LINUX, DEPLOYMENT_MEDIUM_ON_PREMISES_LINUX),
-    ]
-    PLATFORM_CHOICES = [
-        (PLATFORM_BACKGROUND_TASK, PLATFORM_BACKGROUND_TASK),
-        (PLATFORM_CHROME_PLUGIN, PLATFORM_CHROME_PLUGIN),
-        (PLATFORM_IOS, PLATFORM_IOS),
-        (PLATFORM_MICROSOFT_EXCEL, PLATFORM_MICROSOFT_EXCEL),
-        (PLATFORM_MICROSOFT_EXCEL_VBA, PLATFORM_MICROSOFT_EXCEL_VBA),
-        (PLATFORM_MICROSOFT_WORD, PLATFORM_MICROSOFT_WORD),
-        (PLATFORM_WEB, PLATFORM_WEB),
-    ]
-    LIFECYCLE_CHOICES = [
-        (LIFECYCLE_ACTIVE, LIFECYCLE_ACTIVE),
-        (LIFECYCLE_APPROVAL, LIFECYCLE_APPROVAL),
-        (LIFECYCLE_DEPRECATED, LIFECYCLE_DEPRECATED),
-        (LIFECYCLE_DEVELOPMENT, LIFECYCLE_DEVELOPMENT),
-        (LIFECYCLE_HYPER_CARE, LIFECYCLE_HYPER_CARE),
-        (LIFECYCLE_IDEA, LIFECYCLE_IDEA),
-        (LIFECYCLE_IN_DEPRECATION, LIFECYCLE_IN_DEPRECATION),
-        (LIFECYCLE_LIMITED_SUPPORT, LIFECYCLE_LIMITED_SUPPORT),
-        (LIFECYCLE_PLANNING, LIFECYCLE_PLANNING),
-        (LIFECYCLE_REJECTED, LIFECYCLE_REJECTED),
-    ]
-
     acronym = create_generic_varchar()
     application_downstream_dependencies = create_generic_m2m(to='self')
     application_name = create_generic_varchar()
