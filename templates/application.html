@@ -5,6 +5,7 @@
         <tr>
             <td>Acronym</td>
             <td>Name</td>
+            <td>Group</td>
             <td>Platform</td>
             <td>Edit</td>
             <td>Development</td>
@@ -18,6 +19,13 @@
             <tr>
                 <td>{{ application.acronym }}</td>
                 <td>{{ application.name }}</td>
+                <td>
+                    {% if application.application_group %}
+                        {{ application.application_group.acronym }}
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
                 <td>{{ application.type_platform_target }}</td>
                 <td><a href="{% url 'application_edit' model_id=application.id %}">Edit</a></td>
                 <td>
