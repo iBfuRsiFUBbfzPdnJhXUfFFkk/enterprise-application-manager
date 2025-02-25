@@ -42,6 +42,8 @@ class Person(Comment):
         (JOB_TITLE_SOFTWARE_SUPPORT_SPECIALIST, JOB_TITLE_SOFTWARE_SUPPORT_SPECIALIST),
     ]
 
+    is_active = BooleanField(blank=True, default=True, null=True)
+    is_employee = BooleanField(blank=True, default=True, null=True)
     job_level = CharField(blank=True, choices=JOB_LEVEL_CHOICES, max_length=255, null=True)
     job_title = CharField(blank=True, choices=JOB_TITLE_CHOICES, max_length=255, null=True)
     link_gitlab_username = CharField(blank=True, max_length=255, null=True)
@@ -227,13 +229,14 @@ class Release(Comment):
         "related_name": 'releases',
         "to": ReleaseBundle,
     })
-    software_version = CharField(blank=True, max_length=255, null=True)
+    version = CharField(blank=True, max_length=255, null=True)
     type_product_owner_sign_off = CharField(blank=True, choices=SIGN_OFF_CHOICES, max_length=255, null=True)
 
     def __str__(self):
-        return f"{self.application.acronym} v{self.software_version}"
+        return f"{self.application.acronym} v{self.version}"
 
 class Dependency(Comment):
+    DEPENDENCY_TYPE_CHOICES_BINARY = "Binary"
     DEPENDENCY_TYPE_CHOICES_FRAMEWORK = "Framework"
     DEPENDENCY_TYPE_CHOICES_LANGUAGE = "Language"
     DEPENDENCY_TYPE_CHOICES_PACKAGE = "Package"
@@ -241,6 +244,7 @@ class Dependency(Comment):
     DEPENDENCY_TYPE_CHOICES_STANDARD = "Standard"
 
     DEPENDENCY_TYPE_CHOICES = [
+        (DEPENDENCY_TYPE_CHOICES_BINARY, DEPENDENCY_TYPE_CHOICES_BINARY),
         (DEPENDENCY_TYPE_CHOICES_FRAMEWORK, DEPENDENCY_TYPE_CHOICES_FRAMEWORK),
         (DEPENDENCY_TYPE_CHOICES_LANGUAGE, DEPENDENCY_TYPE_CHOICES_LANGUAGE),
         (DEPENDENCY_TYPE_CHOICES_PACKAGE, DEPENDENCY_TYPE_CHOICES_PACKAGE),
@@ -253,8 +257,42 @@ class Dependency(Comment):
         "to": Application,
     })
     dependency_name = CharField(blank=True, max_length=255, null=True)
+    is_heavy = BooleanField(blank=True, default=False, null=True)
     version = CharField(blank=True, max_length=255, null=True)
     type_dependency = CharField(blank=True, choices=DEPENDENCY_TYPE_CHOICES, max_length=255, null=True)
 
     def __str__(self):
         return f"{self.dependency_name} v{self.version}"
+
+class Database(Comment):
+    DATABASE_TYPE_BLOB = "Blob"
+    DATABASE_TYPE_DOCUMENT = "Document"
+    DATABASE_TYPE_RELATIONAL = "Relational"
+
+    DATABASE_FLAVOR_MARIADB = "MARIADB"
+    DATABASE_FLAVOR_POSTGRESQL = "PostgreSQL"
+
+    DATABASE_FLAVOR_CHOICES = [
+        (DATABASE_FLAVOR_MARIADB, DATABASE_FLAVOR_MARIADB),
+        (DATABASE_FLAVOR_POSTGRESQL, DATABASE_FLAVOR_POSTGRESQL),
+    ]
+
+    DATABASE_TYPE_CHOICES = [
+        (DATABASE_TYPE_BLOB, DATABASE_TYPE_BLOB),
+        (DATABASE_TYPE_DOCUMENT, DATABASE_TYPE_DOCUMENT),
+        (DATABASE_TYPE_RELATIONAL, DATABASE_TYPE_RELATIONAL),
+    ]
+
+    application = ForeignKey(**{
+        "blank": True,
+        "null": True,
+        "on_delete": DO_NOTHING,
+        "related_name": 'databases',
+        "to": Application,
+    })
+    version = CharField(blank=True, max_length=255, null=True)
+    type_database_flavor = CharField(blank=True, choices=DATABASE_FLAVOR_CHOICES, max_length=255, null=True)
+    type_database_storage_model = CharField(blank=True, choices=DATABASE_TYPE_CHOICES, max_length=255, null=True)
+
+    def __str__(self):
+        return f"{self.application.acronym} v{self.version}"
