@@ -1,3 +1,4 @@
+from os import getenv
 from typing import Mapping, Any
 
 from django.db.models import Model
@@ -53,7 +54,8 @@ def application_added_view(request: HttpRequest) -> HttpResponse:
 # PERSON
 def person_view(request: HttpRequest) -> HttpResponse:
     people: QuerySet = Person.objects.all().order_by('name_last', 'name_first', 'id')
-    context: Mapping[str, Any] = {'people': people}
+    hostname_gitlab: str = getenv('HOSTNAME_GITLAB') or "gitlab.com"
+    context: Mapping[str, Any] = {'hostname_gitlab': hostname_gitlab, 'people': people}
     return render(context=context, request=request, template_name="person.html")
 
 def person_edit_view(request: HttpRequest, person_id: int) -> HttpResponse:
