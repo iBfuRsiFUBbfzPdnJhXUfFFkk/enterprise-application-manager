@@ -1,5 +1,26 @@
 {% extends 'base_person.html' %}
 {% block title %}PEOPLE{% endblock %}
 {% block content %}
-    PERSON
+        <table>
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>Last</td>
+            <td>First</td>
+            <td>Display Name</td>
+            <td></td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for person in people %}
+            <tr>
+                <td>{{ person.id }}</td>
+                <td>{{ person.name_last }}</td>
+                <td>{{ person.name_first }}</td>
+                <td>{{ person.display_label }}</td>
+                <td><a href="{% url 'person_edit' person_id=person.id %}">edit</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

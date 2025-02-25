@@ -7,6 +7,7 @@
             <td>ID</td>
             <td>Acronym</td>
             <td>Display Name</td>
+            <td></td>
         </tr>
         </thead>
         <tbody>
@@ -15,6 +16,7 @@
                 <td>{{ application.id }}</td>
                 <td>{{ application.acronym }}</td>
                 <td>{{ application.display_label }}</td>
+                <td><a href="{% url 'application_edit' application_id=application.id %}">edit</a></td>
             </tr>
         {% endfor %}
         </tbody>

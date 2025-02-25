@@ -9,9 +9,9 @@
 <body>
 <nav>
     <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/application">Applications</a></li>
-        <li><a href="/person">People</a></li>
+        <li><a href="{% url "home" %}">Home</a></li>
+        <li><a href="{% url "application" %}">Applications</a></li>
+        <li><a href="{% url "person" %}">People</a></li>
         {% block navigation %}
         {% endblock %}
     </ul>
