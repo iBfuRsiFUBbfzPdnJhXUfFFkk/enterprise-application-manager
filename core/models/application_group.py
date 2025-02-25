@@ -9,6 +9,7 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 class ApplicationGroup(Comment, Name):
     acronym = create_generic_varchar()
     is_externally_facing = create_generic_boolean()
+    is_platform = create_generic_boolean()
     name_aliases = create_generic_varchar()
     type_lifecycle = create_generic_enum(choices=LIFECYCLE_CHOICES)
 

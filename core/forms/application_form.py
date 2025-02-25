@@ -5,10 +5,20 @@ from django.forms import ModelForm, ModelMultipleChoiceField, CheckboxSelectMult
 
 from core.forms.common.generic_date_field import generic_date_field
 from core.models.application import Application
+from core.models.application_group import ApplicationGroup
 from core.models.person import Person
 
 
 class ApplicationForm(ModelForm):
+    application_group_platform = ModelChoiceField(
+        queryset=cast(QuerySet, ApplicationGroup.objects.filter(is_platform=True)),
+        required=False,
+    )
+    application_groups = ModelMultipleChoiceField(
+        queryset=cast(QuerySet, ApplicationGroup.objects),
+        required=False,
+        widget=CheckboxSelectMultiple
+    )
     date_launch = generic_date_field()
     person_architect = ModelChoiceField(
         queryset=cast(QuerySet, Person.objects.filter(is_architect=True)),

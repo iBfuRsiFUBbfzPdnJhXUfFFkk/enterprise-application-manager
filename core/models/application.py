@@ -19,7 +19,8 @@ from core.models.person import Person
 class Application(Comment, Name):
     acronym = create_generic_varchar()
     application_downstream_dependencies = create_generic_m2m(to='self')
-    application_group = create_generic_fk(related_name='applications', to=ApplicationGroup)
+    application_group_platform = create_generic_fk(related_name='applications', to=ApplicationGroup)
+    application_groups = create_generic_m2m(to=ApplicationGroup)
     application_upstream_dependencies = create_generic_m2m(to='self')
     date_launch = create_generic_date()
     is_externally_facing = create_generic_boolean()

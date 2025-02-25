@@ -20,8 +20,8 @@
                 <td>{{ application.acronym }}</td>
                 <td>{{ application.name }}</td>
                 <td>
-                    {% if application.application_group %}
-                        {{ application.application_group.acronym }}
+                    {% if application.application_group_platform %}
+                        {{ application.application_group_platform.acronym }}
                     {% else %}
                         <div></div>
                     {% endif %}
