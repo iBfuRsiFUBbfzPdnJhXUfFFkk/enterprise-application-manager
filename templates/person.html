@@ -16,8 +16,8 @@
             <tr>
                 <td>{{ person.name_last }}</td>
                 <td>{{ person.name_first }}</td>
-                <td>{{ person.job_level }}</td>
-                <td>{{ person.job_title }}</td>
+                <td>{{ person.type_job_level }}</td>
+                <td>{{ person.type_job_title }}</td>
                 <td><a href="{% url 'person_edit' model_id=person.id %}">Edit</a></td>
                 <td><a href="https://{{ hostname_gitlab }}/{{ person.link_gitlab_username }}" target="_blank">GitLab</a>
                 </td>
