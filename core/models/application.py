@@ -4,7 +4,7 @@ from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_
 from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CHOICES
 from core.models.common.enums.deployment_medium_choices import DEPLOYMENT_MEDIUM_CHOICES
 from core.models.common.enums.lifecycle_choices import LIFECYCLE_CHOICES
-from core.models.common.enums.platform_choices import PLATFORM_CHOICES
+from core.models.common.enums.platform_target_choices import PLATFORM_TARGET_CHOICES
 from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
 from core.models.common.field_factories.create_generic_date import create_generic_date
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
@@ -38,7 +38,7 @@ class Application(Comment, Name):
     type_authorization = create_generic_enum(choices=AUTHORIZATION_TYPE_CHOICES)
     type_deployment_medium = create_generic_enum(choices=DEPLOYMENT_MEDIUM_CHOICES)
     type_lifecycle = create_generic_enum(choices=LIFECYCLE_CHOICES)
-    type_platform = create_generic_enum(choices=PLATFORM_CHOICES)
+    type_platform_target = create_generic_enum(choices=PLATFORM_TARGET_CHOICES)
 
     def __str__(self):
         return f"{self.name} ({self.acronym})"
