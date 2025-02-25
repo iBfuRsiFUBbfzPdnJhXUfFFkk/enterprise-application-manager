@@ -9,6 +9,7 @@ from core.views.generic.generic_500 import generic_500
 
 
 def generic_upsert_view(
+        decrypt_fields: list[str] | None = None,
         form_cls: type[ModelForm] | None = None,
         is_edit: bool | None = None,
         model_cls: type[Model] | None = None,
@@ -34,6 +35,10 @@ def generic_upsert_view(
     immutable_query_dict = request.POST
     if is_edit:
         model_instance: Model | None = model_cls.objects.get(id=model_id)
+        if decrypt_fields is not None:
+            for field in decrypt_fields:
+                decrypted_value: str = getattr(model_instance, f"get_{field}")()
+                setattr(model_instance, field, decrypted_value)
     else:
         model_instance = None
     if method == 'POST':

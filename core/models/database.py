@@ -6,13 +6,29 @@ from core.models.common.enums.database_flavor_choices import DATABASE_FLAVOR_CHO
 from core.models.common.enums.environment_choices import ENVIRONMENT_CHOICES
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
+from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from core.utilities.encryption import encrypt_secret, decrypt_secret
 
 
 class Database(Comment, Version):
     application = create_generic_fk(related_name='databases', to=Application)
+    encrypted_password = create_generic_varchar()
+    encrypted_username = create_generic_varchar()
     type_data_storage_form = create_generic_enum(choices=DATA_STORAGE_FORM_CHOICES)
     type_database_flavor = create_generic_enum(choices=DATABASE_FLAVOR_CHOICES)
     type_environment = create_generic_enum(choices=ENVIRONMENT_CHOICES)
 
+    def set_encrypted_password(self, secret: str) -> None:
+        self.encrypted_password = encrypt_secret(secret=secret)
+
+    def get_encrypted_password(self) -> str:
+        return decrypt_secret(encrypted_secret=self.encrypted_password)
+
+    def set_encrypted_username(self, secret: str) -> None:
+        self.encrypted_username = encrypt_secret(secret=secret)
+
+    def get_encrypted_username(self) -> str:
+        return decrypt_secret(encrypted_secret=self.encrypted_username)
+
     def __str__(self):
-        return f"{self.application.acronym} - {self.type_environment} - v{self.version}"
+        return f"{self.application.acronym if self.application is not None else 'N/A'} - {self.type_environment} - v{self.version}"
