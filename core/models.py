@@ -19,39 +19,46 @@ class Person(Display):
 class Application(Display):
     acronym = CharField(max_length=255, null=True)
     person_architect = ForeignKey(**{
+        "blank": True,
         "null": True,
         "on_delete": DO_NOTHING,
         "related_name": 'applications_as_architect',
         "to": Person,
     })
     person_developers = ManyToManyField(**{
+        "blank": True,
         "to": Person,
     })
     person_lead_developer = ForeignKey(**{
+        "blank": True,
         "null": True,
         "on_delete": DO_NOTHING,
         "related_name": 'applications_as_lead_developer',
         "to": Person,
     })
     person_product_manager = ForeignKey(**{
+        "blank": True,
         "null": True,
         "on_delete": DO_NOTHING,
         "related_name": 'applications_as_product_manager',
         "to": Person,
     })
     person_product_owner = ForeignKey(**{
+        "blank": True,
         "null": True,
         "on_delete": DO_NOTHING,
         "related_name": 'applications_as_product_owner',
         "to": Person,
     })
     person_project_manager = ForeignKey(**{
+        "blank": True,
         "null": True,
         "on_delete": DO_NOTHING,
         "related_name": 'applications_as_project_manager',
         "to": Person,
     })
     person_scrum_master = ForeignKey(**{
+        "blank": True,
         "null": True,
         "on_delete": DO_NOTHING,
         "related_name": 'applications_as_scrum_master',
