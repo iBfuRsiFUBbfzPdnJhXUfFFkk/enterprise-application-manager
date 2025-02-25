@@ -9,14 +9,14 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 class Person(Comment):
     is_active = create_generic_boolean(default=True)
     is_employee = create_generic_boolean(default=True)
-    job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
-    job_title = create_generic_enum(choices=JOB_TITLE_CHOICES)
     link_gitlab_username = create_generic_varchar()
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
+    type_job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
+    type_job_title = create_generic_enum(choices=JOB_TITLE_CHOICES)
 
     def __str__(self):
-        return f"{self.name_last} {self.name_first} - {self.job_level} {self.job_title}"
+        return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"
 
     class Meta:
         verbose_name_plural = "People"
