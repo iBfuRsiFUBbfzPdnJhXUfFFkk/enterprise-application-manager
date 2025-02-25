@@ -17,7 +17,7 @@ def home_view(request: HttpRequest) -> HttpResponse:
 
 # APPLICATION
 def application_view(request: HttpRequest) -> HttpResponse:
-    applications: QuerySet = Application.objects.all().order_by('-id')
+    applications: QuerySet = Application.objects.all().order_by('display_label', '-id')
     context: Mapping[str, Any] = {'applications': applications}
     return render(context=context, request=request, template_name="application.html")
 
