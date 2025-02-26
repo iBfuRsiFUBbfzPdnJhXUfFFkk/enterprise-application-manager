@@ -40,6 +40,7 @@ class Application(Comment, Name):
     link_production_server_external = create_generic_varchar()
     link_sentry_io = create_generic_varchar()
     link_staging_server = create_generic_varchar()
+    link_support_email = create_generic_varchar()
     link_whiteboard = create_generic_varchar()
     name_aliases = create_generic_varchar()
     peak_userbase = create_generic_integer()

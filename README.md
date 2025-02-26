@@ -13,7 +13,7 @@ HOSTNAME_GITLAB="gitlab.com"
 ## TODO
 
 - [ ] LINKS
-- [ ] ACRONYMS
+- [x] ACRONYMS
 - [ ] WRIKE
 - [ ] DIVIO
 - [ ] LUCID CHART
