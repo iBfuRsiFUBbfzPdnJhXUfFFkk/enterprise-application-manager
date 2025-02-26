@@ -1,5 +1,6 @@
 from core.models.common.abstract.acronym import Acronym
 from core.models.application_group import ApplicationGroup
+from core.models.common.abstract.alias import Alias
 from core.models.common.abstract.comment import Comment
 from core.models.common.abstract.name import Name
 from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_CHOICES
@@ -17,7 +18,7 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 from core.models.person import Person
 
 
-class Application(Acronym, Comment, Name):
+class Application(Alias, Acronym, Comment, Name):
     application_downstream_dependencies = create_generic_m2m(to='self')
     application_group_platform = create_generic_fk(related_name='applications', to=ApplicationGroup)
     application_groups = create_generic_m2m(to=ApplicationGroup)
@@ -51,7 +52,6 @@ class Application(Acronym, Comment, Name):
     link_ticket_submission = create_generic_varchar()
     link_whiteboard = create_generic_varchar()
     link_wrike = create_generic_varchar()
-    name_aliases = create_generic_varchar()
     peak_userbase = create_generic_integer()
     person_architect = create_generic_fk(related_name='applications_as_architect', to=Person)
     person_developers = create_generic_m2m(related_name='applications_developer_of', to=Person)
