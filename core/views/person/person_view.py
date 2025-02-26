@@ -9,7 +9,6 @@ from core.views.generic.generic_view import generic_view
 def person_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
         context_name="people",
-        field_names=['name_last', 'name_first', 'id'],
         model_cls=Person,
         request=request,
         template_name='person.html',

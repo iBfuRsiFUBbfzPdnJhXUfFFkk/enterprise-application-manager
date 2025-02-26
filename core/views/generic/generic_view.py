@@ -9,7 +9,6 @@ from core.views.generic.generic_500 import generic_500
 
 def generic_view(
         context_name: str | None = None,
-        field_names: list[str] | None = None,
         model_cls: type[Model] | None = None,
         request: HttpRequest | None = None,
         template_name: str | None = None,
@@ -17,15 +16,13 @@ def generic_view(
 ) -> HttpResponse:
     if context_name is None:
         return generic_500(request=request)
-    if field_names is None:
-        field_names = ['id']
     if model_cls is None:
         return generic_500(request=request)
     if request is None:
         return generic_500(request=request)
     if template_name is None:
         return generic_500(request=request)
-    models: QuerySet = model_cls.objects.all().order_by(*field_names)
+    models: QuerySet = model_cls.objects.all()
     additional_context: Mapping[str, Any] = additional_context or {}
     context: Mapping[str, Any] = {**additional_context, context_name: models}
     return render(context=context, request=request, template_name=template_name)

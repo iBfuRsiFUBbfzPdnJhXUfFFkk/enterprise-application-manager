@@ -14,3 +14,6 @@ class Document(Comment, Name, Version):
 
     def __str__(self):
         return f"{self.name} v{self.version}"
+
+    class Meta:
+        ordering = ['name', '-id']

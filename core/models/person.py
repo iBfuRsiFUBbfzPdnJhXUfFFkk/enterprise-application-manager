@@ -40,3 +40,4 @@ class Person(Comment):
 
     class Meta:
         verbose_name_plural = "People"
+        ordering = ['name_last', 'name_first', 'id']

@@ -37,3 +37,6 @@ class Database(Comment, Version):
 
     def __str__(self):
         return f"{self.application.acronym if self.application is not None else 'N/A'} - {self.type_environment} - v{self.version}"
+
+    class Meta:
+        ordering = ['schema', '-id']

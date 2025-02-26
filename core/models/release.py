@@ -14,3 +14,6 @@ class Release(Comment, Version):
 
     def __str__(self):
         return f"{self.application.acronym} v{self.version}"
+
+    class Meta:
+        ordering = ['name', '-id']
