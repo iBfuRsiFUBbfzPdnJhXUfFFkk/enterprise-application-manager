@@ -51,3 +51,6 @@ class Application(Comment, Name):
 
     def __str__(self):
         return f"{self.name} ({self.acronym})"
+
+    class Meta:
+        ordering = ['name', 'acronym', '-id']
