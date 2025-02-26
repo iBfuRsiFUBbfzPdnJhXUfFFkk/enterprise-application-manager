@@ -16,6 +16,7 @@ from core.models.common.field_factories.create_generic_integer import create_gen
 from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.person import Person
+from core.utilities.get_name_acronym import get_name_acronym
 
 
 class Application(Alias, Acronym, Comment, Name):
@@ -68,7 +69,7 @@ class Application(Alias, Acronym, Comment, Name):
     type_platform_target = create_generic_enum(choices=PLATFORM_TARGET_CHOICES)
 
     def __str__(self):
-        return f"{self.name} ({self.acronym})"
+        return get_name_acronym(acronym=self.acronym, name=self.name)
 
     class Meta:
         ordering = ['name', 'acronym', '-id']

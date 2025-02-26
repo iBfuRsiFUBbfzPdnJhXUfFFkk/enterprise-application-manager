@@ -13,6 +13,7 @@ from core.models.document import Document
 from core.models.formula import Formula
 from core.models.hotfix import Hotfix
 from core.models.incident import Incident
+from core.models.job_level import JobLevel
 from core.models.link import Link
 from core.models.organization import Organization
 from core.models.person import Person
@@ -26,6 +27,7 @@ from core.models.secret import Secret
 from core.models.server import Server
 from core.models.service_provider import ServiceProvider
 from core.models.service_provider_security_requirements_document import ServiceProviderSecurityRequirementsDocument
+from core.models.skill import Skill
 from core.models.software_bill_of_material import SoftwareBillOfMaterial
 from core.models.task import Task
 from core.models.team import Team
@@ -46,6 +48,7 @@ admin.site.register(Document)
 admin.site.register(Formula)
 admin.site.register(Hotfix)
 admin.site.register(Incident)
+admin.site.register(JobLevel)
 admin.site.register(Link)
 admin.site.register(Organization)
 admin.site.register(Person)
@@ -59,6 +62,7 @@ admin.site.register(Secret)
 admin.site.register(Server)
 admin.site.register(ServiceProvider)
 admin.site.register(ServiceProviderSecurityRequirementsDocument)
+admin.site.register(Skill)
 admin.site.register(SoftwareBillOfMaterial)
 admin.site.register(Task)
 admin.site.register(Team)
