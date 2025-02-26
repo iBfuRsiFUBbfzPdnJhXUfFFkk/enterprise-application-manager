@@ -6,16 +6,14 @@
             <td>Name</td>
             <td>Version</td>
             <td>Concept</td>
-            <td>Edit</td>
         </tr>
         </thead>
         <tbody>
         {% for dependency in dependencies %}
-            <tr>
+            <tr ondblclick='window.location.href = "{% url 'dependency_edit' model_id=dependency.id %}"'>
                 <td>{{ dependency.name }}</td>
                 <td>{{ dependency.version }}</td>
                 <td>{{ dependency.type_programing_concept }}</td>
-                <td><a href="{% url 'dependency_edit' model_id=dependency.id %}">Edit</a></td>
             </tr>
         {% endfor %}
         </tbody>

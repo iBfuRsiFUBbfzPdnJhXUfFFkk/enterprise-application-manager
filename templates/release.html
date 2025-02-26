@@ -5,15 +5,13 @@
         <tr>
             <td>Application</td>
             <td>Bundle</td>
-            <td>Edit</td>
         </tr>
         </thead>
         <tbody>
         {% for release in releases %}
-            <tr>
+            <tr ondblclick='window.location.href = "{% url 'release_edit' model_id=release.id %}"'>
                 <td>{{ release.application.name }}</td>
                 <td>{{ release.release_bundle.name }}</td>
-                <td><a href="{% url 'release_edit' model_id=release.id %}">Edit</a></td>
             </tr>
         {% endfor %}
         </tbody>

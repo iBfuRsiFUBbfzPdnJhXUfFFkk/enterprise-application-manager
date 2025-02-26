@@ -5,15 +5,13 @@
         <tr>
             <td>Name</td>
             <td>Filename</td>
-            <td>Edit</td>
         </tr>
         </thead>
         <tbody>
         {% for document in documents %}
-            <tr>
+            <tr ondblclick='window.location.href = "{% url 'document_edit' model_id=document.id %}"'>
                 <td>{{ document.name }}</td>
                 <td>{{ document.blob_filename }}</td>
-                <td><a href="{% url 'document_edit' model_id=document.id %}">Edit</a></td>
             </tr>
         {% endfor %}
         </tbody>

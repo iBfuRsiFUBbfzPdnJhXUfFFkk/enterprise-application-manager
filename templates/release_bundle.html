@@ -4,14 +4,12 @@
         <thead>
         <tr>
             <td>Name</td>
-            <td>Edit</td>
         </tr>
         </thead>
         <tbody>
         {% for release_bundle in release_bundles %}
-            <tr>
+            <tr ondblclick='window.location.href = "{% url 'release_bundle_edit' model_id=release_bundle.id %}"'>
                 <td>{{ release_bundle.name }}</td>
-                <td><a href="{% url 'release_bundle_edit' model_id=release_bundle.id %}">Edit</a></td>
             </tr>
         {% endfor %}
         </tbody>

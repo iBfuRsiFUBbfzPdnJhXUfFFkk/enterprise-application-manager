@@ -7,19 +7,17 @@
             <td>First</td>
             <td>Job Level</td>
             <td>Job Title</td>
-            <td>Edit</td>
             <td>GitLab</td>
             <td>SharePoint</td>
         </tr>
         </thead>
         <tbody>
         {% for person in people %}
-            <tr>
+            <tr ondblclick='window.location.href = "{% url 'person_edit' model_id=person.id %}"'>
                 <td>{{ person.name_last }}</td>
                 <td>{{ person.name_first }}</td>
                 <td>{{ person.type_job_level }}</td>
                 <td>{{ person.type_job_title }}</td>
-                <td><a href="{% url 'person_edit' model_id=person.id %}">Edit</a></td>
                 <td>
                     {% if person.link_gitlab_username %}
                         <a href="https://{{ hostname_gitlab }}/{{ person.link_gitlab_username }}" target="_blank">

@@ -13,6 +13,10 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
     <script src="https://unpkg.com/htmx.org@1.8.4"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    {% block scripts %}
+        <script type="text/javascript">
+        </script>
+    {% endblock %}
     <style>
         form {
             align-content: center;
@@ -53,10 +57,6 @@
 
         form > p > textarea {
             width: 500px;
-        }
-
-        .new-button {
-            background-color: #4CAF50;
         }
     </style>
 </head>

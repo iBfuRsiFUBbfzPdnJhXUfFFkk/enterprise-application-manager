@@ -7,7 +7,6 @@
             <td>Name</td>
             <td>Group</td>
             <td>Platform</td>
-            <td>Edit</td>
             <td>GitLab</td>
             <td>Wiki</td>
             <td>Whiteboard</td>
@@ -21,7 +20,7 @@
         </thead>
         <tbody>
         {% for application in applications %}
-            <tr>
+            <tr ondblclick='window.location.href = "{% url 'application_edit' model_id=application.id %}"'>
                 <td>{{ application.acronym }}</td>
                 <td>
                     {% if application.is_legacy %}
@@ -33,20 +32,15 @@
                 <td>
                     {% if application.application_group_platform %}
                         {{ application.application_group_platform.acronym }}
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>{{ application.type_platform_target }}</td>
-                <td><a href="{% url 'application_edit' model_id=application.id %}">Edit</a></td>
                 <td>
                     {% if application.link_gitlab_repository %}
                         <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}"
                            target="_blank">
                             Code
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -55,8 +49,6 @@
                            target="_blank">
                             Wiki
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -64,8 +56,6 @@
                         <a href="{{ application.link_whiteboard }}" target="_blank">
                             Board
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -73,8 +63,6 @@
                         <a href="{{ application.link_sentry_io }}" target="_blank">
                             Sentry
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -82,8 +70,6 @@
                         <a href="{{ application.link_open_ai }}" target="_blank">
                             OpenAI
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -91,8 +77,6 @@
                         <a href="{{ application.link_development_server }}" target="_blank">
                             DEVELOPMENT
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -100,8 +84,6 @@
                         <a href="{{ application.link_staging_server }}" target="_blank">
                             STAGING
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -109,8 +91,6 @@
                         <a href="{{ application.link_production_server }}" target="_blank">
                             PRODUCTION
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
                 <td>
@@ -118,8 +98,6 @@
                         <a href="{{ application.link_production_server_external }}" target="_blank">
                             EXTERNAL
                         </a>
-                    {% else %}
-                        <div></div>
                     {% endif %}
                 </td>
             </tr>
