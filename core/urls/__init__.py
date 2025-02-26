@@ -4,6 +4,7 @@ from django.urls import URLPattern, URLResolver, path
 from core.urls.application import urlpatterns_application
 from core.urls.application_group import urlpatterns_application_group
 from core.urls.database import urlpatterns_database
+from core.urls.dependency import urlpatterns_dependency
 from core.urls.document import urlpatterns_document
 from core.urls.person import urlpatterns_person
 from core.urls.release import urlpatterns_release
@@ -21,6 +22,7 @@ urlpatterns: list[URLPattern | URLResolver] = [
     *urlpatterns_application,
     *urlpatterns_application_group,
     *urlpatterns_database,
+    *urlpatterns_dependency,
     *urlpatterns_document,
     *urlpatterns_person,
     *urlpatterns_release,

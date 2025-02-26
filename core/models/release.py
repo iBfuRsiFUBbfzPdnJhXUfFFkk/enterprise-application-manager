@@ -16,4 +16,4 @@ class Release(Comment, Version):
         return f"{self.application.acronym} v{self.version}"
 
     class Meta:
-        ordering = ['name', '-id']
+        ordering = ['-version', '-id']

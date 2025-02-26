@@ -1,0 +1,28 @@
+{% extends 'base_dependency.html' %}
+{% block content %}
+    <table id="data-table" class="display">
+        <thead>
+        <tr>
+            <td>Name</td>
+            <td>Version</td>
+            <td>Concept</td>
+            <td>Edit</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for dependency in dependencies %}
+            <tr>
+                <td>{{ dependency.name }}</td>
+                <td>{{ dependency.version }}</td>
+                <td>{{ dependency.type_programing_concept }}</td>
+                <td><a href="{% url 'dependency_edit' model_id=dependency.id %}">Edit</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}
