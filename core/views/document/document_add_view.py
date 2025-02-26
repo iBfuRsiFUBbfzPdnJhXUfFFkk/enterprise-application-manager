@@ -18,7 +18,9 @@ def document_add_view(request: HttpRequest) -> HttpResponse:
         form = DocumentForm(immutable_query_dict, multi_value_dict_files)
         is_valid: bool = form.is_valid()
         if is_valid:
-            file: UploadedFile = form.cleaned_data['blob_data']
+            file: UploadedFile | None = form.cleaned_data['blob_data']
+            if file is None:
+                return generic_500(request=request)
             Document.objects.create(
                 blob_content_type=file.content_type,
                 blob_data=file.read(),

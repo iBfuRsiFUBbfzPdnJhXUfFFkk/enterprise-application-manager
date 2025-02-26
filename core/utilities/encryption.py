@@ -8,11 +8,15 @@ if secret_key is None:
 cipher_suite: Fernet = Fernet(key=secret_key.encode())
 
 
-def encrypt_secret(secret: str) -> str:
+def encrypt_secret(secret: str | None) -> str | None:
+    if secret is None:
+        return None
     encrypted_secret: bytes = cipher_suite.encrypt(data=secret.encode())
     return encrypted_secret.decode()
 
 
-def decrypt_secret(encrypted_secret: str) -> str:
+def decrypt_secret(encrypted_secret: str | None) -> str | None:
+    if encrypted_secret is None:
+        return None
     decrypted_secret: bytes = cipher_suite.decrypt(token=encrypted_secret.encode())
     return decrypted_secret.decode()

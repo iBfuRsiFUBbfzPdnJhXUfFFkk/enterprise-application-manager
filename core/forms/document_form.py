@@ -4,7 +4,7 @@ from core.models.document import Document
 
 
 class DocumentForm(ModelForm):
-    blob_data = FileField(required=False)
+    blob_data = FileField(required=True)
 
     class Meta:
         fields = ['name', 'version', 'comment']

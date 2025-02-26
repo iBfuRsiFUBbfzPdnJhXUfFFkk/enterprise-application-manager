@@ -23,16 +23,16 @@ class Database(Comment, Version):
     type_database_flavor = create_generic_enum(choices=DATABASE_FLAVOR_CHOICES)
     type_environment = create_generic_enum(choices=ENVIRONMENT_CHOICES)
 
-    def set_encrypted_password(self, secret: str) -> None:
+    def set_encrypted_password(self, secret: str | None) -> None:
         self.encrypted_password = encrypt_secret(secret=secret)
 
-    def get_encrypted_password(self) -> str:
+    def get_encrypted_password(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_password)
 
-    def set_encrypted_username(self, secret: str) -> None:
+    def set_encrypted_username(self, secret: str | None) -> None:
         self.encrypted_username = encrypt_secret(secret=secret)
 
-    def get_encrypted_username(self) -> str:
+    def get_encrypted_username(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_username)
 
     def __str__(self):
