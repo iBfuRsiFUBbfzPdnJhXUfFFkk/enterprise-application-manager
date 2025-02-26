@@ -1,6 +1,7 @@
 from django.contrib.admin import site
 from django.urls import URLPattern, URLResolver, path
 
+from core.urls.acronym import urlpatterns_acronym
 from core.urls.application import urlpatterns_application
 from core.urls.application_group import urlpatterns_application_group
 from core.urls.database import urlpatterns_database
@@ -19,6 +20,7 @@ urlpatterns: list[URLPattern | URLResolver] = [
     # ADMIN
     path(name="admin", route="admin", view=site.urls),
 
+    *urlpatterns_acronym,
     *urlpatterns_application,
     *urlpatterns_application_group,
     *urlpatterns_database,
