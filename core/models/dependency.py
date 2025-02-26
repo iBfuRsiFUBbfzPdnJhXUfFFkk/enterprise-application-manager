@@ -18,3 +18,4 @@ class Dependency(Comment, Name, Version):
 
     class Meta:
         verbose_name_plural = "Dependencies"
+        ordering = ['name', 'type_programing_concept', 'version', '-id']
