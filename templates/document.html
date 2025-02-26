@@ -1,0 +1,26 @@
+{% extends 'base_document.html' %}
+{% block content %}
+    <table id="data-table" class="display">
+        <thead>
+        <tr>
+            <td>Name</td>
+            <td>Filename</td>
+            <td>Edit</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for document in documents %}
+            <tr>
+                <td>{{ document.name }}</td>
+                <td>{{ document.blob_filename }}</td>
+                <td><a href="{% url 'document_edit' model_id=document.id %}">Edit</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}
