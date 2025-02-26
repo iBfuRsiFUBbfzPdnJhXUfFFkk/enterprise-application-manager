@@ -1,3 +1,4 @@
+from core.models.common.abstract.acronym import Acronym
 from core.models.application_group import ApplicationGroup
 from core.models.common.abstract.comment import Comment
 from core.models.common.abstract.name import Name
@@ -16,8 +17,7 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 from core.models.person import Person
 
 
-class Application(Comment, Name):
-    acronym = create_generic_varchar()
+class Application(Acronym, Comment, Name):
     application_downstream_dependencies = create_generic_m2m(to='self')
     application_group_platform = create_generic_fk(related_name='applications', to=ApplicationGroup)
     application_groups = create_generic_m2m(to=ApplicationGroup)

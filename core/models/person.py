@@ -1,5 +1,6 @@
 from core.models.common.abstract.comment import Comment
 from core.models.common.abstract.location import Location
+from core.models.common.abstract.pronunciation import Pronunciation
 from core.models.common.enums.job_level_choices import JOB_LEVEL_CHOICES
 from core.models.common.enums.job_title_choices import JOB_TITLE_CHOICES
 from core.models.common.enums.timezone_choices import TIMEZONE_CHOICES
@@ -9,7 +10,7 @@ from core.models.common.field_factories.create_generic_enum import create_generi
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 
 
-class Person(Comment, Location):
+class Person(Comment, Location, Pronunciation):
     date_birthday = create_generic_date()
     date_hired = create_generic_date()
     date_left = create_generic_date()
@@ -28,7 +29,6 @@ class Person(Comment, Location):
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
     name_preferred = create_generic_varchar()
-    name_pronunciation = create_generic_varchar()
     type_job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
     type_job_title = create_generic_enum(choices=JOB_TITLE_CHOICES)
     type_timezone = create_generic_enum(choices=TIMEZONE_CHOICES)
