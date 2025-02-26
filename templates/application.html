@@ -8,6 +8,7 @@
             <td>Group</td>
             <td>Platform</td>
             <td>Edit</td>
+            <td>GitLab</td>
             <td>Development</td>
             <td>Staging</td>
             <td>Production</td>
@@ -34,6 +35,16 @@
                 </td>
                 <td>{{ application.type_platform_target }}</td>
                 <td><a href="{% url 'application_edit' model_id=application.id %}">Edit</a></td>
+                <td>
+                    {% if application.link_gitlab_repository %}
+                        <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}"
+                           target="_blank">
+                            Code
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
                 <td>
                     {% if application.link_development_server %}
                         <a href="{{ application.link_development_server }}" target="_blank">

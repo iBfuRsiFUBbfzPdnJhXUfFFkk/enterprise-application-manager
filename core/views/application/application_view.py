@@ -1,3 +1,5 @@
+from os import getenv
+
 from django.http import HttpRequest, HttpResponse
 
 from core.models.application import Application
@@ -10,4 +12,5 @@ def application_view(request: HttpRequest) -> HttpResponse:
         model_cls=Application,
         request=request,
         template_name='application.html',
+        additional_context={'hostname_gitlab': getenv('HOSTNAME_GITLAB') or "gitlab.com"},
     )
