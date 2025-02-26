@@ -81,7 +81,8 @@
                     {% endif %}
                 </td>
                 <td>{{ application.type_platform_target }}</td>
-                <td>
+                <td data-toggle="tooltip"
+                    title="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}">
                     {% if application.link_gitlab_repository %}
                         <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}"
                            target="_blank">
@@ -92,7 +93,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="https://{{ hostname_gitlab }}/{{ application.link_gitlab_wiki }}">
                     {% if application.link_gitlab_wiki %}
                         <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_wiki }}"
                            target="_blank">
@@ -103,7 +104,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_whiteboard }}">
                     {% if application.link_whiteboard %}
                         <a href="{{ application.link_whiteboard }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -114,7 +115,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_sentry_io }}">
                     {% if application.link_sentry_io %}
                         <a href="{{ application.link_sentry_io }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -124,7 +125,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_open_ai }}">
                     {% if application.link_open_ai %}
                         <a href="{{ application.link_open_ai }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -135,7 +136,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_development_server }}">
                     {% if application.link_development_server %}
                         <a href="{{ application.link_development_server }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -146,7 +147,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_staging_server }}">
                     {% if application.link_staging_server %}
                         <a href="{{ application.link_staging_server }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -156,7 +157,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_production_server }}">
                     {% if application.link_production_server %}
                         <a href="{{ application.link_production_server }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -166,7 +167,7 @@
                         </a>
                     {% endif %}
                 </td>
-                <td>
+                <td data-toggle="tooltip" title="{{ application.link_production_server_external }}">
                     {% if application.link_production_server_external %}
                         <a href="{{ application.link_production_server_external }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
