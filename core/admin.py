@@ -21,6 +21,7 @@ from core.models.release import Release
 from core.models.release_bundle import ReleaseBundle
 from core.models.requirement import Requirement
 from core.models.risk import Risk
+from core.models.role import Role
 from core.models.secret import Secret
 from core.models.server import Server
 from core.models.service_provider import ServiceProvider
@@ -53,6 +54,7 @@ admin.site.register(Release)
 admin.site.register(ReleaseBundle)
 admin.site.register(Requirement)
 admin.site.register(Risk)
+admin.site.register(Role)
 admin.site.register(Secret)
 admin.site.register(Server)
 admin.site.register(ServiceProvider)

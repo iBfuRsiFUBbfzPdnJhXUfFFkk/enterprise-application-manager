@@ -7,7 +7,9 @@ from core.models.common.enums.timezone_choices import TIMEZONE_CHOICES
 from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
 from core.models.common.field_factories.create_generic_date import create_generic_date
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
+from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from core.models.role import Role
 
 
 class Person(Comment, Location, Pronunciation):
@@ -29,6 +31,7 @@ class Person(Comment, Location, Pronunciation):
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
     name_preferred = create_generic_varchar()
+    roles = create_generic_m2m(related_name='people_who_hold_this_role', to=Role)
     type_job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
     type_job_title = create_generic_enum(choices=JOB_TITLE_CHOICES)
     type_timezone = create_generic_enum(choices=TIMEZONE_CHOICES)
