@@ -1,15 +1,15 @@
 from core.models.common.abstract.comment import Comment
+from core.models.common.abstract.location import Location
 from core.models.common.enums.job_level_choices import JOB_LEVEL_CHOICES
 from core.models.common.enums.job_title_choices import JOB_TITLE_CHOICES
 from core.models.common.enums.timezone_choices import TIMEZONE_CHOICES
-from core.models.common.enums.us_state_choices import US_STATE_CHOICES
 from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
 from core.models.common.field_factories.create_generic_date import create_generic_date
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 
 
-class Person(Comment):
+class Person(Comment, Location):
     date_birthday = create_generic_date()
     date_hired = create_generic_date()
     date_left = create_generic_date()
@@ -25,8 +25,6 @@ class Person(Comment):
     is_stakeholder = create_generic_boolean()
     link_gitlab_username = create_generic_varchar()
     link_sharepoint_profile = create_generic_varchar()
-    location_city = create_generic_varchar()
-    location_state_code = create_generic_enum(choices=US_STATE_CHOICES)
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
     name_preferred = create_generic_varchar()
@@ -39,5 +37,5 @@ class Person(Comment):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"
 
     class Meta:
-        verbose_name_plural = "People"
         ordering = ['name_last', 'name_first', 'id']
+        verbose_name_plural = "people"

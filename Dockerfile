@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir --requirement requirements.txt
 COPY . /shared-volume/
 
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:50479"]
