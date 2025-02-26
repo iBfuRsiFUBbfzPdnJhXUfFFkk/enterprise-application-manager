@@ -25,3 +25,7 @@ HOSTNAME_GITLAB="gitlab.com"
 - [ ] SECRETS
 - [ ] ORGANIZATIONS
 - [ ] SBOMS
+- [ ] Data Points to Scrub
+- [ ] Logs Link
+- [ ] Data Use Exceptions
+- [ ] Companies That Have Service Agreements & The Agreements The Application Has to Maintain
