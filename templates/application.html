@@ -9,6 +9,8 @@
             <td>Platform</td>
             <td>Edit</td>
             <td>GitLab</td>
+            <td>Sentry.io</td>
+            <td>OpenAI</td>
             <td>Development</td>
             <td>Staging</td>
             <td>Production</td>
@@ -40,6 +42,24 @@
                         <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}"
                            target="_blank">
                             Code
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if application.link_sentry_io %}
+                        <a href="{{ application.link_sentry_io }}" target="_blank">
+                            Sentry
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if application.link_open_ai %}
+                        <a href="{{ application.link_open_ai }}" target="_blank">
+                            OpenAI
                         </a>
                     {% else %}
                         <div></div>
