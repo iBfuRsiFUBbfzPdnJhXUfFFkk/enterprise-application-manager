@@ -10,6 +10,7 @@
             <td>Edit</td>
             <td>GitLab</td>
             <td>Wiki</td>
+            <td>Whiteboard</td>
             <td>Sentry.io</td>
             <td>OpenAI</td>
             <td>Development</td>
@@ -53,6 +54,15 @@
                         <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_wiki }}"
                            target="_blank">
                             Wiki
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if application.link_whiteboard %}
+                        <a href="{{ application.link_whiteboard }}" target="_blank">
+                            Board
                         </a>
                     {% else %}
                         <div></div>
