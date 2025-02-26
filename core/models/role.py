@@ -6,7 +6,7 @@ from core.models.common.abstract.name import Name
 
 class Role(Acronym, Alias, Comment, Name):
     def __str__(self):
-        return f"{self.name} ({self.acronym})"
+        return f"{self.name}" + (f"({self.acronym})" if self.acronym else "")
 
     class Meta:
         ordering = ['name', '-id']
