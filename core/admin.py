@@ -20,6 +20,7 @@ from core.models.person import Person
 from core.models.policy import Policy
 from core.models.release import Release
 from core.models.release_bundle import ReleaseBundle
+from core.models.report import Report
 from core.models.requirement import Requirement
 from core.models.risk import Risk
 from core.models.role import Role
@@ -55,6 +56,7 @@ admin.site.register(Person)
 admin.site.register(Policy)
 admin.site.register(Release)
 admin.site.register(ReleaseBundle)
+admin.site.register(Report)
 admin.site.register(Requirement)
 admin.site.register(Risk)
 admin.site.register(Role)

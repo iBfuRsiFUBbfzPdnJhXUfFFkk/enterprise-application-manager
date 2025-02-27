@@ -5,7 +5,7 @@ from core.models.common.abstract.url import UniformResourceLocator
 
 class Link(Comment, Name, UniformResourceLocator):
     def __str__(self):
-        return f"{self.name} {self.url}"
+        return f"{self.name}"
 
     class Meta:
         ordering = ['name', '-id']

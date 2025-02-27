@@ -4,6 +4,7 @@ from core.models.common.field_factories.create_generic_boolean import create_gen
 
 
 class Requirement(Comment, Name):
+    is_for_soc = create_generic_boolean()
     is_for_spsrd = create_generic_boolean()
     is_functional_requirement = create_generic_boolean()
 
