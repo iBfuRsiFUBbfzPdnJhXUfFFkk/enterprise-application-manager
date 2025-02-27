@@ -7,6 +7,8 @@ from core.forms.common.generic_date_field import generic_date_field
 from core.models.application import Application
 from core.models.application_group import ApplicationGroup
 from core.models.person import Person
+from core.models.service_provider import ServiceProvider
+from core.models.tool import Tool
 
 
 class ApplicationForm(ModelForm):
@@ -51,6 +53,16 @@ class ApplicationForm(ModelForm):
     )
     person_stakeholders = ModelMultipleChoiceField(
         queryset=cast(QuerySet, Person.objects.filter(is_stakeholder=True)),
+        required=False,
+        widget=CheckboxSelectMultiple
+    )
+    service_providers = ModelMultipleChoiceField(
+        queryset=cast(QuerySet, ServiceProvider.objects),
+        required=False,
+        widget=CheckboxSelectMultiple
+    )
+    tools = ModelMultipleChoiceField(
+        queryset=cast(QuerySet, Tool.objects),
         required=False,
         widget=CheckboxSelectMultiple
     )

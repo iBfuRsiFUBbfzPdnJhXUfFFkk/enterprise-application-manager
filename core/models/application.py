@@ -16,6 +16,8 @@ from core.models.common.field_factories.create_generic_integer import create_gen
 from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.person import Person
+from core.models.service_provider import ServiceProvider
+from core.models.tool import Tool
 from core.utilities.get_name_acronym import get_name_acronym
 
 
@@ -62,6 +64,8 @@ class Application(Alias, Acronym, Comment, Name):
     person_project_manager = create_generic_fk(related_name='applications_as_project_manager', to=Person)
     person_scrum_master = create_generic_fk(related_name='applications_as_scrum_master', to=Person)
     person_stakeholders = create_generic_m2m(related_name='applications_stakeholder_of', to=Person)
+    service_providers = create_generic_m2m(related_name='applications_that_use_service_provider', to=ServiceProvider)
+    tools = create_generic_m2m(related_name='applications_that_use_tool', to=Tool)
     type_authentication = create_generic_enum(choices=AUTHENTICATION_TYPE_CHOICES)
     type_authorization = create_generic_enum(choices=AUTHORIZATION_TYPE_CHOICES)
     type_deployment_medium = create_generic_enum(choices=DEPLOYMENT_MEDIUM_CHOICES)
