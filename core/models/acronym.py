@@ -3,10 +3,11 @@ from core.models.common.abstract.alias import Alias
 from core.models.common.abstract.comment import Comment
 from core.models.common.abstract.name import Name
 from core.models.common.abstract.pronunciation import Pronunciation
+from core.models.common.abstract.supporting_link import SupportingLink
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class Acronym(Alias, BaseAcronym, Comment, Name, Pronunciation):
+class Acronym(Alias, BaseAcronym, Comment, Name, Pronunciation, SupportingLink):
     def __str__(self):
         return get_name_acronym(acronym=self.acronym, name=self.name)
 
