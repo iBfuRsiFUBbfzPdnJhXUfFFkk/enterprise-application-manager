@@ -1,0 +1,16 @@
+{% extends 'base_release_bundle.html' %}
+{% load markdown_extras %}
+{% block content %}
+    <div><a href="{% url 'release_bundle_edit' model_id=model.id %}">Edit This Record</a></div>
+    <h1>
+        Release Bundle of {{ model.name }}
+    </h1>
+    <h2 class="mt-5">Applications Involved in Release</h2>
+    <ul>
+    {% for release in model.releases.all %}
+        <li>{{ release.application }}</li>
+    {% endfor %}
+    </ul>
+    <h2 class="mt-5">Comments</h2>
+    <div class="border border-1 mt-1 p-1">{{ model.comment|markdown }}</div>
+{% endblock %}

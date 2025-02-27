@@ -1,9 +1,13 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, get_object_or_404
 
 from core.models.release import Release
+from core.views.generic.generic_detail_view import generic_detail_view
 
 
 def release_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
-    model: Release = get_object_or_404(klass=Release, pk=model_id)
-    return render(context={"model": model}, request=request, template_name='release/release_detail.html')
+    return generic_detail_view(
+        model_cls=Release,
+        model_id=model_id,
+        request=request,
+        template_name='release/release_detail.html',
+    )
