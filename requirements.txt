@@ -2,6 +2,7 @@ asgiref==3.8.1
 cffi==1.17.1
 cryptography==44.0.1
 Django==5.1.6
+Markdown==3.7
 pycparser==2.22
 python-dotenv==1.0.1
 sqlparse==0.5.3
