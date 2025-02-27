@@ -9,7 +9,7 @@
         </thead>
         <tbody>
         {% for release in releases %}
-            <tr ondblclick='window.location.href = "{% url 'release_edit' model_id=release.id %}"'>
+            <tr ondblclick='window.location.href = "{% url 'release_detail' model_id=release.id %}"'>
                 <td>{{ release.application.name }}</td>
                 <td>{{ release.release_bundle.name }}</td>
             </tr>
