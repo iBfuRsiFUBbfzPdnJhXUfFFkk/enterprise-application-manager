@@ -35,6 +35,7 @@ from core.models.software_bill_of_material import SoftwareBillOfMaterial
 from core.models.task import Task
 from core.models.team import Team
 from core.models.term import Term
+from core.models.this_server_configuration import ThisServerConfiguration
 from core.models.tool import Tool
 from core.models.user import User
 from core.models.vulnerability import Vulnerability
@@ -73,6 +74,7 @@ admin.site.register(SoftwareBillOfMaterial, SimpleHistoryAdmin)
 admin.site.register(Task, SimpleHistoryAdmin)
 admin.site.register(Team, SimpleHistoryAdmin)
 admin.site.register(Term, SimpleHistoryAdmin)
+admin.site.register(ThisServerConfiguration, SimpleHistoryAdmin)
 admin.site.register(Tool, SimpleHistoryAdmin)
 admin.site.register(User, SimpleHistoryAdmin)
 admin.site.register(Vulnerability, SimpleHistoryAdmin)
