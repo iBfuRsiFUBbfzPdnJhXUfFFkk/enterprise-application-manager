@@ -54,5 +54,3 @@ bash .venv/Scripts/activate
 ```bash
 deactivate
 ```
-
-test2344dee3333dddee
