@@ -1,0 +1,30 @@
+{% extends 'base_database.html' %}
+{% block content %}
+    <table id="data-table" class="display">
+        <thead>
+        <tr>
+            <td>Application</td>
+            <td>Environment</td>
+            <td>Version</td>
+            <td>Storage Model</td>
+            <td>Flavor</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for database in databases %}
+            <tr ondblclick='window.location.href = "{% url 'database_edit' model_id=database.id %}"'>
+                <td>{{ database.application.name }}</td>
+                <td>{{ database.type_environment }}</td>
+                <td>{{ database.version }}</td>
+                <td>{{ database.type_data_storage_form }}</td>
+                <td>{{ database.type_database_flavor }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function() {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

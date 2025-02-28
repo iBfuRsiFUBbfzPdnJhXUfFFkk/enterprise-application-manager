@@ -1,0 +1,14 @@
+**/.idea/*
+!**/.idea/misc.xml
+!**/.idea/modules.xml
+!**/.idea/vcs.xml
+!**/.idea/runConfigurations/
+**/*.iml
+
+**/*.sqlite3
+**/*.env
+**/data.json
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.DS_Store

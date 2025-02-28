@@ -1,0 +1,12 @@
+**/.idea/
+**/.venv/
+**/data.json
+**/__pycache__/*
+**/*.DS_Store
+**/.documentation/*
+**/.git/*
+**/.gitignore
+**/*.sqlite3
+**/docker-compose.yml
+**/*.md
+**/*.env

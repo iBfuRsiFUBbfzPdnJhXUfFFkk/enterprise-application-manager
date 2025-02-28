@@ -1,0 +1,12 @@
+services:
+  enterprise_application_manager:
+    build: .
+    command: python manage.py runserver 0.0.0.0:50479
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    ports:
+      - "50479:50479"
+    restart: always
+    volumes:
+      - .:/shared-volume

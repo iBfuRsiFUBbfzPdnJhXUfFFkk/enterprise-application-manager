@@ -1,0 +1,46 @@
+{% extends 'base_person.html' %}
+{% block content %}
+    <table id="data-table" class="display">
+        <thead>
+        <tr>
+            <td>Last</td>
+            <td>First</td>
+            <td>Job Level</td>
+            <td>Job Title</td>
+            <td>GitLab</td>
+            <td>SharePoint</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for person in people %}
+            <tr ondblclick='window.location.href = "{% url 'person_edit' model_id=person.id %}"'>
+                <td>{{ person.name_last }}</td>
+                <td>{{ person.name_first }}</td>
+                <td>{{ person.type_job_level }}</td>
+                <td>{{ person.type_job_title }}</td>
+                <td>
+                    {% if person.link_gitlab_username %}
+                        <a href="https://{{ hostname_gitlab }}/{{ person.link_gitlab_username }}" target="_blank">
+                            {{ person.link_gitlab_username }}
+                        </a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if person.link_sharepoint_profile %}
+                        <a href="{{ person.link_sharepoint_profile }}" target="_blank">SharePoint</a>
+                    {% else %}
+                        <div></div>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

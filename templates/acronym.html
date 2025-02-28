@@ -1,0 +1,26 @@
+{% extends 'base_acronym.html' %}
+{% block content %}
+    <table id="data-table" class="display">
+        <thead>
+        <tr>
+            <td>Acronym</td>
+            <td>Name</td>
+            <td>Comment</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for acronym in acronyms %}
+            <tr ondblclick='window.location.href = "{% url 'acronym_edit' model_id=acronym.id %}"'>
+                <td>{{ acronym.acronym }}</td>
+                <td>{{ acronym.name }}</td>
+                <td>{{ acronym.comment }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

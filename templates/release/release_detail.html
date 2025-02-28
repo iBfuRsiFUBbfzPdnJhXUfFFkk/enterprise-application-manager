@@ -1,0 +1,39 @@
+{% extends 'base_release.html' %}
+{% load markdown_extras %}
+{% block content %}
+    <div><a href="{% url 'release_edit' model_id=model.id %}">Edit This Record</a></div>
+    <h1>
+        Release of {{ model.application.name }} v{{ model.version }}
+        {% if model.type_product_owner_sign_off == "Approved" %}
+            <span class="text-success">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                     class="bi bi-check-square-fill" viewBox="0 0 16 16">
+                  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"></path>
+                </svg>
+            </span>
+        {% elif model.type_product_owner_sign_off == "Denied" %}
+            <span class="text-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                     class="bi bi-x-square-fill" viewBox="0 0 16 16">
+                  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"></path>
+                </svg>
+            </span>
+        {% else %}
+            <span class="text-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                     class="bi bi-exclamation-square-fill" viewBox="0 0 16 16">
+                  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"></path>
+                </svg>
+            </span>
+        {% endif %}
+    </h1>
+    {% if model.release_bundle %}
+        <span class="caption">
+            Part of the <a href="{% url 'release_bundle_edit' model_id=model.release_bundle.id %}">
+            {{ model.release_bundle.name }}
+            </a> release bundle
+        </span>
+    {% endif %}
+    <h2 class="mt-5">Comments</h2>
+    <div class="border border-1 mt-1 p-1">{{ model.comment|markdown }}</div>
+{% endblock %}

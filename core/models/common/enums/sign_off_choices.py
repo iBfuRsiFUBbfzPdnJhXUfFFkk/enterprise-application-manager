@@ -1,0 +1,9 @@
+SIGN_OFF_APPROVED: str = "Approved"
+SIGN_OFF_DENIED: str = "Denied"
+SIGN_OFF_PENDING: str = "Pending"
+
+SIGN_OFF_CHOICES: list[tuple[str, str]] = [
+    (SIGN_OFF_APPROVED, SIGN_OFF_APPROVED),
+    (SIGN_OFF_DENIED, SIGN_OFF_DENIED),
+    (SIGN_OFF_PENDING, SIGN_OFF_PENDING),
+]

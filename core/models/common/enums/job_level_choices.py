@@ -1,0 +1,9 @@
+JOB_LEVEL_JUNIOR: str = "Junior"
+JOB_LEVEL_MID_LEVEL: str = "Mid-Level"
+JOB_LEVEL_SENIOR: str = "Senior"
+
+JOB_LEVEL_CHOICES: list[tuple[str, str]] = [
+    (JOB_LEVEL_JUNIOR, JOB_LEVEL_JUNIOR),
+    (JOB_LEVEL_MID_LEVEL, JOB_LEVEL_MID_LEVEL),
+    (JOB_LEVEL_SENIOR, JOB_LEVEL_SENIOR),
+]
