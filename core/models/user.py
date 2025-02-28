@@ -1,8 +1,10 @@
+from django.contrib.auth.models import AbstractUser
 from simple_history.models import HistoricalRecords
 
-from django.contrib.auth.models import AbstractUser
 from core.models.common.abstract.comment import Comment
+from core.models.common.field_factories.create_generic_one_to_one_fk import create_generic_one_to_one_fk
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from core.models.person import Person
 
 
 class User(AbstractUser, Comment):
@@ -17,3 +19,4 @@ class User(AbstractUser, Comment):
     employee_title = create_generic_varchar()
     history = HistoricalRecords(excluded_fields=['history_user'])
     ldap_distinguished_name_dn = create_generic_varchar()
+    person_mapping = create_generic_one_to_one_fk(related_name="user_mapping", to=Person)
