@@ -7,9 +7,9 @@
         </tr>
         </thead>
         <tbody>
-        {% for release_bundle in release_bundles %}
-            <tr ondblclick='window.location.href = "{% url 'release_bundle_edit' model_id=release_bundle.id %}"'>
-                <td>{{ release_bundle.name }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'release_bundle_edit' model_id=model.id %}"'>
+                <td>{{ model.name }}</td>
             </tr>
         {% endfor %}
         </tbody>

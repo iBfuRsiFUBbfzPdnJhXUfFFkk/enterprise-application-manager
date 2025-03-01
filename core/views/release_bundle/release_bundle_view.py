@@ -6,8 +6,7 @@ from core.views.generic.generic_view import generic_view
 
 def release_bundle_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="release_bundles",
         model_cls=ReleaseBundle,
+        name='release_bundle',
         request=request,
-        template_name='authenticated/release_bundle/release_bundle.html',
     )

@@ -6,8 +6,7 @@ from core.views.generic.generic_view import generic_view
 
 def application_group_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="application_groups",
         model_cls=ApplicationGroup,
+        name='application_group',
         request=request,
-        template_name='authenticated/application_group/application_group.html',
     )

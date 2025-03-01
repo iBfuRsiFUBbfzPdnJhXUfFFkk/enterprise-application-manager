@@ -7,9 +7,8 @@ from core.views.generic.generic_view import generic_view
 
 def person_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="people",
-        model_cls=Person,
-        request=request,
-        template_name='authenticated/person/person.html',
         additional_context={'hostname_gitlab': get_gitlab_hostname() or "gitlab.com"},
+        model_cls=Person,
+        name='person',
+        request=request,
     )

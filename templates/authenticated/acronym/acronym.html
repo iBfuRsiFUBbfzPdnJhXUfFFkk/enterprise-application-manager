@@ -9,11 +9,11 @@
         </tr>
         </thead>
         <tbody>
-        {% for acronym in acronyms %}
-            <tr ondblclick='window.location.href = "{% url 'acronym_edit' model_id=acronym.id %}"'>
-                <td>{{ acronym.acronym }}</td>
-                <td>{{ acronym.name }}</td>
-                <td>{{ acronym.comment }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'acronym_edit' model_id=model.id %}"'>
+                <td>{{ model.acronym }}</td>
+                <td>{{ model.name }}</td>
+                <td>{{ model.comment }}</td>
             </tr>
         {% endfor %}
         </tbody>

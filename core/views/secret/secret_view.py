@@ -6,8 +6,7 @@ from core.views.generic.generic_view import generic_view
 
 def secret_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="models",
         model_cls=Secret,
+        name='secret',
         request=request,
-        template_name='authenticated/secret/secret.html',
     )

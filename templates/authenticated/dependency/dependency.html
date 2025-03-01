@@ -9,11 +9,11 @@
         </tr>
         </thead>
         <tbody>
-        {% for dependency in dependencies %}
-            <tr ondblclick='window.location.href = "{% url 'dependency_edit' model_id=dependency.id %}"'>
-                <td>{{ dependency.name }}</td>
-                <td>{{ dependency.version }}</td>
-                <td>{{ dependency.type_programing_concept }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'dependency_edit' model_id=model.id %}"'>
+                <td>{{ model.name }}</td>
+                <td>{{ model.version }}</td>
+                <td>{{ model.type_programing_concept }}</td>
             </tr>
         {% endfor %}
         </tbody>

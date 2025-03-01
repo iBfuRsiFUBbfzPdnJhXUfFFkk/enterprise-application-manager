@@ -6,8 +6,7 @@ from core.views.generic.generic_view import generic_view
 
 def acronym_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="acronyms",
         model_cls=Acronym,
+        name='acronym',
         request=request,
-        template_name='authenticated/acronym/acronym.html',
     )

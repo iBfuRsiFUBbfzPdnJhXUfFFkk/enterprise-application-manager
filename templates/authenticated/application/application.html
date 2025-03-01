@@ -71,25 +71,25 @@
         </tr>
         </thead>
         <tbody>
-        {% for application in applications %}
-            <tr ondblclick='window.location.href = "{% url 'application_edit' model_id=application.id %}"'>
-                <td>{{ application.acronym }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'application_edit' model_id=model.id %}"'>
+                <td>{{ model.acronym }}</td>
                 <td>
-                    {% if application.is_legacy %}
-                        {{ application.name }} (LEGACY)
+                    {% if model.is_legacy %}
+                        {{ model.name }} (LEGACY)
                     {% else %}
-                        {{ application.name }}
+                        {{ model.name }}
                     {% endif %}
                 </td>
                 <td>
-                    {% if application.application_group_platform %}
-                        {{ application.application_group_platform.acronym }}
+                    {% if model.application_group_platform %}
+                        {{ model.application_group_platform.acronym }}
                     {% endif %}
                 </td>
-                <td>{{ application.type_platform_target }}</td>
-                <td data-toggle="tooltip" title="{{ application.link_teams_channel }}">
-                    {% if application.link_teams_channel %}
-                        <a href="{{ application.link_teams_channel }}" target="_blank">
+                <td>{{ model.type_platform_target }}</td>
+                <td data-toggle="tooltip" title="{{ model.link_teams_channel }}">
+                    {% if model.link_teams_channel %}
+                        <a href="{{ model.link_teams_channel }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-chat-left-text-fill" viewBox="0 0 16 16">
                                 <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793zm3.5 1a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h9a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1z"></path>
@@ -98,9 +98,9 @@
                     {% endif %}
                 </td>
                 <td data-toggle="tooltip"
-                    title="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}">
-                    {% if application.link_gitlab_repository %}
-                        <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_repository }}"
+                    title="https://{{ hostname_gitlab }}/{{ model.link_gitlab_repository }}">
+                    {% if model.link_gitlab_repository %}
+                        <a href="https://{{ hostname_gitlab }}/{{ model.link_gitlab_repository }}"
                            target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-code-slash" viewBox="0 0 16 16">
@@ -109,9 +109,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="https://{{ hostname_gitlab }}/{{ application.link_gitlab_wiki }}">
-                    {% if application.link_gitlab_wiki %}
-                        <a href="https://{{ hostname_gitlab }}/{{ application.link_gitlab_wiki }}"
+                <td data-toggle="tooltip" title="https://{{ hostname_gitlab }}/{{ model.link_gitlab_wiki }}">
+                    {% if model.link_gitlab_wiki %}
+                        <a href="https://{{ hostname_gitlab }}/{{ model.link_gitlab_wiki }}"
                            target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-wikipedia" viewBox="0 0 16 16">
@@ -120,9 +120,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_whiteboard }}">
-                    {% if application.link_whiteboard %}
-                        <a href="{{ application.link_whiteboard }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_whiteboard }}">
+                    {% if model.link_whiteboard %}
+                        <a href="{{ model.link_whiteboard }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi"
                                  viewBox="0 0 640 512">
@@ -131,9 +131,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_sentry_io }}">
-                    {% if application.link_sentry_io %}
-                        <a href="{{ application.link_sentry_io }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_sentry_io }}">
+                    {% if model.link_sentry_io %}
+                        <a href="{{ model.link_sentry_io }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-substack" viewBox="0 0 16 16">
                                 <path d="M15 3.604H1v1.891h14v-1.89ZM1 7.208V16l7-3.926L15 16V7.208zM15 0H1v1.89h14z"></path>
@@ -141,9 +141,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_open_ai }}">
-                    {% if application.link_open_ai %}
-                        <a href="{{ application.link_open_ai }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_open_ai }}">
+                    {% if model.link_open_ai %}
+                        <a href="{{ model.link_open_ai }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-diagram-3" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd"
@@ -152,9 +152,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_development_server }}">
-                    {% if application.link_development_server %}
-                        <a href="{{ application.link_development_server }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_development_server }}">
+                    {% if model.link_development_server %}
+                        <a href="{{ model.link_development_server }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-star"
                                  viewBox="0 0 16 16">
@@ -163,9 +163,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_staging_server }}">
-                    {% if application.link_staging_server %}
-                        <a href="{{ application.link_staging_server }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_staging_server }}">
+                    {% if model.link_staging_server %}
+                        <a href="{{ model.link_staging_server }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-star-half" viewBox="0 0 16 16">
                                 <path d="M5.354 5.119 7.538.792A.52.52 0 0 1 8 .5c.183 0 .366.097.465.292l2.184 4.327 4.898.696A.54.54 0 0 1 16 6.32a.55.55 0 0 1-.17.445l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256a.5.5 0 0 1-.146.05c-.342.06-.668-.254-.6-.642l.83-4.73L.173 6.765a.55.55 0 0 1-.172-.403.6.6 0 0 1 .085-.302.51.51 0 0 1 .37-.245zM8 12.027a.5.5 0 0 1 .232.056l3.686 1.894-.694-3.957a.56.56 0 0 1 .162-.505l2.907-2.77-4.052-.576a.53.53 0 0 1-.393-.288L8.001 2.223 8 2.226z"></path>
@@ -173,9 +173,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_production_server }}">
-                    {% if application.link_production_server %}
-                        <a href="{{ application.link_production_server }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_production_server }}">
+                    {% if model.link_production_server %}
+                        <a href="{{ model.link_production_server }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-star-fill" viewBox="0 0 16 16">
                                 <path d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"></path>
@@ -183,9 +183,9 @@
                         </a>
                     {% endif %}
                 </td>
-                <td data-toggle="tooltip" title="{{ application.link_production_server_external }}">
-                    {% if application.link_production_server_external %}
-                        <a href="{{ application.link_production_server_external }}" target="_blank">
+                <td data-toggle="tooltip" title="{{ model.link_production_server_external }}">
+                    {% if model.link_production_server_external %}
+                        <a href="{{ model.link_production_server_external }}" target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                  class="bi bi-stars"
                                  viewBox="0 0 16 16">

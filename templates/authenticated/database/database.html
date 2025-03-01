@@ -11,13 +11,13 @@
         </tr>
         </thead>
         <tbody>
-        {% for database in databases %}
-            <tr ondblclick='window.location.href = "{% url 'database_edit' model_id=database.id %}"'>
-                <td>{{ database.application.name }}</td>
-                <td>{{ database.type_environment }}</td>
-                <td>{{ database.version }}</td>
-                <td>{{ database.type_data_storage_form }}</td>
-                <td>{{ database.type_database_flavor }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'database_edit' model_id=model.id %}"'>
+                <td>{{ model.application.name }}</td>
+                <td>{{ model.type_environment }}</td>
+                <td>{{ model.version }}</td>
+                <td>{{ model.type_data_storage_form }}</td>
+                <td>{{ model.type_database_flavor }}</td>
             </tr>
         {% endfor %}
         </tbody>

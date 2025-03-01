@@ -8,10 +8,10 @@
         </tr>
         </thead>
         <tbody>
-        {% for document in documents %}
-            <tr ondblclick='window.location.href = "{% url 'document_edit' model_id=document.id %}"'>
-                <td>{{ document.name }}</td>
-                <td>{{ document.blob_filename }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'document_edit' model_id=model.id %}"'>
+                <td>{{ model.name }}</td>
+                <td>{{ model.blob_filename }}</td>
             </tr>
         {% endfor %}
         </tbody>

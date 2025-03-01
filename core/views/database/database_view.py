@@ -6,8 +6,7 @@ from core.views.generic.generic_view import generic_view
 
 def database_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="databases",
         model_cls=Database,
+        name='database',
         request=request,
-        template_name='authenticated/database/database.html',
     )

@@ -6,8 +6,7 @@ from core.views.generic.generic_view import generic_view
 
 def document_view(request: HttpRequest) -> HttpResponse:
     return generic_view(
-        context_name="documents",
         model_cls=Document,
+        name='document',
         request=request,
-        template_name='authenticated/document/document.html',
     )

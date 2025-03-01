@@ -12,24 +12,24 @@
         </tr>
         </thead>
         <tbody>
-        {% for person in people %}
-            <tr ondblclick='window.location.href = "{% url 'person_edit' model_id=person.id %}"'>
-                <td>{{ person.name_last }}</td>
-                <td>{{ person.name_first }}</td>
-                <td>{{ person.type_job_level }}</td>
-                <td>{{ person.type_job_title }}</td>
+        {% for model in models %}
+            <tr ondblclick='window.location.href = "{% url 'person_edit' model_id=model.id %}"'>
+                <td>{{ model.name_last }}</td>
+                <td>{{ model.name_first }}</td>
+                <td>{{ model.type_job_level }}</td>
+                <td>{{ model.type_job_title }}</td>
                 <td>
-                    {% if person.gitlab_sync_username %}
-                        <a href="https://{{ hostname_gitlab }}/{{ person.gitlab_sync_username }}" target="_blank">
-                            {{ person.gitlab_sync_username }}
+                    {% if model.gitlab_sync_username %}
+                        <a href="https://{{ hostname_gitlab }}/{{ model.gitlab_sync_username }}" target="_blank">
+                            {{ model.gitlab_sync_username }}
                         </a>
                     {% else %}
                         <div></div>
                     {% endif %}
                 </td>
                 <td>
-                    {% if person.link_sharepoint_profile %}
-                        <a href="{{ person.link_sharepoint_profile }}" target="_blank">SharePoint</a>
+                    {% if model.link_sharepoint_profile %}
+                        <a href="{{ model.link_sharepoint_profile }}" target="_blank">SharePoint</a>
                     {% else %}
                         <div></div>
                     {% endif %}
