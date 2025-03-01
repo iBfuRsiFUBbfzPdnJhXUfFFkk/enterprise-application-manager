@@ -19,9 +19,9 @@
                 <td>{{ person.type_job_level }}</td>
                 <td>{{ person.type_job_title }}</td>
                 <td>
-                    {% if person.link_gitlab_username %}
-                        <a href="https://{{ hostname_gitlab }}/{{ person.link_gitlab_username }}" target="_blank">
-                            {{ person.link_gitlab_username }}
+                    {% if person.gitlab_sync_username %}
+                        <a href="https://{{ hostname_gitlab }}/{{ person.gitlab_sync_username }}" target="_blank">
+                            {{ person.gitlab_sync_username }}
                         </a>
                     {% else %}
                         <div></div>
