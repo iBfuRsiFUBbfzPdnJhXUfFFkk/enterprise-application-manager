@@ -63,13 +63,14 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
         gitlab_user_objects.extend(response.json())
         url: str | None = response.links.get("next", {}).get("url")
     for gitlab_user_object in gitlab_user_objects:
+        print(gitlab_user_object)
         gitlab_access_level_int: int | None = gitlab_user_object.get("access_level", None)
         gitlab_id_int: int | None = gitlab_user_object.get("id", None)
         gitlab_name: str | None = gitlab_user_object.get("name", None)
         gitlab_names: list[str] = (gitlab_name or "").split(" ")
         gitlab_username: str | None = gitlab_user_object.get("username", None)
-        gitlab_first_name: str = gitlab_names[0] or ""
-        gitlab_last_name: str = gitlab_names[1] or ""
+        gitlab_first_name: str = gitlab_names[0] if len(gitlab_names) > 0 else ""
+        gitlab_last_name: str = gitlab_names[1] if len(gitlab_names) > 1 else ""
         person: Person | None = Person.objects.filter(
             gitlab_sync_id=str(object=gitlab_id_int),
             gitlab_sync_id__isnull=False,
