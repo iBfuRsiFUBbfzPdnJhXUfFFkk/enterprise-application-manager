@@ -63,7 +63,6 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
         gitlab_user_objects.extend(response.json())
         url: str | None = response.links.get("next", {}).get("url")
     for gitlab_user_object in gitlab_user_objects:
-        print(gitlab_user_object)
         gitlab_access_level_int: int | None = gitlab_user_object.get("access_level", None)
         gitlab_id_int: int | None = gitlab_user_object.get("id", None)
         gitlab_name: str | None = gitlab_user_object.get("name", None)
@@ -88,7 +87,10 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
                     name_last__isnull=False,
                 ).first()
                 if person is None:
-                    person: Person = Person.objects.create()
+                    person: Person = Person.objects.create(
+                        name_first=gitlab_first_name,
+                        name_last=gitlab_last_name,
+                    )
         person.gitlab_sync_access_level = str(
             object=gitlab_access_level_int) if gitlab_access_level_int is not None else None
         person.gitlab_sync_avatar_url = gitlab_user_object.get("avatar_url", None)
@@ -103,6 +105,10 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
         person.gitlab_sync_web_url = gitlab_user_object.get("web_url", None)
         person.save()
     end_time: float = time()
-    execution_time: float = end_time - start_time
-    print(f'Execution time: {execution_time} seconds')
-    return render(context={}, request=request, template_name="home.html")
+    execution_time_in_seconds: float = end_time - start_time
+    print(f'Execution time: {execution_time_in_seconds} seconds')
+    return render(
+        context={"execution_time_in_seconds": execution_time_in_seconds},
+        request=request,
+        template_name="action/action_success.html"
+    )
