@@ -1,11 +1,12 @@
-from django.forms import ModelForm, FileField
+from django.forms import FileField
 
+from core.forms.common.base_model_form import BaseModelForm
+from core.forms.common.base_model_form_meta import BaseModelFormMeta
 from core.models.document import Document
 
 
-class DocumentForm(ModelForm):
+class DocumentForm(BaseModelForm):
     blob_data = FileField(required=True)
 
-    class Meta:
-        fields = ['name', 'version', 'comment']
+    class Meta(BaseModelFormMeta):
         model = Document

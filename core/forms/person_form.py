@@ -1,34 +1,21 @@
-from typing import cast
-
-from django.db.models import QuerySet
-from django.forms import ModelForm, ModelMultipleChoiceField, CheckboxSelectMultiple, ModelChoiceField
-
+from core.forms.common.base_model_form import BaseModelForm
+from core.forms.common.base_model_form_meta import BaseModelFormMeta
+from core.forms.common.generic_choice_field import generic_choice_field
 from core.forms.common.generic_date_field import generic_date_field
+from core.forms.common.generic_multiple_choice_field import generic_multiple_choice_field
 from core.models.job_level import JobLevel
 from core.models.person import Person
 from core.models.role import Role
 from core.models.skill import Skill
 
 
-class PersonForm(ModelForm):
+class PersonForm(BaseModelForm):
     date_birthday = generic_date_field()
     date_hired = generic_date_field()
     date_left = generic_date_field()
-    job_level = ModelChoiceField(
-        queryset=cast(QuerySet, JobLevel.objects),
-        required=False,
-    )
-    roles = ModelMultipleChoiceField(
-        queryset=cast(QuerySet, Role.objects),
-        required=False,
-        widget=CheckboxSelectMultiple
-    )
-    skills = ModelMultipleChoiceField(
-        queryset=cast(QuerySet, Skill.objects),
-        required=False,
-        widget=CheckboxSelectMultiple
-    )
+    job_level = generic_choice_field(queryset=JobLevel.objects.all())
+    roles = generic_multiple_choice_field(queryset=Role.objects.all())
+    skills = generic_multiple_choice_field(queryset=Skill.objects.all())
 
-    class Meta:
-        fields = '__all__'
+    class Meta(BaseModelFormMeta):
         model = Person
