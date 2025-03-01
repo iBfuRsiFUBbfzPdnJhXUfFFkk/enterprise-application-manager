@@ -63,11 +63,11 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
         gitlab_user_objects.extend(response.json())
         url: str | None = response.links.get("next", {}).get("url")
     for gitlab_user_object in gitlab_user_objects:
-        gitlab_access_level_int: int | None = gitlab_user_object.get("access_level", default=None)
-        gitlab_id_int: int | None = gitlab_user_object.get("id", default=None)
-        gitlab_name: str | None = gitlab_user_object.get("name", default=None)
+        gitlab_access_level_int: int | None = gitlab_user_object.get("access_level", None)
+        gitlab_id_int: int | None = gitlab_user_object.get("id", None)
+        gitlab_name: str | None = gitlab_user_object.get("name", None)
         gitlab_names: list[str] = (gitlab_name or "").split(" ")
-        gitlab_username: str | None = gitlab_user_object.get("username", default=None)
+        gitlab_username: str | None = gitlab_user_object.get("username", None)
         gitlab_first_name: str = gitlab_names[0] or ""
         gitlab_last_name: str = gitlab_names[1] or ""
         person: Person | None = Person.objects.filter(
@@ -90,18 +90,16 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
                     person: Person = Person.objects.create()
         person.gitlab_sync_access_level = str(
             object=gitlab_access_level_int) if gitlab_access_level_int is not None else None
-        person.gitlab_sync_avatar_url = gitlab_user_object.get("avatar_url", default=None)
-        person.gitlab_sync_datetime_created_at = parse_datetime(
-            datetime_str=gitlab_user_object.get("created_at", default=None))
-        person.gitlab_sync_datetime_expires_at = parse_datetime(
-            datetime_str=gitlab_user_object.get("expires_at", default=None))
+        person.gitlab_sync_avatar_url = gitlab_user_object.get("avatar_url", None)
+        person.gitlab_sync_datetime_created_at = parse_datetime(datetime_str=gitlab_user_object.get("created_at", None))
+        person.gitlab_sync_datetime_expires_at = parse_datetime(datetime_str=gitlab_user_object.get("expires_at", None))
         person.gitlab_sync_id = str(object=gitlab_id_int) if gitlab_id_int is not None else None
-        person.gitlab_sync_is_locked = gitlab_user_object.get("locked", default=False)
-        person.gitlab_sync_membership_state = gitlab_user_object.get("membership_state", default=None)
+        person.gitlab_sync_is_locked = gitlab_user_object.get("locked", False)
+        person.gitlab_sync_membership_state = gitlab_user_object.get("membership_state", None)
         person.gitlab_sync_name = gitlab_name
-        person.gitlab_sync_state = gitlab_user_object.get("state", default=None)
+        person.gitlab_sync_state = gitlab_user_object.get("state", None)
         person.gitlab_sync_username = gitlab_username
-        person.gitlab_sync_web_url = gitlab_user_object.get("web_url", default=None)
+        person.gitlab_sync_web_url = gitlab_user_object.get("web_url", None)
     end_time: float = time()
     execution_time: float = end_time - start_time
     print(f'Execution time: {execution_time} seconds')
