@@ -1,5 +1,13 @@
 # Enterprise Application Manager
 
+## Point To The Correct Settings Environment
+
+This needs to be in front of your run command
+
+```bash
+export DJANGO_SETTINGS_MODULE="core.settings.local"
+```
+
 ## ENV File
 
 ```properties
