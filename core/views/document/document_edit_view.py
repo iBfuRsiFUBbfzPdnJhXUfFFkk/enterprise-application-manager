@@ -30,6 +30,6 @@ def document_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
         form = DocumentForm(instance=model_instance)
     return render(
         request=request,
-        template_name='generic_edit_multipart.html',
+        template_name='common/generic_edit_multipart.html',
         context={'form': form}
     )

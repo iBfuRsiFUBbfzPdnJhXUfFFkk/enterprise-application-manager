@@ -9,5 +9,5 @@ def document_view(request: HttpRequest) -> HttpResponse:
         context_name="documents",
         model_cls=Document,
         request=request,
-        template_name='document.html',
+        template_name='authenticated/document/document.html',
     )

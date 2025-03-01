@@ -110,5 +110,5 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
     return render(
         context={"execution_time_in_seconds": execution_time_in_seconds},
         request=request,
-        template_name="action/action_success.html"
+        template_name="authenticated/action/action_success.html"
     )

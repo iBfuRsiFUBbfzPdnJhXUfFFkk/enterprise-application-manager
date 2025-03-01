@@ -36,6 +36,6 @@ def document_add_view(request: HttpRequest) -> HttpResponse:
 
     return render(
         request=request,
-        template_name='generic_add_multipart.html',
+        template_name='common/generic_add_multipart.html',
         context={'form': form}
     )

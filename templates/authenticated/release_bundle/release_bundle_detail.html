@@ -1,4 +1,4 @@
-{% extends 'base_release_bundle.html' %}
+{% extends 'authenticated/release_bundle/base_release_bundle.html' %}
 {% load markdown_extras %}
 {% block content %}
     <div><a href="{% url 'release_bundle_edit' model_id=model.id %}">Edit This Record</a></div>

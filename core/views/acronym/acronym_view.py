@@ -9,5 +9,5 @@ def acronym_view(request: HttpRequest) -> HttpResponse:
         context_name="acronyms",
         model_cls=Acronym,
         request=request,
-        template_name='acronym.html',
+        template_name='authenticated/acronym/acronym.html',
     )

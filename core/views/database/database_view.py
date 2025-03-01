@@ -9,5 +9,5 @@ def database_view(request: HttpRequest) -> HttpResponse:
         context_name="databases",
         model_cls=Database,
         request=request,
-        template_name='database.html',
+        template_name='authenticated/database/database.html',
     )

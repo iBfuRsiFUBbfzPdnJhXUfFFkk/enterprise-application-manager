@@ -3,4 +3,4 @@ from django.shortcuts import render
 
 
 def home_view(request: HttpRequest) -> HttpResponse:
-    return render(request=request, template_name="home.html")
+    return render(request=request, template_name="authenticated/home/home.html")

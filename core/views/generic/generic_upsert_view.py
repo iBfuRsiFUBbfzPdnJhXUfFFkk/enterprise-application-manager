@@ -53,5 +53,5 @@ def generic_upsert_view(
     return render(
         context=context,
         request=request,
-        template_name='generic_edit.html' if is_edit else 'generic_add.html'
+        template_name='common/generic_edit.html' if is_edit else 'common/generic_add.html'
     )

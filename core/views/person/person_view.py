@@ -10,6 +10,6 @@ def person_view(request: HttpRequest) -> HttpResponse:
         context_name="people",
         model_cls=Person,
         request=request,
-        template_name='person.html',
+        template_name='authenticated/person/person.html',
         additional_context={'hostname_gitlab': get_gitlab_hostname() or "gitlab.com"},
     )

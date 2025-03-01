@@ -9,5 +9,5 @@ def release_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
         model_cls=Release,
         model_id=model_id,
         request=request,
-        template_name='release/release_detail.html',
+        template_name='authenticated/release/release_detail.html',
     )

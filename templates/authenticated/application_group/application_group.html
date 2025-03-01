@@ -1,19 +1,17 @@
-{% extends 'base_acronym.html' %}
+{% extends 'authenticated/application_group/base_application_group.html' %}
 {% block content %}
     <table id="data-table" class="display">
         <thead>
         <tr>
             <td>Acronym</td>
             <td>Name</td>
-            <td>Comment</td>
         </tr>
         </thead>
         <tbody>
-        {% for acronym in acronyms %}
-            <tr ondblclick='window.location.href = "{% url 'acronym_edit' model_id=acronym.id %}"'>
-                <td>{{ acronym.acronym }}</td>
-                <td>{{ acronym.name }}</td>
-                <td>{{ acronym.comment }}</td>
+        {% for application_group in application_groups %}
+            <tr ondblclick='window.location.href = "{% url 'application_group_edit' model_id=application_group.id %}"'>
+                <td>{{ application_group.acronym }}</td>
+                <td>{{ application_group.name }}</td>
             </tr>
         {% endfor %}
         </tbody>

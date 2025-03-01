@@ -10,6 +10,6 @@ def application_view(request: HttpRequest) -> HttpResponse:
         context_name="applications",
         model_cls=Application,
         request=request,
-        template_name='application.html',
+        template_name='authenticated/application/application.html',
         additional_context={'hostname_gitlab': get_gitlab_hostname() or "gitlab.com"},
     )

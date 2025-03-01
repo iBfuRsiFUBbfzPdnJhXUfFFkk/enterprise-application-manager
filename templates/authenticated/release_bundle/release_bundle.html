@@ -1,17 +1,15 @@
-{% extends 'base_document.html' %}
+{% extends 'authenticated/release_bundle/base_release_bundle.html' %}
 {% block content %}
     <table id="data-table" class="display">
         <thead>
         <tr>
             <td>Name</td>
-            <td>Filename</td>
         </tr>
         </thead>
         <tbody>
-        {% for document in documents %}
-            <tr ondblclick='window.location.href = "{% url 'document_edit' model_id=document.id %}"'>
-                <td>{{ document.name }}</td>
-                <td>{{ document.blob_filename }}</td>
+        {% for release_bundle in release_bundles %}
+            <tr ondblclick='window.location.href = "{% url 'release_bundle_edit' model_id=release_bundle.id %}"'>
+                <td>{{ release_bundle.name }}</td>
             </tr>
         {% endfor %}
         </tbody>

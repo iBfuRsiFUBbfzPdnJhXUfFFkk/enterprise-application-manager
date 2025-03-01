@@ -9,5 +9,5 @@ def secret_view(request: HttpRequest) -> HttpResponse:
         context_name="models",
         model_cls=Secret,
         request=request,
-        template_name='secret/secret.html',
+        template_name='authenticated/secret/secret.html',
     )

@@ -9,5 +9,5 @@ def dependency_view(request: HttpRequest) -> HttpResponse:
         context_name="dependencies",
         model_cls=Dependency,
         request=request,
-        template_name='dependency.html',
+        template_name='authenticated/dependency/dependency.html',
     )

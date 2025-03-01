@@ -9,5 +9,5 @@ def release_bundle_view(request: HttpRequest) -> HttpResponse:
         context_name="release_bundles",
         model_cls=ReleaseBundle,
         request=request,
-        template_name='release_bundle.html',
+        template_name='authenticated/release_bundle/release_bundle.html',
     )
