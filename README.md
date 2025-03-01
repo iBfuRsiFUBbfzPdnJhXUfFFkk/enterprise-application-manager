@@ -13,7 +13,6 @@ AUTH_LDAP_USER_ATTR_MAP="{\"first_name\": \"firstName\"}"
 DEBUG=True
 DJANGO_SECRET_KEY="******"
 ENCRYPTION_SECRET="******"
-HOSTNAME_GITLAB="gitlab.com"
 SHOULD_USE_LDAP=False
 ```
 

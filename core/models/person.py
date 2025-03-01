@@ -10,7 +10,6 @@ from core.models.common.field_factories.create_generic_date import create_generi
 from core.models.common.field_factories.create_generic_datetime import create_generic_datetime
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.job_level import JobLevel
