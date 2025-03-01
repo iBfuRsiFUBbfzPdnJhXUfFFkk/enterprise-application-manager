@@ -101,6 +101,7 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
         person.gitlab_sync_state = gitlab_user_object.get("state", None)
         person.gitlab_sync_username = gitlab_username
         person.gitlab_sync_web_url = gitlab_user_object.get("web_url", None)
+        person.save()
     end_time: float = time()
     execution_time: float = end_time - start_time
     print(f'Execution time: {execution_time} seconds')
