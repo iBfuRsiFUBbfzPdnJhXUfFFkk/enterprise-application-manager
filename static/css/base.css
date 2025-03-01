@@ -1,0 +1,45 @@
+form {
+    align-content: center;
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    flex-flow: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
+
+form > p {
+    align-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+}
+
+form > button[type=submit] {
+    background-color: #4CAF50;
+    width: 100%;
+}
+
+form > p > input {
+    width: 500px;
+}
+
+form > p > label {
+    text-wrap: wrap;
+    width: 200px;
+}
+
+form > p > select {
+    width: 500px;
+}
+
+form > p > textarea {
+    width: 500px;
+}
+
+.caption {
+    color: rgba(0, 0, 0, 0.5);
+    font-style: italic;
+}
