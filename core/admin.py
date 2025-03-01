@@ -2,6 +2,7 @@ from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
 from core.models.acronym import Acronym
+from core.models.action import Action
 from core.models.application import Application
 from core.models.application_group import ApplicationGroup
 from core.models.client import Client
@@ -41,6 +42,7 @@ from core.models.user import User
 from core.models.vulnerability import Vulnerability
 
 admin.site.register(Acronym, SimpleHistoryAdmin)
+admin.site.register(Action, SimpleHistoryAdmin)
 admin.site.register(Application, SimpleHistoryAdmin)
 admin.site.register(ApplicationGroup, SimpleHistoryAdmin)
 admin.site.register(Client, SimpleHistoryAdmin)

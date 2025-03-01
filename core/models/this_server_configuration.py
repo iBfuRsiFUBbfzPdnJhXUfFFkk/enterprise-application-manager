@@ -7,6 +7,8 @@ from core.models.secret import Secret
 
 
 class ThisServerConfiguration(BaseModel, Comment, Name):
+    connection_gitlab_api_version = create_generic_varchar()
+    connection_gitlab_group_id = create_generic_varchar()
     connection_gitlab_hostname = create_generic_varchar()
     connection_gitlab_token = create_generic_fk(to=Secret)
 
