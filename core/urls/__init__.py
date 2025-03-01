@@ -2,16 +2,16 @@ from django.contrib.admin import site
 from django.contrib.auth.decorators import login_required
 from django.urls import URLPattern, URLResolver, path, include
 
-from core.urls.acronym import urlpatterns_acronym
-from core.urls.application import urlpatterns_application
-from core.urls.application_group import urlpatterns_application_group
-from core.urls.database import urlpatterns_database
-from core.urls.dependency import urlpatterns_dependency
-from core.urls.document import urlpatterns_document
-from core.urls.login import urlpatterns_login
-from core.urls.person import urlpatterns_person
-from core.urls.release import urlpatterns_release
-from core.urls.release_bundle import urlpatterns_release_bundle
+from core.urls.urlpatterns_acronym import urlpatterns_acronym
+from core.urls.urlpatterns_application import urlpatterns_application
+from core.urls.urlpatterns_application_group import urlpatterns_application_group
+from core.urls.urlpatterns_database import urlpatterns_database
+from core.urls.urlpatterns_dependency import urlpatterns_dependency
+from core.urls.urlpatterns_document import urlpatterns_document
+from core.urls.urlpatterns_login import urlpatterns_login
+from core.urls.urlpatterns_person import urlpatterns_person
+from core.urls.urlpatterns_release import urlpatterns_release
+from core.urls.urlpatterns_release_bundle import urlpatterns_release_bundle
 from core.urls.urlpatterns_secret import urlpatterns_secret
 from core.urls.urlpatterns_this_api import urlpatterns_this_api
 from core.views import home_view
