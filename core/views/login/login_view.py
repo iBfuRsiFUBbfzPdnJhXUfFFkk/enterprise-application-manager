@@ -1,8 +1,9 @@
 from django.contrib.auth import login
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import AuthenticationForm
+
 
 def login_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":

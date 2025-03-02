@@ -1,5 +1,5 @@
-from core.models.common.abstract.acronym import Acronym
 from core.models.application_group import ApplicationGroup
+from core.models.common.abstract.acronym import Acronym
 from core.models.common.abstract.alias import Alias
 from core.models.common.abstract.base_model import BaseModel
 from core.models.common.abstract.comment import Comment

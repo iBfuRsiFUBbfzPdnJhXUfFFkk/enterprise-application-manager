@@ -6,7 +6,7 @@ TEMPLATES = [
         'DIRS': [
             BASE_DIR / 'templates',
         ],
-        'APP_DIRS': True, # Needed for administration templates
+        'APP_DIRS': True,  # Needed for administration templates
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
