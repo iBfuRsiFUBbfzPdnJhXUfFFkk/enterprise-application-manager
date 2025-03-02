@@ -1,5 +1,6 @@
-{% extends 'authenticated/application_group/base_application_group.html' %}
+{% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+    <a href="{% url "application_group_new" %}">New</a>
     <table id="data-table" class="display">
         <thead>
         <tr>

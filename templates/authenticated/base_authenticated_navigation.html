@@ -1,0 +1,77 @@
+<nav class="navbar navbar-expand navbar-light bg-light">
+    <div class="container-fluid">
+        <ul class="navbar-nav">
+            <li class="nav-item" data-toggle="tooltip" title="Home">
+                <a class="nav-link" href="{% url "home" %}">
+                    {% include 'common/icons/icon_home.html' %}
+                </a>
+            </li>
+            {% if global_context_is_superuser %}
+                <li class="nav-item" data-toggle="tooltip" title="Admin">
+                    <a class="nav-link" href="{% url "admin:index" %}">
+                        {% include 'common/icons/icon_superuser.html' %}
+                    </a>
+                </li>
+            {% endif %}
+            <li class="nav-item" data-toggle="tooltip" title="Acronyms">
+                <a class="nav-link" href="{% url "acronym" %}">
+                    {% include 'common/icons/icon_acronym.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Applications">
+                <a class="nav-link" href="{% url "application" %}">
+                    {% include 'common/icons/icon_application.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Application Groups">
+                <a class="nav-link" href="{% url "application_group" %}">
+                    {% include 'common/icons/icon_application_group.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Databases">
+                <a class="nav-link" href="{% url "database" %}">
+                    {% include 'common/icons/icon_database.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Dependencies">
+                <a class="nav-link" href="{% url "dependency" %}">
+                    {% include 'common/icons/icon_dependency.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Documents">
+                <a class="nav-link" href="{% url "document" %}">
+                    {% include 'common/icons/icon_document.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="People">
+                <a class="nav-link" href="{% url "person" %}">
+                    {% include 'common/icons/icon_people.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Releases">
+                <a class="nav-link" href="{% url "release" %}">
+                    {% include 'common/icons/icon_release.html' %}
+                </a>
+            </li>
+            <li class="nav-item" data-toggle="tooltip" title="Release Bundles">
+                <a class="nav-link" href="{% url "release_bundle" %}">
+                    {% include 'common/icons/icon_release_bundle.html' %}
+                </a>
+            </li>
+            {% if global_context_is_superuser %}
+                <li class="nav-item" data-toggle="tooltip" title="Secrets">
+                    <a class="nav-link" href="{% url "secret" %}">
+                        {% include 'common/icons/icon_secret.html' %}
+                    </a>
+                </li>
+            {% endif %}
+            {% block navigation %}
+            {% endblock %}
+            <li class="nav-item" data-toggle="tooltip" title="Logout">
+                <a class="nav-link" href="{% url "logout" %}">
+                    {% include 'common/icons/icon_logout.html' %}
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

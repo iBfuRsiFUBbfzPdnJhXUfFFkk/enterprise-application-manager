@@ -1,5 +1,6 @@
-{% extends 'authenticated/acronym/base_acronym.html' %}
+{% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+    <a href="{% url "acronym_new" %}">New</a>
     <table id="data-table" class="display">
         <thead>
         <tr>

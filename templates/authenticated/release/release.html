@@ -1,5 +1,6 @@
-{% extends 'authenticated/release/base_release.html' %}
+{% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+    <a href="{% url "release_new" %}">New</a>
     <table id="data-table" class="display">
         <thead>
         <tr>

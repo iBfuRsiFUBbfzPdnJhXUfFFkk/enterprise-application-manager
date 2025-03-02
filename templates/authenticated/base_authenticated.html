@@ -17,37 +17,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container-fluid">
-        <ul class="navbar-nav">
-            <li class="nav-item"><a class="nav-link" href="{% url "home" %}">Home</a></li>
-            {% if global_context_is_superuser %}
-                <li class="nav-item"><a class="nav-link" href="{% url "admin:index" %}">Administration</a></li>
-            {% endif %}
-            <li class="nav-item"><a class="nav-link" href="{% url "acronym" %}">Acronyms</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "application" %}">Applications</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "application_group" %}">Application Groups</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "database" %}">Databases</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "dependency" %}">Dependencies</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "document" %}">Documents</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "person" %}">People</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "release" %}">Releases</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "release_bundle" %}">Release Bundles</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url "secret" %}">Secrets</a></li>
-            {% block navigation %}
-            {% endblock %}
-            <li class="nav-item"><a class="nav-link" href="{% url "logout" %}">Logout</a></li>
-        </ul>
-    </div>
-</nav>
-
+{% include 'authenticated/base_authenticated_navigation.html' %}
 <main>
     <div class="container-fluid">
         {% block content %}
         {% endblock %}
     </div>
 </main>
-
 <script
         crossorigin="anonymous"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

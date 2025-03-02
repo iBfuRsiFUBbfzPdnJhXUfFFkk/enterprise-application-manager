@@ -1,5 +1,6 @@
-{% extends 'authenticated/release_bundle/base_release_bundle.html' %}
+{% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+    <a href="{% url "release_bundle_new" %}">New</a>
     <table id="data-table" class="display">
         <thead>
         <tr>
