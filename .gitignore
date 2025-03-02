@@ -12,3 +12,4 @@
 **/*.pyc
 **/*.pyo
 **/*.DS_Store
+**/qodana.sarif.json
