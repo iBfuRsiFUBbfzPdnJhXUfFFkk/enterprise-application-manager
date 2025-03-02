@@ -3,8 +3,9 @@ from typing import Mapping, Any
 from django.db.models import Model
 from django.forms import ModelForm
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 
+from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 
 
@@ -50,7 +51,7 @@ def generic_upsert_view(
     else:
         form: ModelForm = form_cls(instance=model_instance)
     context: Mapping[str, Any] = {'form': form}
-    return render(
+    return base_render(
         context=context,
         request=request,
         template_name='common/generic_edit.html' if is_edit else 'common/generic_add.html'

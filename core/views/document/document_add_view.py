@@ -1,10 +1,11 @@
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.utils.datastructures import MultiValueDict
 
 from core.forms.document_form import DocumentForm
 from core.models.document import Document
+from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 
 
@@ -34,8 +35,8 @@ def document_add_view(request: HttpRequest) -> HttpResponse:
     else:
         form = DocumentForm()
 
-    return render(
+    return base_render(
+        context={'form': form},
         request=request,
         template_name='common/generic_add_multipart.html',
-        context={'form': form}
     )

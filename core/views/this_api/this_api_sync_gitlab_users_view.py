@@ -3,12 +3,12 @@ from time import time
 from typing import TypedDict
 
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
 from requests import get, Response
 
 from core.models.person import Person
 from core.models.secret import Secret
 from core.models.this_server_configuration import ThisServerConfiguration
+from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 
 
@@ -107,7 +107,7 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
     print(f'Execution time: {execution_time_in_seconds} seconds')
-    return render(
+    return base_render(
         context={"execution_time_in_seconds": execution_time_in_seconds},
         request=request,
         template_name="authenticated/action/action_success.html"

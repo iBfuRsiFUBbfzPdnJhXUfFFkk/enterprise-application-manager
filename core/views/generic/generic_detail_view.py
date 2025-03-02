@@ -2,8 +2,9 @@ from typing import Any, Mapping
 
 from django.db.models import Model
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 
+from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 
 
@@ -25,4 +26,4 @@ def generic_detail_view(
     model: model_cls = get_object_or_404(klass=model_cls, pk=model_id)
     additional_context: Mapping[str, Any] = additional_context or {}
     context: Mapping[str, Any] = {**additional_context, "model": model}
-    return render(context=context, request=request, template_name=template_name)
+    return base_render(context=context, request=request, template_name=template_name)

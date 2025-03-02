@@ -2,8 +2,8 @@ from typing import Any, Mapping
 
 from django.db.models import Model, QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
 
+from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 
 
@@ -22,4 +22,8 @@ def generic_view(
     models: QuerySet = model_cls.objects.all()
     additional_context: Mapping[str, Any] = additional_context or {}
     context: Mapping[str, Any] = {**additional_context, "models": models}
-    return render(context=context, request=request, template_name=f"authenticated/{name}/{name}.html")
+    return base_render(
+        context=context,
+        request=request,
+        template_name=f"authenticated/{name}/{name}.html"
+    )

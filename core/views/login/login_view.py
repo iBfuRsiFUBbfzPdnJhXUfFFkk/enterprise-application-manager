@@ -2,7 +2,9 @@ from django.contrib.auth import login
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
+
+from core.utilities.base_render import base_render
 
 
 def login_view(request: HttpRequest) -> HttpResponse:
@@ -14,7 +16,7 @@ def login_view(request: HttpRequest) -> HttpResponse:
             return redirect(to='/authenticated/home/')
     else:
         form = AuthenticationForm()
-    return render(
+    return base_render(
         context={'form': form},
         request=request,
         template_name='login/login.html',

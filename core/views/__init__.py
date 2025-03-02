@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+
+from core.utilities.base_render import base_render
 
 
 def home_view(request: HttpRequest) -> HttpResponse:
-    return render(request=request, template_name="authenticated/home/home.html")
+    return base_render(request=request, template_name="authenticated/home/home.html")
