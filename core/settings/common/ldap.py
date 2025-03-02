@@ -20,10 +20,3 @@ if SHOULD_USE_LDAP is True:
     )
     AUTH_LDAP_USER_ATTR_MAP: dict[str, str] = loads(s=env(default='{}', var='AUTH_LDAP_USER_ATTR_MAP'))
     AUTH_LDAP_ALWAYS_UPDATE_USER: bool = True
-
-AUTH_USER_MODEL = 'core.User'
-
-AUTHENTICATION_BACKENDS = [
-    *BACKEND_BUILDER,
-    'django.contrib.auth.backends.ModelBackend',
-]

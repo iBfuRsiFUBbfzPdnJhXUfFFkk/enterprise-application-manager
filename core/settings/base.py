@@ -1,130 +1,23 @@
-from core.settings.common.environment import BASE_DIR
-
+# noinspection PyUnresolvedReferences
+from core.settings.common.authentication import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.developer import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.installed_apps import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.internationalization import *
 # noinspection PyUnresolvedReferences
 from core.settings.common.ldap import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.middleware import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.models import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.security import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.templates import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.urls_and_directories import *
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-SECRET_KEY: str = env(var='DJANGO_SECRET_KEY')
-DEBUG: bool = env.bool(default=False, var='DEBUG')
-ALLOWED_HOSTS: list[str] = loads(s=env(default='["127.0.0.1","localhost"]', var='ALLOWED_HOSTS'))
-
-# Application definition
-
-INSTALLED_APPS = [
-    'core',  # NEEDS TO BE ABOVE AUTH
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'simple_history',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
-    'core.middleware.authentication_required_middleware.AuthenticationRequiredMiddleware',
-]
-
-ROOT_URLCONF = 'core.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'templates',
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
+# https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 WSGI_APPLICATION = 'core.wsgi.application'
-
-BACKEND_BUILDER: list[str] = []
-SHOULD_USE_LDAP: bool = env.bool(default=False, var='SHOULD_USE_LDAP')
-if SHOULD_USE_LDAP is True:
-    BACKEND_BUILDER.append('django_auth_ldap.backend.LDAPBackend')
-    AUTH_LDAP_SERVER_URI: str = env(var='AUTH_LDAP_SERVER_URI')
-    AUTH_LDAP_BIND_DN: str = env(var='AUTH_LDAP_BIND_DN')
-    AUTH_LDAP_BIND_PASSWORD: str = env(var='AUTH_LDAP_BIND_PASSWORD')
-    AUTH_LDAP_SEARCH_BASE: str = env(var='AUTH_LDAP_SEARCH_BASE')
-    AUTH_LDAP_SEARCH_FILTER: str = env(var='AUTH_LDAP_SEARCH_FILTER')
-    AUTH_LDAP_USER_SEARCH: LDAPSearch = LDAPSearch(
-        base_dn=AUTH_LDAP_SEARCH_BASE,
-        filterstr=AUTH_LDAP_SEARCH_FILTER,
-        scope="SUBTREE",
-    )
-    AUTH_LDAP_USER_ATTR_MAP: dict[str, str] = loads(s=env(default='{}', var='AUTH_LDAP_USER_ATTR_MAP'))
-    AUTH_LDAP_ALWAYS_UPDATE_USER: bool = True
-
-AUTH_USER_MODEL = 'core.User'
-
-AUTHENTICATION_BACKENDS = [
-    *BACKEND_BUILDER,
-    'django.contrib.auth.backends.ModelBackend',
-]
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/authenticated/'
-LOGOUT_REDIRECT_URL = '/login/'
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# https://django-simple-history.readthedocs.io/en/latest/admin.html#enforcing-history-model-permissions-in-admin
-SIMPLE_HISTORY_ENFORCE_HISTORY_MODEL_PERMISSIONS = True
