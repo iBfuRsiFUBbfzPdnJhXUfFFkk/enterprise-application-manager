@@ -44,7 +44,10 @@ def this_api_create_sprint_kpis_view(request: HttpRequest) -> HttpResponse:
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
     return base_render(
-        context={"execution_time_in_seconds": execution_time_in_seconds},
+        context={
+            "execution_time_in_seconds": execution_time_in_seconds,
+            "number_of_created_records": number_of_created_records,
+        },
         request=request,
         template_name="authenticated/action/action_success.html"
     )
