@@ -8,4 +8,5 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
     'core.middleware.authentication_required_middleware.AuthenticationRequiredMiddleware',
+    'hijack.middleware.HijackUserMiddleware',
 ]

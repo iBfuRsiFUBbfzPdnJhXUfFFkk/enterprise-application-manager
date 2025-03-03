@@ -26,6 +26,8 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     # ADMIN
     path(name="admin", route="admin/", view=site.urls),
 
+    path(route='hijack/', view=include(arg='hijack.urls')),
+
     *urlpatterns_acronym,
     *urlpatterns_action,
     *urlpatterns_application,
