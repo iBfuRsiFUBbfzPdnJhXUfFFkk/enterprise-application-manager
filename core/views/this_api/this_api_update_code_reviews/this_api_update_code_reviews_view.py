@@ -16,7 +16,7 @@ from core.views.this_api.this_api_update_code_reviews.fetch_and_filter_pull_requ
 from core.views.this_api.this_api_update_code_reviews.fetch_approvals_for_pull_requests import \
     fetch_approvals_for_pull_requests, MergeRequest
 from core.views.this_api.this_api_update_code_reviews.fetch_discussions_for_pull_requests import \
-    fetch_discussions_for_pull_requests
+    fetch_discussions_for_pull_requests, NoteEntry
 from core.views.this_api.this_api_update_code_reviews.process_discussions import process_discussions
 
 
@@ -83,7 +83,7 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
             approvals_mod = [a for a in approvals_mod if a]
             for approval_m in approvals_mod:
                 metrics[approval_m]["approvals"] += 1
-            discussions = fetch_discussions_for_pull_requests(
+            discussions: list[NoteEntry] | None = fetch_discussions_for_pull_requests(
                 connection_gitlab_hostname=connection_gitlab_hostname,
                 connection_gitlab_api_version=connection_gitlab_api_version,
                 decrypted_token=decrypted_token,
