@@ -23,7 +23,7 @@ def fetch_and_filter_pull_requests(
         return None
     filtered_pull_requests: list[dict] = []
     params = {
-        "state": "approved",
+        "state": "merged",
         "updated_after": closed_after,
         "updated_before": closed_before,
         "per_page": 100
