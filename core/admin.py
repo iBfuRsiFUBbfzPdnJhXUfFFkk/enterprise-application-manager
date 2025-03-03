@@ -9,6 +9,10 @@ from django.contrib import admin
 from django.db.models import Model
 from simple_history.admin import SimpleHistoryAdmin
 
+class BaseModelAdmin(SimpleHistoryAdmin):
+    # noinspection PyUnresolvedReferences
+    exclude = ['enumeration_attack_uuid']
+
 models_directory: Path = Path("core") / "models"
 models_directory_str: str = str(models_directory)
 common_folder: Path = models_directory / "common"
@@ -40,7 +44,7 @@ def register_models():
             continue  # skip if already registered
         try:
             admin.site.register(
-                admin_class=SimpleHistoryAdmin,
+                admin_class=BaseModelAdmin,
                 model_or_iterable=model_class,
             )
         except Exception as error:
