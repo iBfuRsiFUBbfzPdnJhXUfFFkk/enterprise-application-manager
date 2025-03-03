@@ -1,0 +1,49 @@
+from typing import Mapping, TypedDict
+
+from requests import get, Response
+
+from core.views.this_api.this_api_update_code_churn_view.parse_diff import parse_diff
+
+
+class FetchPullRequestChangesReturn(TypedDict):
+    added: int
+    removed: int
+
+
+def fetch_pull_request_changes(
+        connection_gitlab_hostname: str | None = None,
+        connection_gitlab_api_version: str | None = None,
+        connection_gitlab_group_id: str | None = None,
+        decrypted_token: str | None = None,
+        project_id: str | None = None,
+        pull_request_iid: str | None = None,
+) -> FetchPullRequestChangesReturn | None:
+    if (
+            connection_gitlab_hostname is None
+            or connection_gitlab_api_version is None
+            or connection_gitlab_group_id is None
+            or decrypted_token is None
+            or project_id is None
+            or pull_request_iid is None
+    ):
+        return None
+    url: str = f"https://{connection_gitlab_hostname}/api/{connection_gitlab_api_version}/projects/{project_id}/merge_requests/{pull_request_iid}/changes"
+    headers: Mapping[str, str] = {"PRIVATE-TOKEN": decrypted_token}
+    response: Response = get(
+        headers=headers,
+        url=url,
+    )
+    response.raise_for_status()
+    changes_data = response.json()
+    total_added = 0
+    total_removed = 0
+
+    for change in changes_data.get("changes", []):
+        diff_text: str = change.get("diff", "")
+        parse_diff_tuple: tuple[int, int] | None = parse_diff(diff_text=diff_text)
+        if parse_diff_tuple is None:
+            continue
+        added, removed = parse_diff_tuple
+        total_added += added
+        total_removed += removed
+    return {"added": total_added, "removed": total_removed}
