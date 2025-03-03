@@ -35,7 +35,6 @@ def parse_datetime(datetime_str: str | None) -> datetime | None:
 
 def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
     start_time: float = time()
-    print('Syncing GitLab users...')
     this_server_configuration: ThisServerConfiguration | None = ThisServerConfiguration.objects.last()
     if this_server_configuration is None:
         return generic_500(request=request)

@@ -17,6 +17,7 @@ def this_api_create_sprint_kpis_view(request: HttpRequest) -> HttpResponse:
     this_server_configuration: ThisServerConfiguration | None = ThisServerConfiguration.objects.last()
     if this_server_configuration is None:
         return generic_500(request=request)
+    scrum_capacity_base: int | None = this_server_configuration.scrum_capacity_base
     type_developer_role: Role | None = this_server_configuration.type_developer_role
     if type_developer_role is None:
         return generic_500(request=request)
@@ -35,7 +36,7 @@ def this_api_create_sprint_kpis_view(request: HttpRequest) -> HttpResponse:
                     sprint_id=sprint.sprint_id,
             ).exists():
                 KeyPerformanceIndicatorSprint.objects.create(
-                    capacity_base=developer.scrum_capacity_base,
+                    capacity_base=developer.scrum_capacity_base or scrum_capacity_base,
                     sprint_id=sprint.sprint_id,
                     person_id=developer.person_id,
                 )
@@ -46,7 +47,9 @@ def this_api_create_sprint_kpis_view(request: HttpRequest) -> HttpResponse:
     return base_render(
         context={
             "execution_time_in_seconds": execution_time_in_seconds,
-            "number_of_created_records": number_of_created_records,
+            "payload": {
+                "number_of_created_records": number_of_created_records,
+            },
         },
         request=request,
         template_name="authenticated/action/action_success.html"

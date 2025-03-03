@@ -6,6 +6,9 @@
         </div>
     {% endif %}
     <div class="alert alert-success" role="alert">
-        Action Succeeded in {{ execution_time_in_seconds }} Seconds!
+        <p>Action Succeeded in {{ execution_time_in_seconds }} Seconds!</p>
+        {% if payload %}
+            <p>Payload: {{ payload }}</p>
+        {% endif %}
     </div>
 {% endblock %}

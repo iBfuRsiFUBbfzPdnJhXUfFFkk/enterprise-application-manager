@@ -110,7 +110,9 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
     return base_render(
         context={
             "execution_time_in_seconds": execution_time_in_seconds,
-            "number_of_key_performance_indicator_sprints_updated": number_of_key_performance_indicator_sprints_updated,
+            "payload": {
+                "number_of_key_performance_indicator_sprints_updated": number_of_key_performance_indicator_sprints_updated,
+            },
         },
         request=request,
         template_name="authenticated/action/action_success.html"
