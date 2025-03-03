@@ -1,5 +1,10 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+    {% if action_url %}
+        <div class="alert alert-info" role="alert">
+            Action Succeeded in {{ action_url }} Seconds!
+        </div>
+    {% endif %}
     <div class="alert alert-success" role="alert">
         Action Succeeded in {{ execution_time_in_seconds }} Seconds!
     </div>
