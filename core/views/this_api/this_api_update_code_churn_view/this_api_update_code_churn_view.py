@@ -11,30 +11,8 @@ from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_update_code_churn_view.fetch_merged_pull_requests import fetch_merged_pull_requests
 
 
-class GitlabApiResponseMember(TypedDict):
-    access_level: int | None
-    avatar_url: str | None
-    created_at: str | None
-    expires_at: str | None
-    id: int | None
-    locked: bool | None
-    membership_state: str | None
-    name: str | None
-    state: str | None
-    username: str | None
-    web_url: str | None
-
-
-def parse_datetime(datetime_str: str | None) -> datetime | None:
-    if datetime_str is None:
-        return None
-    dt: datetime = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-    return dt.replace(tzinfo=UTC)
-
-
 def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
     start_time: float = time()
-    print('Syncing GitLab users...')
     this_server_configuration: ThisServerConfiguration | None = ThisServerConfiguration.objects.last()
     if this_server_configuration is None:
         return generic_500(request=request)
@@ -61,7 +39,6 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
         merged_after="2025-01-01T00:00:00Z",
         merged_before="2025-02-01T00:00:00Z",
     )
-
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
     return base_render(
