@@ -95,3 +95,15 @@ class MergeRequest(TypedDict, total=False):
     user_notes_count: Optional[int]
     web_url: Optional[str]
     work_in_progress: Optional[bool]
+
+
+class Change(TypedDict):
+    a_mode: str | None
+    b_mode: str | None
+    diff: str | None
+    new_path: str | None
+    old_path: str | None
+
+
+class Changes(TypedDict):
+    changes: List[Change] | None

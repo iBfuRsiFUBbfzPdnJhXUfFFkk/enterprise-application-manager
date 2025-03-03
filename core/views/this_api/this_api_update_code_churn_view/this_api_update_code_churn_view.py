@@ -12,8 +12,9 @@ from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_update_code_churn_view.fetch_merged_pull_requests import fetch_merged_pull_requests
-from core.views.this_api.this_api_update_code_churn_view.fetch_pull_request_changes import fetch_pull_request_changes
-from core.views.this_api.this_api_update_code_churn_view.update_code_churn_typed_dicts import MergeRequest
+from core.views.this_api.this_api_update_code_churn_view.fetch_pull_request_changes import fetch_pull_request_changes, \
+    FetchPullRequestChangesReturn
+from core.views.this_api.this_api_update_code_churn_view.update_code_churn_typed_dicts import MergeRequest, User
 
 
 def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
@@ -36,9 +37,13 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
     decrypted_token: str | None = connection_gitlab_token_secret.get_encrypted_value()
     if decrypted_token is None:
         return generic_500(request=request)
+    number_of_key_performance_indicator_sprints_updated: int = 0
     current_date: date = date.today()
     try:
-        sprints = Sprint.objects.filter(date_start__lte=current_date, date_end__gte=(current_date - timedelta(days=3)))
+        sprints = Sprint.objects.filter(
+            date_end__gte=(current_date - timedelta(days=3)),
+            date_start__lte=current_date,
+        )
         if not sprints.exists():
             return generic_500(request=request)
     except Sprint.DoesNotExist:
@@ -46,7 +51,6 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
     for sprint in sprints:
         merged_after: str = sprint.date_start.isoformat()
         merged_before: str = sprint.date_end.isoformat()
-
         pull_requests: list[MergeRequest] | None = fetch_merged_pull_requests(
             connection_gitlab_hostname=connection_gitlab_hostname,
             connection_gitlab_api_version=connection_gitlab_api_version,
@@ -60,39 +64,54 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
         lines_data = defaultdict(lambda: {"added": 0, "removed": 0})
         for pull_request in pull_requests:
             try:
-                author = pull_request["author"]["username"]
-                changes = fetch_pull_request_changes(
+                project_id: int | None = pull_request["project_id"]
+                if project_id is None:
+                    continue
+                iid: int | None = pull_request["iid"]
+                if iid is None:
+                    continue
+                author: User | None = pull_request["author"]
+                if author is None:
+                    continue
+                username: str | None = author["username"]
+                if username is None:
+                    continue
+                changes: FetchPullRequestChangesReturn | None = fetch_pull_request_changes(
                     connection_gitlab_hostname=connection_gitlab_hostname,
                     connection_gitlab_api_version=connection_gitlab_api_version,
                     connection_gitlab_group_id=connection_gitlab_group_id,
                     decrypted_token=decrypted_token,
-                    project_id=pull_request["project_id"],
-                    pull_request_iid=pull_request["iid"]
+                    project_id=str(project_id),
+                    pull_request_iid=str(iid)
                 )
-                lines_data[author]["added"] += changes["added"]
-                lines_data[author]["removed"] += changes["removed"]
-            except KeyError as error:
-                print(f"KeyError: {error}")
+                if changes is None:
+                    continue
+                lines_data[username]["added"] += changes["added"]
+                lines_data[username]["removed"] += changes["removed"]
+            except KeyError:
                 continue
-        updated = 0
         for username, stats in lines_data.items():
             try:
-                person = Person.objects.get(gitlab_sync_username=username)
-                kpi, created = KeyPerformanceIndicatorSprint.objects.get_or_create(
+                person: Person | None = Person.objects.get(gitlab_sync_username=username)
+                if person is None:
+                    continue
+                key_performance_indicator_sprint, created = KeyPerformanceIndicatorSprint.objects.get_or_create(
                     person_developer=person,
                     sprint=sprint,
                 )
-                kpi.number_of_code_lines_added = stats["added"]
-                kpi.number_of_code_lines_removed = stats["removed"]
-                kpi.save()
-                updated += 1
-
+                key_performance_indicator_sprint.number_of_code_lines_added = stats["added"]
+                key_performance_indicator_sprint.number_of_code_lines_removed = stats["removed"]
+                key_performance_indicator_sprint.save()
+                number_of_key_performance_indicator_sprints_updated += 1
             except Person.DoesNotExist:
                 continue
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
     return base_render(
-        context={"execution_time_in_seconds": execution_time_in_seconds},
+        context={
+            "execution_time_in_seconds": execution_time_in_seconds,
+            "number_of_key_performance_indicator_sprints_updated": number_of_key_performance_indicator_sprints_updated,
+        },
         request=request,
         template_name="authenticated/action/action_success.html"
     )

@@ -3,6 +3,7 @@ from typing import Mapping, TypedDict
 from requests import get, Response
 
 from core.views.this_api.this_api_update_code_churn_view.parse_diff import parse_diff
+from core.views.this_api.this_api_update_code_churn_view.update_code_churn_typed_dicts import Changes, Change
 
 
 class FetchPullRequestChangesReturn(TypedDict):
@@ -34,16 +35,24 @@ def fetch_pull_request_changes(
         url=url,
     )
     response.raise_for_status()
-    changes_data = response.json()
-    total_added = 0
-    total_removed = 0
+    changes_data: Changes = response.json()
+    changes: list[Change] | None = changes_data.get("changes")
+    if changes is None:
+        return None
+    total_added: int = 0
+    total_removed: int = 0
 
-    for change in changes_data.get("changes", []):
-        diff_text: str = change.get("diff", "")
+    for change in changes:
+        diff_text: str | None = change.get("diff")
+        if diff_text is None:
+            continue
         parse_diff_tuple: tuple[int, int] | None = parse_diff(diff_text=diff_text)
         if parse_diff_tuple is None:
             continue
         added, removed = parse_diff_tuple
         total_added += added
         total_removed += removed
-    return {"added": total_added, "removed": total_removed}
+    return {
+        "added": total_added,
+        "removed": total_removed
+    }
