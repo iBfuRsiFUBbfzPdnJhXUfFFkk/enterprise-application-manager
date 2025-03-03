@@ -51,8 +51,8 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
     except Sprint.DoesNotExist:
         return generic_500(request=request)
     for sprint in sprints:
-        closed_after: str = sprint.date_start.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        closed_before: str = sprint.date_end.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        closed_after: str = sprint.date_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        closed_before: str = sprint.date_end.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         pull_requests = fetch_and_filter_pull_requests(
             closed_after=closed_after,
