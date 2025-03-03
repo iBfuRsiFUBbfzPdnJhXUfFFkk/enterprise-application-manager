@@ -35,6 +35,7 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     gitlab_sync_web_url = create_generic_varchar()
     is_active = create_generic_boolean(default=True)
     is_architect = create_generic_boolean()
+    is_bot = create_generic_boolean()
     is_developer = create_generic_boolean()
     is_employee = create_generic_boolean(default=True)
     is_lead_developer = create_generic_boolean()
