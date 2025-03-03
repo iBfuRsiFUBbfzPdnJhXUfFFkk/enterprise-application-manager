@@ -82,8 +82,8 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
                     person_developer=person,
                     sprint=sprint,
                 )
-                kpi.lines_added = stats["added"]
-                kpi.lines_removed = stats["removed"]
+                kpi.number_of_code_lines_added = stats["added"]
+                kpi.number_of_code_lines_removed = stats["removed"]
                 kpi.save()
                 updated += 1
 
