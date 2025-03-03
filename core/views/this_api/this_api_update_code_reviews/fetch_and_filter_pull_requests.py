@@ -24,8 +24,8 @@ def fetch_and_filter_pull_requests(
     filtered_pull_requests: list[dict] = []
     params = {
         "state": "approved",
-        "updated_after": "2023-01-01",
-        "updated_before": "2023-02-01",
+        "updated_after": closed_after,
+        "updated_before": closed_before,
         "per_page": 100
     }
     url: str = f"https://{connection_gitlab_hostname}/api/{connection_gitlab_api_version}/groups/{connection_gitlab_group_id}/merge_requests"
