@@ -22,7 +22,12 @@ def fetch_merged_pull_requests(
             or merged_before is None
     ):
         return None
-    url: str = f"https://{connection_gitlab_hostname}/api/{connection_gitlab_api_version}/groups/{connection_gitlab_group_id}/merge_requests"
+    url: str = (
+        f"https://{connection_gitlab_hostname}/"
+        f"api/{connection_gitlab_api_version}/"
+        f"groups/{connection_gitlab_group_id}/"
+        f"merge_requests"
+    )
     parameters: dict[str, Any] = {
         "state": "merged",
         "updated_after": merged_after,

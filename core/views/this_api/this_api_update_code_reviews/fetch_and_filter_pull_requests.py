@@ -3,6 +3,8 @@ from typing import Mapping
 
 from requests import get, Response
 
+from core.views.this_api.this_api_update_code_churn_view.update_code_churn_typed_dicts import MergeRequest
+
 
 def fetch_and_filter_pull_requests(
         closed_after: str | None = None,
@@ -11,7 +13,7 @@ def fetch_and_filter_pull_requests(
         connection_gitlab_group_id: str | None = None,
         connection_gitlab_hostname: str | None = None,
         decrypted_token: str | None = None,
-) -> list[dict] | None:
+) -> list[MergeRequest] | None:
     if (
             closed_after is None
             or closed_before is None
@@ -23,12 +25,17 @@ def fetch_and_filter_pull_requests(
         return None
     filtered_pull_requests: list[dict] = []
     params = {
+        "per_page": 100,
         "state": "merged",
         "updated_after": closed_after,
         "updated_before": closed_before,
-        "per_page": 100
     }
-    url: str = f"https://{connection_gitlab_hostname}/api/{connection_gitlab_api_version}/groups/{connection_gitlab_group_id}/merge_requests"
+    url: str = (
+        f"https://{connection_gitlab_hostname}/"
+        f"api/{connection_gitlab_api_version}/"
+        f"groups/{connection_gitlab_group_id}/"
+        f"merge_requests"
+    )
     headers: Mapping[str, str] = {"PRIVATE-TOKEN": decrypted_token}
     while url is not None:
         response: Response = get(
@@ -37,10 +44,12 @@ def fetch_and_filter_pull_requests(
             url=url,
         )
         response.raise_for_status()
-        pull_requests = response.json()
+        pull_requests: list[MergeRequest] = response.json()
         for pull_request in pull_requests:
             if "merged_at" in pull_request:
-                merged_at = pull_request["merged_at"]
+                merged_at: str | None = pull_request["merged_at"]
+                if merged_at is None:
+                    continue
                 try:
                     merged_at_dt = datetime.strptime(merged_at, "%Y-%m-%dT%H:%M:%S.%fZ")
                 except ValueError:

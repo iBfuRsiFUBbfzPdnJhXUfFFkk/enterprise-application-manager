@@ -73,7 +73,6 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
             approvals = fetch_approvals_for_pull_requests(
                 connection_gitlab_hostname=connection_gitlab_hostname,
                 connection_gitlab_api_version=connection_gitlab_api_version,
-                connection_gitlab_group_id=connection_gitlab_group_id,
                 decrypted_token=decrypted_token,
                 project_id=str(project_id),
                 pull_request_iid=str(pull_request_iid),
@@ -87,7 +86,6 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
             discussions = fetch_discussions_for_pull_requests(
                 connection_gitlab_hostname=connection_gitlab_hostname,
                 connection_gitlab_api_version=connection_gitlab_api_version,
-                connection_gitlab_group_id=connection_gitlab_group_id,
                 decrypted_token=decrypted_token,
                 project_id=str(project_id),
                 pull_request_iid=str(pull_request_iid),
