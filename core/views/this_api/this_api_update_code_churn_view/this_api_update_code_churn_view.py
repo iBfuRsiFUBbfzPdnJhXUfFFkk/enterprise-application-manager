@@ -4,6 +4,8 @@ from time import time
 
 from django.http import HttpRequest, HttpResponse
 
+from core.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+from core.models.person import Person
 from core.models.secret import Secret
 from core.models.sprint import Sprint
 from core.models.this_server_configuration import ThisServerConfiguration
@@ -72,7 +74,21 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
             except KeyError as error:
                 print(f"KeyError: {error}")
                 continue
-        print(lines_data)
+        updated = 0
+        for username, stats in lines_data.items():
+            try:
+                person = Person.objects.get(gitlab_sync_username=username)
+                kpi, created = KeyPerformanceIndicatorSprint.objects.get_or_create(
+                    person_developer=person,
+                    sprint=sprint,
+                )
+                kpi.lines_added = stats["added"]
+                kpi.lines_removed = stats["removed"]
+                kpi.save()
+                updated += 1
+
+            except Person.DoesNotExist:
+                continue
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
     return base_render(
