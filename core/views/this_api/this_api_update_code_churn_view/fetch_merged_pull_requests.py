@@ -39,7 +39,7 @@ def fetch_merged_pull_requests(
             url=url,
         )
         response.raise_for_status()
-        pull_request: MergeRequest = response.json()
+        pull_request: MergeRequest = response.json()[0]
         all_pull_requests.extend(response.json())
         print(dumps({"iid": pull_request["iid"], "username": pull_request["author"]["username"]}))
         url: str | None = response.links.get("next", {}).get("url")
