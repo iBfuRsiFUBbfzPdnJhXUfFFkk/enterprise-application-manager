@@ -1,0 +1,31 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+    <table id="data-table" class="display">
+        <thead>
+        <tr>
+            <td>Name</td>
+            <td>Comment</td>
+            <td>Run</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for model in models %}
+            <tr>
+                <td>{{ model.name }}</td>
+                <td>{{ model.comment }}</td>
+                <td>
+                    <a class="nav-link" data-toggle="tooltip" title="Run {{ model.name }}"
+                       href="{% url 'action_run' model_id=model.id %}">
+                        {% include 'common/icons/icon_run.html' %}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

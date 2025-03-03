@@ -64,6 +64,11 @@
                         {% include 'common/icons/icon_secret.html' %}
                     </a>
                 </li>
+                <li class="nav-item" data-toggle="tooltip" title="Actions">
+                    <a class="nav-link" href="{% url "action" %}">
+                        {% include 'common/icons/icon_run.html' %}
+                    </a>
+                </li>
             {% endif %}
             {% block navigation %}
             {% endblock %}

@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import URLPattern, URLResolver, path, include
 
 from core.urls.urlpatterns_acronym import urlpatterns_acronym
+from core.urls.urlpatterns_action import urlpatterns_action
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
 from core.urls.urlpatterns_database import urlpatterns_database
@@ -26,6 +27,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     path(name="admin", route="admin/", view=site.urls),
 
     *urlpatterns_acronym,
+    *urlpatterns_action,
     *urlpatterns_application,
     *urlpatterns_application_group,
     *urlpatterns_database,
