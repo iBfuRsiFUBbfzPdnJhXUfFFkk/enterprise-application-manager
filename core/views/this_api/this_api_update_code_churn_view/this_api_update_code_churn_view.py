@@ -11,6 +11,7 @@ from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_update_code_churn_view.fetch_merged_pull_requests import fetch_merged_pull_requests
 from core.views.this_api.this_api_update_code_churn_view.fetch_pull_request_changes import fetch_pull_request_changes
+from core.views.this_api.this_api_update_code_churn_view.update_code_churn_typed_dicts import MergeRequest
 
 
 def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
@@ -44,7 +45,7 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
         merged_after: str = sprint.date_start.isoformat()
         merged_before: str = sprint.date_end.isoformat()
 
-        pull_requests = fetch_merged_pull_requests(
+        pull_requests: list[MergeRequest] | None = fetch_merged_pull_requests(
             connection_gitlab_hostname=connection_gitlab_hostname,
             connection_gitlab_api_version=connection_gitlab_api_version,
             connection_gitlab_group_id=connection_gitlab_group_id,
@@ -66,7 +67,7 @@ def this_api_update_code_churn_view(request: HttpRequest) -> HttpResponse:
                     project_id=pull_request["project_id"],
                     pull_request_iid=pull_request["iid"]
                 )
-                lines_data[author]["added"] += changes["additions"]
+                lines_data[author]["added"] += changes["added"]
                 lines_data[author]["removed"] += changes["removed"]
             except KeyError as error:
                 print(f"KeyError: {error}")
