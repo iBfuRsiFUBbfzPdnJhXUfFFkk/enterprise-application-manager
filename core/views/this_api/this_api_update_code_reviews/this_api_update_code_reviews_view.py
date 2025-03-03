@@ -96,8 +96,8 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
                 continue
             comments, threads = process_discussions(discussions, approvals_mod)
             for approval_m in approvals_mod:
-                metrics[approval_m]["comments"] += comments.get(approval_m, 0)
-                metrics[approval_m]["threads"] += threads.get(approval_m, 0)
+                metrics[approval_m]["comments"] += comments
+                metrics[approval_m]["threads"] += threads
         updated_count = 0
         for username, counts in metrics.items():
             try:
