@@ -32,13 +32,13 @@ def this_api_create_sprint_kpis_view(request: HttpRequest) -> HttpResponse:
     for sprint in sprints:
         for developer in developers:
             if not KeyPerformanceIndicatorSprint.objects.filter(
-                    person_id=developer.person_id,
-                    sprint_id=sprint.sprint_id,
+                    person=developer.person,
+                    sprint=sprint.sprint,
             ).exists():
                 KeyPerformanceIndicatorSprint.objects.create(
                     capacity_base=developer.scrum_capacity_base or scrum_capacity_base,
-                    sprint_id=sprint.sprint_id,
-                    person_id=developer.person_id,
+                    sprint=sprint,
+                    person=developer,
                 )
                 number_of_created_records += 1
 
