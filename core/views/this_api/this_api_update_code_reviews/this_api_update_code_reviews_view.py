@@ -14,7 +14,7 @@ from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_update_code_reviews.fetch_and_filter_pull_requests import \
     fetch_and_filter_pull_requests
 from core.views.this_api.this_api_update_code_reviews.fetch_approvals_for_pull_requests import \
-    fetch_approvals_for_pull_requests
+    fetch_approvals_for_pull_requests, MergeRequest
 from core.views.this_api.this_api_update_code_reviews.fetch_discussions_for_pull_requests import \
     fetch_discussions_for_pull_requests
 from core.views.this_api.this_api_update_code_reviews.process_discussions import process_discussions
@@ -70,7 +70,7 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
             project_id = pull_request["project_id"]
             pull_request_iid = pull_request["iid"]
 
-            approvals = fetch_approvals_for_pull_requests(
+            approvals: MergeRequest | None = fetch_approvals_for_pull_requests(
                 connection_gitlab_hostname=connection_gitlab_hostname,
                 connection_gitlab_api_version=connection_gitlab_api_version,
                 decrypted_token=decrypted_token,

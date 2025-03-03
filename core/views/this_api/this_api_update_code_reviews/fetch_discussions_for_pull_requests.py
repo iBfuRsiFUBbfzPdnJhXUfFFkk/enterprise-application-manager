@@ -34,5 +34,6 @@ def fetch_discussions_for_pull_requests(
         )
         response.raise_for_status()
         discussions.extend(response.json())
+        print(response.json())
         url: str | None = response.links.get("next", {}).get("url")
     return discussions
