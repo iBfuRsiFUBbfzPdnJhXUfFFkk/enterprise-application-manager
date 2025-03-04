@@ -2,6 +2,8 @@ from typing import Mapping, TypedDict
 
 from requests import get, Response
 
+from core.utilities.git_lab.get_git_lab_url_base_projects_merge_requests_changes import \
+    get_git_lab_url_base_projects_merge_requests_changes
 from core.views.this_api.this_api_update_code_churn_view.parse_diff import parse_diff
 from core.views.this_api.this_api_update_code_churn_view.update_code_churn_typed_dicts import Changes, Change
 
@@ -28,7 +30,12 @@ def fetch_pull_request_changes(
             or pull_request_iid is None
     ):
         return None
-    url: str = f"https://{connection_gitlab_hostname}/api/{connection_gitlab_api_version}/projects/{project_id}/merge_requests/{pull_request_iid}/changes"
+    url: str | None = get_git_lab_url_base_projects_merge_requests_changes(
+        merge_request_internal_identification_iid=pull_request_iid,
+        project_id=project_id,
+    )
+    if url is None:
+        return None
     headers: Mapping[str, str] = {"PRIVATE-TOKEN": decrypted_token}
     response: Response = get(
         headers=headers,

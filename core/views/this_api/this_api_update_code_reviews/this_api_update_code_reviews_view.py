@@ -100,7 +100,7 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
         for username, counts in metrics.items():
             try:
                 user = Person.objects.get(gitlab_sync_username=username)
-                kpi, created = KeyPerformanceIndicatorSprint.objects.update_or_create(
+                KeyPerformanceIndicatorSprint.objects.update_or_create(
                     person_developer=user,
                     sprint=sprint,
                     defaults={

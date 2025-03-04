@@ -6,9 +6,9 @@ from django.http import HttpRequest, HttpResponse
 from requests import get, Response
 
 from core.models.person import Person
-from core.models.secret import Secret
-from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.base_render import base_render
+from core.utilities.git_lab.get_git_lab_headers import get_git_lab_headers, GitLabHeaders
+from core.utilities.git_lab.get_git_lab_url_base_groups_members import get_git_lab_url_base_groups_members
 from core.views.generic.generic_500 import generic_500
 
 
@@ -35,26 +35,10 @@ def parse_datetime(datetime_str: str | None) -> datetime | None:
 
 def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
     start_time: float = time()
-    this_server_configuration: ThisServerConfiguration | None = ThisServerConfiguration.objects.last()
-    if this_server_configuration is None:
+    headers: GitLabHeaders | None = get_git_lab_headers()
+    url: str | None = get_git_lab_url_base_groups_members()
+    if url is None or headers is None:
         return generic_500(request=request)
-    connection_gitlab_hostname: str | None = this_server_configuration.connection_gitlab_hostname
-    if connection_gitlab_hostname is None:
-        return generic_500(request=request)
-    connection_gitlab_api_version: str | None = this_server_configuration.connection_gitlab_api_version
-    if connection_gitlab_api_version is None:
-        return generic_500(request=request)
-    connection_gitlab_group_id: str | None = this_server_configuration.connection_gitlab_group_id
-    if connection_gitlab_group_id is None:
-        return generic_500(request=request)
-    connection_gitlab_token_secret: Secret | None = this_server_configuration.connection_gitlab_token
-    if connection_gitlab_token_secret is None:
-        return generic_500(request=request)
-    decrypted_token: str | None = connection_gitlab_token_secret.get_encrypted_value()
-    if decrypted_token is None:
-        return generic_500(request=request)
-    headers: dict[str, str] = {"PRIVATE-TOKEN": decrypted_token}
-    url: str = f"https://{connection_gitlab_hostname}/api/{connection_gitlab_api_version}/groups/{connection_gitlab_group_id}/members"
     gitlab_user_objects: list[GitlabApiResponseMember] = []
     while url is not None:
         response: Response = get(headers=headers, url=url)
