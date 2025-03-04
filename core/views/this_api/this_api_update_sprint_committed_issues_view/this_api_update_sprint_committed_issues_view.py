@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from time import time
 
 from django.http import HttpRequest, HttpResponse
@@ -20,8 +20,8 @@ def this_api_update_sprint_committed_issues_view(request: HttpRequest) -> HttpRe
     current_date: date = date.today()
     try:
         sprints = Sprint.objects.filter(
-            date_start__gte=(current_date - timedelta(days=5)),
-            date_start__lte=(current_date + timedelta(days=3)),
+            date_end__gte=current_date,
+            date_start__lte=current_date,
         )
         if not sprints.exists():
             return generic_500(request=request)
@@ -29,7 +29,7 @@ def this_api_update_sprint_committed_issues_view(request: HttpRequest) -> HttpRe
         return generic_500(request=request)
     for sprint in sprints:
         all_group_issues: list[RESTObject] | None = fetch_issues_by_iterations(
-            iteration_ids=[iteration.git_lab_id for iteration in sprint.git_lab_iterations.all()]
+            iteration_ids=[iteration.git_lab_id for iteration in sprint.git_lab_iteration_set.all()]
         )
         committed_issues = calculate_committed_issues(all_group_issues=all_group_issues)
         updated_count = 0
@@ -43,7 +43,7 @@ def this_api_update_sprint_committed_issues_view(request: HttpRequest) -> HttpRe
                     person_developer=developer,
                     sprint=sprint,
                 )
-                kpi.committed = total_weight  # Update the committed field with total weight
+                kpi.number_of_story_points_committed_to = total_weight  # Update the committed field with total weight
                 kpi.save()
                 updated_count += 1
             except Person.DoesNotExist:

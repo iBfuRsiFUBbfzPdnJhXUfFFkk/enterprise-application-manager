@@ -13,6 +13,7 @@ def fetch_issues_by_iteration(
     if git_lab_client is None or git_lab_group_id is None:
         return None
     return git_lab_client.groups.get(id=git_lab_group_id).issues.list(
+        get_all=True,
         iteration_id=iteration_id,
         state="all",
     )
