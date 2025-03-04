@@ -1,5 +1,3 @@
-from typing import Any
-
 from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
 from core.models.common.abstract.alias import Alias
 from core.models.common.abstract.base_model import BaseModel
@@ -16,10 +14,6 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
     cached_velocity = create_generic_decimal()
     number_of_business_days_in_sprint = create_generic_integer()
     number_of_holidays_during_sprint = create_generic_integer()
-
-    def __init__(self, *args: Any, **kwargs: Any):
-        super().__init__(args, kwargs)
-        self.git_lab_iteration_set = None
 
     def __str__(self):
         return self.name
