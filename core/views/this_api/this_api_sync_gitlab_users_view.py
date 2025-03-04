@@ -3,12 +3,13 @@ from time import time
 from typing import TypedDict
 
 from django.http import HttpRequest, HttpResponse
-from requests import get, Response
+from gitlab import Gitlab
+from gitlab.base import RESTObjectList
 
 from core.models.person import Person
 from core.utilities.base_render import base_render
-from core.utilities.git_lab.get_git_lab_headers import get_git_lab_headers, GitLabHeaders
-from core.utilities.git_lab.get_git_lab_url_base_groups_members import get_git_lab_url_base_groups_members
+from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
+from core.utilities.git_lab.get_git_lab_group_id import get_git_lab_group_id
 from core.views.generic.generic_500 import generic_500
 
 
@@ -35,22 +36,17 @@ def parse_datetime(datetime_str: str | None) -> datetime | None:
 
 def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
     start_time: float = time()
-    headers: GitLabHeaders | None = get_git_lab_headers()
-    url: str | None = get_git_lab_url_base_groups_members()
-    if url is None or headers is None:
+    git_lab_client: Gitlab | None = get_git_lab_client()
+    git_lab_group_id: str | None = get_git_lab_group_id()
+    if git_lab_client is None or git_lab_group_id is None:
         return generic_500(request=request)
-    gitlab_user_objects: list[GitlabApiResponseMember] = []
-    while url is not None:
-        response: Response = get(headers=headers, url=url)
-        response.raise_for_status()
-        gitlab_user_objects.extend(response.json())
-        url: str | None = response.links.get("next", {}).get("url")
-    for gitlab_user_object in gitlab_user_objects:
-        gitlab_access_level_int: int | None = gitlab_user_object.get("access_level", None)
-        gitlab_id_int: int | None = gitlab_user_object.get("id", None)
-        gitlab_name: str | None = gitlab_user_object.get("name", None)
+    group_members: RESTObjectList = git_lab_client.groups.get(id=git_lab_group_id).members.list(all=True)
+    for group_member in group_members:
+        gitlab_access_level_int: int | None = group_member.access_level
+        gitlab_id_int: int | None = group_member.id
+        gitlab_name: str | None = group_member.name
         gitlab_names: list[str] = (gitlab_name or "").split(" ")
-        gitlab_username: str | None = gitlab_user_object.get("username", None)
+        gitlab_username: str | None = group_member.username
         gitlab_first_name: str = gitlab_names[0] if len(gitlab_names) > 0 else ""
         gitlab_last_name: str = gitlab_names[1] if len(gitlab_names) > 1 else ""
         person: Person | None = Person.objects.filter(
@@ -76,16 +72,16 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
                     )
         person.gitlab_sync_access_level = str(
             object=gitlab_access_level_int) if gitlab_access_level_int is not None else None
-        person.gitlab_sync_avatar_url = gitlab_user_object.get("avatar_url", None)
-        person.gitlab_sync_datetime_created_at = parse_datetime(datetime_str=gitlab_user_object.get("created_at", None))
-        person.gitlab_sync_datetime_expires_at = parse_datetime(datetime_str=gitlab_user_object.get("expires_at", None))
+        person.gitlab_sync_avatar_url = group_member.avatar_url
+        person.gitlab_sync_datetime_created_at = parse_datetime(datetime_str=group_member.created_at)
+        person.gitlab_sync_datetime_expires_at = parse_datetime(datetime_str=group_member.expires_at)
         person.gitlab_sync_id = str(object=gitlab_id_int) if gitlab_id_int is not None else None
-        person.gitlab_sync_is_locked = gitlab_user_object.get("locked", False)
-        person.gitlab_sync_membership_state = gitlab_user_object.get("membership_state", None)
+        person.gitlab_sync_is_locked = group_member.locked
+        person.gitlab_sync_membership_state = group_member.membership_state
         person.gitlab_sync_name = gitlab_name
-        person.gitlab_sync_state = gitlab_user_object.get("state", None)
+        person.gitlab_sync_state = group_member.state
         person.gitlab_sync_username = gitlab_username
-        person.gitlab_sync_web_url = gitlab_user_object.get("web_url", None)
+        person.gitlab_sync_web_url = group_member.web_url
         person.save()
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
