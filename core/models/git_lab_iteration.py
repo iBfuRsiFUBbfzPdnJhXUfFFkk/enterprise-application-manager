@@ -8,7 +8,7 @@ from core.models.sprint import Sprint
 
 class GitLabIteration(BaseModel, Comment, Name):
     git_lab_id = create_generic_varchar()
-    sprint = create_generic_fk(to=Sprint)
+    sprint = create_generic_fk(related_name="git_lab_iterations", to=Sprint)
 
     def __str__(self):
         return str(self.id)

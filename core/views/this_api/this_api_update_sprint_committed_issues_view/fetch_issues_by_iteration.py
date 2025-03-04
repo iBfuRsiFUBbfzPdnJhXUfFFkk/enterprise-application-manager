@@ -1,44 +1,18 @@
-from typing import Mapping
+from gitlab import Gitlab
+from gitlab.base import RESTObject
 
-from requests import Response, get
+from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
+from core.utilities.git_lab.get_git_lab_group_id import get_git_lab_group_id
 
 
 def fetch_issues_by_iteration(
-        connection_gitlab_api_version: str | None = None,
-        connection_gitlab_group_id: str | None = None,
-        connection_gitlab_hostname: str | None = None,
-        decrypted_token: str | None = None,
-        iteration_id: str | None = None,
-) -> list[dict] | None:
-    if (
-            connection_gitlab_api_version is None
-            or connection_gitlab_group_id is None
-            or connection_gitlab_hostname is None
-            or decrypted_token is None
-            or iteration_id is None
-    ):
+        iteration_id: int | str | None = None,
+) -> list[RESTObject] | None:
+    git_lab_client: Gitlab | None = get_git_lab_client()
+    git_lab_group_id: str | None = get_git_lab_group_id()
+    if git_lab_client is None or git_lab_group_id is None:
         return None
-    all_issues: list[dict] = []
-    params = {
-        "iteration_id": iteration_id,
-        "per_page": 100,
-        "state": "all",
-    }
-    url: str = (
-        f"https://{connection_gitlab_hostname}/"
-        f"api/v{connection_gitlab_api_version}/"
-        f"groups/{connection_gitlab_group_id}/"
-        f"issues"
+    return git_lab_client.groups.get(id=git_lab_group_id).issues.list(
+        iteration_id=iteration_id,
+        state="all",
     )
-    headers: Mapping[str, str] = {"PRIVATE-TOKEN": decrypted_token}
-    while url is not None:
-        response: Response = get(
-            headers=headers,
-            params=params,
-            url=url,
-        )
-        response.raise_for_status()
-        issues = response.json()
-        all_issues.extend(issues)
-        url: str | None = response.links.get("next", {}).get("url")
-    return all_issues
