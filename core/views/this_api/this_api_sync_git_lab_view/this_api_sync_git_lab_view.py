@@ -4,7 +4,6 @@ from typing import TypedDict, Literal
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObject
-from gitlab.v4.objects import User
 
 from core.models.person import Person
 from core.models.sprint import Sprint
@@ -17,11 +16,22 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 
 
 class IssueMap(TypedDict):
-    number_of_issues_weights_committed_to: int
-    number_of_issues_weights_delivered_on: int
+    number_of_issues_authored: int
     number_of_issues_committed_to: int
     number_of_issues_delivered_on: int
+    number_of_issues_weights_committed_to: int
+    number_of_issues_weights_delivered_on: int
     project_ids_worked_on: list[str]
+
+
+INITIAL_ISSUE_MAP: IssueMap = {
+    "number_of_issues_authored": 0,
+    "number_of_issues_committed_to": 0,
+    "number_of_issues_delivered_on": 0,
+    "number_of_issues_weights_committed_to": 0,
+    "number_of_issues_weights_delivered_on": 0,
+    "project_ids_worked_on": [],
+}
 
 
 def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
@@ -40,38 +50,39 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
             weight: int = group_issue.weight or 0
+            author: dict[Literal["username"], str] = group_issue.author
+            author_username: str | None = author["username"]
+            if author_username is not None:
+                if author_username not in issues_map:
+                    issues_map[author_username] = INITIAL_ISSUE_MAP
+                issues_map[author_username]["number_of_issues_authored"] += 1
             assignees: list[dict[Literal["username"], str]] = group_issue.assignees or []
             for assignee in assignees:
-                username: str | None = assignee["username"]
-                if username is None:
+                assignee_username: str | None = assignee["username"]
+                if assignee_username is None:
                     continue
-                if username not in issues_map:
-                    issues_map[username] = {
-                        "number_of_issues_weights_committed_to": 0,
-                        "number_of_issues_weights_delivered_on": 0,
-                        "number_of_issues_committed_to": 0,
-                        "number_of_issues_delivered_on": 0,
-                        "project_ids_worked_on": [],
-                    }
-                issues_map[username]["number_of_issues_weights_committed_to"] += weight
-                issues_map[username]["number_of_issues_committed_to"] += 1
+                if assignee_username not in issues_map:
+                    issues_map[assignee_username] = INITIAL_ISSUE_MAP
+                issues_map[assignee_username]["number_of_issues_committed_to"] += 1
+                issues_map[assignee_username]["number_of_issues_weights_committed_to"] += weight
                 if state == "closed":
-                    issues_map[username]["number_of_issues_weights_delivered_on"] += weight
-                    issues_map[username]["number_of_issues_delivered_on"] += 1
-                    issues_map[username]["project_ids_worked_on"].append(str(project_id))
+                    issues_map[assignee_username]["number_of_issues_delivered_on"] += 1
+                    issues_map[assignee_username]["number_of_issues_weights_delivered_on"] += weight
+                    issues_map[assignee_username]["project_ids_worked_on"].append(str(project_id))
     number_of_new_kpi_records_created: int = 0
     number_of_updated_kpi_records: int = 0
-    for username, issue_map in issues_map.items():
-        person_instance: Person | None = Person.objects.get(gitlab_sync_username=username)
+    for assignee_username, issue_map in issues_map.items():
+        person_instance: Person | None = Person.objects.get(gitlab_sync_username=assignee_username)
         if person_instance is None:
             continue
         kpi_instance, did_create = KeyPerformanceIndicatorSprint.objects.get_or_create(
             person_developer=person_instance,
             sprint=current_sprint,
         )
+        kpi_instance.number_of_context_switches = len(issue_map["project_ids_worked_on"])
+        kpi_instance.number_of_issues_written = issue_map["number_of_issues_authored"]
         kpi_instance.number_of_story_points_committed_to = issue_map["number_of_issues_weights_committed_to"]
         kpi_instance.number_of_story_points_delivered = issue_map["number_of_issues_weights_delivered_on"]
-        kpi_instance.number_of_context_switches = len(issue_map["project_ids_worked_on"])
         kpi_instance.save()
         if did_create:
             number_of_new_kpi_records_created += 1
