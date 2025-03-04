@@ -26,7 +26,7 @@ def calculate_committed_issues(
     }
     url: str = (
         f"https://{connection_gitlab_hostname}/"
-        f"api/{connection_gitlab_api_version}/"
+        f"api/v{connection_gitlab_api_version}/"
         f"groups/{connection_gitlab_group_id}/"
         f"issues"
     )

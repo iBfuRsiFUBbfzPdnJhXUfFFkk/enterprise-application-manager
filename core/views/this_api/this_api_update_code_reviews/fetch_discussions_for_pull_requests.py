@@ -54,7 +54,7 @@ def fetch_discussions_for_pull_requests(
         return None
     url: str = (
         f"https://{connection_gitlab_hostname}/"
-        f"api/{connection_gitlab_api_version}/"
+        f"api/v{connection_gitlab_api_version}/"
         f"projects/{project_id}/"
         f"merge_requests/{pull_request_iid}/"
         f"discussions"

@@ -24,7 +24,7 @@ def fetch_merged_pull_requests(
         return None
     url: str = (
         f"https://{connection_gitlab_hostname}/"
-        f"api/{connection_gitlab_api_version}/"
+        f"api/v{connection_gitlab_api_version}/"
         f"groups/{connection_gitlab_group_id}/"
         f"merge_requests"
     )

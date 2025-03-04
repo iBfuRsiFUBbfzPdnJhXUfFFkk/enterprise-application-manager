@@ -9,7 +9,7 @@ bash .venv/bin/activate
 ## Freeze The VENV Requirements
 
 ```bash
-.venv/bin/python -m pip freeze > requirements.txt
+./../.venv/bin/python -m pip freeze > ./../requirements.txt
 ```
 
 ## Dump The Database
