@@ -24,5 +24,5 @@ def get_git_lab_client() -> Gitlab | None:
     return Gitlab(
         api_version=connection_gitlab_api_version.replace("v", ""),
         private_token=decrypted_token,
-        url=connection_gitlab_hostname
+        url=f"https://{connection_gitlab_hostname}/"
     )
