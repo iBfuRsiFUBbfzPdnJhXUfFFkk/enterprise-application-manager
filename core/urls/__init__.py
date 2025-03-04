@@ -41,6 +41,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_release_bundle,
     *urlpatterns_secret,
     *urlpatterns_this_api,
+    path('kpi/', include('kpi.urls')),
 ]
 
 urlpatterns: list[URLPattern | URLResolver] = [
