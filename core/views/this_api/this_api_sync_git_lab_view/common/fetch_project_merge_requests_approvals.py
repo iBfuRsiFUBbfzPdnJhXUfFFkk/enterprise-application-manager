@@ -20,8 +20,6 @@ def fetch_project_merge_requests_approvals(
         val=(
             git_lab_client.projects.get(project_id)
             .mergerequests.get(merge_request_internal_identification_iid)
-            .approvals.list(
-                get_all=True,
-            )
+            .approvals
         )
     )
