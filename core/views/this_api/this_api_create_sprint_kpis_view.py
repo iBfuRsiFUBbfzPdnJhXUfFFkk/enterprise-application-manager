@@ -3,7 +3,7 @@ from time import time
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 
-from core.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 from core.models.person import Person
 from core.models.role import Role
 from core.models.sprint import Sprint

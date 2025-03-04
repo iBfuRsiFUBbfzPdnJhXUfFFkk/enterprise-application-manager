@@ -1,7 +1,7 @@
-from django.urls import path
+from django.urls import path, URLPattern, URLResolver
 
-from kpi.views import kpi_home_view
+from kpi.views.kpi_home_view import kpi_home_view
 
-urlpatterns = [
-    path('', kpi_home_view, name='kpi_home'),
+urlpatterns: list[URLPattern | URLResolver] = [
+    path(name='kpi_home', route='', view=kpi_home_view),
 ]

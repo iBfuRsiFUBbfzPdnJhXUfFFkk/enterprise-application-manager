@@ -4,7 +4,7 @@ from time import time
 
 from django.http import HttpRequest, HttpResponse
 
-from core.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 from core.models.person import Person
 from core.models.secret import Secret
 from core.models.sprint import Sprint
