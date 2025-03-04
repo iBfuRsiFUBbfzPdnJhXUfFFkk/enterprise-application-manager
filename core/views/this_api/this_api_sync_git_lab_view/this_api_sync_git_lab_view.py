@@ -72,7 +72,7 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     number_of_new_kpi_records_created: int = 0
     number_of_updated_kpi_records: int = 0
     for assignee_username, issue_map in issues_map.items():
-        person_instance: Person | None = Person.objects.get(gitlab_sync_username=assignee_username)
+        person_instance: Person | None = Person.objects.filter(gitlab_sync_username=assignee_username).first()
         if person_instance is None:
             continue
         kpi_instance, did_create = KeyPerformanceIndicatorSprint.objects.get_or_create(
