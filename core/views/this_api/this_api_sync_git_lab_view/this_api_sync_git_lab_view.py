@@ -12,6 +12,7 @@ from core.utilities.base_render import base_render
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.utilities.git_lab.get_git_lab_group_id import get_git_lab_group_id
 from core.views.generic.generic_500 import generic_500
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch_group_merge_requests import fetch_group_merge_requests
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
@@ -45,9 +46,12 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     current_sprint: Sprint | None = Sprint.current_sprint()
     issues_map: dict[str, IssueMap] = {}
     if current_sprint is not None:
-        all_group_issues: list[RESTObject] | None = fetch_issues_by_iterations(
+        all_group_issues: list[RESTObject] = fetch_issues_by_iterations(
             iteration_ids=current_sprint.iteration_ids
-        )
+        ) or []
+        all_group_merge_requests: list[RESTObject] = fetch_group_merge_requests() or []
+        for group_merge_request in all_group_merge_requests:
+            print(group_merge_request)
         for group_issue in all_group_issues:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
