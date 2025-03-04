@@ -5,6 +5,7 @@ from typing import TypedDict, Literal
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObject
+from gitlab.v4.objects import GroupMergeRequest
 
 from core.models.person import Person
 from core.models.sprint import Sprint
@@ -49,9 +50,10 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
         all_group_issues: list[RESTObject] = fetch_issues_by_iterations(
             iteration_ids=current_sprint.iteration_ids
         ) or []
-        all_group_merge_requests: list[RESTObject] = fetch_group_merge_requests() or []
+        all_group_merge_requests: list[GroupMergeRequest] = fetch_group_merge_requests() or []
         for group_merge_request in all_group_merge_requests:
-            print(group_merge_request)
+            if group_merge_request.state == "merged":
+                print(group_merge_request)
         for group_issue in all_group_issues:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
