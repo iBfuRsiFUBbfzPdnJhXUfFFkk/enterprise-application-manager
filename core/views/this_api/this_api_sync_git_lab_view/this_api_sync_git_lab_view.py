@@ -21,6 +21,7 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 
 
 class IssueMap(TypedDict):
+    number_of_approvals: int
     number_of_issues_authored: int
     number_of_issues_committed_to: int
     number_of_issues_delivered_on: int
@@ -31,6 +32,7 @@ class IssueMap(TypedDict):
 
 def create_initial_issue_map() -> IssueMap:
     return {
+        "number_of_approvals": 0,
         "number_of_issues_authored": 0,
         "number_of_issues_committed_to": 0,
         "number_of_issues_delivered_on": 0,
@@ -59,7 +61,16 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
                 )
-                print(all_approvals)
+                for approval in all_approvals:
+                    approved_by = approval.approved_by
+                    if approved_by is None:
+                        continue
+                    approved_by_username: str | None = approved_by.username
+                    if approved_by_username is None:
+                        continue
+                    if approved_by_username not in issues_map:
+                        issues_map[approved_by_username] = create_initial_issue_map()
+                    issues_map[approved_by_username]["number_of_approvals"] += 1
         for group_issue in all_group_issues:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
@@ -95,6 +106,7 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
             person_developer=person_instance,
             sprint=current_sprint,
         )
+        kpi_instance.number_of_code_reviews_submitted = issue_map["number_of_approvals"]
         kpi_instance.number_of_context_switches = len(issue_map["project_ids_worked_on"])
         kpi_instance.number_of_issues_written = issue_map["number_of_issues_authored"]
         kpi_instance.number_of_story_points_committed_to = issue_map["number_of_issues_weights_committed_to"]
