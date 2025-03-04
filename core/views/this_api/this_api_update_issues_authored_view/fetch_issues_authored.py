@@ -25,7 +25,7 @@ def fetch_issues_authored(
     all_issues: list[dict] = []
     params = {
         "per_page": 100,
-        "state": "merged",
+        "state": "all",
         "updated_after": closed_after,
         "updated_before": closed_before,
     }
