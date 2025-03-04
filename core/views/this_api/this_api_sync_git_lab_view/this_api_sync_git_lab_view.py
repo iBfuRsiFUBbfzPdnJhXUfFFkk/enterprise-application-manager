@@ -5,7 +5,7 @@ from typing import TypedDict, Literal
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObject
-from gitlab.v4.objects import GroupMergeRequest
+from gitlab.v4.objects import GroupMergeRequest, ProjectMergeRequestApproval
 
 from core.models.person import Person
 from core.models.sprint import Sprint
@@ -15,6 +15,8 @@ from core.utilities.git_lab.get_git_lab_group_id import get_git_lab_group_id
 from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_group_merge_requests import fetch_group_merge_requests
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_approvals import \
+    fetch_project_merge_requests_approvals
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
 
@@ -53,7 +55,11 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
         all_group_merge_requests: list[GroupMergeRequest] = fetch_group_merge_requests() or []
         for group_merge_request in all_group_merge_requests:
             if group_merge_request.state == "merged":
-                print(group_merge_request.manager.approvals.get())
+                all_approvals: list[ProjectMergeRequestApproval] | None = fetch_project_merge_requests_approvals(
+                    merge_request_internal_identification_iid=group_merge_request.iid,
+                    project_id=group_merge_request.project_id,
+                )
+                print(all_approvals)
         for group_issue in all_group_issues:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
