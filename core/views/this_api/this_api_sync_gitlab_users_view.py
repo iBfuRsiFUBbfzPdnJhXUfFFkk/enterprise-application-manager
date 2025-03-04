@@ -1,6 +1,5 @@
 from datetime import datetime, UTC
 from time import time
-from typing import TypedDict
 
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
@@ -11,20 +10,6 @@ from core.utilities.base_render import base_render
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.utilities.git_lab.get_git_lab_group_id import get_git_lab_group_id
 from core.views.generic.generic_500 import generic_500
-
-
-class GitlabApiResponseMember(TypedDict):
-    access_level: int | None
-    avatar_url: str | None
-    created_at: str | None
-    expires_at: str | None
-    id: int | None
-    locked: bool | None
-    membership_state: str | None
-    name: str | None
-    state: str | None
-    username: str | None
-    web_url: str | None
 
 
 def parse_datetime(datetime_str: str | None) -> datetime | None:
@@ -85,7 +70,6 @@ def this_api_sync_gitlab_users_view(request: HttpRequest) -> HttpResponse:
         person.save()
     end_time: float = time()
     execution_time_in_seconds: float = end_time - start_time
-    print(f'Execution time: {execution_time_in_seconds} seconds')
     return base_render(
         context={"execution_time_in_seconds": execution_time_in_seconds},
         request=request,
