@@ -1,3 +1,5 @@
+from typing import Optional
+
 from core.models.common.abstract.base_model import BaseModel
 from core.models.common.abstract.comment import Comment
 from core.models.common.abstract.location import Location
@@ -55,6 +57,10 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     type_job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
     type_job_title = create_generic_enum(choices=JOB_TITLE_CHOICES)
     type_timezone = create_generic_enum(choices=TIMEZONE_CHOICES)
+
+    @staticmethod
+    def get_git_lab_user(username: str | None = None) -> Optional['Person']:
+        return Person.objects.filter(gitlab_sync_username=username).first()
 
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"

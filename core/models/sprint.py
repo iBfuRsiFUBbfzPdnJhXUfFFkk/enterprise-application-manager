@@ -1,4 +1,5 @@
-from typing import cast
+from datetime import date
+from typing import cast, Optional
 
 from django.db.models import QuerySet
 
@@ -20,12 +21,24 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
     number_of_business_days_in_sprint = create_generic_integer()
     number_of_holidays_during_sprint = create_generic_integer()
 
+    @staticmethod
+    def current_sprint() -> Optional['Sprint']:
+        current_date: date = date.today()
+        return Sprint.objects.filter(
+            date_end__gte=current_date,
+            date_start__lte=current_date,
+        ).first()
+
     @property
     def iterations(self) -> QuerySet[GitLabIteration]:
         return cast(typ=QuerySet[GitLabIteration], val=GitLabIteration.objects.filter(sprint=self).all())
 
+    @property
+    def iteration_ids(self) -> list[int]:
+        return [iteration.git_lab_id for iteration in self.iterations]
+
     def __str__(self):
-        return self.name
+        return f"{self.name or 'PLEASE ADD NAME'} ::: {self.date_start} - {self.date_end}"
 
     class Meta:
-        ordering = ['name', '-id']
+        ordering = ['-id']
