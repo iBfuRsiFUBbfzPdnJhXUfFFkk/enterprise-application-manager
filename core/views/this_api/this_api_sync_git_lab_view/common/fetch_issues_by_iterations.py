@@ -1,6 +1,6 @@
 from gitlab.base import RESTObject
 
-from core.views.this_api.this_api_sync_gitlab_view.common.fetch_issues_by_iteration import \
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iteration import \
     fetch_issues_by_iteration
 
 

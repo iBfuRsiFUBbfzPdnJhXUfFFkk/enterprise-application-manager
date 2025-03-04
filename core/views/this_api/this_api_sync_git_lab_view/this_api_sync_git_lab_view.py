@@ -1,5 +1,5 @@
 from time import time
-from typing import TypedDict
+from typing import TypedDict, Literal
 
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
@@ -12,7 +12,7 @@ from core.utilities.base_render import base_render
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.utilities.git_lab.get_git_lab_group_id import get_git_lab_group_id
 from core.views.generic.generic_500 import generic_500
-from core.views.this_api.this_api_sync_gitlab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
 
@@ -24,7 +24,7 @@ class IssueMap(TypedDict):
     project_ids_worked_on: list[str]
 
 
-def this_api_sync_gitlab_view(request: HttpRequest) -> HttpResponse:
+def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     start_time: float = time()
     git_lab_client: Gitlab | None = get_git_lab_client()
     git_lab_group_id: str | None = get_git_lab_group_id()
@@ -40,9 +40,9 @@ def this_api_sync_gitlab_view(request: HttpRequest) -> HttpResponse:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
             weight: int = group_issue.weight or 0
-            assignees: list[User] = group_issue.assignees or []
+            assignees: list[dict[Literal["username"], str]] = group_issue.assignees or []
             for assignee in assignees:
-                username: str | None = assignee.username
+                username: str | None = assignee["username"]
                 if username is None:
                     continue
                 if username not in issues_map:
