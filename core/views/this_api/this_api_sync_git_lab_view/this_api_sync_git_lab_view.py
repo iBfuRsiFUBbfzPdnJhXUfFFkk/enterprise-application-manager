@@ -71,14 +71,15 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                     issues_map[assignee_username]["project_ids_worked_on"].append(str(project_id))
     number_of_new_kpi_records_created: int = 0
     number_of_updated_kpi_records: int = 0
-    for assignee_username, issue_map in issues_map.items():
-        person_instance: Person | None = Person.objects.filter(gitlab_sync_username=assignee_username).first()
+    for git_lab_username, issue_map in issues_map.items():
+        person_instance: Person | None = Person.objects.filter(gitlab_sync_username=git_lab_username).first()
         if person_instance is None:
             continue
         kpi_instance, did_create = KeyPerformanceIndicatorSprint.objects.get_or_create(
             person_developer=person_instance,
             sprint=current_sprint,
         )
+        print(issue_map)
         kpi_instance.number_of_context_switches = len(issue_map["project_ids_worked_on"])
         kpi_instance.number_of_issues_written = issue_map["number_of_issues_authored"]
         kpi_instance.number_of_story_points_committed_to = issue_map["number_of_issues_weights_committed_to"]
