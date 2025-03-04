@@ -29,7 +29,7 @@ def this_api_update_sprint_committed_issues_view(request: HttpRequest) -> HttpRe
         return generic_500(request=request)
     for sprint in sprints:
         all_group_issues: list[RESTObject] | None = fetch_issues_by_iterations(
-            iteration_ids=[iteration.git_lab_id for iteration in sprint.git_lab_iterations.all()]
+            iteration_ids=[iteration.git_lab_id for iteration in sprint.iterations]
         )
         committed_issues = calculate_committed_issues(all_group_issues=all_group_issues)
         updated_count = 0
