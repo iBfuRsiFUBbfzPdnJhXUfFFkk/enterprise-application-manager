@@ -1,3 +1,4 @@
+from re import match
 from time import time
 from typing import TypedDict, Literal
 
@@ -24,14 +25,15 @@ class IssueMap(TypedDict):
     project_ids_worked_on: list[str]
 
 
-INITIAL_ISSUE_MAP: IssueMap = {
-    "number_of_issues_authored": 0,
-    "number_of_issues_committed_to": 0,
-    "number_of_issues_delivered_on": 0,
-    "number_of_issues_weights_committed_to": 0,
-    "number_of_issues_weights_delivered_on": 0,
-    "project_ids_worked_on": [],
-}
+def create_initial_issue_map() -> IssueMap:
+    return {
+        "number_of_issues_authored": 0,
+        "number_of_issues_committed_to": 0,
+        "number_of_issues_delivered_on": 0,
+        "number_of_issues_weights_committed_to": 0,
+        "number_of_issues_weights_delivered_on": 0,
+        "project_ids_worked_on": [],
+    }
 
 
 def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
@@ -54,7 +56,7 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
             author_username: str | None = author["username"]
             if author_username is not None:
                 if author_username not in issues_map:
-                    issues_map[author_username] = INITIAL_ISSUE_MAP
+                    issues_map[author_username] = create_initial_issue_map()
                 issues_map[author_username]["number_of_issues_authored"] += 1
             assignees: list[dict[Literal["username"], str]] = group_issue.assignees or []
             for assignee in assignees:
@@ -62,7 +64,7 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                 if assignee_username is None:
                     continue
                 if assignee_username not in issues_map:
-                    issues_map[assignee_username] = INITIAL_ISSUE_MAP
+                    issues_map[assignee_username] = create_initial_issue_map()
                 issues_map[assignee_username]["number_of_issues_committed_to"] += 1
                 issues_map[assignee_username]["number_of_issues_weights_committed_to"] += weight
                 if state == "closed":
@@ -71,8 +73,9 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                     issues_map[assignee_username]["project_ids_worked_on"].append(str(project_id))
     number_of_new_kpi_records_created: int = 0
     number_of_updated_kpi_records: int = 0
-    print(issues_map)
     for git_lab_username, issue_map in issues_map.items():
+        if match(r'^(project|group).*bot.*$', git_lab_username):
+            continue
         person_instance: Person | None = Person.objects.filter(gitlab_sync_username=git_lab_username).first()
         if person_instance is None:
             continue
