@@ -53,7 +53,7 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
         all_group_merge_requests: list[GroupMergeRequest] = fetch_group_merge_requests() or []
         for group_merge_request in all_group_merge_requests:
             if group_merge_request.state == "merged":
-                print(group_merge_request.approvals.get())
+                print(group_merge_request.manager.approvals.get())
         for group_issue in all_group_issues:
             project_id: int | None = group_issue.project_id
             state: str | None = group_issue.state
