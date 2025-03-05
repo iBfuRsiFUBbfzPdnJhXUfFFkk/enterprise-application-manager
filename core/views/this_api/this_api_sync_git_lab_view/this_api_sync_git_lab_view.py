@@ -69,10 +69,10 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
         all_group_merge_requests: list[GroupMergeRequest] = fetch_group_merge_requests() or []
         for group_merge_request in all_group_merge_requests:
             if group_merge_request.state == "merged":
-                author: User | None = group_merge_request["author"]
+                author: User | None = group_merge_request.author
                 if author is None:
                     continue
-                merge_request_author_username: str | None = author["username"]
+                merge_request_author_username: str | None = author.username
                 if merge_request_author_username is None:
                     continue
                 all_approvals: list[GitLabApproval] = fetch_project_merge_requests_approvals(
