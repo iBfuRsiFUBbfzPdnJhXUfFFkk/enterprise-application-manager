@@ -17,6 +17,8 @@ from core.views.this_api.this_api_sync_git_lab_view.common.fetch_group_merge_req
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_approvals import \
     fetch_project_merge_requests_approvals, GitLabApproval
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_discussions import \
+    fetch_project_merge_requests_discussions
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
 
@@ -61,6 +63,11 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
                 ) or []
+                all_discussions = fetch_project_merge_requests_discussions(
+                    merge_request_internal_identification_iid=group_merge_request.iid,
+                    project_id=group_merge_request.project_id,
+                )
+                print(all_discussions)
                 for approval in all_approvals:
                     approved_by_username: str | None = approval["username"]
                     if approved_by_username is None:
