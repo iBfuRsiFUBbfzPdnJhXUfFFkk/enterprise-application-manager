@@ -10,6 +10,7 @@ from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_git_lab_group import fetch_git_lab_group
 from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_group_issues import handle_group_issues
+from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_group_members import handle_group_members
 from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_group_merge_requests import \
     handle_group_merge_requests
 from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, \
@@ -30,6 +31,11 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     indicator_map: IndicatorMap = create_initial_indicator_map()
     if current_sprint is None:
         return generic_500(request=request)
+    indicator_map: IndicatorMap = handle_group_members(
+        git_lab_client=git_lab_client,
+        git_lab_group=git_lab_group,
+        indicator_map=indicator_map,
+    )
     indicator_map: IndicatorMap = handle_group_merge_requests(
         current_sprint=current_sprint,
         git_lab_client=git_lab_client,
