@@ -5,7 +5,7 @@ from typing import TypedDict, Literal
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObject
-from gitlab.v4.objects import GroupMergeRequest, ProjectMergeRequestDiscussion
+from gitlab.v4.objects import GroupMergeRequest, ProjectMergeRequestDiscussion, User
 
 from core.models.person import Person
 from core.models.sprint import Sprint
@@ -17,6 +17,8 @@ from core.views.this_api.this_api_sync_git_lab_view.common.fetch_group_merge_req
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_approvals import \
     fetch_project_merge_requests_approvals, GitLabApproval
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_changes import \
+    fetch_project_merge_requests_changes
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_discussions import \
     fetch_project_merge_requests_discussions
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
@@ -24,6 +26,8 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 
 class IssueMap(TypedDict):
     number_of_approvals: int
+    number_of_code_lines_added: int
+    number_of_code_lines_removed: int
     number_of_comments_made: int
     number_of_issues_authored: int
     number_of_issues_committed_to: int
@@ -37,6 +41,8 @@ class IssueMap(TypedDict):
 def create_initial_issue_map() -> IssueMap:
     return {
         "number_of_approvals": 0,
+        "number_of_code_lines_added": 0,
+        "number_of_code_lines_removed": 0,
         "number_of_comments_made": 0,
         "number_of_issues_authored": 0,
         "number_of_issues_committed_to": 0,
@@ -63,7 +69,17 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
         all_group_merge_requests: list[GroupMergeRequest] = fetch_group_merge_requests() or []
         for group_merge_request in all_group_merge_requests:
             if group_merge_request.state == "merged":
+                author: User | None = group_merge_request["author"]
+                if author is None:
+                    continue
+                merge_request_author_username: str | None = author["username"]
+                if merge_request_author_username is None:
+                    continue
                 all_approvals: list[GitLabApproval] = fetch_project_merge_requests_approvals(
+                    merge_request_internal_identification_iid=group_merge_request.iid,
+                    project_id=group_merge_request.project_id,
+                ) or []
+                all_changes: list[dict] = fetch_project_merge_requests_changes(
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
                 ) or []
@@ -71,6 +87,19 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
                 )
+                for changes in all_changes:
+                    diff_text: str | None = changes["diff"]
+                    if diff_text is None:
+                        continue
+                    for line in diff_text.splitlines():
+                        if line.startswith('+'):
+                            if merge_request_author_username not in issues_map:
+                                issues_map[merge_request_author_username] = create_initial_issue_map()
+                            issues_map[merge_request_author_username]["number_of_code_lines_added"] += 1
+                        elif line.startswith('-'):
+                            if merge_request_author_username not in issues_map:
+                                issues_map[merge_request_author_username] = create_initial_issue_map()
+                            issues_map[merge_request_author_username]["number_of_code_lines_removed"] += 1
                 if all_discussions is not None:
                     for discussion in all_discussions:
                         notes: dict | None = discussion.attributes["notes"]
@@ -138,6 +167,8 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
             person_developer=person_instance,
             sprint=current_sprint,
         )
+        kpi_instance.number_of_code_lines_added = issue_map["number_of_code_lines_added"]
+        kpi_instance.number_of_code_lines_removed = issue_map["number_of_code_lines_removed"]
         kpi_instance.number_of_comments_made = issue_map["number_of_comments_made"]
         kpi_instance.number_of_context_switches = len(issue_map["project_ids_worked_on"])
         kpi_instance.number_of_issues_written = issue_map["number_of_issues_authored"]
