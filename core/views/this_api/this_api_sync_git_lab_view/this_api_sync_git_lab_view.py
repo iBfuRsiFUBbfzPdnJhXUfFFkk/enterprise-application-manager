@@ -1,4 +1,3 @@
-from re import match
 from time import time
 
 from django.http import HttpRequest, HttpResponse
@@ -12,8 +11,10 @@ from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_git_lab_group import fetch_git_lab_group
 from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_group_issues import handle_group_issues
-from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_group_merge_requests import handle_group_merge_requests
-from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap
+from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_group_merge_requests import \
+    handle_group_merge_requests
+from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, \
+    create_initial_indicator_map
 from core.views.this_api.this_api_sync_git_lab_view.common.indicator_to_kpi_instance import indicator_to_kpi_instance
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
@@ -27,16 +28,16 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     if git_lab_group is None:
         return generic_500(request=request)
     current_sprint: Sprint | None = Sprint.current_sprint()
-    indicator_map: dict[str, IndicatorMap] = {}
+    indicator_map: IndicatorMap = create_initial_indicator_map()
     if current_sprint is None:
         return generic_500(request=request)
-    indicator_map: dict[str, IndicatorMap] = handle_group_merge_requests(
+    indicator_map: IndicatorMap = handle_group_merge_requests(
         current_sprint=current_sprint,
         git_lab_client=git_lab_client,
         git_lab_group=git_lab_group,
         indicator_map=indicator_map,
     )
-    indicator_map: dict[str, IndicatorMap] = handle_group_issues(
+    indicator_map: IndicatorMap = handle_group_issues(
         current_sprint=current_sprint,
         git_lab_client=git_lab_client,
         git_lab_group=git_lab_group,
@@ -44,10 +45,8 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     )
     number_of_new_kpi_records_created: int = 0
     number_of_updated_kpi_records: int = 0
-    for git_lab_username, indicator in indicator_map.items():
-        if match(r'^(project|group).*bot.*$', git_lab_username):
-            continue
-        person_instance: Person | None = Person.objects.filter(gitlab_sync_username=git_lab_username).first()
+    for git_lab_user_id, indicator in indicator_map.items():
+        person_instance: Person | None = Person.objects.filter(gitlab_sync_id=git_lab_user_id).first()
         if person_instance is None:
             continue
         kpi_instance, did_create = KeyPerformanceIndicatorSprint.objects.get_or_create(

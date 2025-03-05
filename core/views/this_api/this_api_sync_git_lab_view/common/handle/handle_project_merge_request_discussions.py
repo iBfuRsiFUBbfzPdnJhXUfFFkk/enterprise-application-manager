@@ -6,11 +6,12 @@ from gitlab.v4.objects import ProjectMergeRequestDiscussion, Project, \
 
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_project_merge_requests_discussions import \
     fetch_project_merge_requests_discussions
-from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, create_initial_indicator_map
+from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, ensure_indicator_map, \
+    ensure_indicator_is_in_map
 
 
 class GitLabNoteAuthor(TypedDict):
-    username: str | None
+    id: int | None
 
 
 class GitLabNote(TypedDict):
@@ -21,13 +22,12 @@ class GitLabNote(TypedDict):
 def handle_project_merge_request_discussions(
         git_lab_client: Gitlab | None = None,
         git_lab_project: Project | None = None,
-        indicator_map: dict[str, IndicatorMap] | None = None,
+        indicator_map: IndicatorMap | None = None,
         merge_request_internal_identification_iid: int | None = None,
         project_id: int | None = None,
         project_merge_request: ProjectMergeRequest | None = None,
-) -> dict[str, IndicatorMap]:
-    if indicator_map is None:
-        indicator_map: dict[str, IndicatorMap] = {}
+) -> IndicatorMap:
+    indicator_map: IndicatorMap = ensure_indicator_map(indicator_map=indicator_map)
     discussions: list[ProjectMergeRequestDiscussion] | None = fetch_project_merge_requests_discussions(
         git_lab_client=git_lab_client,
         git_lab_project=git_lab_project,
@@ -46,13 +46,16 @@ def handle_project_merge_request_discussions(
             author: GitLabNoteAuthor | None = note["author"]
             if author is None:
                 continue
-            note_username: str | None = author["username"]
-            if note_username is None:
+            note_git_lab_user_id_int: int | None = author["id"]
+            if note_git_lab_user_id_int is None:
                 continue
-            if note_username not in indicator_map:
-                indicator_map[note_username] = create_initial_indicator_map()
-            indicator_map[note_username]["number_of_comments_made"] += 1
+            note_git_lab_user_id: str = str(note_git_lab_user_id_int)
+            indicator_map: IndicatorMap = ensure_indicator_is_in_map(
+                git_lab_user_id=note_git_lab_user_id,
+                indicator_map=indicator_map
+            )
+            indicator_map[note_git_lab_user_id]["number_of_comments_made"] += 1
             if not note["system"]:
-                indicator_map[note_username]["number_of_threads_made"] += 1
+                indicator_map[note_git_lab_user_id]["number_of_threads_made"] += 1
             index += 1
     return indicator_map

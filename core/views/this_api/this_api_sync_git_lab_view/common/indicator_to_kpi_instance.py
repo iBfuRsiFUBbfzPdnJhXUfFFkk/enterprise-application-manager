@@ -1,9 +1,9 @@
-from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap
+from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import Indicator
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
 
 def indicator_to_kpi_instance(
-        indicator: IndicatorMap | None = None,
+        indicator: Indicator | None = None,
         kpi_instance: KeyPerformanceIndicatorSprint | None = None,
 ) -> KeyPerformanceIndicatorSprint | None:
     if indicator is None:
