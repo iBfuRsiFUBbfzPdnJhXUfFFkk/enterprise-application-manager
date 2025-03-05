@@ -29,6 +29,17 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
             date_start__lte=current_date,
         ).first()
 
+    @staticmethod
+    def last_five() -> QuerySet['Sprint']:
+        current_date: date = date.today()
+        return cast(
+            typ=QuerySet[Sprint],
+            val=Sprint.objects.filter(
+                date_end__gte=current_date,
+                date_start__lt=current_date,
+            ).order_by('-date_end')[:5]
+        )
+
     @property
     def iterations(self) -> QuerySet[GitLabIteration]:
         return cast(typ=QuerySet[GitLabIteration], val=GitLabIteration.objects.filter(sprint=self).all())

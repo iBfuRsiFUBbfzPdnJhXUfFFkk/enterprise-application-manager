@@ -58,6 +58,11 @@
                     {% include 'common/icons/icon_release_bundle.html' %}
                 </a>
             </li>
+            <li class="nav-item" data-toggle="tooltip" title="KPI">
+                <a class="nav-link" href="{% url "kpi:kpi_home" %}">
+                    {% include 'common/icons/icon_kpi.html' %}
+                </a>
+            </li>
             {% if global_context_is_superuser %}
                 <li class="nav-item" data-toggle="tooltip" title="Secrets">
                     <a class="nav-link" href="{% url "secret" %}">
