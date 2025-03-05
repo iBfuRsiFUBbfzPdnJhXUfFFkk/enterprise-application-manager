@@ -3,7 +3,7 @@ from typing import cast, TypedDict
 from gitlab import Gitlab
 from gitlab.v4.objects import ProjectMergeRequestApprovalRule, ProjectMergeRequest, Project
 
-from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_request import \
+from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_project_merge_request import \
     fetch_project_merge_request
 
 
@@ -30,7 +30,7 @@ def fetch_project_merge_requests_approvals(
         return None
     approval_rules: list[ProjectMergeRequestApprovalRule] = cast(
         typ=list[ProjectMergeRequestApprovalRule],
-        val=project_merge_request.approval_state.get().rules
+        val=project_merge_request.approval_state.get(lazy=True).rules
     )
     if len(approval_rules) == 0:
         return None

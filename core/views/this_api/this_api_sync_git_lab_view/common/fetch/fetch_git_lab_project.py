@@ -4,7 +4,7 @@ from gitlab.v4.objects import Project
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 
 
-def get_git_lab_project(
+def fetch_git_lab_project(
         git_lab_client: Gitlab | None = None,
         project_id: int | str | None = None,
 ) -> Project | None:
