@@ -3,7 +3,9 @@ from django.http import JsonResponse, HttpRequest, HttpResponse
 
 from core.models.person import Person
 from core.models.sprint import Sprint
+from core.models.this_server_configuration import ThisServerConfiguration
 from core.models.user import User
+from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 from core.views.generic.generic_500 import generic_500
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
@@ -18,6 +20,8 @@ def ajax_get_chart_data_for_user(
     person: Person | None = user.person_mapping
     if person is None:
         return generic_500(request=request)
+    this_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
+    parent_base_capacity: int = this_server_configuration.scrum_capacity_base or 15
     last_five_sprints: QuerySet[Sprint] = Sprint.last_five()
     velocity_data = []
     accuracy_data = []
@@ -25,9 +29,10 @@ def ajax_get_chart_data_for_user(
 
     for sprint in last_five_sprints:
         sprint_kpi = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint, person_developer=person).first()
+        base_capacity = sprint_kpi.capacity_base or parent_base_capacity
 
         if sprint_kpi:
-            adjusted_capacity = sprint_kpi.capacity_base - sprint_kpi.number_of_paid_time_off_days
+            adjusted_capacity = base_capacity- sprint_kpi.number_of_paid_time_off_days
             velocity = round(sprint_kpi.number_of_story_points_delivered / adjusted_capacity, 2) if adjusted_capacity > 0 else 0
             accuracy = round(sprint_kpi.number_of_story_points_delivered / sprint_kpi.number_of_story_points_committed_to, 2) if sprint_kpi.number_of_story_points_committed_to > 0 else 0
         else:
