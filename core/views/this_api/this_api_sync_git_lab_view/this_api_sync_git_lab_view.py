@@ -5,7 +5,7 @@ from typing import TypedDict, Literal
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObject
-from gitlab.v4.objects import GroupMergeRequest
+from gitlab.v4.objects import GroupMergeRequest, ProjectMergeRequestDiscussion
 
 from core.models.person import Person
 from core.models.sprint import Sprint
@@ -63,11 +63,14 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
                 ) or []
-                all_discussions = fetch_project_merge_requests_discussions(
+                all_discussions: list[ProjectMergeRequestDiscussion] | None = fetch_project_merge_requests_discussions(
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
                 )
-                print(all_discussions)
+                if all_discussions is not None:
+                    for discussion in all_discussions:
+                        notes = discussion.notes
+                        print(notes)
                 for approval in all_approvals:
                     approved_by_username: str | None = approval["username"]
                     if approved_by_username is None:
