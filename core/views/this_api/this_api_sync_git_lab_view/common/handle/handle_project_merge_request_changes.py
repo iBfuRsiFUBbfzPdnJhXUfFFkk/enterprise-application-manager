@@ -3,6 +3,8 @@ from gitlab.v4.objects import Project, ProjectMergeRequest
 
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_project_merge_requests_changes import \
     fetch_project_merge_requests_changes
+from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_project_merge_request_change import \
+    handle_project_merge_request_change
 from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import ensure_indicator_map, \
     IndicatorMap
 from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_change import GitLabApiChange
@@ -28,12 +30,9 @@ def handle_project_merge_request_changes(
     if changes is None:
         return indicator_map
     for change in changes:
-        diff_text: str | None = change["diff"]
-        if diff_text is None:
-            continue
-        for line in diff_text.splitlines():
-            if line.startswith('+'):
-                indicator_map[merge_request_author_id]["number_of_code_lines_added"] += 1
-            elif line.startswith('-'):
-                indicator_map[merge_request_author_id]["number_of_code_lines_removed"] += 1
+        indicator_map: IndicatorMap = handle_project_merge_request_change(
+            change=change,
+            indicator_map=indicator_map,
+            merge_request_author_id=merge_request_author_id,
+        )
     return indicator_map

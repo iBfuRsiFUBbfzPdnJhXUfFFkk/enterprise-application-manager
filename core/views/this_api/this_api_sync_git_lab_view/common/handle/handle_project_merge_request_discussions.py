@@ -4,10 +4,9 @@ from gitlab.v4.objects import ProjectMergeRequestDiscussion, Project, \
 
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_project_merge_requests_discussions import \
     fetch_project_merge_requests_discussions
-from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, ensure_indicator_map, \
-    ensure_indicator_is_in_map
-from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_note import GitLabApiNote
-from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_user import GitLabApiUser
+from core.views.this_api.this_api_sync_git_lab_view.common.handle.handle_project_merge_request_discussion import \
+    handle_project_merge_request_discussion
+from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, ensure_indicator_map
 
 
 def handle_project_merge_request_discussions(
@@ -29,24 +28,8 @@ def handle_project_merge_request_discussions(
     if discussions is None:
         return indicator_map
     for discussion in discussions:
-        notes: list[GitLabApiNote] | None = discussion.attributes["notes"]
-        if notes is None:
-            continue
-        index: int = 0
-        for note in notes:
-            author: GitLabApiUser | None = note["author"]
-            if author is None:
-                continue
-            note_git_lab_user_id_int: int | None = author["id"]
-            if note_git_lab_user_id_int is None:
-                continue
-            note_git_lab_user_id: str = str(note_git_lab_user_id_int)
-            indicator_map: IndicatorMap = ensure_indicator_is_in_map(
-                git_lab_user_id=note_git_lab_user_id,
-                indicator_map=indicator_map
-            )
-            indicator_map[note_git_lab_user_id]["number_of_comments_made"] += 1
-            if not note["system"]:
-                indicator_map[note_git_lab_user_id]["number_of_threads_made"] += 1
-            index += 1
+        indicator_map: IndicatorMap = handle_project_merge_request_discussion(
+            discussion=discussion,
+            indicator_map=indicator_map,
+        )
     return indicator_map
