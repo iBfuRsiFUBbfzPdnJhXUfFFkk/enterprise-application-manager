@@ -19,7 +19,9 @@ def handle_group_merge_request(
         git_lab_client: Gitlab | None = None,
         group_merge_request: GroupMergeRequest | None = None,
         indicator_map: dict[str, IndicatorMap] | None = None,
-) -> dict[str, IndicatorMap] | None:
+) -> dict[str, IndicatorMap]:
+    if indicator_map is None:
+        indicator_map: dict[str, IndicatorMap] = {}
     if git_lab_client is None:
         git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:

@@ -14,21 +14,21 @@ def handle_group_merge_requests(
         git_lab_client: Gitlab | None = None,
         git_lab_group: Group | None = None,
         indicator_map: dict[str, IndicatorMap] | None = None,
-) -> dict[str, IndicatorMap] | None:
+) -> dict[str, IndicatorMap]:
+    if indicator_map is None:
+        indicator_map: dict[str, IndicatorMap] = {}
     if git_lab_client is None:
         git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
-        return None
+        return indicator_map
     if git_lab_group is None:
         git_lab_group: Group | None = fetch_git_lab_group(git_lab_client=git_lab_client)
     if git_lab_group is None:
-        return None
+        return indicator_map
     if current_sprint is None:
         current_sprint: Sprint | None = Sprint.current_sprint()
     if current_sprint is None:
-        return None
-    if indicator_map is None:
-        indicator_map: dict[str, IndicatorMap] = {}
+        return indicator_map
     all_group_merge_requests: list[GroupMergeRequest] | None = fetch_group_merge_requests(
         current_sprint=current_sprint,
         git_lab_client=git_lab_client,

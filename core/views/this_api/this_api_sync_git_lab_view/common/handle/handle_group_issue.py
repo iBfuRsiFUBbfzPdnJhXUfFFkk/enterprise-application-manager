@@ -12,9 +12,11 @@ class GroupIssueUser(TypedDict):
 def handle_group_issue(
         group_issue: GroupIssue | None = None,
         indicator_map: dict[str, IndicatorMap] | None = None,
-) -> dict[str, IndicatorMap] | None:
+) -> dict[str, IndicatorMap]:
+    if indicator_map is None:
+        indicator_map: dict[str, IndicatorMap] = {}
     if group_issue is None:
-        return None
+        return indicator_map
     if indicator_map is None:
         indicator_map: dict[str, IndicatorMap] = {}
     project_id: int | None = group_issue.project_id
