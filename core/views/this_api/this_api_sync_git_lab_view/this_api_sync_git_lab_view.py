@@ -76,9 +76,7 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     ) or []
     for group_merge_request in all_group_merge_requests:
         project_id: int | None = group_merge_request.project_id
-        merge_request_internal_identification_iid: int | None = (
-            group_merge_request.merge_request_internal_identification_iid
-        )
+        merge_request_internal_identification_iid: int | None = group_merge_request.iid
         if project_id is None:
             continue
         git_lab_project: Project | None = get_git_lab_project(
