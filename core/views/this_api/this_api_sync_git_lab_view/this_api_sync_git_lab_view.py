@@ -70,7 +70,8 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                 if all_discussions is not None:
                     for discussion in all_discussions:
                         notes = discussion.notes
-                        print(notes)
+                        for note in notes:
+                            print(note)
                 for approval in all_approvals:
                     approved_by_username: str | None = approval["username"]
                     if approved_by_username is None:
