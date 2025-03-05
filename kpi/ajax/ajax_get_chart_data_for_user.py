@@ -24,7 +24,7 @@ def ajax_get_chart_data_for_user(
     sprint_labels = []
 
     for sprint in last_five_sprints:
-        sprint_kpi = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint, developer=person).first()
+        sprint_kpi = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint, person_developer=person).first()
 
         if sprint_kpi:
             adjusted_capacity = sprint_kpi.capacity_base - sprint_kpi.number_of_paid_time_off_days
