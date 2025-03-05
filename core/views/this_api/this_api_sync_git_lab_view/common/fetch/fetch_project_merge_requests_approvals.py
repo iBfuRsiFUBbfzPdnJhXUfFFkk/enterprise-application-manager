@@ -1,15 +1,11 @@
-from typing import cast, TypedDict
+from typing import cast
 
 from gitlab import Gitlab
 from gitlab.v4.objects import ProjectMergeRequestApprovalRule, ProjectMergeRequest, Project
 
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_project_merge_request import \
     fetch_project_merge_request
-
-
-class GitLabApproval(TypedDict):
-    id: str | None
-    username: str | None
+from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_user import GitLabApiUser
 
 
 def fetch_project_merge_requests_approvals(
@@ -18,7 +14,7 @@ def fetch_project_merge_requests_approvals(
         merge_request_internal_identification_iid: int | str | None = None,
         project_id: int | str | None = None,
         project_merge_request: ProjectMergeRequest | None = None
-) -> list[GitLabApproval] | None:
+) -> list[GitLabApiUser] | None:
     if project_merge_request is None:
         project_merge_request: ProjectMergeRequest | None = fetch_project_merge_request(
             git_lab_client=git_lab_client,

@@ -1,13 +1,8 @@
-from typing import TypedDict
-
 from gitlab.v4.objects import GroupIssue
 
 from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, ensure_indicator_map, \
     ensure_indicator_is_in_map
-
-
-class GroupIssueUser(TypedDict):
-    id: int | None
+from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_user import GitLabApiUser
 
 
 def handle_group_issue(
@@ -24,7 +19,7 @@ def handle_group_issue(
     if state is None:
         return indicator_map
     weight: int = group_issue.weight or 0
-    author: GroupIssueUser | None = group_issue.author
+    author: GitLabApiUser | None = group_issue.author
     if author is None:
         return indicator_map
     author_git_lab_id_int: int | None = author["id"]
@@ -37,7 +32,7 @@ def handle_group_issue(
             indicator_map=indicator_map
         )
         indicator_map[author_git_lab_id]["number_of_issues_authored"] += 1
-    assignees: list[GroupIssueUser] | None = group_issue.assignees
+    assignees: list[GitLabApiUser] | None = group_issue.assignees
     if assignees is None:
         return indicator_map
     for assignee in assignees:

@@ -1,5 +1,3 @@
-from typing import TypedDict
-
 from gitlab import Gitlab
 from gitlab.v4.objects import ProjectMergeRequestDiscussion, Project, \
     ProjectMergeRequest
@@ -8,15 +6,8 @@ from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_project_m
     fetch_project_merge_requests_discussions
 from core.views.this_api.this_api_sync_git_lab_view.common.indicator_map import IndicatorMap, ensure_indicator_map, \
     ensure_indicator_is_in_map
-
-
-class GitLabNoteAuthor(TypedDict):
-    id: int | None
-
-
-class GitLabNote(TypedDict):
-    author: GitLabNoteAuthor | None
-    system: bool | None
+from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_note import GitLabApiNote
+from core.views.this_api.this_api_sync_git_lab_view.common.models.git_lab_api_user import GitLabApiUser
 
 
 def handle_project_merge_request_discussions(
@@ -38,12 +29,12 @@ def handle_project_merge_request_discussions(
     if discussions is None:
         return indicator_map
     for discussion in discussions:
-        notes: list[GitLabNote] | None = discussion.attributes["notes"]
+        notes: list[GitLabApiNote] | None = discussion.attributes["notes"]
         if notes is None:
             continue
         index: int = 0
         for note in notes:
-            author: GitLabNoteAuthor | None = note["author"]
+            author: GitLabApiUser | None = note["author"]
             if author is None:
                 continue
             note_git_lab_user_id_int: int | None = author["id"]
