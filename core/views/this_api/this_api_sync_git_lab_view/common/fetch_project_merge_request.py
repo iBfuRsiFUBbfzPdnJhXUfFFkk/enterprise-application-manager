@@ -1,24 +1,27 @@
 from typing import cast
 
 from gitlab import Gitlab
-from gitlab.v4.objects import ProjectMergeRequest
+from gitlab.v4.objects import ProjectMergeRequest, Project
 
-from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
+from core.views.this_api.this_api_sync_git_lab_view.common.get_git_lab_project import get_git_lab_project
 
 
 def fetch_project_merge_request(
+        git_lab_client: Gitlab | None = None,
+        git_lab_project: Project | None = None,
         merge_request_internal_identification_iid: int | str | None = None,
         project_id: int | str | None = None,
 ) -> ProjectMergeRequest | None:
-    if merge_request_internal_identification_iid is None or project_id is None:
+    if git_lab_project is None:
+        git_lab_project: Project | None = get_git_lab_project(
+            git_lab_client=git_lab_client,
+            project_id=project_id,
+        )
+    if git_lab_project is None:
         return None
-    git_lab_client: Gitlab | None = get_git_lab_client()
-    if git_lab_client is None:
+    if merge_request_internal_identification_iid is None:
         return None
     return cast(
         typ=ProjectMergeRequest,
-        val=(
-            git_lab_client.projects.get(project_id)
-            .mergerequests.get(merge_request_internal_identification_iid)
-        )
+        val=git_lab_project.mergerequests.get(merge_request_internal_identification_iid)
     )
