@@ -24,22 +24,26 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 
 class IssueMap(TypedDict):
     number_of_approvals: int
+    number_of_comments_made: int
     number_of_issues_authored: int
     number_of_issues_committed_to: int
     number_of_issues_delivered_on: int
     number_of_issues_weights_committed_to: int
     number_of_issues_weights_delivered_on: int
+    number_of_threads_made: int
     project_ids_worked_on: list[str]
 
 
 def create_initial_issue_map() -> IssueMap:
     return {
         "number_of_approvals": 0,
+        "number_of_comments_made": 0,
         "number_of_issues_authored": 0,
         "number_of_issues_committed_to": 0,
         "number_of_issues_delivered_on": 0,
         "number_of_issues_weights_committed_to": 0,
         "number_of_issues_weights_delivered_on": 0,
+        "number_of_threads_made": 0,
         "project_ids_worked_on": [],
     }
 
@@ -69,9 +73,29 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
                 )
                 if all_discussions is not None:
                     for discussion in all_discussions:
-                        notes = discussion.notes
+                        notes: dict | None = discussion.attributes["notes"]
+                        if notes is None:
+                            continue
+                        first_note: dict | None = notes[0]
+                        if first_note is not None:
+                            author: dict | None = first_note["author"]
+                            if author is None:
+                                continue
+                            note_username: str | None = author["username"]
+                            if not first_note["system"]:
+                                if note_username not in issues_map:
+                                    issues_map[note_username] = create_initial_issue_map()
+                                issues_map[note_username]["number_of_threads_made"] += 1
                         for note in notes:
-                            print(note)
+                            author: dict | None = note["author"]
+                            if author is None:
+                                continue
+                            note_username: str | None = author["username"]
+                            if note_username is None:
+                                continue
+                            if note_username not in issues_map:
+                                issues_map[note_username] = create_initial_issue_map()
+                            issues_map[note_username]["number_of_comments_made"] += 1
                 for approval in all_approvals:
                     approved_by_username: str | None = approval["username"]
                     if approved_by_username is None:
@@ -114,6 +138,8 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
             person_developer=person_instance,
             sprint=current_sprint,
         )
+        kpi_instance.number_of_threads_resolved = issue_map["number_of_threads_made"]
+        kpi_instance.number_of_comments_made = issue_map["number_of_comments_made"]
         kpi_instance.number_of_merge_requests_approved = issue_map["number_of_approvals"]
         kpi_instance.number_of_context_switches = len(issue_map["project_ids_worked_on"])
         kpi_instance.number_of_issues_written = issue_map["number_of_issues_authored"]
