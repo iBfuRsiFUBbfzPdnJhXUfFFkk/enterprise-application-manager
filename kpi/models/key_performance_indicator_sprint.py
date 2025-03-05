@@ -25,7 +25,7 @@ class KeyPerformanceIndicatorSprint(BaseModel, Comment):
     sprint = create_generic_fk(to=Sprint)
 
     def __str__(self):
-        return str(self.id)
+        return f"{str(self.id)} | {str(self.person_developer)} | {str(self.sprint)}"
 
     class Meta:
         ordering = ['-id']
