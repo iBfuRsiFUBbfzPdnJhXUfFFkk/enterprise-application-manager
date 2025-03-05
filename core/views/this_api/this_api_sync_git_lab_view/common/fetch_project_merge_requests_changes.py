@@ -18,5 +18,5 @@ def fetch_project_merge_requests_changes(
         return None
     return cast(
         typ=list[dict],
-        val=project_merge_request.changes.attributes.get("changes")
+        val=project_merge_request.changes(get_all=True)["changes"]
     )
