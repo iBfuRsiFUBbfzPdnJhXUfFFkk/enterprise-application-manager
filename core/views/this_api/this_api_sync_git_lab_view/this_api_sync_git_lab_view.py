@@ -5,7 +5,7 @@ from typing import TypedDict, Literal
 from django.http import HttpRequest, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObject
-from gitlab.v4.objects import GroupMergeRequest, ProjectMergeRequestApproval
+from gitlab.v4.objects import GroupMergeRequest
 
 from core.models.person import Person
 from core.models.sprint import Sprint
@@ -16,7 +16,7 @@ from core.views.generic.generic_500 import generic_500
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_group_merge_requests import fetch_group_merge_requests
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_issues_by_iterations import fetch_issues_by_iterations
 from core.views.this_api.this_api_sync_git_lab_view.common.fetch_project_merge_requests_approvals import \
-    fetch_project_merge_requests_approvals
+    fetch_project_merge_requests_approvals, GitLabApproval
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
 
@@ -57,15 +57,12 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
         all_group_merge_requests: list[GroupMergeRequest] = fetch_group_merge_requests() or []
         for group_merge_request in all_group_merge_requests:
             if group_merge_request.state == "merged":
-                all_approvals: list[ProjectMergeRequestApproval] | None = fetch_project_merge_requests_approvals(
+                all_approvals: list[GitLabApproval] = fetch_project_merge_requests_approvals(
                     merge_request_internal_identification_iid=group_merge_request.iid,
                     project_id=group_merge_request.project_id,
-                )
+                ) or []
                 for approval in all_approvals:
-                    approved_by = approval.approved_by
-                    if approved_by is None:
-                        continue
-                    approved_by_username: str | None = approved_by.username
+                    approved_by_username: str | None = approval["username"]
                     if approved_by_username is None:
                         continue
                     if approved_by_username not in issues_map:
