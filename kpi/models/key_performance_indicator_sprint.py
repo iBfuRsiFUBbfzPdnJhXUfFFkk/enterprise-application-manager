@@ -20,7 +20,7 @@ class KeyPerformanceIndicatorSprint(BaseModel, Comment):
     number_of_paid_time_off_days = create_generic_integer()
     number_of_story_points_committed_to = create_generic_integer()
     number_of_story_points_delivered = create_generic_integer()
-    number_of_threads_resolved = create_generic_integer()
+    number_of_threads_made = create_generic_integer()
     person_developer = create_generic_fk(to=Person)
     sprint = create_generic_fk(to=Sprint)
 
