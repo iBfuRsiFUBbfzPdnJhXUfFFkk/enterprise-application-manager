@@ -104,7 +104,7 @@ def this_api_update_code_reviews_view(request: HttpRequest) -> HttpResponse:
                     person_developer=user,
                     sprint=sprint,
                     defaults={
-                        "number_of_code_reviews_submitted": counts["approvals"],
+                        "number_of_merge_requests_approved": counts["approvals"],
                         "number_of_comments_made": counts["comments"],
                         "number_of_threads_resolved": counts["threads"],
                     }
