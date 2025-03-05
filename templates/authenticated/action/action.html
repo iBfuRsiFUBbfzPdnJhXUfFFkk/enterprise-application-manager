@@ -4,7 +4,11 @@
         <thead>
         <tr>
             <td>Name</td>
-            <td>Comment</td>
+            <td>URL</td>
+            <td>Estimated Run Time</td>
+            <td>Total Times Run</td>
+            <td>Last Time Run</td>
+            <td>Last User to Run</td>
             <td>Run</td>
         </tr>
         </thead>
@@ -12,7 +16,11 @@
         {% for model in models %}
             <tr>
                 <td>{{ model.name }}</td>
-                <td>{{ model.comment }}</td>
+                <td>{{ model.url }}</td>
+                <td>{{ model.estimated_run_time_in_seconds }} Second(s)</td>
+                <td>{{ model.number_of_times_run }}</td>
+                <td>{{ model.datetime_of_last_run }}</td>
+                <td>{{ model.user_of_last_run }}</td>
                 <td>
                     <a class="nav-link" data-toggle="tooltip" title="Run {{ model.name }}"
                        href="{% url 'action_run' model_id=model.id %}">
