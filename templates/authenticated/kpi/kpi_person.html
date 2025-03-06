@@ -23,7 +23,9 @@
                         <div class="card bg-darker border-accent h-100">
                             <div class="card-body">
                                 <h5 class="text-accent">Current Sprint</h5>
-                                <p><strong>{{ current_sprint.name }}</strong>
+                                <p><strong><a
+                                        href="{% url 'kpi:kpi_sprint' uuid=current_sprint.enumeration_attack_uuid %}">{{ current_sprint.name }}</a></strong>
+                                </p>
                                 </p>
                                 <p>Sprint Dates: {{ current_sprint.date_start }} - {{ current_sprint.date_end }}</p>
                                 <p>Velocity: <span class="metric-accent">{{ current_metrics.velocity }}</span></p>
