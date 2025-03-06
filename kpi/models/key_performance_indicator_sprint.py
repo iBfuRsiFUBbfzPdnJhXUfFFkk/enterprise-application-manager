@@ -53,8 +53,6 @@ class KeyPerformanceIndicatorSprint(BaseModel, Comment):
         return value
 
     @property
-
-    @property
     def capacity_based_velocity(self) -> float:
         value: float = 0
         number_of_story_points_delivered: int = self.number_of_story_points_delivered or 0
