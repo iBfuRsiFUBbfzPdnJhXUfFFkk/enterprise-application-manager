@@ -1,4 +1,4 @@
-from typing import cast
+from typing import cast, Optional
 
 from django.db.models import QuerySet
 from math import ceil
@@ -116,6 +116,10 @@ class KeyPerformanceIndicatorSprint(BaseModel, Comment):
                 person_developer=person,
             ).order_by('-sprint__date_end')
         )
+
+    @staticmethod
+    def get_by_uuid(uuid: str) -> Optional['KeyPerformanceIndicatorSprint']:
+        return KeyPerformanceIndicatorSprint.objects.filter(enumeration_attack_uuid=uuid).first()
 
     def __str__(self):
         return f"{str(self.id)} | {str(self.person_developer)} | {str(self.sprint)}"

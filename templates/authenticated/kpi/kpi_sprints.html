@@ -98,7 +98,10 @@
                         <td>{{ sprint.date_start|date:"Y-m-d" }}</td>
                         <td>{{ sprint.date_end|date:"Y-m-d" }}</td>
                         <td>
-                            todo
+                            <a href="{% url 'kpi:kpi_sprint' uuid=sprint.enumeration_attack_uuid %}"
+                               class="btn btn-sm btn-outline-accent">
+                                View Stats
+                            </a>
                         </td>
                     </tr>
                     {% empty %}

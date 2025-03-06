@@ -39,6 +39,10 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
         ).first()
 
     @staticmethod
+    def get_by_uuid(uuid: str) -> Optional['Sprint']:
+        return Sprint.objects.filter(enumeration_attack_uuid=uuid).first()
+
+    @staticmethod
     def last_five() -> QuerySet['Sprint']:
         current_date: date = date.today()
         return cast(
