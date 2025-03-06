@@ -62,7 +62,7 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     @property
     def user_account(self):
         from core.models.user import User
-        return User.objects.filter(person=self).first()
+        return User.objects.filter(person_mapping=self).first()
 
     @property
     def is_superuser(self):
