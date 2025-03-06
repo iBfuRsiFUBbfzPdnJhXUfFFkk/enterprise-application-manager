@@ -18,11 +18,6 @@ def get_chart_data_for_person(
     accuracy_data: list[float] = []
     sprint_labels: list[str] = []
 
-    for index in range(5 - len(last_five_sprints)):
-        velocity_data.append(0)
-        accuracy_data.append(0)
-        sprint_labels.append("No Sprint")
-
     for sprint in last_five_sprints:
         sprint_kpi: KeyPerformanceIndicatorSprint | None = KeyPerformanceIndicatorSprint.objects.filter(
             person_developer=person,
@@ -45,6 +40,11 @@ def get_chart_data_for_person(
         sprint_labels.append(sprint.name)
         velocity_data.append(velocity)
         accuracy_data.append(accuracy)
+
+    for index in range(5 - len(last_five_sprints)):
+        velocity_data.append(0)
+        accuracy_data.append(0)
+        sprint_labels.append("No Sprint Data")
 
     return {
         "accuracy": accuracy_data[::-1],
