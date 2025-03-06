@@ -1,7 +1,7 @@
 from datetime import date
 from typing import cast, Optional
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Sum
 
 from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
 from core.models.common.abstract.alias import Alias
@@ -60,6 +60,38 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
     @property
     def iteration_ids(self) -> list[int]:
         return [iteration.git_lab_id for iteration in self.iterations]
+
+    @property
+    def kpi_sprints(self) -> QuerySet:
+        from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+        return cast(
+            typ=QuerySet[KeyPerformanceIndicatorSprint],
+            val=KeyPerformanceIndicatorSprint.objects.filter(sprint=self)
+        )
+
+    @property
+    def velocity(self):
+        kpis = self.kpi_sprints.all().exclude(developer__user__is_superuser=True)
+        total_capacity = sum(kpi.adjusted_capacity for kpi in kpis)
+        total_delivered = kpis.aggregate(Sum("number_of_story_points_delivered"))["number_of_story_points_delivered__sum"] or 0
+        return round(total_delivered / total_capacity, 2) if total_capacity else 0
+
+    @property
+    def accuracy(self):
+        kpis = self.kpi_sprints.all().exclude(developer__user__is_superuser=True)
+        total_delivered = kpis.aggregate(Sum("number_of_story_points_delivered"))["number_of_story_points_delivered__sum"] or 0
+        total_committed = kpis.aggregate(Sum("number_of_story_points_committed_to"))["number_of_story_points_committed_to__sum"] or 0
+        return round(total_delivered / total_committed, 2) if total_committed else 0
+
+    @property
+    def delivered(self):
+        return self.kpi_sprints.exclude(developer__user__is_superuser=True).aggregate(Sum("number_of_story_points_delivered"))[
+            "number_of_story_points_delivered__sum"] or 0
+
+    @property
+    def reviews(self):
+        return self.kpi_sprints.exclude(developer__user__is_superuser=True).aggregate(Sum("number_of_merge_requests_approved"))[
+            "number_of_merge_requests_approved__sum"] or 0
 
     def __str__(self):
         return f"{self.name or 'PLEASE ADD NAME'} ::: {self.date_start} - {self.date_end}"
