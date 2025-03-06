@@ -29,13 +29,24 @@ def get_chart_data_for_person(
         number_of_story_points_committed_to: int = sprint_kpi.number_of_story_points_committed_to or 0
 
         if sprint_kpi is not None:
-            adjusted_capacity = base_capacity - number_of_paid_time_off_days
-            velocity = round(number_of_story_points_delivered / adjusted_capacity, 2) if adjusted_capacity > 0 else 0
-            accuracy = round(number_of_story_points_delivered / number_of_story_points_committed_to,
-                             2) if number_of_story_points_committed_to > 0 else 0
+            adjusted_capacity: int = base_capacity - number_of_paid_time_off_days
+            if adjusted_capacity > 0:
+                velocity: float = round(
+                    ndigits=2,
+                    number=number_of_story_points_delivered / adjusted_capacity,
+                )
+            else:
+                velocity: float = 0
+            if number_of_story_points_committed_to > 0:
+                accuracy: float = round(
+                    ndigits=2,
+                    number=number_of_story_points_delivered / number_of_story_points_committed_to,
+                )
+            else:
+                accuracy: float = 0
         else:
-            velocity = 0
-            accuracy = 0
+            velocity: float = 0
+            accuracy: float = 0
 
         sprint_labels.append(sprint.name)
         velocity_data.append(velocity)
