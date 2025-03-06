@@ -1,6 +1,9 @@
 {% extends "authenticated/base_authenticated.html" %}
 
 {% block content %}
+    <div>
+    <a href="{% url "kpi:kpi_sprints" %}">Sprints</a>
+    </div>
     <div class="card">
         <div class="card-header">
             <h2 class="mb-0">Developers List</h2>
