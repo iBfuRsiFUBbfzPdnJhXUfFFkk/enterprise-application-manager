@@ -32,12 +32,12 @@ def this_api_sync_git_lab_view(request: HttpRequest) -> HttpResponse:
     indicator_map: IndicatorMap = create_initial_indicator_map()
     if current_sprint is None:
         return generic_500(request=request)
-    indicator_map: IndicatorMap = handle_create_kpis(
-        indicator_map=indicator_map,
-    )
     indicator_map: IndicatorMap = handle_group_members(
         git_lab_client=git_lab_client,
         git_lab_group=git_lab_group,
+        indicator_map=indicator_map,
+    )
+    indicator_map: IndicatorMap = handle_create_kpis(
         indicator_map=indicator_map,
     )
     indicator_map: IndicatorMap = handle_group_merge_requests(

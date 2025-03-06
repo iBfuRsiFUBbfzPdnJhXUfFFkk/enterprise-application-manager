@@ -29,6 +29,11 @@ def handle_group_member(
     gitlab_username: str | None = group_member.username
     gitlab_first_name: str = gitlab_names[0] if len(gitlab_names) > 0 else ""
     gitlab_last_name: str = gitlab_names[1] if len(gitlab_names) > 1 else ""
+    print(f"------------------------------------")
+    print(f"gitlab_id: {gitlab_id}")
+    print(f"gitlab_name: {gitlab_name}")
+    print(f"gitlab_username: {gitlab_username}")
+    print(f"------------------------------------")
     indicator_map: IndicatorMap = ensure_indicator_is_in_map(
         git_lab_user_id=gitlab_id,
         indicator_map=indicator_map
