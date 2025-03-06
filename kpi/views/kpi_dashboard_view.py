@@ -16,12 +16,10 @@ def kpi_dashboard_view(request: HttpRequest) -> HttpResponse:
     # Adjust data retrieval for developers vs. superusers
     if user.is_staff or user.is_superuser:
         current_metrics = (
-            calculate_sprint_metrics(KeyPerformanceIndicatorSprint.objects.filter(sprint=current_sprint).exclude(
-                person_developer__user__is_superuser=True)) if current_sprint else None
+            calculate_sprint_metrics(KeyPerformanceIndicatorSprint.objects.filter(sprint=current_sprint)) if current_sprint else None
         )
         completed_metrics = [
-            calculate_sprint_metrics(KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint).exclude(
-                person_developer__user__is_superuser=True)) for
+            calculate_sprint_metrics(KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint)) for
             sprint in completed_sprints
         ]
         developer = None  # Not a single developer
