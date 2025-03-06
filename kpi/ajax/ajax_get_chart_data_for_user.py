@@ -28,13 +28,20 @@ def ajax_get_chart_data_for_user(
     sprint_labels = []
 
     for sprint in last_five_sprints:
-        sprint_kpi = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint, person_developer=person).first()
-        base_capacity = sprint_kpi.capacity_base or parent_base_capacity
+        sprint_kpi: KeyPerformanceIndicatorSprint | None = KeyPerformanceIndicatorSprint.objects.filter(
+            person_developer=person,
+            sprint=sprint,
+        ).first()
+        base_capacity: int = sprint_kpi.capacity_base or parent_base_capacity
+        number_of_paid_time_off_days: int = sprint_kpi.number_of_paid_time_off_days or 0
+        number_of_story_points_delivered: int = sprint_kpi.number_of_story_points_delivered or 0
+        number_of_story_points_committed_to: int = sprint_kpi.number_of_story_points_committed_to or 0
 
-        if sprint_kpi:
-            adjusted_capacity = base_capacity- sprint_kpi.number_of_paid_time_off_days
-            velocity = round(sprint_kpi.number_of_story_points_delivered / adjusted_capacity, 2) if adjusted_capacity > 0 else 0
-            accuracy = round(sprint_kpi.number_of_story_points_delivered / sprint_kpi.number_of_story_points_committed_to, 2) if sprint_kpi.number_of_story_points_committed_to > 0 else 0
+        if sprint_kpi is not None:
+            adjusted_capacity = base_capacity - number_of_paid_time_off_days
+            velocity = round(number_of_story_points_delivered / adjusted_capacity, 2) if adjusted_capacity > 0 else 0
+            accuracy = round(number_of_story_points_delivered / number_of_story_points_committed_to,
+                             2) if number_of_story_points_committed_to > 0 else 0
         else:
             velocity = 0
             accuracy = 0
