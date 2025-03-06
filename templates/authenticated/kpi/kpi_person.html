@@ -13,28 +13,12 @@
                         <div class="card bg-darker border-accent h-100">
                             <div class="card-body">
                                 <h5 class="text-accent">Current Sprint</h5>
-                                <p><strong><a
-                                        href="{% url 'kpi:sprint_kpi_list' uuid=current_sprint.id %}">{{ current_sprint.name }}</a></strong>
+                                <p><strong>{{ current_sprint.name }}</strong>
                                 </p>
-                                <p>Sprint Dates: {{ current_sprint.start_date }} - {{ current_sprint.end_date }}</p>
+                                <p>Sprint Dates: {{ current_sprint.date_start }} - {{ current_sprint.date_end }}</p>
                                 <p>Velocity: <span class="metric-accent">{{ current_metrics.velocity }}</span></p>
                                 <p>Commitment Accuracy: <span
                                         class="metric-accent">{{ current_metrics.accuracy }}</span></p>
-                            </div>
-                        </div>
-                    </div>
-                {% endif %}
-
-                {% if avg_metrics %}
-                    <div class="col-md-6">
-                        <div class="card bg-darker border-accent h-100">
-                            <div class="card-body">
-                                <h5 class="text-accent">Avg. Last 5 Sprints</h5>
-                                <p>Velocity: <span class="metric-accent">{{ avg_metrics.velocity }}</span></p>
-                                <p>Commitment Accuracy: <span class="metric-accent">{{ avg_metrics.accuracy }}</span>
-                                </p>
-                                <p>Avg Delivered: <span class="metric-accent">{{ avg_metrics.delivered }}</span></p>
-                                <p>Avg Code Reviews: <span class="metric-accent">{{ avg_metrics.reviews }}</span></p>
                             </div>
                         </div>
                     </div>

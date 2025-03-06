@@ -25,6 +25,7 @@ def kpi_person_view(request: HttpRequest, uuid: str) -> HttpResponse:
     return base_render(
         context={
             "current_metrics": current_metrics,
+            "current_sprint": current_sprint,
             "kpi_sprints": kpi_sprints,
             "person": person,
         },
