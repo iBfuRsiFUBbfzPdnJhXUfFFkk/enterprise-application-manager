@@ -1,7 +1,7 @@
 {% extends "authenticated/base_authenticated.html" %}
 
 {% block content %}
-    KPI
+    KPI - by person
     <div class="row">
         <div class="col-md-6">
             <canvas id="velocityChart"></canvas>
@@ -10,35 +10,14 @@
             <canvas id="accuracyChart"></canvas>
         </div>
     </div>
-    <table id="data-table" class="display">
-        <thead>
-        <tr>
-            <td>Name</td>
-            <td>Version</td>
-            <td>Concept</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for person in people %}
-            <tr ondblclick='window.location.href = "{% url 'ajax:ajax_get_chart_data_for_user' uuid=person.uuid %}"'>
-                <td>{{ person.name_first }} {{ person.name_last }}</td>
-                <td>{{ model.version }}</td>
-                <td>{{ model.type_programing_concept }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
 {% endblock %}
 
 {% block scripts %}
     <!-- Chart.js Script -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        $(document).ready(function () {
-            $('#data-table').DataTable({"pageLength": 100});
-        });
         document.addEventListener("DOMContentLoaded", function () {
-            fetch("{% url 'kpi:ajax_get_chart_data_for_self' %}")
+            fetch("{% url 'kpi:ajax_get_chart_data_for_user' person.enumeration_attack_uuid %}")
                 .then(response => response.json())
                 .then(data => {
                     var ctxVelocity = document.getElementById('velocityChart').getContext('2d');
