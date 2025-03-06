@@ -14,7 +14,7 @@ def kpi_home_view(request: HttpRequest) -> HttpResponse:
     developer_role: Role | None = this_server_configuration.type_developer_role
     if developer_role is None:
         return generic_500(request=request)
-    people: QuerySet = developer_role.people_who_hold_this_role
+    people: QuerySet = developer_role.people_who_hold_this_role.all()
     return base_render(
         context={
             "people": people,
