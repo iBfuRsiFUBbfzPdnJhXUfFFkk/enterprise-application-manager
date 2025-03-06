@@ -17,7 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        fetch("{% url 'kpi:ajax_get_chart_data_for_user' request.user.enumeration_attack_uuid %}")
+        fetch("{% url 'kpi:ajax_get_chart_data_for_self' %}")
             .then(response => response.json())
             .then(data => {
                 var ctxVelocity = document.getElementById('velocityChart').getContext('2d');

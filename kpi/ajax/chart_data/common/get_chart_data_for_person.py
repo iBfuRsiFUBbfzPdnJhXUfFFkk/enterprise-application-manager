@@ -1,31 +1,27 @@
 from django.db.models import QuerySet
-from django.http import JsonResponse, HttpRequest, HttpResponse
 
 from core.models.person import Person
 from core.models.sprint import Sprint
 from core.models.this_server_configuration import ThisServerConfiguration
-from core.models.user import User
 from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
-from core.views.generic.generic_500 import generic_500
+from kpi.ajax.chart_data.common.chart_data_model import ChartDataModel
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 
 
-def ajax_get_chart_data_for_user(
-        request: HttpRequest,
-        uuid: str
-) -> JsonResponse | HttpResponse:
-    user: User | None = User.get_by_uuid(uuid=uuid)
-    if user is None:
-        return generic_500(request=request)
-    person: Person | None = user.person_mapping
-    if person is None:
-        return generic_500(request=request)
+def get_chart_data_for_person(
+        person: Person | None = None
+) -> ChartDataModel | None:
     this_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-    parent_base_capacity: int = this_server_configuration.scrum_capacity_base or 15
+    parent_base_capacity: int = this_server_configuration.scrum_capacity_base or 30
     last_five_sprints: QuerySet[Sprint] = Sprint.last_five()
-    velocity_data = []
-    accuracy_data = []
-    sprint_labels = []
+    velocity_data: list[float] = []
+    accuracy_data: list[float] = []
+    sprint_labels: list[str] = []
+
+    for index in range(5 - len(last_five_sprints)):
+        velocity_data.append(0)
+        accuracy_data.append(0)
+        sprint_labels.append("No Sprint")
 
     for sprint in last_five_sprints:
         sprint_kpi: KeyPerformanceIndicatorSprint | None = KeyPerformanceIndicatorSprint.objects.filter(
@@ -50,10 +46,8 @@ def ajax_get_chart_data_for_user(
         velocity_data.append(velocity)
         accuracy_data.append(accuracy)
 
-    # Prepare data for the charts
-    data = {
-        "labels": sprint_labels[::-1],  # Reverse order for chronological display
-        "velocity": velocity_data[::-1],
+    return {
         "accuracy": accuracy_data[::-1],
+        "labels": sprint_labels[::-1],
+        "velocity": velocity_data[::-1],
     }
-    return JsonResponse(data=data)
