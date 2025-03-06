@@ -92,11 +92,11 @@
                     {% for sprint in sprints %}
                     <tr>
                         <td>{{ sprint.name }}</td>
-                        <td>{{ sprint.start_date|date:"M j" }} - {{ sprint.end_date|date:"M j, Y" }}</td>
-                        <td class="metric-accent">{{ sprint.business_days }}</td>
-                        <td>{{ sprint.holidays }}</td>
-                        <td>{{ sprint.start_date|date:"Y-m-d" }}</td>
-                        <td>{{ sprint.end_date|date:"Y-m-d" }}</td>
+                        <td>{{ sprint.date_start|date:"M j" }} - {{ sprint.date_end|date:"M j, Y" }}</td>
+                        <td class="metric-accent">{{ sprint.coerced_number_of_business_days_in_sprint }}</td>
+                        <td>{{ sprint.number_of_holidays_during_sprint }}</td>
+                        <td>{{ sprint.date_start|date:"Y-m-d" }}</td>
+                        <td>{{ sprint.date_end|date:"Y-m-d" }}</td>
                         <td>
                             <a href="{% url 'kpi:sprint_kpi_list' uuid=sprint.id %}"
                                class="btn btn-sm btn-outline-accent">

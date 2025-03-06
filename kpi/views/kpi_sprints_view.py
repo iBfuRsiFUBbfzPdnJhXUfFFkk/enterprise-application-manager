@@ -14,6 +14,7 @@ def kpi_sprints_view(request: HttpRequest) -> HttpResponse:
     avg_metrics = _calculate_average_metrics(completed_metrics)
     return base_render(
         context={
+            "sprints": Sprint.objects.all(),
             "current_sprint": current_metrics,
             "avg_completed_metrics": avg_metrics,
             "completed_sprints_count": len(completed_sprints),
