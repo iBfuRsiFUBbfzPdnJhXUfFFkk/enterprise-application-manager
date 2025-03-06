@@ -59,10 +59,10 @@
                         <td>{{ kpi_sprint.number_of_issues_written }}</td>
                         <td>{{ kpi_sprint.number_of_code_lines_added }}/{{ kpi_sprint.number_of_code_lines_removed }}</td>
                         <td class="group-separator">{{ kpi_sprint.number_of_context_switches }}</td>
-                        <td style="background-color: {{ stat.capacity_based_velocity|get_color }}; color: white;">
+                        <td style="background-color: {{ kpi_sprint.capacity_based_velocity|get_color }}; color: white;">
                             {{ kpi_sprint.capacity_based_velocity|floatformat:2 }}
                         </td>
-                        <td style="background-color: {{ stat.commitment_accuracy|get_color }}; color: white;">
+                        <td style="background-color: {{ kpi_sprint.commitment_accuracy|get_color }}; color: white;">
                             {{ kpi_sprint.commitment_accuracy|floatformat:2 }}
                         </td>
                     </tr>
