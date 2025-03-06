@@ -10,4 +10,5 @@ INSTALLED_APPS = [
     'simple_history',
     'hijack',
     'hijack.contrib.admin',
+    'django.contrib.humanize',
 ]

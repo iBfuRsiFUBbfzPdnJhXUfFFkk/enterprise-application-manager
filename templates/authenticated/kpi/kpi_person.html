@@ -1,4 +1,6 @@
 {% extends "authenticated/base_authenticated.html" %}
+{% load humanize %}
+{% load kpi_tags %}
 {% block content %}
     <div class="card">
         <div class="card-header">
@@ -57,11 +59,11 @@
                         <td>{{ kpi_sprint.number_of_issues_written }}</td>
                         <td>{{ kpi_sprint.number_of_code_lines_added }}/{{ kpi_sprint.number_of_code_lines_removed }}</td>
                         <td class="group-separator">{{ kpi_sprint.number_of_context_switches }}</td>
-                        <td>
-                            {{ kpi_sprint.capacity_based_velocity }}
+                        <td style="background-color: {{ stat.capacity_based_velocity|get_color }}; color: white;">
+                            {{ kpi_sprint.capacity_based_velocity|floatformat:2 }}
                         </td>
-                        <td>
-                            {{ kpi_sprint.commitment_accuracy }}
+                        <td style="background-color: {{ stat.commitment_accuracy|get_color }}; color: white;">
+                            {{ kpi_sprint.commitment_accuracy|floatformat:2 }}
                         </td>
                     </tr>
                     {% empty %}
