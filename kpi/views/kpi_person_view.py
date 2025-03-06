@@ -2,18 +2,29 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 
 from core.models.person import Person
+from core.models.sprint import Sprint
 from core.utilities.base_render import base_render
 from core.views.generic.generic_500 import generic_500
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+from kpi.utilities.calculate_sprint_metrics import SprintMetrics, calculate_sprint_metrics
 
 
 def kpi_person_view(request: HttpRequest, uuid: str) -> HttpResponse:
     person: Person | None = Person.get_by_uuid(uuid=uuid)
     if person is None:
         return generic_500(request=request)
+    current_sprint: Sprint | None = Sprint.current_sprint()
+    current_metrics: SprintMetrics | None = calculate_sprint_metrics(
+        KeyPerformanceIndicatorSprint.objects.filter(
+            sprint=current_sprint,
+            person_developer=person,
+        )
+    ) if current_sprint else None
+
     kpi_sprints: QuerySet[KeyPerformanceIndicatorSprint] = KeyPerformanceIndicatorSprint.for_person(person=person)
     return base_render(
         context={
+            "current_metrics": current_metrics,
             "kpi_sprints": kpi_sprints,
             "person": person,
         },

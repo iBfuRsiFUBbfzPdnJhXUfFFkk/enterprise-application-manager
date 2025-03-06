@@ -7,6 +7,39 @@
             <h2 class="mb-0">KPI Metrics for {{ person.full_name_for_human }}</h2>
         </div>
         <div class="card-body">
+            <div class="row mb-4">
+                {% if current_sprint %}
+                    <div class="col-md-6">
+                        <div class="card bg-darker border-accent h-100">
+                            <div class="card-body">
+                                <h5 class="text-accent">Current Sprint</h5>
+                                <p><strong><a
+                                        href="{% url 'kpi:sprint_kpi_list' uuid=current_sprint.id %}">{{ current_sprint.name }}</a></strong>
+                                </p>
+                                <p>Sprint Dates: {{ current_sprint.start_date }} - {{ current_sprint.end_date }}</p>
+                                <p>Velocity: <span class="metric-accent">{{ current_metrics.velocity }}</span></p>
+                                <p>Commitment Accuracy: <span
+                                        class="metric-accent">{{ current_metrics.accuracy }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if avg_metrics %}
+                    <div class="col-md-6">
+                        <div class="card bg-darker border-accent h-100">
+                            <div class="card-body">
+                                <h5 class="text-accent">Avg. Last 5 Sprints</h5>
+                                <p>Velocity: <span class="metric-accent">{{ avg_metrics.velocity }}</span></p>
+                                <p>Commitment Accuracy: <span class="metric-accent">{{ avg_metrics.accuracy }}</span>
+                                </p>
+                                <p>Avg Delivered: <span class="metric-accent">{{ avg_metrics.delivered }}</span></p>
+                                <p>Avg Code Reviews: <span class="metric-accent">{{ avg_metrics.reviews }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
             <div class="row">
                 <div class="col-md-6">
                     <canvas id="velocity-chart"></canvas>
@@ -16,8 +49,8 @@
                 </div>
             </div>
             <div class="table-responsive mt-4">
-            <table class="table table-canary table-hover mb-0">
-                <thead>
+                <table class="table table-canary table-hover mb-0">
+                    <thead>
                     <tr>
                         <th rowspan="2" class="column-group">Sprint</th>
                         <th colspan="4" class="text-center column-group">Availability</th>
@@ -42,38 +75,38 @@
                         <th>Velocity</th>
                         <th>Accuracy</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     {% for kpi_sprint in kpi_sprints %}
-                    <tr>
-                        <td class="column-group">{{ kpi_sprint.sprint.name }}</td>
-                        <td>{{ kpi_sprint.coerced_base_capacity }}</td>
-                        <td>{{ kpi_sprint.sprint.number_of_holidays_during_sprint }}</td>
-                        <td>{{ kpi_sprint.number_of_paid_time_off_days }}</td>
-                        <td class="group-separator">{{ kpi_sprint.adjusted_capacity }}</td>
-                        <td class="metric-accent">{{ kpi_sprint.number_of_story_points_committed_to }}</td>
-                        <td class="group-separator">{{ kpi_sprint.number_of_story_points_delivered }}</td>
-                        <td>{{ kpi_sprint.number_of_merge_requests_approved }}</td>
-                        <td>{{ kpi_sprint.number_of_comments_made }}</td>
-                        <td class="group-separator">{{ kpi_sprint.number_of_threads_made }}</td>
-                        <td>{{ kpi_sprint.number_of_issues_written }}</td>
-                        <td>{{ kpi_sprint.number_of_code_lines_added }}/{{ kpi_sprint.number_of_code_lines_removed }}</td>
-                        <td class="group-separator">{{ kpi_sprint.number_of_context_switches }}</td>
-                        <td style="background-color: {{ kpi_sprint.capacity_based_velocity|get_color }}; color: white;">
-                            {{ kpi_sprint.capacity_based_velocity|floatformat:2 }}
-                        </td>
-                        <td style="background-color: {{ kpi_sprint.commitment_accuracy|get_color }}; color: white;">
-                            {{ kpi_sprint.commitment_accuracy|floatformat:2 }}
-                        </td>
-                    </tr>
+                        <tr>
+                            <td class="column-group">{{ kpi_sprint.sprint.name }}</td>
+                            <td>{{ kpi_sprint.coerced_base_capacity }}</td>
+                            <td>{{ kpi_sprint.sprint.number_of_holidays_during_sprint }}</td>
+                            <td>{{ kpi_sprint.number_of_paid_time_off_days }}</td>
+                            <td class="group-separator">{{ kpi_sprint.adjusted_capacity }}</td>
+                            <td class="metric-accent">{{ kpi_sprint.number_of_story_points_committed_to }}</td>
+                            <td class="group-separator">{{ kpi_sprint.number_of_story_points_delivered }}</td>
+                            <td>{{ kpi_sprint.number_of_merge_requests_approved }}</td>
+                            <td>{{ kpi_sprint.number_of_comments_made }}</td>
+                            <td class="group-separator">{{ kpi_sprint.number_of_threads_made }}</td>
+                            <td>{{ kpi_sprint.number_of_issues_written }}</td>
+                            <td>{{ kpi_sprint.number_of_code_lines_added }}/{{ kpi_sprint.number_of_code_lines_removed }}</td>
+                            <td class="group-separator">{{ kpi_sprint.number_of_context_switches }}</td>
+                            <td style="background-color: {{ kpi_sprint.capacity_based_velocity|get_color }}; color: white;">
+                                {{ kpi_sprint.capacity_based_velocity|floatformat:2 }}
+                            </td>
+                            <td style="background-color: {{ kpi_sprint.commitment_accuracy|get_color }}; color: white;">
+                                {{ kpi_sprint.commitment_accuracy|floatformat:2 }}
+                            </td>
+                        </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="15" class="text-center py-4">No sprint stats found for this developer</td>
-                    </tr>
+                        <tr>
+                            <td colspan="15" class="text-center py-4">No sprint stats found for this developer</td>
+                        </tr>
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}
