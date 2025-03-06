@@ -20,6 +20,11 @@ AUTH_LDAP_SERVER_URI="ldap://ldap.domain.com"
 AUTH_LDAP_USER_ATTR_MAP="{\"first_name\": \"firstName\"}"
 DEBUG=True
 DJANGO_SECRET_KEY="******"
+EMAIL_FROM="user@domain.com"
+EMAIL_HOST="localhost"
+EMAIL_PORT=25
+EMAIL_USE_SSL=False
+EMAIL_USE_TLS=False
 ENCRYPTION_SECRET="******"
 SHOULD_USE_LDAP=False
 ```
