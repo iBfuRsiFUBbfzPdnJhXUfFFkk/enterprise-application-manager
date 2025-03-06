@@ -33,7 +33,7 @@ def kpi_sprint_view(request: HttpRequest, uuid: str) -> HttpResponse:
             "sprint_end_date": sprint.date_end,
         },
         request=request,
-        template_name="authenticated/kpi/kpi_sprints.html"
+        template_name="authenticated/kpi/kpi_sprint.html"
     )
 
 
