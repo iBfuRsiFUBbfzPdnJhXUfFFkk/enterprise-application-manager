@@ -1,7 +1,7 @@
 {% extends "authenticated/base_authenticated.html" %}
 
 {% block content %}
-    KPI - by person
+    KPI - by person {{ person.name_first }} {{ person.name_last }}
     <div class="row">
         <div class="col-md-6">
             <canvas id="velocityChart"></canvas>
