@@ -18,6 +18,10 @@ class ThisServerConfiguration(BaseModel, Comment, Name):
     scrum_capacity_base = create_generic_integer()
     type_developer_role = create_generic_fk(to=Role)
 
+    @property
+    def coerced_base_capacity(self) -> int:
+        return self.scrum_capacity_base or 30
+
     def __str__(self):
         return f"{self.name}"
 

@@ -77,10 +77,10 @@ class Person(BaseModel, Comment, Location, Pronunciation):
 
     @property
     def coerced_base_capacity(self) -> int:
+        if self.scrum_capacity_base is not None:
+            return self.scrum_capacity_base
         current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        if current_server_configuration is None:
-            return self.scrum_capacity_base or 30
-        return self.scrum_capacity_base or current_server_configuration.scrum_capacity_base or 30
+        return current_server_configuration.coerced_base_capacity
 
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"
