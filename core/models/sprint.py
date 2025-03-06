@@ -71,26 +71,26 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
 
     @property
     def velocity(self):
-        kpis = self.kpi_sprints.all().exclude(developer__user__is_superuser=True)
+        kpis = self.kpi_sprints.all().exclude(person_developer__is_superuser=True)
         total_capacity = sum(kpi.adjusted_capacity for kpi in kpis)
         total_delivered = kpis.aggregate(Sum("number_of_story_points_delivered"))["number_of_story_points_delivered__sum"] or 0
         return round(total_delivered / total_capacity, 2) if total_capacity else 0
 
     @property
     def accuracy(self):
-        kpis = self.kpi_sprints.all().exclude(developer__user__is_superuser=True)
+        kpis = self.kpi_sprints.all().exclude(person_developer__is_superuser=True)
         total_delivered = kpis.aggregate(Sum("number_of_story_points_delivered"))["number_of_story_points_delivered__sum"] or 0
         total_committed = kpis.aggregate(Sum("number_of_story_points_committed_to"))["number_of_story_points_committed_to__sum"] or 0
         return round(total_delivered / total_committed, 2) if total_committed else 0
 
     @property
     def delivered(self):
-        return self.kpi_sprints.exclude(developer__user__is_superuser=True).aggregate(Sum("number_of_story_points_delivered"))[
+        return self.kpi_sprints.exclude(person_developer__is_superuser=True).aggregate(Sum("number_of_story_points_delivered"))[
             "number_of_story_points_delivered__sum"] or 0
 
     @property
     def reviews(self):
-        return self.kpi_sprints.exclude(developer__user__is_superuser=True).aggregate(Sum("number_of_merge_requests_approved"))[
+        return self.kpi_sprints.exclude(person_developer__is_superuser=True).aggregate(Sum("number_of_merge_requests_approved"))[
             "number_of_merge_requests_approved__sum"] or 0
 
     def __str__(self):

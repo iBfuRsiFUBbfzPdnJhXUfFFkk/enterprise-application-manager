@@ -59,6 +59,15 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     type_job_title = create_generic_enum(choices=JOB_TITLE_CHOICES)
     type_timezone = create_generic_enum(choices=TIMEZONE_CHOICES)
 
+    @property
+    def user_account(self):
+        from core.models.user import User
+        return User.objects.filter(person=self).first()
+
+    @property
+    def is_superuser(self):
+        return self.user_account.is_superuser if self.user_account else False
+
     @staticmethod
     def get_git_lab_user(username: str | None = None) -> Optional['Person']:
         return Person.objects.filter(gitlab_sync_username=username).first()
