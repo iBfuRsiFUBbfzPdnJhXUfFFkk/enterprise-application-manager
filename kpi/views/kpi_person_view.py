@@ -1,11 +1,7 @@
-from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 
 from core.models.person import Person
-from core.models.role import Role
-from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.base_render import base_render
-from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 from core.views.generic.generic_500 import generic_500
 
 

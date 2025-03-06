@@ -16,8 +16,9 @@ from core.models.common.field_factories.create_generic_integer import create_gen
 from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.job_level import JobLevel
-from core.models.role import Role
 from core.models.skill import Skill
+from core.models.this_server_configuration import ThisServerConfiguration
+from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 
 
 class Person(BaseModel, Comment, Location, Pronunciation):
@@ -47,11 +48,11 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     is_scrum_master = create_generic_boolean()
     is_stakeholder = create_generic_boolean()
     link_sharepoint_profile = create_generic_varchar()
-    job_level = create_generic_fk(related_name='people_who_hold_this_job_level', to=JobLevel)
+    job_level = create_generic_fk(to=JobLevel)
     name_first = create_generic_varchar()
     name_last = create_generic_varchar()
     name_preferred = create_generic_varchar()
-    roles = create_generic_m2m(related_name='people_who_hold_this_role', to=Role)
+    roles = create_generic_m2m(to='Role')
     scrum_capacity_base = create_generic_integer()
     skills = create_generic_m2m(related_name='people_who_hold_this_skill', to=Skill)
     type_job_level = create_generic_enum(choices=JOB_LEVEL_CHOICES)
@@ -65,6 +66,21 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     @staticmethod
     def get_by_uuid(uuid: str) -> Optional['Person']:
         return Person.objects.filter(enumeration_attack_uuid=uuid).first()
+
+    @property
+    def full_name_for_human(self) -> str:
+        return f"{self.name_first} {self.name_last}"
+
+    @property
+    def full_name_for_sort(self) -> str:
+        return f"{self.name_last}, {self.name_first}"
+
+    @property
+    def coerced_base_capacity(self) -> int:
+        current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
+        if current_server_configuration is None:
+            return self.scrum_capacity_base or 30
+        return self.scrum_capacity_base or current_server_configuration.scrum_capacity_base or 30
 
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"

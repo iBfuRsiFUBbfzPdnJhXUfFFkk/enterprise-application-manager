@@ -1,26 +1,26 @@
 {% extends "authenticated/base_authenticated.html" %}
-
 {% block content %}
-    KPI - by person {{ person.name_first }} {{ person.name_last }}
+    <div class="row">
+        <h1>KPI For: {{ person.full_name_for_human }}</h1>
+    </div>
     <div class="row">
         <div class="col-md-6">
-            <canvas id="velocityChart"></canvas>
+            <canvas id="velocity-chart"></canvas>
         </div>
         <div class="col-md-6">
-            <canvas id="accuracyChart"></canvas>
+            <canvas id="accuracy-chart"></canvas>
         </div>
     </div>
 {% endblock %}
-
 {% block scripts %}
-    <!-- Chart.js Script -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!--suppress JSUnresolvedReference -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             fetch("{% url 'kpi:ajax_get_chart_data_for_user' person.enumeration_attack_uuid %}")
                 .then(response => response.json())
                 .then(data => {
-                    var ctxVelocity = document.getElementById('velocityChart').getContext('2d');
+                    const ctxVelocity = document.getElementById('velocity-chart').getContext('2d');
                     new Chart(ctxVelocity, {
                         type: 'line',
                         data: {
@@ -34,7 +34,7 @@
                         }
                     });
 
-                    var ctxAccuracy = document.getElementById('accuracyChart').getContext('2d');
+                    const ctxAccuracy = document.getElementById('accuracy-chart').getContext('2d');
                     new Chart(ctxAccuracy, {
                         type: 'line',
                         data: {
