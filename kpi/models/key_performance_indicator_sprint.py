@@ -39,7 +39,7 @@ class KeyPerformanceIndicatorSprint(BaseModel, Comment):
         number_of_holidays_during_sprint: int = 0
         sprint: Sprint | None = self.sprint
         if sprint is not None:
-            number_of_business_days_in_sprint: int = sprint.number_of_business_days_in_sprint or 0
+            number_of_business_days_in_sprint: int = sprint.coerced_number_of_business_days_in_sprint
             number_of_holidays_during_sprint: int = sprint.number_of_holidays_during_sprint or 0
         effective_days: int = (
                 number_of_business_days_in_sprint
@@ -71,7 +71,7 @@ class KeyPerformanceIndicatorSprint(BaseModel, Comment):
         number_of_business_days_in_sprint: int = 0
         sprint: Sprint | None = self.sprint
         if sprint is not None:
-            number_of_business_days_in_sprint: int = sprint.number_of_business_days_in_sprint or 0
+            number_of_business_days_in_sprint: int = sprint.coerced_number_of_business_days_in_sprint
         if number_of_business_days_in_sprint == 0:
             self.cached_capacity_per_day = 0
             self.save()

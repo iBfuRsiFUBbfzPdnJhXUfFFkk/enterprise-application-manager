@@ -16,11 +16,16 @@ class ThisServerConfiguration(BaseModel, Comment, Name):
     connection_gitlab_hostname = create_generic_varchar()
     connection_gitlab_token = create_generic_fk(to=Secret)
     scrum_capacity_base = create_generic_integer()
+    scrum_number_of_business_days_in_sprint = create_generic_integer()
     type_developer_role = create_generic_fk(to=Role)
 
     @property
     def coerced_base_capacity(self) -> int:
         return self.scrum_capacity_base or 30
+
+    @property
+    def coerced_number_of_business_days_in_sprint(self) -> int:
+        return self.scrum_number_of_business_days_in_sprint or 15
 
     def __str__(self):
         return f"{self.name}"

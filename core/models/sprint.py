@@ -11,6 +11,8 @@ from core.models.common.abstract.name import Name
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
+from core.models.this_server_configuration import ThisServerConfiguration
+from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 
 
 class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
@@ -20,6 +22,13 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
     cached_velocity = create_generic_decimal()
     number_of_business_days_in_sprint = create_generic_integer()
     number_of_holidays_during_sprint = create_generic_integer()
+
+    @property
+    def coerced_number_of_business_days_in_sprint(self) -> int:
+        if self.number_of_business_days_in_sprint is not None:
+            return self.number_of_business_days_in_sprint
+        current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
+        return current_server_configuration.coerced_number_of_business_days_in_sprint
 
     @staticmethod
     def current_sprint() -> Optional['Sprint']:
