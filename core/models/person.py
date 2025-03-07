@@ -17,6 +17,7 @@ from core.models.common.field_factories.create_generic_fk import create_generic_
 from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.job_level import JobLevel
+from core.models.job_title import JobTitle
 from core.models.role import Role
 from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
@@ -56,6 +57,7 @@ class Person(
     is_stakeholder: bool | None = create_generic_boolean()
     link_sharepoint_profile: str | None = create_generic_varchar()
     job_level: JobLevel | None = create_generic_fk(to=JobLevel)
+    job_title: JobLevel | None = create_generic_fk(to=JobTitle)
     name_first: str | None = create_generic_varchar()
     name_last: str | None = create_generic_varchar()
     name_preferred: str | None = create_generic_varchar()
@@ -97,8 +99,8 @@ class Person(
         from core.models.user import User
         return User.objects.filter(person_mapping=self).first()
 
-    def __str__(self):
-        return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"
+    def __str__(self) -> str:
+        return f"{self.name_last}, {self.name_first} - {str(self.job_title) if self.job_title else ''}"
 
     class Meta:
         ordering = ['name_last', 'name_first', 'id']
