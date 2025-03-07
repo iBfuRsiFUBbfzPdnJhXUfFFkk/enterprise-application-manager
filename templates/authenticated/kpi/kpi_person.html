@@ -89,7 +89,7 @@
                     {% for kpi_sprint in kpi_sprints %}
                         <tr>
                             <td class="column-group">{{ kpi_sprint.sprint.name }}</td>
-                            <td>{{ kpi_sprint.coerced_base_capacity }}</td>
+                            <td>{{ kpi_sprint.coerced_scrum_capacity_base }}</td>
                             <td>{{ kpi_sprint.sprint.number_of_holidays_during_sprint }}</td>
                             <td>{{ kpi_sprint.coerced_number_of_paid_time_off_days }}</td>
                             <td class="group-separator">{{ kpi_sprint.adjusted_capacity }}</td>

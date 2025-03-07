@@ -3,6 +3,7 @@ from math import ceil
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScrumCapacityBase
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
@@ -18,12 +19,12 @@ from kpi.utilities.save_divide import save_divide
 class KeyPerformanceIndicatorSprint(
     AbstractBaseModel,
     AbstractComment,
+    AbstractScrumCapacityBase,
 ):
     cached_capacity_adjusted: int | None = create_generic_integer()
     cached_capacity_base_velocity: float | None = create_generic_decimal()
     cached_capacity_per_day: float | None = create_generic_decimal()
     cached_commitment_accuracy: float | None = create_generic_decimal()
-    capacity_base: int | None = create_generic_integer()
     number_of_code_lines_added: int | None = create_generic_integer()
     number_of_code_lines_removed: int | None = create_generic_integer()
     number_of_comments_made: int | None = create_generic_integer()
@@ -49,7 +50,7 @@ class KeyPerformanceIndicatorSprint(
                 - self.coerced_number_of_paid_time_off_days
         )
         capacity: int = max(0, ceil(effective_days * self.capacity_per_day))
-        value: int = min(self.coerced_base_capacity, capacity)
+        value: int = min(self.coerced_scrum_capacity_base, capacity)
         self.cached_capacity_adjusted = value
         self.save()
         return value
@@ -80,7 +81,7 @@ class KeyPerformanceIndicatorSprint(
             return 0
         value: float = round(
             ndigits=2,
-            number=self.coerced_base_capacity / number_of_business_days_in_sprint
+            number=self.coerced_scrum_capacity_base / number_of_business_days_in_sprint
         )
         self.cached_capacity_per_day = value
         self.save()
@@ -103,12 +104,12 @@ class KeyPerformanceIndicatorSprint(
         return coerce_float(value=self.cached_commitment_accuracy)
 
     @property
-    def coerced_base_capacity(self) -> int:
-        if self.capacity_base is not None:
-            return self.capacity_base
+    def coerced_scrum_capacity_base(self) -> int:
+        if self.scrum_capacity_base is not None:
+            return self.scrum_capacity_base
         person: Person | None = self.person_developer
         if person is not None:
-            return person.coerced_base_capacity
+            return person.coerced_scrum_capacity_base
         return ThisServerConfiguration.current().coerced_scrum_capacity_base
 
     @property

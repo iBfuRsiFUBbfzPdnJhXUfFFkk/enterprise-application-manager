@@ -86,7 +86,7 @@ def kpi_sprint_export_view(request: HttpRequest, uuid: str) -> HttpResponse:
 
         row = [
             person.gitlab_sync_username if person else "N/A",
-            kpi.coerced_base_capacity,
+            kpi.coerced_scrum_capacity_base,
             sprint.number_of_holidays_during_sprint if sprint else 0,
             kpi.coerced_number_of_paid_time_off_days,
             kpi.adjusted_capacity,

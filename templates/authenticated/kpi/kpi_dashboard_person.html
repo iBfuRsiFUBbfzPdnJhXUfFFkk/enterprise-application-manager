@@ -92,7 +92,7 @@
                     {% for stat in sprint_kpis %}
                     <tr>
                         <td class="column-group">{{ stat.sprint.name }}</td>
-                        <td>{{ stat.coerced_base_capacity }}</td>
+                        <td>{{ stat.coerced_scrum_capacity_base }}</td>
                         <td>{{ stat.sprint.number_of_holidays_during_sprint }}</td>
                         <td>{{ stat.coerced_number_of_paid_time_off_days }}</td>
                         <td class="group-separator">{{ stat.adjusted_capacity }}</td>

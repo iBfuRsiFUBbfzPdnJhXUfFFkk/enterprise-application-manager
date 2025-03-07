@@ -3,6 +3,7 @@ from math import ceil
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
+from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScrumCapacityBase
 from core.models.common.enums.git_lab_api_version_choices import GIT_LAB_API_VERSION_CHOICES, GIT_LAB_API_VERSION_FOUR
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
@@ -17,12 +18,12 @@ class ThisServerConfiguration(
     AbstractBaseModel,
     AbstractComment,
     AbstractName,
+    AbstractScrumCapacityBase,
 ):
     connection_git_lab_api_version: str | None = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
     connection_git_lab_group_id: str | None = create_generic_varchar()
     connection_git_lab_hostname: str | None = create_generic_varchar()
     connection_git_lab_token: Secret | None = create_generic_fk(to=Secret)
-    scrum_capacity_base: int | None = create_generic_integer()
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
     scrum_number_of_business_days_in_week: int | None = create_generic_integer()

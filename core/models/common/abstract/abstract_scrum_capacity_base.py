@@ -1,0 +1,15 @@
+from django.db.models import Model
+
+from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from kpi.utilities.coerce_integer import coerce_integer
+
+
+class AbstractScrumCapacityBase(Model):
+    scrum_capacity_base: int | None = create_generic_integer()
+
+    @property
+    def coerced_scrum_capacity_base_local(self) -> int:
+        return coerce_integer(self.scrum_capacity_base)
+
+    class Meta:
+        abstract = True

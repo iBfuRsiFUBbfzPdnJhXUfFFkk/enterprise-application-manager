@@ -73,7 +73,7 @@
                     {% for stat in sprint_kpis %}
                     <tr>
                         <td class="column-group{% if request.GET.privacy == 'on' %} blurry-text{% endif %}">{{ stat.person_developer.gitlab_sync_username }}</td>
-                        <td class="{% if request.GET.privacy == 'on' %}blurry-text{% endif %}">{{ stat.coerced_base_capacity }}</td>
+                        <td class="{% if request.GET.privacy == 'on' %}blurry-text{% endif %}">{{ stat.coerced_scrum_capacity_base }}</td>
                         <td class="{% if request.GET.privacy == 'on' %}blurry-text{% endif %}">{{ stat.sprint.number_of_holidays_during_sprint }}</td>
                         <td class="{% if request.GET.privacy == 'on' %}blurry-text{% endif %}">{{ stat.coerced_number_of_paid_time_off_days }}</td>
                         <td class="group-separator {% if request.GET.privacy == 'on' %}blurry-text{% endif %}">{{ stat.adjusted_capacity }}</td>
