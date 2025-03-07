@@ -12,6 +12,7 @@ from core.models.common.field_factories.create_generic_decimal import create_gen
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
+from kpi.utilities.coerce_integer import coerce_integer
 from kpi.utilities.string_or_na import string_or_na
 
 
@@ -28,6 +29,10 @@ class Sprint(
     cached_velocity: float | None  = create_generic_decimal()
     number_of_business_days_in_sprint: int | None = create_generic_integer()
     number_of_holidays_during_sprint: int | None = create_generic_integer()
+
+    @property
+    def coerced_number_of_holidays_during_sprint(self) -> int:
+        return coerce_integer(value=self.number_of_holidays_during_sprint)
 
     @property
     def coerced_number_of_business_days_in_sprint(self) -> int:

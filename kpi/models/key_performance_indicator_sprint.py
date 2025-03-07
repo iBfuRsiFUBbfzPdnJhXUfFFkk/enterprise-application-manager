@@ -40,48 +40,36 @@ class KeyPerformanceIndicatorSprint(
 
     @property
     def adjusted_capacity(self) -> int:
-        number_of_holidays_during_sprint: int = 0
-        sprint: Sprint | None = self.sprint
-        if sprint is not None:
-            number_of_holidays_during_sprint: int = sprint.number_of_holidays_during_sprint or 0
-        effective_days: int = (
-                sprint.coerced_number_of_business_days_in_sprint
-                - number_of_holidays_during_sprint
-                - self.coerced_number_of_paid_time_off_days
-        )
-        capacity: int = max(0, ceil(effective_days * self.capacity_per_day))
-        value: int = min(self.coerced_scrum_capacity_base, capacity)
+        value: int = min(self.coerced_scrum_capacity_base, self.calculated_capacity)
         self.cached_capacity_adjusted = value
         self.save()
         return value
 
     @property
+    def calculated_capacity(self) -> int:
+        return max(0, ceil(self.effective_days * self.capacity_per_day))
+
+    @property
     def capacity_based_velocity(self) -> float:
-        value: float = 0
-        number_of_story_points_delivered: int = self.coerced_number_of_story_points_delivered
-        adjusted_capacity: int = self.adjusted_capacity
-        if adjusted_capacity > 0:
-            value: float = round(
-                ndigits=2,
-                number=number_of_story_points_delivered / adjusted_capacity
+        value: float = round(
+            ndigits=2,
+            number=save_divide(
+                dividend=self.coerced_number_of_story_points_delivered,
+                divisor=self.adjusted_capacity,
             )
+        )
         self.cached_capacity_based_velocity = value
         self.save()
         return value
 
     @property
     def capacity_per_day(self) -> float:
-        number_of_business_days_in_sprint: int = 0
-        sprint: Sprint | None = self.sprint
-        if sprint is not None:
-            number_of_business_days_in_sprint: int = sprint.coerced_number_of_business_days_in_sprint
-        if number_of_business_days_in_sprint == 0:
-            self.cached_capacity_per_day = 0
-            self.save()
-            return 0
         value: float = round(
             ndigits=2,
-            number=self.coerced_scrum_capacity_base / number_of_business_days_in_sprint
+            number=save_divide(
+                dividend=self.coerced_scrum_capacity_base,
+                divisor=self.coerced_number_of_business_days_in_sprint
+            )
         )
         self.cached_capacity_per_day = value
         self.save()
@@ -113,6 +101,12 @@ class KeyPerformanceIndicatorSprint(
         return ThisServerConfiguration.current().coerced_scrum_capacity_base
 
     @property
+    def coerced_number_of_business_days_in_sprint(self) -> int:
+        if self.sprint is None:
+            return ThisServerConfiguration.current().coerced_scrum_number_of_business_days_in_sprint
+        return self.sprint.number_of_business_days_in_sprint
+
+    @property
     def coerced_number_of_code_lines_added(self) -> int:
         return coerce_integer(value=self.number_of_code_lines_added)
 
@@ -127,6 +121,12 @@ class KeyPerformanceIndicatorSprint(
     @property
     def coerced_number_of_context_switches(self) -> int:
         return coerce_integer(value=self.number_of_context_switches)
+
+    @property
+    def coerced_number_of_holidays_during_sprint(self) -> int:
+        if self.sprint is None:
+            return 0
+        return self.sprint.number_of_holidays_during_sprint
 
     @property
     def coerced_number_of_issues_written(self) -> int:
@@ -165,6 +165,14 @@ class KeyPerformanceIndicatorSprint(
         self.save()
         return value
 
+    @property
+    def effective_days(self) -> int:
+        return (
+                self.coerced_number_of_business_days_in_sprint
+                - self.coerced_number_of_holidays_during_sprint
+                - self.coerced_number_of_paid_time_off_days
+        )
+
     @staticmethod
     def from_person(person: Person) -> QuerySet['KeyPerformanceIndicatorSprint']:
         return cast_query_set(
@@ -177,3 +185,5 @@ class KeyPerformanceIndicatorSprint(
 
     class Meta:
         ordering = ['-sprint__date_end', '-id']
+        verbose_name = 'Key Performance Indicator (KPI) Sprint'
+        verbose_name_plural = 'Key Performance Indicator (KPI) Sprints'
