@@ -1,34 +1,51 @@
 from datetime import date
-from typing import cast, Optional
+from typing import Optional
 
-from django.db.models import QuerySet, Sum
+from django.db.models import QuerySet
 
-from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
+from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
+from kpi.utilities.cast_query_set import cast_query_set
 from kpi.utilities.coerce_integer import coerce_integer
+from kpi.utilities.save_divide import save_divide
 from kpi.utilities.string_or_na import string_or_na
 
 
 class Sprint(
-    AbstractStartEndDates,
     AbstractAlias,
     AbstractBaseModel,
     AbstractComment,
     AbstractName,
+    AbstractStartEndDates,
 ):
-    cached_accuracy: float | None  = create_generic_decimal()
-    cached_number_of_code_reviews: int | None = create_generic_integer()
-    cached_number_of_story_points_delivered: int | None = create_generic_integer()
-    cached_velocity: float | None  = create_generic_decimal()
+    cached_accuracy: float | None = create_generic_decimal()
+    cached_total_adjusted_capacity: int | None = create_generic_integer()
+    cached_total_number_of_merge_requests_approved: int | None = create_generic_integer()
+    cached_total_number_of_story_points_delivered: int | None = create_generic_integer()
+    cached_total_number_of_story_points_committed_to: int | None = create_generic_integer()
+    cached_velocity: float | None = create_generic_decimal()
     number_of_business_days_in_sprint: int | None = create_generic_integer()
     number_of_holidays_during_sprint: int | None = create_generic_integer()
+
+    @property
+    def accuracy(self) -> float:
+        value: float = round(
+            ndigits=2,
+            number=save_divide(
+                dividend=self.total_number_of_story_points_delivered,
+                divisor=self.total_number_of_story_points_committed_to,
+            )
+        )
+        self.cached_accuracy = value
+        self.save()
+        return value
 
     @property
     def coerced_number_of_holidays_during_sprint(self) -> int:
@@ -40,6 +57,66 @@ class Sprint(
             return self.number_of_business_days_in_sprint
         return ThisServerConfiguration.current().coerced_scrum_number_of_business_days_in_sprint
 
+    @property
+    def git_lab_iterations(self) -> QuerySet[GitLabIteration]:
+        return cast_query_set(
+            typ=GitLabIteration,
+            val=GitLabIteration.objects.filter(sprint=self)
+        )
+
+    @property
+    def git_lab_iteration_ids(self) -> list[int]:
+        return [git_lab_iteration.git_lab_id for git_lab_iteration in self.git_lab_iterations]
+
+    @property
+    def kpi_sprints(self) -> QuerySet:
+        from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(sprint=self)
+        )
+
+    @property
+    def total_adjusted_capacity(self) -> int:
+        value: int = sum(kpi_sprint.adjusted_capacity for kpi_sprint in self.kpi_sprints)
+        self.cached_total_adjusted_capacity = value
+        self.save()
+        return value
+
+    @property
+    def total_number_of_merge_requests_approved(self) -> int:
+        value: int = sum(kpi_sprint.coerced_number_of_merge_requests_approved for kpi_sprint in self.kpi_sprints)
+        self.cached_total_number_of_merge_requests_approved = value
+        self.save()
+        return value
+
+    @property
+    def total_number_of_story_points_committed_to(self) -> int:
+        value: int = sum(kpi_sprint.coerced_number_of_story_points_committed_to for kpi_sprint in self.kpi_sprints)
+        self.cached_total_number_of_story_points_committed_to = value
+        self.save()
+        return value
+
+    @property
+    def total_number_of_story_points_delivered(self) -> int:
+        value: int = sum(kpi_sprint.coerced_number_of_story_points_delivered for kpi_sprint in self.kpi_sprints)
+        self.cached_total_number_of_story_points_delivered = value
+        self.save()
+        return value
+
+    @property
+    def velocity(self) -> float:
+        value: float = round(
+            ndigits=2,
+            number=save_divide(
+                dividend=self.total_number_of_story_points_delivered,
+                divisor=self.total_adjusted_capacity,
+            )
+        )
+        self.cached_velocity = value
+        self.save()
+        return value
+
     @staticmethod
     def current_sprint() -> Optional['Sprint']:
         current_date: date = date.today()
@@ -50,57 +127,13 @@ class Sprint(
 
     @staticmethod
     def last_five() -> QuerySet['Sprint']:
-        current_date: date = date.today()
-        return cast(
-            typ=QuerySet[Sprint],
-            val=Sprint.objects.filter(
-                date_end__gte=current_date,
-                date_start__lt=current_date,
-            ).order_by('-date_end')[:5]
+        return cast_query_set(
+            typ=Sprint,
+            val=Sprint.objects.all().order_by('-date_end')[:5]
         )
-
-    @property
-    def iterations(self) -> QuerySet[GitLabIteration]:
-        return cast(typ=QuerySet[GitLabIteration], val=GitLabIteration.objects.filter(sprint=self).all())
-
-    @property
-    def iteration_ids(self) -> list[int]:
-        return [iteration.git_lab_id for iteration in self.iterations]
-
-    @property
-    def kpi_sprints(self) -> QuerySet:
-        from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
-        return cast(
-            typ=QuerySet[KeyPerformanceIndicatorSprint],
-            val=KeyPerformanceIndicatorSprint.objects.filter(sprint=self)
-        )
-
-    @property
-    def velocity(self):
-        kpis = self.kpi_sprints.all()
-        total_capacity = sum(kpi.adjusted_capacity for kpi in kpis)
-        total_delivered = kpis.aggregate(Sum("number_of_story_points_delivered"))["number_of_story_points_delivered__sum"] or 0
-        return round(total_delivered / total_capacity, 2) if total_capacity else 0
-
-    @property
-    def accuracy(self):
-        kpis = self.kpi_sprints.all()
-        total_delivered = kpis.aggregate(Sum("number_of_story_points_delivered"))["number_of_story_points_delivered__sum"] or 0
-        total_committed = kpis.aggregate(Sum("number_of_story_points_committed_to"))["number_of_story_points_committed_to__sum"] or 0
-        return round(total_delivered / total_committed, 2) if total_committed else 0
-
-    @property
-    def delivered(self):
-        return self.kpi_sprints.aggregate(Sum("number_of_story_points_delivered"))[
-            "number_of_story_points_delivered__sum"] or 0
-
-    @property
-    def reviews(self):
-        return self.kpi_sprints.aggregate(Sum("number_of_merge_requests_approved"))[
-            "number_of_merge_requests_approved__sum"] or 0
 
     def __str__(self) -> str:
-        return f"{string_or_na(self.name)} [{self.date_start} - {self.date_end}]"
+        return f"{string_or_na(self.name)} {self.date_range_string}"
 
     class Meta:
         ordering = ['-date_end', '-id']

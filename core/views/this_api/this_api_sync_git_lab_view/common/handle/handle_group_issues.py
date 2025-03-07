@@ -19,7 +19,7 @@ def handle_group_issues(
     all_group_issues: list[GroupIssue] | None = fetch_group_issues_by_iteration_ids(
         git_lab_client=git_lab_client,
         git_lab_group=git_lab_group,
-        iteration_ids=current_sprint.iteration_ids
+        iteration_ids=current_sprint.git_lab_iteration_ids
     )
     if all_group_issues is None:
         return indicator_map
