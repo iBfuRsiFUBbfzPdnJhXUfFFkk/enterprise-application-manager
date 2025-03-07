@@ -1,9 +1,9 @@
 from core.models.application_group import ApplicationGroup
-from core.models.common.abstract.acronym import Acronym
-from core.models.common.abstract.alias import Alias
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.name import Name
+from core.models.common.abstract.abstract_acronym import AbstractAcronym
+from core.models.common.abstract.abstract_alias import AbstractAlias
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_CHOICES
 from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CHOICES
 from core.models.common.enums.deployment_medium_choices import DEPLOYMENT_MEDIUM_CHOICES
@@ -22,7 +22,7 @@ from core.models.tool import Tool
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class Application(Alias, Acronym, BaseModel, Comment, Name):
+class Application(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractName):
     application_downstream_dependencies = create_generic_m2m(to='self')
     application_group_platform = create_generic_fk(related_name='applications', to=ApplicationGroup)
     application_groups = create_generic_m2m(to=ApplicationGroup)

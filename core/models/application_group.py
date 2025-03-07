@@ -1,15 +1,15 @@
-from core.models.common.abstract.acronym import Acronym
-from core.models.common.abstract.alias import Alias
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.name import Name
+from core.models.common.abstract.abstract_acronym import AbstractAcronym
+from core.models.common.abstract.abstract_alias import AbstractAlias
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.lifecycle_choices import LIFECYCLE_CHOICES
 from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class ApplicationGroup(Alias, Acronym, BaseModel, Comment, Name):
+class ApplicationGroup(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractName):
     is_externally_facing = create_generic_boolean()
     is_platform = create_generic_boolean()
     type_lifecycle = create_generic_enum(choices=LIFECYCLE_CHOICES)

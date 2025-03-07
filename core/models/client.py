@@ -1,13 +1,13 @@
-from core.models.common.abstract.acronym import Acronym
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.location import Location
-from core.models.common.abstract.name import Name
-from core.models.common.abstract.url import UniformResourceLocator
+from core.models.common.abstract.abstract_acronym import AbstractAcronym
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_location import AbstractLocation
+from core.models.common.abstract.abstract_name import AbstractName
+from core.models.common.abstract.abstract_uniform_resource_locator import AbstractUniformResourceLocator
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class Client(Acronym, BaseModel, Comment, Location, Name, UniformResourceLocator):
+class Client(AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractLocation, AbstractName, AbstractUniformResourceLocator):
     def __str__(self):
         return get_name_acronym(acronym=self.acronym, name=self.name)
 

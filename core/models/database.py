@@ -1,7 +1,7 @@
 from core.models.application import Application
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.version import Version
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_version import AbstractVersion
 from core.models.common.enums.data_storage_form_choices import DATA_STORAGE_FORM_CHOICES
 from core.models.common.enums.database_flavor_choices import DATABASE_FLAVOR_CHOICES
 from core.models.common.enums.environment_choices import ENVIRONMENT_CHOICES
@@ -12,7 +12,7 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 from core.utilities.encryption import encrypt_secret, decrypt_secret
 
 
-class Database(BaseModel, Comment, Version):
+class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
     application = create_generic_fk(related_name='databases', to=Application)
     encrypted_password = create_generic_varchar()
     encrypted_username = create_generic_varchar()

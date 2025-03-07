@@ -1,9 +1,9 @@
 from typing import Optional
 
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.location import Location
-from core.models.common.abstract.pronunciation import Pronunciation
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_location import AbstractLocation
+from core.models.common.abstract.abstract_pronunciation import AbstractPronunciation
 from core.models.common.enums.job_level_choices import JOB_LEVEL_CHOICES
 from core.models.common.enums.job_title_choices import JOB_TITLE_CHOICES
 from core.models.common.enums.timezone_choices import TIMEZONE_CHOICES
@@ -20,7 +20,7 @@ from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
 
 
-class Person(BaseModel, Comment, Location, Pronunciation):
+class Person(AbstractBaseModel, AbstractComment, AbstractLocation, AbstractPronunciation):
     date_birthday = create_generic_date()
     date_hired = create_generic_date()
     date_left = create_generic_date()

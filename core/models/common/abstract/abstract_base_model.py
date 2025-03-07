@@ -4,7 +4,7 @@ from simple_history.models import HistoricalRecords
 from core.models.common.field_factories.create_generic_uuid import create_generic_uuid
 
 
-class BaseModel(Model):
+class AbstractBaseModel(Model):
     enumeration_attack_uuid: str | None = create_generic_uuid()
     history: HistoricalRecords = None
 

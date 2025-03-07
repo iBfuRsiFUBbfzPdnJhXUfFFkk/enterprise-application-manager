@@ -1,12 +1,12 @@
-from core.models.common.abstract.acronym import Acronym
-from core.models.common.abstract.alias import Alias
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.name import Name
+from core.models.common.abstract.abstract_acronym import AbstractAcronym
+from core.models.common.abstract.abstract_alias import AbstractAlias
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class Skill(Acronym, Alias, BaseModel, Comment, Name):
+class Skill(AbstractAcronym, AbstractAlias, AbstractBaseModel, AbstractComment, AbstractName):
     def __str__(self):
         return get_name_acronym(acronym=self.acronym, name=self.name)
 

@@ -1,8 +1,8 @@
 from math import ceil
 
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.name import Name
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.git_lab_api_version_choices import GIT_LAB_API_VERSION_CHOICES, GIT_LAB_API_VERSION_FOUR
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
@@ -14,9 +14,9 @@ from core.models.secret import Secret
 
 
 class ThisServerConfiguration(
-    BaseModel,
-    Comment,
-    Name,
+    AbstractBaseModel,
+    AbstractComment,
+    AbstractName,
 ):
     connection_git_lab_api_version: str | None = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
     connection_git_lab_group_id: str | None = create_generic_varchar()

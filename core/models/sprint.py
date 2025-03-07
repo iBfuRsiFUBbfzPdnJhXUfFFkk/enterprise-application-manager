@@ -4,10 +4,10 @@ from typing import cast, Optional
 from django.db.models import QuerySet, Sum
 
 from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
-from core.models.common.abstract.alias import Alias
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
-from core.models.common.abstract.name import Name
+from core.models.common.abstract.abstract_alias import AbstractAlias
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
@@ -17,10 +17,10 @@ from kpi.utilities.string_or_na import string_or_na
 
 class Sprint(
     AbstractStartEndDates,
-    Alias,
-    BaseModel,
-    Comment,
-    Name,
+    AbstractAlias,
+    AbstractBaseModel,
+    AbstractComment,
+    AbstractName,
 ):
     cached_accuracy: float | None  = create_generic_decimal()
     cached_number_of_code_reviews: int | None = create_generic_integer()

@@ -3,13 +3,13 @@ from typing import Optional
 from django.contrib.auth.models import AbstractUser
 from simple_history.models import HistoricalRecords
 
-from core.models.common.abstract.comment import Comment
+from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.field_factories.create_generic_one_to_one_fk import create_generic_one_to_one_fk
 from core.models.common.field_factories.create_generic_uuid import create_generic_uuid
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 
 
-class User(AbstractUser, Comment):
+class User(AbstractUser, AbstractComment):
     active_directory_globally_unique_identifier_guid = create_generic_varchar()
     active_directory_security_accounts_manager_account_name = create_generic_varchar()
     active_directory_security_accounts_manager_account_type = create_generic_varchar()

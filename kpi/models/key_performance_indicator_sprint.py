@@ -1,8 +1,8 @@
 from django.db.models import QuerySet
 from math import ceil
 
-from core.models.common.abstract.base_model import BaseModel
-from core.models.common.abstract.comment import Comment
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
+from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
@@ -16,8 +16,8 @@ from kpi.utilities.save_divide import save_divide
 
 
 class KeyPerformanceIndicatorSprint(
-    BaseModel,
-    Comment,
+    AbstractBaseModel,
+    AbstractComment,
 ):
     cached_capacity_adjusted: int | None = create_generic_integer()
     cached_capacity_base_velocity: float | None = create_generic_decimal()
