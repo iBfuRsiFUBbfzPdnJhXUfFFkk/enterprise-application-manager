@@ -100,7 +100,8 @@ class Person(
         return User.objects.filter(person_mapping=self).first()
 
     def __str__(self) -> str:
-        return f"{self.name_last}, {self.name_first} - {str(self.job_title) if self.job_title else ''}"
+        title_particle: str = f" - {str(self.job_title)}" if self.job_title else ''
+        return f"{self.name_last}, {self.name_first}{title_particle}"
 
     class Meta:
         ordering = ['name_last', 'name_first', 'id']
