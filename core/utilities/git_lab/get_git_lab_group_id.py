@@ -6,4 +6,4 @@ def get_git_lab_group_id() -> str | None:
     this_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
     if this_server_configuration is None:
         return None
-    return this_server_configuration.connection_gitlab_group_id
+    return this_server_configuration.connection_git_lab_group_id

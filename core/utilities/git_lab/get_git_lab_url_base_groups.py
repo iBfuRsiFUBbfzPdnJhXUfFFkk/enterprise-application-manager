@@ -7,13 +7,13 @@ def get_git_lab_url_base_groups() -> str | None:
     this_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
     if this_server_configuration is None:
         return None
-    connection_gitlab_group_id: str | None = this_server_configuration.connection_gitlab_group_id
-    if connection_gitlab_group_id is None:
+    connection_git_lab_group_id: str | None = this_server_configuration.connection_git_lab_group_id
+    if connection_git_lab_group_id is None:
         return None
     git_lab_url_base: str | None = get_git_lab_url_base()
     if git_lab_url_base is None:
         return None
     return (
         f"{git_lab_url_base}"
-        f"groups/{str(connection_gitlab_group_id)}/"
+        f"groups/{str(connection_git_lab_group_id)}/"
     )
