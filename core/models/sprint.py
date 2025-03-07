@@ -97,4 +97,6 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
         return f"{self.name or 'PLEASE ADD NAME'} ::: {self.date_start} - {self.date_end}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-date_end', '-id']
+        verbose_name = 'Sprint'
+        verbose_name_plural = 'Sprints'
