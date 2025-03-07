@@ -1,11 +1,9 @@
-from django.db.models import Model
 from simple_history.models import HistoricalRecords
 
-from core.models.common.field_factories.create_generic_uuid import create_generic_uuid
+from core.models.common.abstract.abstract_enumeration_attack_uuid import AbstractEnumerationAttackUuid
 
 
-class AbstractBaseModel(Model):
-    enumeration_attack_uuid: str | None = create_generic_uuid()
+class AbstractBaseModel(AbstractEnumerationAttackUuid):
     history: HistoricalRecords = None
 
     class Meta:
