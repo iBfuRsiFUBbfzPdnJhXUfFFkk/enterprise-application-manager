@@ -24,9 +24,9 @@ def ajax_get_chart_data_for_dashboard_user(
         sprint_kpi = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint, person_developer=developer).first()
 
         if sprint_kpi:
-            adjusted_capacity = sprint_kpi.coerced_base_capacity - sprint_kpi.number_of_paid_time_off_days
-            velocity = round((sprint_kpi.number_of_story_points_delivered or 0) / adjusted_capacity, 2) if adjusted_capacity > 0 else 0
-            accuracy = round((sprint_kpi.number_of_story_points_delivered or 0) / (sprint_kpi.number_of_story_points_committed_to or 0), 2) if (sprint_kpi.number_of_story_points_committed_to or 0) > 0 else 0
+            adjusted_capacity = sprint_kpi.coerced_base_capacity - sprint_kpi.coerced_number_of_paid_time_off_days
+            velocity = round(sprint_kpi.coerced_number_of_story_points_delivered / adjusted_capacity, 2) if adjusted_capacity > 0 else 0
+            accuracy = round(sprint_kpi.coerced_number_of_story_points_delivered / sprint_kpi.coerced_number_of_story_points_committed_to, 2) if sprint_kpi.coerced_number_of_story_points_committed_to > 0 else 0
         else:
             velocity = 0
             accuracy = 0

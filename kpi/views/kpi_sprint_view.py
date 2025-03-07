@@ -43,9 +43,9 @@ def _calculate_sprint_metrics(sprint):
 
     # Calculate totals using model properties
     total_capacity = sum(kpi.adjusted_capacity for kpi in kpis)
-    total_delivered = sum((kpi.number_of_story_points_delivered or 0) for kpi in kpis)
-    total_committed = sum((kpi.number_of_story_points_committed_to or 0) for kpi in kpis)
-    total_reviews = sum((kpi.number_of_merge_requests_approved or 0) for kpi in kpis)
+    total_delivered = sum(kpi.coerced_number_of_story_points_delivered for kpi in kpis)
+    total_committed = sum(kpi.coerced_number_of_story_points_committed_to for kpi in kpis)
+    total_reviews = sum(kpi.coerced_number_of_merge_requests_approved for kpi in kpis)
 
     return {
         "sprint": sprint,

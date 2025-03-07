@@ -16,12 +16,12 @@ from core.utilities.this_server_configuration.get_current_server_configuration i
 
 
 class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
-    cached_accuracy = create_generic_decimal()
-    cached_number_of_code_reviews = create_generic_integer()
-    cached_number_of_story_points_delivered = create_generic_integer()
-    cached_velocity = create_generic_decimal()
-    number_of_business_days_in_sprint = create_generic_integer()
-    number_of_holidays_during_sprint = create_generic_integer()
+    cached_accuracy: float | None  = create_generic_decimal()
+    cached_number_of_code_reviews: int | None = create_generic_integer()
+    cached_number_of_story_points_delivered: int | None = create_generic_integer()
+    cached_velocity: float | None  = create_generic_decimal()
+    number_of_business_days_in_sprint: int | None = create_generic_integer()
+    number_of_holidays_during_sprint: int | None = create_generic_integer()
 
     @property
     def coerced_number_of_business_days_in_sprint(self) -> int:

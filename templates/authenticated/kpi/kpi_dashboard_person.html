@@ -94,16 +94,16 @@
                         <td class="column-group">{{ stat.sprint.name }}</td>
                         <td>{{ stat.coerced_base_capacity }}</td>
                         <td>{{ stat.sprint.number_of_holidays_during_sprint }}</td>
-                        <td>{{ stat.number_of_paid_time_off_days }}</td>
+                        <td>{{ stat.coerced_number_of_paid_time_off_days }}</td>
                         <td class="group-separator">{{ stat.adjusted_capacity }}</td>
-                        <td class="metric-accent">{{ stat.number_of_story_points_committed_to }}</td>
-                        <td class="group-separator">{{ stat.number_of_story_points_delivered }}</td>
-                        <td>{{ stat.number_of_merge_requests_approved }}</td>
-                        <td>{{ stat.number_of_comments_made }}</td>
-                        <td class="group-separator">{{ stat.number_of_threads_made }}</td>
-                        <td>{{ stat.number_of_issues_written }}</td>
-                        <td>{{ stat.number_of_code_lines_added }}/{{ stat.number_of_code_lines_removed }}</td>
-                        <td class="group-separator">{{ stat.number_of_context_switches }}</td>
+                        <td class="metric-accent">{{ stat.coerced_number_of_story_points_committed_to }}</td>
+                        <td class="group-separator">{{ stat.coerced_number_of_story_points_delivered }}</td>
+                        <td>{{ stat.coerced_number_of_merge_requests_approved }}</td>
+                        <td>{{ stat.coerced_number_of_comments_made }}</td>
+                        <td class="group-separator">{{ stat.coerced_number_of_threads_made }}</td>
+                        <td>{{ stat.coerced_number_of_issues_written }}</td>
+                        <td>{{ stat.coerced_number_of_code_lines_added }}/{{ stat.coerced_number_of_code_lines_removed }}</td>
+                        <td class="group-separator">{{ stat.coerced_number_of_context_switches }}</td>
                         <td style="background-color: {{ stat.capacity_based_velocity|get_color }}; color: white;">
                             {{ stat.capacity_based_velocity|floatformat:2 }}
                         </td>

@@ -5,7 +5,7 @@ from core.models.common.field_factories.create_generic_uuid import create_generi
 
 
 class BaseModel(Model):
-    enumeration_attack_uuid = create_generic_uuid()
+    enumeration_attack_uuid: str | None = create_generic_uuid()
     history = HistoricalRecords(inherit=True)
 
     class Meta:

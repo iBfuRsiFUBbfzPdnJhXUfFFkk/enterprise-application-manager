@@ -80,7 +80,7 @@ def kpi_sprint_export_view(request: HttpRequest, uuid: str) -> HttpResponse:
         sheet.column_dimensions[get_column_letter(col)].width = 15
 
     for kpi in sprint_kpis:
-        code_changes = "---" if kpi.number_of_code_lines_added == 0 and kpi.number_of_code_lines_removed == 0 else f"+{kpi.number_of_code_lines_added}/-{kpi.number_of_code_lines_removed} lines"
+        code_changes = "---" if kpi.coerced_number_of_code_lines_added == 0 and kpi.coerced_number_of_code_lines_removed == 0 else f"+{kpi.coerced_number_of_code_lines_added}/-{kpi.coerced_number_of_code_lines_removed} lines"
         person = kpi.person_developer
         sprint = kpi.sprint
 
@@ -88,16 +88,16 @@ def kpi_sprint_export_view(request: HttpRequest, uuid: str) -> HttpResponse:
             person.gitlab_sync_username if person else "N/A",
             kpi.coerced_base_capacity,
             sprint.number_of_holidays_during_sprint if sprint else 0,
-            kpi.number_of_paid_time_off_days,
+            kpi.coerced_number_of_paid_time_off_days,
             kpi.adjusted_capacity,
-            kpi.number_of_story_points_committed_to,
-            kpi.number_of_story_points_delivered,
-            kpi.number_of_merge_requests_approved,
-            kpi.number_of_comments_made,
-            kpi.number_of_threads_made,
-            kpi.number_of_issues_written,
+            kpi.coerced_number_of_story_points_committed_to,
+            kpi.coerced_number_of_story_points_delivered,
+            kpi.coerced_number_of_merge_requests_approved,
+            kpi.coerced_number_of_comments_made,
+            kpi.coerced_number_of_threads_made,
+            kpi.coerced_number_of_issues_written,
             code_changes,
-            kpi.number_of_context_switches,  # 🆕 New Context Switching column
+            kpi.coerced_number_of_context_switches,  # 🆕 New Context Switching column
             kpi.capacity_based_velocity,
             kpi.commitment_accuracy,
         ]

@@ -10,10 +10,14 @@ from core.models.role import Role
 from core.models.secret import Secret
 
 
-class ThisServerConfiguration(BaseModel, Comment, Name):
-    connection_gitlab_api_version = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
-    connection_gitlab_group_id = create_generic_varchar()
-    connection_gitlab_hostname = create_generic_varchar()
+class ThisServerConfiguration(
+    BaseModel,
+    Comment,
+    Name,
+):
+    connection_gitlab_api_version: str | None = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
+    connection_gitlab_group_id: str | None = create_generic_varchar()
+    connection_gitlab_hostname: str | None = create_generic_varchar()
     connection_gitlab_token = create_generic_fk(to=Secret)
     scrum_capacity_base = create_generic_integer()
     scrum_number_of_business_days_in_sprint = create_generic_integer()

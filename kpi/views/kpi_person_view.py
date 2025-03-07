@@ -34,7 +34,7 @@ def kpi_person_view(request: HttpRequest, uuid: str) -> HttpResponse:
     ]
     avg_metrics: AverageMetrics | None = calculate_average_metrics(completed_metrics)
 
-    kpi_sprints: QuerySet[KeyPerformanceIndicatorSprint] = KeyPerformanceIndicatorSprint.for_person(person=person)
+    kpi_sprints: QuerySet[KeyPerformanceIndicatorSprint] = KeyPerformanceIndicatorSprint.from_person(person=person)
     return base_render(
         context={
             "avg_metrics": avg_metrics,

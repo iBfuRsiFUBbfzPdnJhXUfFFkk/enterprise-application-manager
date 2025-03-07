@@ -21,7 +21,7 @@ def calculate_sprint_metrics(
     if kpi_sprints is None:
         return None
     total_capacity: int = sum(kpi_sprint.adjusted_capacity for kpi_sprint in kpi_sprints)
-    total_delivered: int = sum((kpi_sprint.number_of_story_points_delivered or 0) for kpi_sprint in kpi_sprints)
+    total_delivered: int = sum(kpi_sprint.coerced_number_of_story_points_delivered for kpi_sprint in kpi_sprints)
     total_committed: int = kpi_sprints.aggregate(Sum("number_of_story_points_committed_to"))[
                                "number_of_story_points_committed_to__sum"] or 0
     total_reviews: int = kpi_sprints.aggregate(Sum("number_of_merge_requests_approved"))[

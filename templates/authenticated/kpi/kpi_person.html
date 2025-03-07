@@ -26,7 +26,6 @@
                                 <p><strong><a
                                         href="{% url 'kpi:kpi_sprint' uuid=current_sprint.enumeration_attack_uuid %}">{{ current_sprint.name }}</a></strong>
                                 </p>
-                                </p>
                                 <p>Sprint Dates: {{ current_sprint.date_start }} - {{ current_sprint.date_end }}</p>
                                 <p>Velocity: <span class="metric-accent">{{ current_metrics.velocity }}</span></p>
                                 <p>Commitment Accuracy: <span
@@ -92,16 +91,16 @@
                             <td class="column-group">{{ kpi_sprint.sprint.name }}</td>
                             <td>{{ kpi_sprint.coerced_base_capacity }}</td>
                             <td>{{ kpi_sprint.sprint.number_of_holidays_during_sprint }}</td>
-                            <td>{{ kpi_sprint.number_of_paid_time_off_days }}</td>
+                            <td>{{ kpi_sprint.coerced_number_of_paid_time_off_days }}</td>
                             <td class="group-separator">{{ kpi_sprint.adjusted_capacity }}</td>
-                            <td class="metric-accent">{{ kpi_sprint.number_of_story_points_committed_to }}</td>
-                            <td class="group-separator">{{ kpi_sprint.number_of_story_points_delivered }}</td>
-                            <td>{{ kpi_sprint.number_of_merge_requests_approved }}</td>
-                            <td>{{ kpi_sprint.number_of_comments_made }}</td>
-                            <td class="group-separator">{{ kpi_sprint.number_of_threads_made }}</td>
-                            <td>{{ kpi_sprint.number_of_issues_written }}</td>
-                            <td>{{ kpi_sprint.number_of_code_lines_added }}/{{ kpi_sprint.number_of_code_lines_removed }}</td>
-                            <td class="group-separator">{{ kpi_sprint.number_of_context_switches }}</td>
+                            <td class="metric-accent">{{ kpi_sprint.coerced_number_of_story_points_committed_to }}</td>
+                            <td class="group-separator">{{ kpi_sprint.coerced_number_of_story_points_delivered }}</td>
+                            <td>{{ kpi_sprint.coerced_number_of_merge_requests_approved }}</td>
+                            <td>{{ kpi_sprint.coerced_number_of_comments_made }}</td>
+                            <td class="group-separator">{{ kpi_sprint.coerced_number_of_threads_made }}</td>
+                            <td>{{ kpi_sprint.coerced_number_of_issues_written }}</td>
+                            <td>{{ kpi_sprint.coerced_number_of_code_lines_added }}/{{ kpi_sprint.coerced_number_of_code_lines_removed }}</td>
+                            <td class="group-separator">{{ kpi_sprint.coerced_number_of_context_switches }}</td>
                             <td style="background-color: {{ kpi_sprint.capacity_based_velocity|get_color }}; color: white;">
                                 {{ kpi_sprint.capacity_based_velocity|floatformat:2 }}
                             </td>
