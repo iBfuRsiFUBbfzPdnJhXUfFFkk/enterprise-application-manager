@@ -9,7 +9,6 @@ from core.models.common.field_factories.create_generic_integer import create_gen
 from core.models.person import Person
 from core.models.sprint import Sprint
 from core.models.this_server_configuration import ThisServerConfiguration
-from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 from kpi.utilities.cast_query_set import cast_query_set
 from kpi.utilities.coerce_float import coerce_float
 from kpi.utilities.coerce_integer import coerce_integer
@@ -110,8 +109,7 @@ class KeyPerformanceIndicatorSprint(
         person: Person | None = self.person_developer
         if person is not None:
             return person.coerced_base_capacity
-        current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        return current_server_configuration.coerced_scrum_capacity_base
+        return ThisServerConfiguration.current().coerced_scrum_capacity_base
 
     @property
     def coerced_number_of_code_lines_added(self) -> int:

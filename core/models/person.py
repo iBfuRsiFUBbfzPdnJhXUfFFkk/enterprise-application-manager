@@ -18,7 +18,6 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 from core.models.job_level import JobLevel
 from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
-from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 
 
 class Person(BaseModel, Comment, Location, Pronunciation):
@@ -88,8 +87,7 @@ class Person(BaseModel, Comment, Location, Pronunciation):
     def coerced_base_capacity(self) -> int:
         if self.scrum_capacity_base is not None:
             return self.scrum_capacity_base
-        current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        return current_server_configuration.coerced_scrum_capacity_base
+        return ThisServerConfiguration.current().coerced_scrum_capacity_base
 
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"

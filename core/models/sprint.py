@@ -12,7 +12,6 @@ from core.models.common.field_factories.create_generic_decimal import create_gen
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
-from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
 from kpi.utilities.string_or_na import string_or_na
 
 
@@ -34,8 +33,7 @@ class Sprint(
     def coerced_number_of_business_days_in_sprint(self) -> int:
         if self.number_of_business_days_in_sprint is not None:
             return self.number_of_business_days_in_sprint
-        current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        return current_server_configuration.coerced_scrum_number_of_business_days_in_sprint
+        return ThisServerConfiguration.current().coerced_scrum_number_of_business_days_in_sprint
 
     @staticmethod
     def current_sprint() -> Optional['Sprint']:
