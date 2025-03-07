@@ -9,7 +9,7 @@ def ajax_get_chart_data_for_dashboard_user(
         request: HttpRequest,
         uuid: str,
 ):
-    user = User.get_by_uuid(uuid=uuid)
+    user = User.from_uuid(uuid=uuid)
     developer = user.person_mapping
 
     # Get the last 5 completed sprints

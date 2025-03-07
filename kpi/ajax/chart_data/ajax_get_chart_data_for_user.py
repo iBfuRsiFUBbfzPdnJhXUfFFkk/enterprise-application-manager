@@ -10,7 +10,7 @@ def ajax_get_chart_data_for_user(
         request: HttpRequest,
         uuid: str
 ) -> JsonResponse | HttpResponse:
-    person: Person | None = Person.get_by_uuid(uuid=uuid)
+    person: Person | None = Person.from_uuid(uuid=uuid)
     if person is None:
         return generic_500(request=request)
     data: ChartDataModel | None = get_chart_data_for_person(person=person)

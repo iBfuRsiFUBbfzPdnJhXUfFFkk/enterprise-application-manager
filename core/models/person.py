@@ -71,10 +71,6 @@ class Person(AbstractBaseModel, AbstractComment, AbstractLocation, AbstractPronu
     def get_git_lab_user(username: str | None = None) -> Optional['Person']:
         return Person.objects.filter(gitlab_sync_username=username).first()
 
-    @staticmethod
-    def get_by_uuid(uuid: str) -> Optional['Person']:
-        return Person.objects.filter(enumeration_attack_uuid=uuid).first()
-
     @property
     def full_name_for_human(self) -> str:
         return f"{self.name_first} {self.name_last}"

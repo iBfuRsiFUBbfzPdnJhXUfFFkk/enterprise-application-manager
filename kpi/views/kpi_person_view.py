@@ -11,7 +11,7 @@ from kpi.utilities.calculate_sprint_metrics import SprintMetrics, calculate_spri
 
 
 def kpi_person_view(request: HttpRequest, uuid: str) -> HttpResponse:
-    person: Person | None = Person.get_by_uuid(uuid=uuid)
+    person: Person | None = Person.from_uuid(uuid=uuid)
     if person is None:
         return generic_500(request=request)
     current_sprint: Sprint | None = Sprint.current_sprint()

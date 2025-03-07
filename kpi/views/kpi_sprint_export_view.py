@@ -10,7 +10,7 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 
 
 def kpi_sprint_export_view(request: HttpRequest, uuid: str) -> HttpResponse:
-    sprint = Sprint.get_by_uuid(uuid=uuid)
+    sprint = Sprint.from_uuid(uuid=uuid)
     sprint_kpis = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint)
 
     workbook = Workbook()

@@ -7,7 +7,7 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 
 
 def kpi_sprint_view(request: HttpRequest, uuid: str) -> HttpResponse:
-    sprint: Sprint | None = Sprint.get_by_uuid(uuid=uuid)
+    sprint: Sprint | None = Sprint.from_uuid(uuid=uuid)
     sprint_kpis = KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint)
 
     total_adjusted_capacity = sum(kpi.adjusted_capacity for kpi in sprint_kpis)
