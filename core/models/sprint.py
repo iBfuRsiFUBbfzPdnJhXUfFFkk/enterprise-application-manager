@@ -13,9 +13,16 @@ from core.models.common.field_factories.create_generic_integer import create_gen
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.this_server_configuration.get_current_server_configuration import get_current_server_configuration
+from kpi.utilities.string_or_na import string_or_na
 
 
-class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
+class Sprint(
+    AbstractStartEndDates,
+    Alias,
+    BaseModel,
+    Comment,
+    Name,
+):
     cached_accuracy: float | None  = create_generic_decimal()
     cached_number_of_code_reviews: int | None = create_generic_integer()
     cached_number_of_story_points_delivered: int | None = create_generic_integer()
@@ -93,8 +100,8 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
         return self.kpi_sprints.aggregate(Sum("number_of_merge_requests_approved"))[
             "number_of_merge_requests_approved__sum"] or 0
 
-    def __str__(self):
-        return f"{self.name or 'PLEASE ADD NAME'} ::: {self.date_start} - {self.date_end}"
+    def __str__(self) -> str:
+        return f"{string_or_na(self.name)} [{self.date_start} - {self.date_end}]"
 
     class Meta:
         ordering = ['-date_end', '-id']
