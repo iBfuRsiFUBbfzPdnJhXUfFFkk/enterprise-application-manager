@@ -15,8 +15,8 @@
         <tbody>
         {% for model in models %}
             <tr ondblclick='window.location.href = "{% url 'person_edit' model_id=model.id %}"'>
-                <td>{{ model.name_last }}</td>
-                <td>{{ model.name_first }}</td>
+                <td>{{ model.coerced_name_last }}</td>
+                <td>{{ model.coerced_name_first }}</td>
                 <td>{{ model.type_job_level }}</td>
                 <td>{{ model.type_job_title }}</td>
                 <td>

@@ -19,9 +19,7 @@ def this_api_send_send_kpi_report_view(request):
 
     for kpi in sprint_kpis:
         subject = f"Your Sprint {sprint.name} KPI Report"
-        if kpi.person_developer.user_account is None:
-            continue
-        recipient_email = kpi.person_developer.user_account.email
+        recipient_email = kpi.person_developer.coerced_communication_email
 
         html_content = render_to_string(
             "email/kpi_email.html",
