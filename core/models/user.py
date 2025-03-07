@@ -24,4 +24,12 @@ class User(
     employee_title: str | None = create_generic_varchar()
     history: HistoricalRecords = HistoricalRecords(excluded_fields=['history_user'])
     ldap_distinguished_name_dn: str | None = create_generic_varchar()
-    person_mapping: Person | None = create_generic_one_to_one_fk(related_name="user_mapping", to='Person')
+    person_mapping: Person | None = create_generic_one_to_one_fk(to='Person')
+
+    def __str__(self):
+        return f"{self.last_name}, {self.first_name} - {self.username}"
+
+    class Meta:
+        ordering = ['last_name', 'first_name', 'username', '-id']
+        verbose_name = "User"
+        verbose_name_plural = "Users"

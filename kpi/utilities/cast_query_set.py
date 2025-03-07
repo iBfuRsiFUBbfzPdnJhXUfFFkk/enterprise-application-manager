@@ -1,10 +1,8 @@
 from typing import TypeVar, Any, cast
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Model
 
-from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-
-ClassType = TypeVar('ClassType', bound=AbstractBaseModel)
+ClassType = TypeVar('ClassType', bound=Model)
 
 
 def cast_query_set(

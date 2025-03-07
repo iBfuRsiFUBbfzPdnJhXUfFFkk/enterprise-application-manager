@@ -1,5 +1,7 @@
 from typing import Optional
 
+from django.db.models import QuerySet
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_location import AbstractLocation
@@ -18,6 +20,7 @@ from core.models.common.field_factories.create_generic_varchar import create_gen
 from core.models.job_level import JobLevel
 from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
+from kpi.utilities.cast_query_set import cast_query_set
 
 
 class Person(AbstractBaseModel, AbstractComment, AbstractLocation, AbstractPronunciation):
@@ -85,9 +88,15 @@ class Person(AbstractBaseModel, AbstractComment, AbstractLocation, AbstractPronu
             return self.scrum_capacity_base
         return ThisServerConfiguration.current().coerced_scrum_capacity_base
 
+    @property
+    def user_mapping(self):
+        from core.models.user import User
+        return User.objects.filter(person_mapping=self).first()
+
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"
 
     class Meta:
         ordering = ['name_last', 'name_first', 'id']
-        verbose_name_plural = "people"
+        verbose_name = "Person"
+        verbose_name_plural = "People"
