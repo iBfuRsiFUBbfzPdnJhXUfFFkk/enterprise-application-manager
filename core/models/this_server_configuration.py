@@ -1,7 +1,10 @@
+from math import ceil
+
 from core.models.common.abstract.base_model import BaseModel
 from core.models.common.abstract.comment import Comment
 from core.models.common.abstract.name import Name
 from core.models.common.enums.git_lab_api_version_choices import GIT_LAB_API_VERSION_CHOICES
+from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
@@ -18,21 +21,48 @@ class ThisServerConfiguration(
     connection_gitlab_api_version: str | None = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
     connection_gitlab_group_id: str | None = create_generic_varchar()
     connection_gitlab_hostname: str | None = create_generic_varchar()
-    connection_gitlab_token = create_generic_fk(to=Secret)
-    scrum_capacity_base = create_generic_integer()
-    scrum_number_of_business_days_in_sprint = create_generic_integer()
-    type_developer_role = create_generic_fk(to=Role)
+    connection_gitlab_token: Secret | None = create_generic_fk(to=Secret)
+    scrum_capacity_base: int | None = create_generic_integer()
+    scrum_capacity_base_per_day: float | None = create_generic_decimal()
+    scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
+    scrum_number_of_business_days_in_week: int | None = create_generic_integer()
+    scrum_number_of_weeks_in_a_sprint: int | None = create_generic_integer()
+    type_developer_role: Role | None = create_generic_fk(to=Role)
 
     @property
-    def coerced_base_capacity(self) -> int:
-        return self.scrum_capacity_base or 30
+    def coerced_scrum_capacity_base(self) -> int:
+        if self.scrum_capacity_base is not None:
+            return self.scrum_capacity_base
+        return ceil(
+            self.coerced_scrum_capacity_base_per_day
+            * self.coerced_scrum_number_of_business_days_in_sprint
+        )
 
     @property
-    def coerced_number_of_business_days_in_sprint(self) -> int:
-        return self.scrum_number_of_business_days_in_sprint or 15
+    def coerced_scrum_capacity_base_per_day(self) -> float:
+        return self.scrum_capacity_base_per_day or 2
 
-    def __str__(self):
+    @property
+    def coerced_scrum_number_of_business_days_in_sprint(self) -> int:
+        if self.scrum_number_of_business_days_in_sprint is not None:
+            return self.scrum_number_of_business_days_in_sprint
+        return (
+                self.coerced_scrum_number_of_business_days_in_week
+                * self.coerced_scrum_number_of_weeks_in_a_sprint
+        )
+
+    @property
+    def coerced_scrum_number_of_business_days_in_week(self) -> int:
+        return self.scrum_number_of_business_days_in_week or 5
+
+    @property
+    def coerced_scrum_number_of_weeks_in_a_sprint(self) -> int:
+        return self.scrum_number_of_weeks_in_a_sprint or 3
+
+    def __str__(self) -> str:
         return f"{self.name}"
 
     class Meta:
         ordering = ['name', '-id']
+        verbose_name = "This Server Configuration"
+        verbose_name_plural = "These Server Configurations"

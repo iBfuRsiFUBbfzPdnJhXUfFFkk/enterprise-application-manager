@@ -89,7 +89,7 @@ class Person(BaseModel, Comment, Location, Pronunciation):
         if self.scrum_capacity_base is not None:
             return self.scrum_capacity_base
         current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        return current_server_configuration.coerced_base_capacity
+        return current_server_configuration.coerced_scrum_capacity_base
 
     def __str__(self):
         return f"{self.name_last} {self.name_first} - {self.type_job_level} {self.type_job_title}"

@@ -28,7 +28,7 @@ class Sprint(AbstractStartEndDates, Alias, BaseModel, Comment, Name):
         if self.number_of_business_days_in_sprint is not None:
             return self.number_of_business_days_in_sprint
         current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        return current_server_configuration.coerced_number_of_business_days_in_sprint
+        return current_server_configuration.coerced_scrum_number_of_business_days_in_sprint
 
     @staticmethod
     def current_sprint() -> Optional['Sprint']:

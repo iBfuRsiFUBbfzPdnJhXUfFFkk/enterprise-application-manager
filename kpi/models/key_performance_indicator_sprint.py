@@ -111,7 +111,7 @@ class KeyPerformanceIndicatorSprint(
         if person is not None:
             return person.coerced_base_capacity
         current_server_configuration: ThisServerConfiguration | None = get_current_server_configuration()
-        return current_server_configuration.coerced_base_capacity
+        return current_server_configuration.coerced_scrum_capacity_base
 
     @property
     def coerced_number_of_code_lines_added(self) -> int:
