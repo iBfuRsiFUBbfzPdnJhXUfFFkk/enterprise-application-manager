@@ -10,7 +10,7 @@ def fetch_group_users(
         git_lab_client: Gitlab | None = None,
         git_lab_group: Group | None = None,
 ) -> list[GroupMember] | None:
-    if fetch_git_lab_group is None:
+    if git_lab_group is None:
         git_lab_group: Group | None = fetch_git_lab_group(git_lab_client=git_lab_client)
     if git_lab_group is None:
         return None
