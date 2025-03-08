@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from math import ceil
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -174,6 +174,17 @@ class KeyPerformanceIndicatorSprint(
         )
 
     @staticmethod
+    def developers_actively_employed() -> QuerySet['KeyPerformanceIndicatorSprint']:
+        developers_actively_employed: QuerySet[Person] = Person.developers_actively_employed()
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(
+                Q(person_developer__in=developers_actively_employed),
+                ~Q(person_developer__in=ThisServerConfiguration.current().kpi_developers_to_exclude.all())
+            )
+        )
+
+    @staticmethod
     def from_person(person: Person) -> QuerySet['KeyPerformanceIndicatorSprint']:
         return cast_query_set(
             typ=KeyPerformanceIndicatorSprint,
@@ -204,7 +215,7 @@ class KeyPerformanceIndicatorSprint(
     def from_sprint(sprint: Sprint) -> QuerySet['KeyPerformanceIndicatorSprint']:
         return cast_query_set(
             typ=KeyPerformanceIndicatorSprint,
-            val=KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint)
+            val=KeyPerformanceIndicatorSprint.developers_actively_employed().filter(sprint=sprint)
         )
 
     def __str__(self) -> str:

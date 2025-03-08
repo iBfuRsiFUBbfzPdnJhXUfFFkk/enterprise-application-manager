@@ -75,14 +75,9 @@ class Sprint(
     @property
     def kpi_sprints(self) -> QuerySet:
         from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
-        from core.models.person import Person
-        developers_actively_employed: QuerySet[Person] = Person.developers_actively_employed()
         return cast_query_set(
             typ=KeyPerformanceIndicatorSprint,
-            val=KeyPerformanceIndicatorSprint.objects.filter(sprint=self).filter(
-                Q(person_developer__in=developers_actively_employed),
-                ~Q(person_developer__in=ThisServerConfiguration.current().kpi_developers_to_exclude.all())
-            )
+            val=KeyPerformanceIndicatorSprint.developers_actively_employed().filter(sprint=self)
         )
 
     @property
