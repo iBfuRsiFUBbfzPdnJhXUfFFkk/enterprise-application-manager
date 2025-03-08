@@ -1,14 +1,12 @@
 from typing import cast
 
-from django.http import HttpRequest, JsonResponse, HttpResponse
+from django.http import HttpRequest, JsonResponse
 from gitlab import Gitlab
-from gitlab.base import RESTObject
-from gitlab.v4.objects import GroupMember, Group, GroupSubgroup
+from gitlab.v4.objects import Group, GroupSubgroup
 
 from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
-from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_git_lab_group import fetch_git_lab_group
-from core.views.this_api.this_api_sync_git_lab_view.common.fetch.fetch_group_users import fetch_group_users
+from git_lab.models.git_lab_group import GitLabGroup
 
 
 def recurse_groups(
@@ -32,17 +30,28 @@ def recurse_groups(
         )
     return all_groups
 
+
 def git_lab_groups_api(
         request: HttpRequest,
 ) -> JsonResponse:
     git_lab_client: Gitlab | None = get_git_lab_client()
     git_lab_group_id: str | None = ThisServerConfiguration.current().connection_git_lab_group_id
-    group_parent =  git_lab_client.groups.get(id=git_lab_group_id, lazy=True)
+    group_parent = git_lab_client.groups.get(id=git_lab_group_id, lazy=True)
     all_groups: set[Group] = recurse_groups(
         all_groups={group_parent},
         git_lab_client=git_lab_client,
         parent_group=group_parent,
     )
-    print(all_groups)
-    print(len(all_groups))
-    return JsonResponse(data={})
+    group_dicts: list[dict] = [group.asdict() for group in list(all_groups)]
+    for group_dict in group_dicts:
+        GitLabGroup.objects.update_or_create(
+            avatar_url=group_dict["avatar_url"],
+            created_at=group_dict["created_at"],
+            description=group_dict["description"],
+            full_name=group_dict["full_name"],
+            full_path=group_dict["full_path"],
+            id=group_dict["id"],
+            path=group_dict["path"],
+            web_url=group_dict["web_url"],
+        )
+    return JsonResponse(data=group_dicts)
