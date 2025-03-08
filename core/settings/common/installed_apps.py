@@ -1,6 +1,7 @@
 INSTALLED_APPS = [
     'core',  # NEEDS TO BE ABOVE AUTH
     'kpi',
+    'git_lab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
