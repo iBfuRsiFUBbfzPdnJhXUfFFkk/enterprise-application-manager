@@ -26,8 +26,10 @@ def git_lab_merge_requests_api(
         group: Group | None = git_lab_client.groups.get(id=git_lab_group.id)
         if group is None:
             continue
-        merge_requests: list[GroupMergeRequest] = cast(typ=list[GroupMergeRequest],
-                                                       val=group.mergerequests.list(all=True))
+        merge_requests: list[GroupMergeRequest] = cast(
+            typ=list[GroupMergeRequest],
+            val=group.mergerequests.list(page=1, per_page=100)
+        )
         for merge_request in merge_requests:
             all_merge_requests.add(merge_request)
     merge_request_dicts: list[dict] = [project.asdict() for project in list(all_merge_requests)]
