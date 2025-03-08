@@ -104,7 +104,7 @@ class KeyPerformanceIndicatorSprint(
     def coerced_number_of_business_days_in_sprint(self) -> int:
         if self.sprint is None:
             return ThisServerConfiguration.current().coerced_scrum_number_of_business_days_in_sprint
-        return coerce_integer(self.sprint.number_of_business_days_in_sprint)
+        return coerce_integer(self.sprint.coerced_number_of_business_days_in_sprint)
 
     @property
     def coerced_number_of_code_lines_added(self) -> int:
