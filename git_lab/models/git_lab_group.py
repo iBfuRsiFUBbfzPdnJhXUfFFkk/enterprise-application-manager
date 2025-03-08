@@ -22,7 +22,7 @@ class GitLabGroup(
     web_url: str | None = create_generic_varchar()
 
     def __str__(self) -> str:
-        return f"{self.name}"
+        return f"{self.full_path}"
 
     class Meta:
         ordering = ['full_path']

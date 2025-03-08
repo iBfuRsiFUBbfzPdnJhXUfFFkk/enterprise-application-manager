@@ -10,7 +10,7 @@ def fetch_git_lab_group(
 ) -> Group | None:
     if git_lab_client is None:
         git_lab_client: Gitlab | None = get_git_lab_client()
-    git_lab_group_id: str | None = ThisServerConfiguration.current().connection_git_lab_group_id
-    if git_lab_client is None or git_lab_group_id is None:
+    connection_git_lab_top_level_group_id: str | None = ThisServerConfiguration.current().connection_git_lab_top_level_group_id
+    if git_lab_client is None or connection_git_lab_top_level_group_id is None:
         return None
-    return git_lab_client.groups.get(id=git_lab_group_id, lazy=True)
+    return git_lab_client.groups.get(id=connection_git_lab_top_level_group_id, lazy=True)

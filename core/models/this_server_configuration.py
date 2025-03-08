@@ -22,9 +22,9 @@ class ThisServerConfiguration(
     AbstractScrumCapacityBase,
 ):
     connection_git_lab_api_version: str | None = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
-    connection_git_lab_group_id: str | None = create_generic_varchar()
     connection_git_lab_hostname: str | None = create_generic_varchar()
     connection_git_lab_token: Secret | None = create_generic_fk(to=Secret)
+    connection_git_lab_top_level_group_id: str | None = create_generic_varchar()
     kpi_developers_to_exclude = create_generic_m2m(to='Person')
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
