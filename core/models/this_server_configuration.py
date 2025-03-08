@@ -9,6 +9,7 @@ from core.models.common.field_factories.create_generic_decimal import create_gen
 from core.models.common.field_factories.create_generic_enum import create_generic_enum
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.models.role import Role
 from core.models.secret import Secret
@@ -24,6 +25,7 @@ class ThisServerConfiguration(
     connection_git_lab_group_id: str | None = create_generic_varchar()
     connection_git_lab_hostname: str | None = create_generic_varchar()
     connection_git_lab_token: Secret | None = create_generic_fk(to=Secret)
+    kpi_developers_to_exclude = create_generic_m2m(to='Person')
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
     scrum_number_of_business_days_in_week: int | None = create_generic_integer()
