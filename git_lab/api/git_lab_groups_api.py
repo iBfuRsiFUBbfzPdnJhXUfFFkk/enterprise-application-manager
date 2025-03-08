@@ -1,4 +1,4 @@
-from typing import cast
+from typing import cast, TypedDict
 
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab
@@ -8,6 +8,18 @@ from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.git_lab_group import GitLabGroup
+
+
+class GitLabGroupTypedDict(TypedDict):
+    avatar_url: str | None
+    created_at: str | None
+    description: str | None
+    full_name: str | None
+    full_path: str | None
+    id: int
+    name: str | None
+    path: str | None
+    web_url: str | None
 
 
 def recurse_groups(
@@ -55,20 +67,19 @@ def git_lab_groups_api(
         git_lab_client=git_lab_client,
         parent_group=group_parent,
     )
-    group_dicts: list[dict] = [group.asdict() for group in list(all_groups)]
+    group_dicts: list[GitLabGroupTypedDict] = [group.asdict() for group in list(all_groups)]
     for group_dict in group_dicts:
         group_id: int | None = group_dict.get("id")
         if group_id is None:
             continue
-        GitLabGroup.objects.update_or_create(
-            avatar_url=group_dict.get("avatar_url"),
-            created_at=group_dict.get("created_at"),
-            description=group_dict.get("description"),
-            full_name=group_dict.get("full_name"),
-            full_path=group_dict.get("full_path"),
-            id=group_id,
-            name=group_dict.get("name"),
-            path=group_dict.get("path"),
-            web_url=group_dict.get("web_url"),
-        )
+        git_lab_group: GitLabGroup = GitLabGroup.objects.get_or_create(id=group_id)[0]
+        git_lab_group.avatar_url = group_dict.get("avatar_url")
+        git_lab_group.created_at = group_dict.get("created_at")
+        git_lab_group.description = group_dict.get("description")
+        git_lab_group.full_name = group_dict.get("full_name")
+        git_lab_group.full_path = group_dict.get("full_path")
+        git_lab_group.name = group_dict.get("name")
+        git_lab_group.path = group_dict.get("path")
+        git_lab_group.web_url = group_dict.get("web_url")
+        git_lab_group.save()
     return JsonResponse(data=group_dicts, safe=False)
