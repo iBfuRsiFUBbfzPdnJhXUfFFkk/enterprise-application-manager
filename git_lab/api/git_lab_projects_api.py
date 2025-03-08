@@ -23,6 +23,11 @@ class GitLabProjectLinksTypedDict(TypedDict):
     self: str | None
 
 
+class GitLabProjectNamespaceTypedDict(TypedDict):
+    id: int | None
+    kind: str | None
+
+
 class GitLabProjectTypedDict(TypedDict):
     _links: GitLabProjectLinksTypedDict | None
     avatar_url: str | None
@@ -35,6 +40,7 @@ class GitLabProjectTypedDict(TypedDict):
     last_activity_at: str | None
     name: str | None
     name_with_namespace: str | None
+    namespace: GitLabProjectNamespaceTypedDict | None
     open_issues_count: int | None
     path: str | None
     path_with_namespace: str | None
@@ -87,6 +93,14 @@ def git_lab_projects_api(
             git_lab_project.link_self = links.get("self")
         git_lab_project.name = project_dict.get("name")
         git_lab_project.name_with_namespace = project_dict.get("name_with_namespace")
+        namespace: GitLabProjectNamespaceTypedDict | None = project_dict.get("namespace")
+        if namespace is not None:
+            namespace_id: int | None = namespace.get("id")
+            namespace_kind: str | None = namespace.get("kind")
+            if namespace_kind == "group":
+                group: GitLabGroup | None = GitLabGroup.objects.filter(id=namespace_id).first()
+                if group is not None:
+                    git_lab_project.group = group
         git_lab_project.open_issues_count = project_dict.get("open_issues_count")
         git_lab_project.path = project_dict.get("path")
         git_lab_project.path_with_namespace = project_dict.get("path_with_namespace")
