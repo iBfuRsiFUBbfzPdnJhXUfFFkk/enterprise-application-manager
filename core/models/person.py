@@ -135,6 +135,20 @@ class Person(
             val=Person.objects.filter(roles__in=[developer_role]) if developer_role else Person.objects.all()
         )
 
+    @staticmethod
+    def developers_active() -> QuerySet['Person']:
+        return cast_query_set(
+            typ=Person,
+            val=Person.developers().filter(is_active=True)
+        )
+
+    @staticmethod
+    def developers_actively_employed() -> QuerySet['Person']:
+        return cast_query_set(
+            typ=Person,
+            val=Person.developers_active().filter(is_employee=True)
+        )
+
     def __str__(self) -> str:
         title_particle: str = f" - {str(self.job_title)}" if self.job_title else ''
         return f"{self.full_name_for_sort}{title_particle}"
