@@ -20,7 +20,7 @@ def kpi_sprint_view(request: HttpRequest, uuid: str) -> HttpResponse:
         .from_sprint(sprint=sprint)
         .filter(
             Q(person_developer__in=developers_actively_employed),
-            ~Q(person_developer__in=(ThisServerConfiguration.current().kpi_developers_to_exclude or []))
+            ~Q(person_developer__in=ThisServerConfiguration.current().kpi_developers_to_exclude)
         )
     )
 
