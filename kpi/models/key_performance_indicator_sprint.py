@@ -10,10 +10,10 @@ from core.models.common.field_factories.create_generic_integer import create_gen
 from core.models.person import Person
 from core.models.sprint import Sprint
 from core.models.this_server_configuration import ThisServerConfiguration
-from kpi.utilities.cast_query_set import cast_query_set
-from kpi.utilities.coerce_float import coerce_float
-from kpi.utilities.coerce_integer import coerce_integer
-from kpi.utilities.safe_divide import safe_divide
+from core.utilities.cast_query_set import cast_query_set
+from core.utilities.coerce_float import coerce_float
+from core.utilities.coerce_integer import coerce_integer
+from core.utilities.safe_divide import safe_divide
 
 
 class KeyPerformanceIndicatorSprint(

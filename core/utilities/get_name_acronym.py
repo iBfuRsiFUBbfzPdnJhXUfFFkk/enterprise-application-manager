@@ -1,4 +1,4 @@
-from kpi.utilities.string_or_na import string_or_na
+from core.utilities.string_or_na import string_or_na
 
 
 def get_name_acronym(

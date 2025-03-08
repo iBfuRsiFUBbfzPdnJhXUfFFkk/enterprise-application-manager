@@ -1,4 +1,4 @@
-from kpi.utilities.coerce_float import coerce_float
+from core.utilities.coerce_float import coerce_float
 
 
 def safe_divide(

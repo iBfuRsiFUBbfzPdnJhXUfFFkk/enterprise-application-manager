@@ -5,7 +5,7 @@ from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.get_name_acronym import get_name_acronym
-from kpi.utilities.cast_query_set import cast_query_set
+from core.utilities.cast_query_set import cast_query_set
 
 
 class JobTitle(

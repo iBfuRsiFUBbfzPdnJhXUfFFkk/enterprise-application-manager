@@ -2,7 +2,7 @@ from django.db.models import QuerySet
 from math import floor
 
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
-from kpi.utilities.safe_divide import safe_divide
+from core.utilities.safe_divide import safe_divide
 from kpi.utilities.scoped_metrics.scoped_metric import ScopedMetric, get_initial_scoped_metric
 
 

@@ -25,7 +25,7 @@ def kpi_developer_view(request: HttpRequest, uuid: str) -> HttpResponse:
     kpi_sprints: QuerySet[KeyPerformanceIndicatorSprint] = KeyPerformanceIndicatorSprint.from_person(person=developer)
     return base_render(
         context={
-            "chart_url": reverse(viewname='kpi:ajax_get_chart_data_for_developer', kwargs={'uuid': developer.uuid}),
+            "chart_url": reverse(viewname='kpi:kpi_chart_data_for_developer_ajax', kwargs={'uuid': developer.uuid}),
             "current_sprint": current_sprint,
             "current_sprint_scoped_metric": current_sprint_scoped_metric,
             "developer": developer,

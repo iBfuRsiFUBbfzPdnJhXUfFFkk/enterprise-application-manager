@@ -22,7 +22,7 @@ from core.models.job_title import JobTitle
 from core.models.role import Role
 from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
-from kpi.utilities.cast_query_set import cast_query_set
+from core.utilities.cast_query_set import cast_query_set
 
 
 class Person(

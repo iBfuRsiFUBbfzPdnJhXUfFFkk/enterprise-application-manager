@@ -1,7 +1,7 @@
 from django.db.models import Model
 
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
-from kpi.utilities.coerce_integer import coerce_integer
+from core.utilities.coerce_integer import coerce_integer
 
 
 class AbstractScrumCapacityBase(Model):

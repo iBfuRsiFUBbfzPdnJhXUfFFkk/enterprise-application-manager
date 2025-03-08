@@ -12,10 +12,10 @@ from core.models.common.field_factories.create_generic_decimal import create_gen
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
-from kpi.utilities.cast_query_set import cast_query_set
-from kpi.utilities.coerce_integer import coerce_integer
-from kpi.utilities.safe_divide import safe_divide
-from kpi.utilities.string_or_na import string_or_na
+from core.utilities.cast_query_set import cast_query_set
+from core.utilities.coerce_integer import coerce_integer
+from core.utilities.safe_divide import safe_divide
+from core.utilities.string_or_na import string_or_na
 
 
 class Sprint(
