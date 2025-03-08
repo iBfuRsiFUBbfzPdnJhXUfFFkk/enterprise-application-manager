@@ -40,7 +40,7 @@ def git_lab_groups_api(
     group_parent =  git_lab_client.groups.get(id=git_lab_group_id, lazy=True)
     all_groups: set[Group] = recurse_groups(
         all_groups={group_parent},
-        git_lab_client=group_parent.manager,
+        git_lab_client=git_lab_client,
         parent_group=group_parent,
     )
     print(all_groups)
