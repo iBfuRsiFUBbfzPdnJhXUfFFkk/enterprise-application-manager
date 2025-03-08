@@ -14,7 +14,9 @@ def kpi_sprint_view(request: HttpRequest, uuid: str) -> HttpResponse:
         return generic_500(request=request)
     developers_actively_employed: QuerySet[Person] = Person.developers_actively_employed()
     sprint_kpis: QuerySet[KeyPerformanceIndicatorSprint] = (
-        KeyPerformanceIndicatorSprint.from_sprint(sprint=sprint).filter(person__in=developers_actively_employed)
+        KeyPerformanceIndicatorSprint
+        .from_sprint(sprint=sprint)
+        .filter(person_developer__in=developers_actively_employed)
     )
 
     return base_render(
