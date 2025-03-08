@@ -21,12 +21,13 @@ def git_lab_projects_api(
         typ=GitLabGroup,
         val=GitLabGroup.objects.all(),
     )
-    all_projects: set[dict] = set()
+    all_projects: set[GroupProject] = set()
     for git_lab_group in git_lab_groups:
         group: Group | None = git_lab_client.groups.get(id=git_lab_group.id)
         if group is None:
             continue
         projects: list[GroupProject] = cast(typ=list[GroupProject], val=group.projects.list(all=True))
         for project in projects:
-            all_projects.add(project.asdict())
-    return JsonResponse(data=list(all_projects), safe=False)
+            all_projects.add(project)
+    project_dicts: list[dict] = [project.asdict() for project in list(all_projects)]
+    return JsonResponse(data=project_dicts, safe=False)
