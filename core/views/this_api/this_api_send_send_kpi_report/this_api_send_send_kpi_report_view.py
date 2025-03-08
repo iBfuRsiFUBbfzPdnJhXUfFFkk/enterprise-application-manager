@@ -45,6 +45,7 @@ def this_api_send_send_kpi_report_view(request):
         template_name="authenticated/action/action_success.html"
     )
 
+
 def should_send_email_today(sprint):
     """
     Checks if an email should be sent today based on the sprint schedule:
@@ -61,7 +62,8 @@ def should_send_email_today(sprint):
     # Adjusted days to correctly align with a **Sunday** start sprint
     first_week = {sprint_start + datetime.timedelta(days=6)}  # Thursday (Day 7)
     second_week = {sprint_start + datetime.timedelta(days=i) for i in [8, 10, 11]}  # Mon (9), Wed (11), Thurs (12)
-    third_week = {sprint_start + datetime.timedelta(days=i) for i in [15, 16, 17, 18]}  # Tue (16), Wed (17), Thurs (18), Fri (19)
+    third_week = {sprint_start + datetime.timedelta(days=i) for i in
+                  [15, 16, 17, 18]}  # Tue (16), Wed (17), Thurs (18), Fri (19)
     week_after = {monday_after_end - datetime.timedelta(days=1), monday_after_end}  # Mon (23), Tue (24)
 
     email_days = first_week | second_week | third_week | week_after

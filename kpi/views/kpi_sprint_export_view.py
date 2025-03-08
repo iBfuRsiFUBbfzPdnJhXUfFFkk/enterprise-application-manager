@@ -116,7 +116,7 @@ def kpi_sprint_export_view(request: HttpRequest, uuid: str) -> HttpResponse:
     workbook.save(output)
     output.seek(0)
 
-    response = HttpResponse(output.getvalue(),request=request,
+    response = HttpResponse(output.getvalue(), request=request,
                             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = f'attachment; filename="sprint_{sprint.name}_kpis.xlsx"'
     return response

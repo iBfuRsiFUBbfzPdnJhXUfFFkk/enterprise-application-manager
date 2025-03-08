@@ -44,6 +44,7 @@ def ensure_indicator_map(indicator_map: IndicatorMap | None = None) -> Indicator
         return create_initial_indicator_map()
     return indicator_map
 
+
 def ensure_indicator_is_in_map(
         git_lab_user_id: int | str | None = None,
         indicator_map: IndicatorMap | None = None

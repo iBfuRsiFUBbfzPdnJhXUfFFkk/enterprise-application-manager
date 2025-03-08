@@ -7,7 +7,8 @@ from core.models.common.abstract.abstract_uniform_resource_locator import Abstra
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class Client(AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractLocation, AbstractName, AbstractUniformResourceLocator):
+class Client(AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractLocation, AbstractName,
+             AbstractUniformResourceLocator):
     def __str__(self):
         return get_name_acronym(acronym=self.acronym, name=self.name)
 

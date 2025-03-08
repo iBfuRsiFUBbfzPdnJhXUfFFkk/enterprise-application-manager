@@ -7,9 +7,9 @@
     </h1>
     <h2 class="mt-5">Applications Involved in Release</h2>
     <ul>
-    {% for release in model.releases.all %}
-        <li>{{ release.application }}</li>
-    {% endfor %}
+        {% for release in model.releases.all %}
+            <li>{{ release.application }}</li>
+        {% endfor %}
     </ul>
     <h2 class="mt-5">Comments</h2>
     <div class="border border-1 mt-1 p-1">{{ model.comment|markdown }}</div>
