@@ -3,60 +3,65 @@
 {% load templatetags_colors %}
 {% load templatetags_percentages %}
 {% block content_kpi %}
-    <table id="data-table">
-        <thead>
-        <tr>
-            <th>GitLab Username</th>
-            <th>Base Capacity</th>
-            <th>Holidays</th>
-            <th>PTO Days</th>
-            <th>Adjusted Capacity</th>
-            <th>Committed</th>
-            <th>Delivered</th>
-            <th>Reviews</th>
-            <th>Comments</th>
-            <th>Threads</th>
-            <th>Issues Written</th>
-            <th>Code Changes</th>
-            <th>Context Switching</th>
-            <th>Velocity</th>
-            <th>Accuracy</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for stat in sprint_kpis %}
+    <div class="row mb-4">
+        <a href="{% url 'kpi:kpi_sprint_export' sprint.uuid %}" class="btn btn-success">Download Excel</a>
+    </div>
+    <div class="row">
+        <table id="data-table">
+            <thead>
             <tr>
-                <td>{{ stat.person_developer.gitlab_sync_username }}</td>
-                <td>{{ stat.coerced_scrum_capacity_base }}</td>
-                <td>{{ stat.sprint.number_of_holidays_during_sprint }}</td>
-                <td>{{ stat.coerced_number_of_paid_time_off_days }}</td>
-                <td>{{ stat.adjusted_capacity }}</td>
-                <td>{{ stat.coerced_number_of_story_points_committed_to }}</td>
-                <td>{{ stat.coerced_number_of_story_points_delivered }}</td>
-                <td>{{ stat.coerced_number_of_merge_requests_approved }}</td>
-                <td>{{ stat.coerced_number_of_comments_made }}</td>
-                <td>{{ stat.coerced_number_of_threads_made }}</td>
-                <td>{{ stat.coerced_number_of_issues_written }}</td>
-                <td>
-                    +{{ stat.coerced_number_of_code_lines_added }}
-                    /
-                    -{{ stat.coerced_number_of_code_lines_removed }}
-                </td>
-                <td>{{ stat.coerced_number_of_context_switches }}</td>
-                <td style="background-color: {{ stat.capacity_based_velocity|get_color }}; color: white;">
-                    {{ stat.capacity_based_velocity|percentage }}
-                </td>
-                <td style="background-color: {{ stat.commitment_accuracy|get_color }}; color: white;">
-                    {{ stat.commitment_accuracy|percentage }}
-                </td>
+                <th>GitLab Username</th>
+                <th>Base Capacity</th>
+                <th>Holidays</th>
+                <th>PTO Days</th>
+                <th>Adjusted Capacity</th>
+                <th>Committed</th>
+                <th>Delivered</th>
+                <th>Reviews</th>
+                <th>Comments</th>
+                <th>Threads</th>
+                <th>Issues Written</th>
+                <th>Code Changes</th>
+                <th>Context Switching</th>
+                <th>Velocity</th>
+                <th>Accuracy</th>
             </tr>
-        {% empty %}
-            <tr>
-                <td colspan="15" class="text-center py-4">No sprint stats found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for sprint_kpi in sprint_kpis %}
+                <tr>
+                    <td>{{ sprint_kpi.person_developer.gitlab_sync_username }}</td>
+                    <td>{{ sprint_kpi.coerced_scrum_capacity_base }}</td>
+                    <td>{{ sprint_kpi.sprint.number_of_holidays_during_sprint }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_paid_time_off_days }}</td>
+                    <td>{{ sprint_kpi.adjusted_capacity }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_story_points_committed_to }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_story_points_delivered }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_merge_requests_approved }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_comments_made }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_threads_made }}</td>
+                    <td>{{ sprint_kpi.coerced_number_of_issues_written }}</td>
+                    <td>
+                        +{{ sprint_kpi.coerced_number_of_code_lines_added }}
+                        /
+                        -{{ sprint_kpi.coerced_number_of_code_lines_removed }}
+                    </td>
+                    <td>{{ sprint_kpi.coerced_number_of_context_switches }}</td>
+                    <td style="background-color: {{ sprint_kpi.capacity_based_velocity|get_color }}; color: white;">
+                        {{ sprint_kpi.capacity_based_velocity|percentage }}
+                    </td>
+                    <td style="background-color: {{ sprint_kpi.commitment_accuracy|get_color }}; color: white;">
+                        {{ sprint_kpi.commitment_accuracy|percentage }}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="15" class="text-center py-4">No sprint stats found</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
 {% block scripts %}
     <script>

@@ -15,6 +15,7 @@ def kpi_sprint_view(request: HttpRequest, uuid: str) -> HttpResponse:
 
     return base_render(
         context={
+            "sprint": sprint,
             "sprint_kpis": sprint_kpis,
         },
         request=request,
