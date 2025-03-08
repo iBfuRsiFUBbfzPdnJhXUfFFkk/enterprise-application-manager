@@ -66,7 +66,11 @@ class Sprint(
 
     @property
     def git_lab_iteration_ids(self) -> list[int]:
-        return [git_lab_iteration.git_lab_id for git_lab_iteration in self.git_lab_iterations]
+        git_lab_iterations: QuerySet[GitLabIteration] = cast_query_set(
+            typ=GitLabIteration,
+            val=self.git_lab_iterations.all()
+        )
+        return [git_lab_iteration.git_lab_id for git_lab_iteration in git_lab_iterations]
 
     @property
     def kpi_sprints(self) -> QuerySet:
