@@ -13,7 +13,7 @@ from core.models.this_server_configuration import ThisServerConfiguration
 from kpi.utilities.cast_query_set import cast_query_set
 from kpi.utilities.coerce_float import coerce_float
 from kpi.utilities.coerce_integer import coerce_integer
-from kpi.utilities.save_divide import save_divide
+from kpi.utilities.safe_divide import safe_divide
 
 
 class KeyPerformanceIndicatorSprint(
@@ -53,7 +53,7 @@ class KeyPerformanceIndicatorSprint(
     def capacity_based_velocity(self) -> float:
         value: float = round(
             ndigits=2,
-            number=save_divide(
+            number=safe_divide(
                 dividend=self.coerced_number_of_story_points_delivered,
                 divisor=self.adjusted_capacity,
             )
@@ -66,7 +66,7 @@ class KeyPerformanceIndicatorSprint(
     def capacity_per_day(self) -> float:
         value: float = round(
             ndigits=2,
-            number=save_divide(
+            number=safe_divide(
                 dividend=self.coerced_scrum_capacity_base,
                 divisor=self.coerced_number_of_business_days_in_sprint
             )
@@ -104,7 +104,7 @@ class KeyPerformanceIndicatorSprint(
     def coerced_number_of_business_days_in_sprint(self) -> int:
         if self.sprint is None:
             return ThisServerConfiguration.current().coerced_scrum_number_of_business_days_in_sprint
-        return self.sprint.number_of_business_days_in_sprint
+        return coerce_integer(self.sprint.number_of_business_days_in_sprint)
 
     @property
     def coerced_number_of_code_lines_added(self) -> int:
@@ -126,7 +126,7 @@ class KeyPerformanceIndicatorSprint(
     def coerced_number_of_holidays_during_sprint(self) -> int:
         if self.sprint is None:
             return 0
-        return self.sprint.number_of_holidays_during_sprint
+        return coerce_integer(self.sprint.number_of_holidays_during_sprint)
 
     @property
     def coerced_number_of_issues_written(self) -> int:
@@ -156,7 +156,7 @@ class KeyPerformanceIndicatorSprint(
     def commitment_accuracy(self) -> float:
         value: float = round(
             ndigits=2,
-            number=save_divide(
+            number=safe_divide(
                 dividend=self.coerced_number_of_story_points_delivered,
                 divisor=self.coerced_number_of_story_points_committed_to,
             )
@@ -178,6 +178,33 @@ class KeyPerformanceIndicatorSprint(
         return cast_query_set(
             typ=KeyPerformanceIndicatorSprint,
             val=KeyPerformanceIndicatorSprint.objects.filter(person_developer=person)
+        )
+
+    @staticmethod
+    def from_person_current_sprint(person: Person) -> QuerySet['KeyPerformanceIndicatorSprint']:
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(
+                person_developer=person,
+                sprint=Sprint.current_sprint(),
+            )
+        )
+
+    @staticmethod
+    def from_person_last_five_sprints(person: Person) -> QuerySet['KeyPerformanceIndicatorSprint']:
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(
+                person_developer=person,
+                sprint__in=Sprint.last_five_sprints(),
+            )
+        )
+
+    @staticmethod
+    def from_sprint(sprint: Sprint) -> QuerySet['KeyPerformanceIndicatorSprint']:
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(sprint=sprint)
         )
 
     def __str__(self) -> str:

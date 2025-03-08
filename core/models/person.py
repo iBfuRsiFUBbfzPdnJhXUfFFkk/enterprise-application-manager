@@ -1,5 +1,7 @@
 from datetime import date, datetime
 
+from django.db.models import QuerySet
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_location import AbstractLocation
@@ -20,6 +22,7 @@ from core.models.job_title import JobTitle
 from core.models.role import Role
 from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
+from kpi.utilities.cast_query_set import cast_query_set
 
 
 class Person(
@@ -123,6 +126,14 @@ class Person(
     @property
     def user_permissions(self):
         return self.user_mapping.user_permissions if self.user_mapping else None
+
+    @staticmethod
+    def developers() -> QuerySet['Person']:
+        developer_role: Role | None = ThisServerConfiguration.current().type_developer_role
+        return cast_query_set(
+            typ=Person,
+            val=Person.objects.filter(roles__in=[developer_role]) if developer_role else Person.objects.all()
+        )
 
     def __str__(self) -> str:
         title_particle: str = f" - {str(self.job_title)}" if self.job_title else ''

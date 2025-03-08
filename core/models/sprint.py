@@ -14,7 +14,7 @@ from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
 from kpi.utilities.cast_query_set import cast_query_set
 from kpi.utilities.coerce_integer import coerce_integer
-from kpi.utilities.save_divide import save_divide
+from kpi.utilities.safe_divide import safe_divide
 from kpi.utilities.string_or_na import string_or_na
 
 
@@ -38,7 +38,7 @@ class Sprint(
     def accuracy(self) -> float:
         value: float = round(
             ndigits=2,
-            number=save_divide(
+            number=safe_divide(
                 dividend=self.total_number_of_story_points_delivered,
                 divisor=self.total_number_of_story_points_committed_to,
             )
@@ -108,7 +108,7 @@ class Sprint(
     def velocity(self) -> float:
         value: float = round(
             ndigits=2,
-            number=save_divide(
+            number=safe_divide(
                 dividend=self.total_number_of_story_points_delivered,
                 divisor=self.total_adjusted_capacity,
             )
@@ -126,7 +126,7 @@ class Sprint(
         ).first()
 
     @staticmethod
-    def last_five() -> QuerySet['Sprint']:
+    def last_five_sprints() -> QuerySet['Sprint']:
         return cast_query_set(
             typ=Sprint,
             val=Sprint.objects.all().order_by('-date_end')[:5]

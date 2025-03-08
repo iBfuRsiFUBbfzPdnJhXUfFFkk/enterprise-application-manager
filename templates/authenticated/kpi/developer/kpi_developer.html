@@ -1,0 +1,74 @@
+{% extends "authenticated/kpi/kpi_base.html" %}
+{% load kpi_tags %}
+{% load templatetags_percentages %}
+
+{% block content_kpi %}
+    <div class="row">
+        <div class="col-6">
+            {% include "authenticated/kpi/common/kpi_scoped_metric_current_sprint.html" %}
+        </div>
+        <div class="col-6">
+            {% include "authenticated/kpi/common/kpi_scoped_metric_last_five_sprints.html" %}
+        </div>
+    </div>
+    {% include "authenticated/kpi/common/kpi_charts.html" %}
+    <div class="row">
+        <table id="data-table">
+            <thead>
+            <tr>
+                <th>Sprint</th>
+                <th>Base Capacity</th>
+                <th>Holidays</th>
+                <th>PTO Days</th>
+                <th>Adjusted Capacity</th>
+                <th>Committed</th>
+                <th>Delivered</th>
+                <th>Reviews</th>
+                <th>Comments</th>
+                <th>Threads</th>
+                <th>Issues Written</th>
+                <th>Code Changes</th>
+                <th>Context Switching 🌀</th>
+                <th>Velocity</th>
+                <th>Accuracy</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for kpi_sprint in kpi_sprints %}
+                <tr>
+                    <td>{{ kpi_sprint.sprint.name }}</td>
+                    <td>{{ kpi_sprint.coerced_scrum_capacity_base }}</td>
+                    <td>{{ kpi_sprint.sprint.number_of_holidays_during_sprint }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_paid_time_off_days }}</td>
+                    <td>{{ kpi_sprint.adjusted_capacity }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_story_points_committed_to }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_story_points_delivered }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_merge_requests_approved }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_comments_made }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_threads_made }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_issues_written }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_code_lines_added }}/{{ kpi_sprint.coerced_number_of_code_lines_removed }}</td>
+                    <td>{{ kpi_sprint.coerced_number_of_context_switches }}</td>
+                    <td style="background-color: {{ kpi_sprint.capacity_based_velocity|get_color }}; color: white;">
+                        {{ kpi_sprint.capacity_based_velocity|percentage }}
+                    </td>
+                    <td style="background-color: {{ kpi_sprint.commitment_accuracy|get_color }}; color: white;">
+                        {{ kpi_sprint.commitment_accuracy|percentage }}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="15" class="text-center py-4">No sprint stats found for this developer</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

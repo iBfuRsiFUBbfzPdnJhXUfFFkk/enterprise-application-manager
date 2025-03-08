@@ -1,0 +1,39 @@
+{% extends "authenticated/kpi/kpi_base.html" %}
+
+{% block content_kpi %}
+    <table id="data-table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date Range</th>
+            <th>Business Days</th>
+            <th>Holidays</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for sprint in sprints %}
+            <tr ondblclick='window.location.href = "{% url 'kpi:kpi_sprint' uuid=sprint.uuid %}"'>
+                <td>{{ sprint.name }}</td>
+                <td>{{ sprint.date_start|date:"M j" }} - {{ sprint.date_end|date:"M j, Y" }}</td>
+                <td>{{ sprint.coerced_number_of_business_days_in_sprint }}</td>
+                <td>{{ sprint.number_of_holidays_during_sprint }}</td>
+                <td>{{ sprint.date_start|date:"Y-m-d" }}</td>
+                <td>{{ sprint.date_end|date:"Y-m-d" }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7" class="text-center py-4">No sprints found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,35 @@
+<table id="data-table">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Date Range</th>
+        <th>Velocity</th>
+        <th>Accuracy</th>
+        <th>Delivered</th>
+        <th>Reviews</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for sprint in last_five_sprints %}
+        <tr>
+            <td>{{ sprint.name }}</td>
+            <td>{{ sprint.date_start|date:"M j" }} - {{ sprint.date_end|date:"M j, Y" }}</td>
+            <td>{{ sprint.velocity }}</td>
+            <td>{{ sprint.accuracy }}</td>
+            <td>{{ sprint.total_number_of_story_points_delivered }}</td>
+            <td>{{ sprint.total_number_of_merge_requests_approved }}</td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="6" class="text-center py-4">No completed sprints found</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

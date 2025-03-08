@@ -1,0 +1,33 @@
+{% extends "authenticated/kpi/kpi_base.html" %}
+
+{% block content_kpi %}
+    <table id="data-table">
+        <thead>
+        <tr>
+            <td>Developer</td>
+            <td>GitLab Username</td>
+            <td>Base Capacity</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for developer in developers %}
+            <tr ondblclick='window.location.href = "{% url 'kpi:kpi_developer' uuid=developer.uuid %}"'>
+                <td>{{ developer }}</td>
+                <td>{{ developer.gitlab_sync_username }}</td>
+                <td>{{ developer.coerced_scrum_capacity_base }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3" class="text-center py-4">No developers found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+{% block scripts %}
+    <script>
+        $(document).ready(function () {
+            $('#data-table').DataTable({"pageLength": 100});
+        });
+    </script>
+{% endblock %}

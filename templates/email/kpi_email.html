@@ -1,38 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Sprint {{ sprint.name }} KPIs</title>
 </head>
 <body style="background-color: #1a1a1a; color: #e0e0e0; font-family: Arial, sans-serif; margin: 0; padding: 20px;">
-
-    <!-- Email Container -->
     <table style="width: 100%; max-width: 600px; margin: 0 auto; background-color: #121212; border: 1px solid #4A6572; border-radius: 8px; overflow: hidden;">
-
-        <!-- Header -->
         <tr>
             <td style="background-color: #2A3D4E; color: #ffffff; padding: 20px; text-align: center; font-size: 24px; font-weight: bold;">
                 Sprint {{ sprint.name }} KPIs
             </td>
         </tr>
-
-        <!-- Sprint Summary -->
         <tr>
             <td style="padding: 20px; color: #e0e0e0;">
                 <p style="margin: 0 0 10px;"><strong>Sprint Dates:</strong> {{ sprint_start_date }} - {{ sprint_end_date }}</p>
             </td>
         </tr>
-
-        <!-- Divider -->
         <tr>
             <td style="background-color: #4A6572; height: 2px;"></td>
         </tr>
-
-        <!-- Developer Personal Stats -->
         <tr>
             <td style="padding: 20px;">
                 <h3 style="color: #4ECDC4; border-bottom: 2px solid #4A6572; padding-bottom: 5px;">Your Personal Stats</h3>
-
                 <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
                     <tr>
                         <th style="background-color: #2A3D4E; color: #e0e0e0; padding: 10px; text-align: left; border: 1px solid #4A6572;">Metric</th>
@@ -65,8 +54,6 @@
                 </table>
             </td>
         </tr>
-
     </table>
-
 </body>
 </html>

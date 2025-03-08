@@ -6,7 +6,7 @@ from kpi.ajax.chart_data.common.chart_data_model import ChartDataModel
 from kpi.ajax.chart_data.common.get_chart_data_for_person import get_chart_data_for_person
 
 
-def ajax_get_chart_data_for_user(
+def ajax_get_chart_data_for_developer(
         request: HttpRequest,
         uuid: str
 ) -> JsonResponse | HttpResponse:

@@ -9,7 +9,7 @@ from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorS
 def get_chart_data_for_person(
         person: Person | None = None
 ) -> ChartDataModel | None:
-    last_five_sprints: QuerySet[Sprint] = Sprint.last_five()
+    last_five_sprints: QuerySet[Sprint] = Sprint.last_five_sprints()
     velocity_data: list[float] = []
     accuracy_data: list[float] = []
     sprint_labels: list[str] = []

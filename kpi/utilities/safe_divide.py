@@ -1,7 +1,7 @@
 from kpi.utilities.coerce_float import coerce_float
 
 
-def save_divide(
+def safe_divide(
         dividend: float | int | str | None = None,
         divisor: float | int | str | None = None,
 ) -> float:

@@ -1,0 +1,32 @@
+{% load templatetags_percentages %}
+<div class="card p-0">
+    <div class="card-header">
+        Avg. Last 5 Sprints
+    </div>
+    <div class="card-body">
+        <p>
+            Capacity Velocity:
+            <span class="fw-lighter">
+                {{ last_five_sprints_scoped_metric.total_velocity_of_capacity|percentage }}
+            </span>
+        </p>
+        <p>
+            Commitment Accuracy:
+            <span class="fw-lighter">
+                {{ last_five_sprints_scoped_metric.total_accuracy_on_committed_to_story_points|percentage }}
+            </span>
+        </p>
+        <p>
+            Avg Delivered:
+            <span class="fw-lighter">
+                {{ last_five_sprints_scoped_metric.total_story_points_delivered }}
+            </span>
+        </p>
+        <p>
+            Avg Code Reviews:
+            <span class="fw-lighter">
+                {{ last_five_sprints_scoped_metric.total_merge_requests_approved }}
+            </span>
+        </p>
+    </div>
+</div>

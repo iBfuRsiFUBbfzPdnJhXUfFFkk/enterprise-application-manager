@@ -1,0 +1,33 @@
+{% load templatetags_percentages %}
+<div class="card p-0">
+    <div class="card-header">
+        Current Sprint
+    </div>
+    <div class="card-body">
+        <p>
+            <strong>
+                <a href="{% url 'kpi:kpi_sprint' uuid=current_sprint.uuid %}">
+                    {{ current_sprint.name }}
+                </a>
+            </strong>
+        </p>
+        <p>
+            Sprint Dates:
+            <span class="fw-lighter">
+                {{ current_sprint.date_start }} - {{ current_sprint.date_end }}
+            </span>
+        </p>
+        <p>
+            Capacity Velocity:
+            <span class="fw-lighter">
+                {{ current_sprint_scoped_metric.total_velocity_of_capacity|percentage }}
+            </span>
+        </p>
+        <p>
+            Commitment Accuracy:
+            <span class="fw-lighter">
+                {{ current_sprint_scoped_metric.total_accuracy_on_committed_to_story_points|percentage }}
+            </span>
+        </p>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+{% extends "authenticated/base_authenticated.html" %}
+
+{% block content %}
+    <div class="row mb-4 mt-2">
+        {% include "authenticated/kpi/kpi_navigation.html" %}
+    </div>
+    <div class="row">
+        {% block content_kpi %}
+        {% endblock %}
+    </div>
+{% endblock %}

@@ -1,0 +1,23 @@
+<div class="btn-group">
+    <button
+            class="btn btn-outline-secondary"
+            onclick='window.location.href = "{% url 'kpi:kpi_dashboard' %}"'
+            type="button"
+    >
+        Dashboard
+    </button>
+    <button
+            class="btn btn-outline-secondary"
+            onclick='window.location.href = "{% url 'kpi:kpi_developers' %}"'
+            type="button"
+    >
+        Developers
+    </button>
+    <button
+            class="btn btn-outline-secondary"
+            onclick='window.location.href = "{% url 'kpi:kpi_sprints' %}"'
+            type="button"
+    >
+        Sprints
+    </button>
+</div>
