@@ -27,6 +27,30 @@ class GitLabUser(
     username: str | None = create_generic_varchar()
 
     @property
+    def issues_assigned(self):
+        from git_lab.models.git_lab_issue import GitLabIssue
+        return cast_query_set(
+            typ=GitLabIssue,
+            val=GitLabIssue.objects.filter(assignees__in=[self])
+        )
+
+    @property
+    def issues_authored(self):
+        from git_lab.models.git_lab_issue import GitLabIssue
+        return cast_query_set(
+            typ=GitLabIssue,
+            val=GitLabIssue.objects.filter(author=self)
+        )
+
+    @property
+    def issues_closed(self):
+        from git_lab.models.git_lab_issue import GitLabIssue
+        return cast_query_set(
+            typ=GitLabIssue,
+            val=GitLabIssue.objects.filter(closed_by=self)
+        )
+
+    @property
     def merge_requests_assigned(self):
         from git_lab.models.git_lab_merge_request import GitLabMergeRequest
         return cast_query_set(

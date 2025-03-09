@@ -48,6 +48,14 @@ class GitLabProject(
     ssh_url_to_repo: str | None = create_generic_varchar()
 
     @property
+    def issues(self):
+        from git_lab.models.git_lab_issue import GitLabIssue
+        return cast_query_set(
+            typ=GitLabIssue,
+            val=GitLabIssue.objects.filter(project=self)
+        )
+
+    @property
     def merge_requests(self):
         from git_lab.models.git_lab_merge_request import GitLabMergeRequest
         return cast_query_set(
