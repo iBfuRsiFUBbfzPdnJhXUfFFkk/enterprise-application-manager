@@ -12,7 +12,7 @@ app_name: str = 'git_lab'
 urlpatterns: list[URLPattern | URLResolver] = [
     path(name='git_lab_groups', route='group/', view=git_lab_groups_api),
     path(name='git_lab_issues', route='issue/', view=git_lab_issues_api),
-    path(name='git_lab_iterations', route='iterations/', view=git_lab_iterations_api),
+    path(name='git_lab_iterations', route='iteration/', view=git_lab_iterations_api),
     path(name='git_lab_merge_requests', route='merge-request/', view=git_lab_merge_requests_api),
     path(name='git_lab_projects', route='project/', view=git_lab_projects_api),
     path(name='git_lab_users', route='user/', view=git_lab_users_api),
