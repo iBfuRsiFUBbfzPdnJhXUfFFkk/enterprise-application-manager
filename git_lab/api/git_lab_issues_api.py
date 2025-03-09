@@ -40,7 +40,7 @@ def git_lab_issues_api(
             continue
         issues: list[ProjectIssue] = cast(
             typ=list[ProjectIssue],
-            val=project.issues.list(page=1, per_page=100)
+            val=project.issues.list(all=True)
         )
         for issue in issues:
             all_issues.add(issue)
