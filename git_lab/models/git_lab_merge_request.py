@@ -38,7 +38,7 @@ class GitLabMergeRequest(
     merged_at: datetime | None = create_generic_datetime()
     merged_by: GitLabUser | None = create_generic_fk(related_name="merge_requests_merged", to=GitLabUser)
     prepared_at: datetime | None = create_generic_datetime()
-    project: GitLabProject | None = create_generic_fk(to=GitLabProject)
+    project: GitLabProject | None = create_generic_fk(related_name="merge_requests", to=GitLabProject)
     references_long: str | None = create_generic_varchar()
     references_relative: str | None = create_generic_varchar()
     references_short: str | None = create_generic_varchar()
