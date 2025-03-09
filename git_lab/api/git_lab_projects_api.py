@@ -1,4 +1,4 @@
-from typing import cast, TypedDict
+from typing import cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
@@ -9,46 +9,11 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.models.common.typed_dicts.git_lab_links_typed_dict import GitLabLinksTypedDict
+from git_lab.models.common.typed_dicts.git_lab_namespace_typed_dict import GitLabNamespaceTypedDict
+from git_lab.models.common.typed_dicts.git_lab_project_typed_dict import GitLabProjectTypedDict
 from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_project import GitLabProject
-
-
-class GitLabProjectLinksTypedDict(TypedDict):
-    cluster_agents: str | None
-    events: str | None
-    issues: str | None
-    labels: str | None
-    members: str | None
-    merge_requests: str | None
-    repo_branches: str | None
-    self: str | None
-
-
-class GitLabProjectNamespaceTypedDict(TypedDict):
-    id: int | None
-    kind: str | None
-
-
-class GitLabProjectTypedDict(TypedDict):
-    _links: GitLabProjectLinksTypedDict | None
-    avatar_url: str | None
-    container_registry_image_prefix: str | None
-    created_at: str | None
-    default_branch: str | None
-    description: str | None
-    http_url_to_repo: str | None
-    id: int
-    last_activity_at: str | None
-    name: str | None
-    name_with_namespace: str | None
-    namespace: GitLabProjectNamespaceTypedDict | None
-    open_issues_count: int | None
-    path: str | None
-    path_with_namespace: str | None
-    readme_url: str | None
-    ssh_url_to_repo: str | None
-    updated_at: str | None
-    web_url: str | None
 
 
 def git_lab_projects_api(
@@ -81,8 +46,9 @@ def git_lab_projects_api(
         git_lab_project.default_branch = project_dict.get("default_branch")
         git_lab_project.description = project_dict.get("description")
         git_lab_project.http_url_to_repo = project_dict.get("http_url_to_repo")
-        git_lab_project.last_activity_at = convert_and_enforce_utc_timezone(datetime_string=project_dict.get("last_activity_at"))
-        links: GitLabProjectLinksTypedDict | None = project_dict.get("_links")
+        git_lab_project.last_activity_at = convert_and_enforce_utc_timezone(
+            datetime_string=project_dict.get("last_activity_at"))
+        links: GitLabLinksTypedDict | None = project_dict.get("_links")
         if links is not None:
             git_lab_project.link_cluster_agents = links.get("cluster_agents")
             git_lab_project.link_events = links.get("events")
@@ -94,7 +60,7 @@ def git_lab_projects_api(
             git_lab_project.link_self = links.get("self")
         git_lab_project.name = project_dict.get("name")
         git_lab_project.name_with_namespace = project_dict.get("name_with_namespace")
-        namespace: GitLabProjectNamespaceTypedDict | None = project_dict.get("namespace")
+        namespace: GitLabNamespaceTypedDict | None = project_dict.get("namespace")
         if namespace is not None:
             namespace_id: int | None = namespace.get("id")
             namespace_kind: str | None = namespace.get("kind")

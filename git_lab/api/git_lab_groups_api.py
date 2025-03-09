@@ -1,4 +1,4 @@
-from typing import cast, TypedDict
+from typing import cast
 
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab
@@ -8,19 +8,8 @@ from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.models.common.typed_dicts.git_lab_group_typed_dict import GitLabGroupTypedDict
 from git_lab.models.git_lab_group import GitLabGroup
-
-
-class GitLabGroupTypedDict(TypedDict):
-    avatar_url: str | None
-    created_at: str | None
-    description: str | None
-    full_name: str | None
-    full_path: str | None
-    id: int
-    name: str | None
-    path: str | None
-    web_url: str | None
 
 
 def recurse_groups(

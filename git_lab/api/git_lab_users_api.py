@@ -1,4 +1,4 @@
-from typing import cast, TypedDict
+from typing import cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
@@ -9,28 +9,9 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.models.common.typed_dicts.git_lab_user_typed_dict import GitLabUserTypedDict
 from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_user import GitLabUser
-
-
-class GitLabUserBaseTypedDict(TypedDict):
-    avatar_url: str | None
-    id: int | None
-    locked: bool | None
-    name: str | None
-    username: str | None
-    web_url: str | None
-
-
-class GitLabCreatedByTypedDict(GitLabUserBaseTypedDict):
-    state: str | None
-
-
-class GitLabUserTypedDict(GitLabUserBaseTypedDict):
-    created_at: str | None
-    created_by: GitLabCreatedByTypedDict | None
-    expires_at: str | None
-    membership_state: str | None
 
 
 def git_lab_users_api(
