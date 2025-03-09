@@ -54,6 +54,6 @@ class GitLabIssue(
         return f"{self.references_long}"
 
     class Meta:
-        ordering = ['-references_long']
+        ordering = ['-id']
         verbose_name = "GitLab Issue"
         verbose_name_plural = "GitLab Issues"
