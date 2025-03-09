@@ -38,7 +38,7 @@ def git_lab_merge_requests_api(
             continue
         merge_requests: list[GroupMergeRequest] = cast(
             typ=list[GroupMergeRequest],
-            val=group.mergerequests.list(page=1, per_page=100)
+            val=group.mergerequests.list(all=True)
         )
         for merge_request in merge_requests:
             all_merge_requests.add(merge_request)
