@@ -8,6 +8,7 @@ from gitlab.v4.objects import ProjectIssue, Project
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.models.common.typed_dicts.git_lab_issue_typed_dict import GitLabIssueTypedDict
 from git_lab.models.git_lab_project import GitLabProject
 
 
@@ -32,5 +33,5 @@ def git_lab_issues_api(
         )
         for issue in issues:
             all_issues.add(issue)
-    issue_dicts: list[dict] = [issue.asdict() for issue in list(all_issues)]
+    issue_dicts: list[GitLabIssueTypedDict] = [issue.asdict() for issue in list(all_issues)]
     return JsonResponse(data=issue_dicts, safe=False)

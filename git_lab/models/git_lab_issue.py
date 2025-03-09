@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
-from core.models.common.field_factories.create_generic_datetime import create_generic_datetime
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
+from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from git_lab.models.common.abstract.abstract_git_lab_closed_at import AbstractGitLabClosedAt
@@ -22,7 +20,7 @@ from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 
 
-class GitLabMergeRequest(
+class GitLabIssue(
     AbstractBaseModel,
     AbstractGitLabClosedAt,
     AbstractGitLabCreatedAt,
@@ -37,25 +35,21 @@ class GitLabMergeRequest(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
-    assignees: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_assigned", to=GitLabUser)
-    author: GitLabUser | None = create_generic_fk(related_name="merge_requests_authored", to=GitLabUser)
-    blocking_discussions_resolved: bool | None = create_generic_boolean()
-    closed_by: GitLabUser | None = create_generic_fk(related_name="merge_requests_closed", to=GitLabUser)
-    draft: bool | None = create_generic_boolean()
-    has_conflicts: bool | None = create_generic_boolean()
-    merged_at: datetime | None = create_generic_datetime()
-    merged_by: GitLabUser | None = create_generic_fk(related_name="merge_requests_merged", to=GitLabUser)
-    prepared_at: datetime | None = create_generic_datetime()
-    project: GitLabProject | None = create_generic_fk(related_name="merge_requests", to=GitLabProject)
-    reviewers: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_reviewed", to=GitLabUser)
-    sha: str | None = create_generic_varchar()
-    source_branch: str | None = create_generic_varchar()
-    target_branch: str | None = create_generic_varchar()
+    assignees: set[GitLabUser] | None = create_generic_m2m(related_name="issues_assigned", to=GitLabUser)
+    author: GitLabUser | None = create_generic_fk(related_name="issues_authored", to=GitLabUser)
+    blocking_issues_count: int | None = create_generic_integer()
+    closed_by: GitLabUser | None = create_generic_fk(related_name="issues_closed", to=GitLabUser)
+    has_tasks: bool | None = create_generic_boolean()
+    issue_type: str | None = create_generic_varchar()
+    project: GitLabProject | None = create_generic_fk(related_name="issues", to=GitLabProject)
+    type: str | None = create_generic_varchar()
+    user_notes_count: int | None = create_generic_integer()
+    weight: int | None = create_generic_integer()
 
     def __str__(self) -> str:
         return f"{self.references_relative}"
 
     class Meta:
         ordering = ['-id']
-        verbose_name = "GitLab Merge Request"
-        verbose_name_plural = "GitLab Merge Requests"
+        verbose_name = "GitLab Issue"
+        verbose_name_plural = "GitLab Issues"
