@@ -11,6 +11,8 @@ from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
+from git_lab.models.git_lab_project import GitLabProject
+from git_lab.models.git_lab_user import GitLabUser
 
 
 class GitLabMergeRequestUserTypedDict(TypedDict):
@@ -127,6 +129,15 @@ def git_lab_merge_requests_api(
             git_lab_merge_request.time_stats_human_total_time_spent = time_stats.get("human_total_time_spent")
             git_lab_merge_request.time_stats_time_estimate = time_stats.get("time_estimate")
             git_lab_merge_request.time_stats_total_time_spent = time_stats.get("total_time_spent")
-
+        merged_by: GitLabMergeRequestUserTypedDict | None = merge_request_dict.get("merged_by")
+        if merged_by is not None:
+            git_lab_merge_request.merged_by = GitLabUser.objects.get(id=merged_by.get("id"))
+        git_lab_merge_request.project = GitLabProject.objects.get(id=merge_request_dict.get("project_id"))
+        reviewers: list[GitLabMergeRequestUserTypedDict] | None = merge_request_dict.get("reviewers")
+        if reviewers is not None:
+            for reviewer in reviewers:
+                user: GitLabUser | None = GitLabUser.objects.get(id=reviewer.get("id"))
+                if user is not None:
+                    git_lab_merge_request.reviewers.add(user)
         git_lab_merge_request.save()
     return JsonResponse(data=merge_request_dicts, safe=False)

@@ -34,7 +34,7 @@ class GitLabMergeRequest(
     references_long: str | None = create_generic_varchar()
     references_relative: str | None = create_generic_varchar()
     references_short: str | None = create_generic_varchar()
-    reviewers: list[GitLabUser] | None = create_generic_m2m(to=GitLabUser)
+    reviewers: set[GitLabUser] | None = create_generic_m2m(to=GitLabUser)
     sha: str | None = create_generic_varchar()
     source_branch: str | None = create_generic_varchar()
     state: str | None = create_generic_varchar()
@@ -49,7 +49,7 @@ class GitLabMergeRequest(
     updated_at: datetime | None = create_generic_datetime()
 
     def __str__(self) -> str:
-        return f"{self.references_long}"
+        return f"{self.references_relative}"
 
     class Meta:
         ordering = ['-id']
