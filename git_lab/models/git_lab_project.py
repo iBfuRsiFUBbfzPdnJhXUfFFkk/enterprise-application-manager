@@ -30,7 +30,7 @@ class GitLabProject(
 ):
     container_registry_image_prefix: str | None = create_generic_varchar()
     default_branch: str | None = create_generic_varchar()
-    group: GitLabGroup | None = create_generic_fk(to=GitLabGroup)
+    group: GitLabGroup | None = create_generic_fk(related_name="projects", to=GitLabGroup)
     http_url_to_repo: str | None = create_generic_varchar()
     last_activity_at: datetime | None = create_generic_datetime()
     link_cluster_agents: str | None = create_generic_varchar()

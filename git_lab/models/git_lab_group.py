@@ -1,6 +1,7 @@
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_description import AbstractGitLabDescription
@@ -21,6 +22,14 @@ class GitLabGroup(
 ):
     full_name: str | None = create_generic_varchar()
     full_path: str | None = create_generic_varchar()
+
+    @property
+    def projects(self):
+        from git_lab.models.git_lab_project import GitLabProject
+        return cast_query_set(
+            typ=GitLabProject,
+            val=GitLabProject.objects.filter(group=self)
+        )
 
     def __str__(self) -> str:
         return f"{self.full_path}"
