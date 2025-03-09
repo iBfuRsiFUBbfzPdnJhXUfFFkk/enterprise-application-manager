@@ -28,8 +28,11 @@ class GitLabMergeRequest(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
+    assignees: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_assigned", to=GitLabUser)
+    author: GitLabUser | None = create_generic_fk(related_name="merge_requests_authored", to=GitLabUser)
     blocking_discussions_resolved: bool | None = create_generic_boolean()
     closed_at: datetime | None = create_generic_datetime()
+    closed_by: GitLabUser | None = create_generic_fk(related_name="merge_requests_closed", to=GitLabUser)
     draft: bool | None = create_generic_boolean()
     has_conflicts: bool | None = create_generic_boolean()
     merged_at: datetime | None = create_generic_datetime()
@@ -39,7 +42,7 @@ class GitLabMergeRequest(
     references_long: str | None = create_generic_varchar()
     references_relative: str | None = create_generic_varchar()
     references_short: str | None = create_generic_varchar()
-    reviewers: set[GitLabUser] | None = create_generic_m2m(to=GitLabUser)
+    reviewers: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_reviewed", to=GitLabUser)
     sha: str | None = create_generic_varchar()
     source_branch: str | None = create_generic_varchar()
     target_branch: str | None = create_generic_varchar()

@@ -89,6 +89,12 @@ def git_lab_merge_requests_api(
         merged_by: GitLabUserReferenceTypedDict | None = merge_request_dict.get("merged_by")
         if merged_by is not None:
             git_lab_merge_request.merged_by = GitLabUser.objects.get(id=merged_by.get("id"))
+        closed_by: GitLabUserReferenceTypedDict | None = merge_request_dict.get("closed_by")
+        if closed_by is not None:
+            git_lab_merge_request.closed_by = GitLabUser.objects.get(id=closed_by.get("id"))
+        author: GitLabUserReferenceTypedDict | None = merge_request_dict.get("author")
+        if author is not None:
+            git_lab_merge_request.author = GitLabUser.objects.get(id=author.get("id"))
         git_lab_merge_request.project = GitLabProject.objects.get(id=merge_request_dict.get("project_id"))
         reviewers: list[GitLabUserReferenceTypedDict] | None = merge_request_dict.get("reviewers")
         if reviewers is not None:
@@ -96,5 +102,11 @@ def git_lab_merge_requests_api(
                 user: GitLabUser | None = GitLabUser.objects.get(id=reviewer.get("id"))
                 if user is not None:
                     git_lab_merge_request.reviewers.add(user)
+        assignees: list[GitLabUserReferenceTypedDict] | None = merge_request_dict.get("assignees")
+        if assignees is not None:
+            for assignee in assignees:
+                user: GitLabUser | None = GitLabUser.objects.get(id=assignee.get("id"))
+                if user is not None:
+                    git_lab_merge_request.assignees.add(user)
         git_lab_merge_request.save()
     return JsonResponse(data=merge_request_dicts, safe=False)

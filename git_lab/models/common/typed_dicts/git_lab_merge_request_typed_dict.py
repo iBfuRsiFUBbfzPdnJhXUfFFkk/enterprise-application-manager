@@ -13,6 +13,7 @@ class GitLabMergeRequestTypedDict(TypedDict):
     author: GitLabUserReferenceTypedDict | None
     blocking_discussions_resolved: bool | None
     closed_at: str | None
+    closed_by: GitLabUserReferenceTypedDict | None
     created_at: str | None
     description: str | None
     draft: bool | None
