@@ -51,9 +51,9 @@ class GitLabIssue(
     weight: int | None = create_generic_integer()
 
     def __str__(self) -> str:
-        return f"{self.references_relative}"
+        return f"{self.references_long}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-references_long']
         verbose_name = "GitLab Issue"
         verbose_name_plural = "GitLab Issues"
