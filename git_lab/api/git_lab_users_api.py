@@ -6,6 +6,7 @@ from gitlab import Gitlab
 from gitlab.v4.objects import GroupMember, Group
 
 from core.utilities.cast_query_set import cast_query_set
+from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.git_lab_group import GitLabGroup
@@ -57,8 +58,8 @@ def git_lab_users_api(
             continue
         git_lab_user: GitLabUser = GitLabUser.objects.get_or_create(id=member_id)[0]
         git_lab_user.avatar_url = member_dict.get("avatar_url")
-        git_lab_user.created_at = member_dict.get("created_at")
-        git_lab_user.expires_at = member_dict.get("expires_at")
+        git_lab_user.created_at = convert_and_enforce_utc_timezone(datetime_string=member_dict.get("created_at"))
+        git_lab_user.expires_at = convert_and_enforce_utc_timezone(datetime_string=member_dict.get("expires_at"))
         git_lab_user.locked = member_dict.get("locked")
         git_lab_user.membership_state = member_dict.get("membership_state")
         git_lab_user.name = member_dict.get("name")

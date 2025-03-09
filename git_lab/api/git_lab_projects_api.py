@@ -6,6 +6,7 @@ from gitlab import Gitlab
 from gitlab.v4.objects import Group, GroupProject
 
 from core.utilities.cast_query_set import cast_query_set
+from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.git_lab_group import GitLabGroup
@@ -76,11 +77,11 @@ def git_lab_projects_api(
         git_lab_project: GitLabProject = GitLabProject.objects.get_or_create(id=project_id)[0]
         git_lab_project.avatar_url = project_dict.get("avatar_url")
         git_lab_project.container_registry_image_prefix = project_dict.get("container_registry_image_prefix")
-        git_lab_project.created_at = project_dict.get("created_at")
+        git_lab_project.created_at = convert_and_enforce_utc_timezone(datetime_string=project_dict.get("created_at"))
         git_lab_project.default_branch = project_dict.get("default_branch")
         git_lab_project.description = project_dict.get("description")
         git_lab_project.http_url_to_repo = project_dict.get("http_url_to_repo")
-        git_lab_project.last_activity_at = project_dict.get("last_activity_at")
+        git_lab_project.last_activity_at = convert_and_enforce_utc_timezone(datetime_string=project_dict.get("last_activity_at"))
         links: GitLabProjectLinksTypedDict | None = project_dict.get("_links")
         if links is not None:
             git_lab_project.link_cluster_agents = links.get("cluster_agents")
@@ -106,7 +107,7 @@ def git_lab_projects_api(
         git_lab_project.path_with_namespace = project_dict.get("path_with_namespace")
         git_lab_project.readme_url = project_dict.get("readme_url")
         git_lab_project.ssh_url_to_repo = project_dict.get("ssh_url_to_repo")
-        git_lab_project.updated_at = project_dict.get("updated_at")
+        git_lab_project.updated_at = convert_and_enforce_utc_timezone(datetime_string=project_dict.get("updated_at"))
         git_lab_project.web_url = project_dict.get("web_url")
         git_lab_project.save()
     return JsonResponse(data=project_dicts, safe=False)

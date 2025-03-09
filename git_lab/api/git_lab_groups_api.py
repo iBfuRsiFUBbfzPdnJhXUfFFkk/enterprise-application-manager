@@ -5,6 +5,7 @@ from gitlab import Gitlab
 from gitlab.v4.objects import Group, GroupSubgroup
 
 from core.models.this_server_configuration import ThisServerConfiguration
+from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.git_lab_group import GitLabGroup
@@ -74,7 +75,7 @@ def git_lab_groups_api(
             continue
         git_lab_group: GitLabGroup = GitLabGroup.objects.get_or_create(id=group_id)[0]
         git_lab_group.avatar_url = group_dict.get("avatar_url")
-        git_lab_group.created_at = group_dict.get("created_at")
+        git_lab_group.created_at = convert_and_enforce_utc_timezone(datetime_string=group_dict.get("created_at"))
         git_lab_group.description = group_dict.get("description")
         git_lab_group.full_name = group_dict.get("full_name")
         git_lab_group.full_path = group_dict.get("full_path")

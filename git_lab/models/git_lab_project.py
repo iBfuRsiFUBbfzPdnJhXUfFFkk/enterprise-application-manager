@@ -1,18 +1,20 @@
 from datetime import datetime
 
-from django.db.models import IntegerField
-
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.field_factories.create_generic_datetime import create_generic_datetime
 from core.models.common.field_factories.create_generic_fk import create_generic_fk
 from core.models.common.field_factories.create_generic_integer import create_generic_integer
 from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from git_lab.models.common.abstract.abstract_git_lab_primary_key import AbstractGitLabPrimaryKey
+from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
 from git_lab.models.git_lab_group import GitLabGroup
 
 
 class GitLabProject(
     AbstractBaseModel,
+    AbstractGitLabPrimaryKey,
+    AbstractGitLabWebUrl,
     AbstractName,
 ):
     avatar_url: str | None = create_generic_varchar()
@@ -22,7 +24,6 @@ class GitLabProject(
     description: str | None = create_generic_varchar()
     group: GitLabGroup | None = create_generic_fk(to=GitLabGroup)
     http_url_to_repo: str | None = create_generic_varchar()
-    id: int = IntegerField(primary_key=True)
     last_activity_at: datetime | None = create_generic_datetime()
     link_cluster_agents: str | None = create_generic_varchar()
     link_events: str | None = create_generic_varchar()
@@ -39,7 +40,6 @@ class GitLabProject(
     readme_url: str | None = create_generic_varchar()
     ssh_url_to_repo: str | None = create_generic_varchar()
     updated_at: datetime | None = create_generic_datetime()
-    web_url: str | None = create_generic_varchar()
 
     def __str__(self) -> str:
         return f"{self.path_with_namespace}"
