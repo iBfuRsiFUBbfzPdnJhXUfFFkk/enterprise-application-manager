@@ -88,24 +88,24 @@ def git_lab_merge_requests_api(
             git_lab_merge_request.time_stats_total_time_spent = time_stats.get("total_time_spent")
         merged_by: GitLabUserReferenceTypedDict | None = merge_request_dict.get("merged_by")
         if merged_by is not None:
-            git_lab_merge_request.merged_by = GitLabUser.objects.get(id=merged_by.get("id"))
+            git_lab_merge_request.merged_by = GitLabUser.objects.filter(id=merged_by.get("id")).first()
         closed_by: GitLabUserReferenceTypedDict | None = merge_request_dict.get("closed_by")
         if closed_by is not None:
-            git_lab_merge_request.closed_by = GitLabUser.objects.get(id=closed_by.get("id"))
+            git_lab_merge_request.closed_by = GitLabUser.objects.filter(id=closed_by.get("id")).first()
         author: GitLabUserReferenceTypedDict | None = merge_request_dict.get("author")
         if author is not None:
-            git_lab_merge_request.author = GitLabUser.objects.get(id=author.get("id"))
-        git_lab_merge_request.project = GitLabProject.objects.get(id=merge_request_dict.get("project_id"))
+            git_lab_merge_request.author = GitLabUser.objects.filter(id=author.get("id")).first()
+        git_lab_merge_request.project = GitLabProject.objects.filter(id=merge_request_dict.get("project_id")).first()
         reviewers: list[GitLabUserReferenceTypedDict] | None = merge_request_dict.get("reviewers")
         if reviewers is not None:
             for reviewer in reviewers:
-                user: GitLabUser | None = GitLabUser.objects.get(id=reviewer.get("id"))
+                user: GitLabUser | None = GitLabUser.objects.filter(id=reviewer.get("id")).first()
                 if user is not None:
                     git_lab_merge_request.reviewers.add(user)
         assignees: list[GitLabUserReferenceTypedDict] | None = merge_request_dict.get("assignees")
         if assignees is not None:
             for assignee in assignees:
-                user: GitLabUser | None = GitLabUser.objects.get(id=assignee.get("id"))
+                user: GitLabUser | None = GitLabUser.objects.filter(id=assignee.get("id")).first()
                 if user is not None:
                     git_lab_merge_request.assignees.add(user)
         git_lab_merge_request.save()
