@@ -61,7 +61,7 @@ def git_lab_users_api(
         git_lab_user.created_at = convert_and_enforce_utc_timezone(datetime_string=member_dict.get("created_at"))
         git_lab_user.expires_at = convert_and_enforce_utc_timezone(datetime_string=member_dict.get("expires_at"))
         git_lab_user.locked = member_dict.get("locked")
-        git_lab_user.membership_state = member_dict.get("membership_state")
+        git_lab_user.state = member_dict.get("membership_state")
         git_lab_user.name = member_dict.get("name")
         git_lab_user.username = member_dict.get("username")
         git_lab_user.web_url = member_dict.get("web_url")
