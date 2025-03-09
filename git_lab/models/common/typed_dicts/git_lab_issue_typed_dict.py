@@ -1,5 +1,6 @@
 from typing import TypedDict
 
+from git_lab.models.common.typed_dicts.git_lab_iteration_typed_dict import GitLabIterationTypedDict
 from git_lab.models.common.typed_dicts.git_lab_links_typed_dict import GitLabLinksTypedDict
 from git_lab.models.common.typed_dicts.git_lab_references_typed_dict import GitLabReferencesTypedDict
 from git_lab.models.common.typed_dicts.git_lab_task_completion_status_typed_dict import \
@@ -21,6 +22,7 @@ class GitLabIssueTypedDict(TypedDict):
     id: int
     iid: int | None
     issue_type: str | None
+    iteration: GitLabIterationTypedDict | None
     project_id: int | None
     references: GitLabReferencesTypedDict | None
     state: str | None

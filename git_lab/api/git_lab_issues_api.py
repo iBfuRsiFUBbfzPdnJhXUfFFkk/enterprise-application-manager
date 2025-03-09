@@ -10,6 +10,7 @@ from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.common.typed_dicts.git_lab_issue_typed_dict import GitLabIssueTypedDict
+from git_lab.models.common.typed_dicts.git_lab_iteration_typed_dict import GitLabIterationTypedDict
 from git_lab.models.common.typed_dicts.git_lab_links_typed_dict import GitLabLinksTypedDict
 from git_lab.models.common.typed_dicts.git_lab_references_typed_dict import GitLabReferencesTypedDict
 from git_lab.models.common.typed_dicts.git_lab_task_completion_status_typed_dict import \
@@ -17,6 +18,7 @@ from git_lab.models.common.typed_dicts.git_lab_task_completion_status_typed_dict
 from git_lab.models.common.typed_dicts.git_lab_time_stats_typed_dict import GitLabTimeStatsTypedDict
 from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
 from git_lab.models.git_lab_issue import GitLabIssue
+from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 
@@ -100,5 +102,8 @@ def git_lab_issues_api(
             git_lab_issue.link_notes = links.get("notes")
             git_lab_issue.link_project = links.get("project")
             git_lab_issue.link_self = links.get("self")
+        iteration: GitLabIterationTypedDict | None = issue_dict.get("iteration")
+        if iteration is not None:
+            git_lab_issue.iteration = GitLabIteration.objects.filter(id=iteration.get("id")).first()
         git_lab_issue.save()
     return JsonResponse(data=issue_dicts, safe=False)

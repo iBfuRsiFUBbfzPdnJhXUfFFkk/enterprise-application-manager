@@ -16,6 +16,7 @@ from git_lab.models.common.abstract.abstract_git_lab_time_stats import AbstractG
 from git_lab.models.common.abstract.abstract_git_lab_title import AbstractGitLabTitle
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
+from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 
@@ -41,6 +42,7 @@ class GitLabIssue(
     closed_by: GitLabUser | None = create_generic_fk(related_name="issues_closed", to=GitLabUser)
     has_tasks: bool | None = create_generic_boolean()
     issue_type: str | None = create_generic_varchar()
+    iteration: GitLabIteration | None = create_generic_fk(related_name="issues", to=GitLabIteration)
     link_award_emoji: str | None = create_generic_varchar()
     link_notes: str | None = create_generic_varchar()
     link_project: str | None = create_generic_varchar()
