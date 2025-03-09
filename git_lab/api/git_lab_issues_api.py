@@ -96,9 +96,9 @@ def git_lab_issues_api(
                     git_lab_issue.assignees.add(user)
         links: GitLabLinksTypedDict | None = issue_dict.get("_links")
         if links is not None:
-            git_lab_issue.award_emoji = links.get("award_emoji")
-            git_lab_issue.notes = links.get("notes")
-            git_lab_issue.project = links.get("project")
-            git_lab_issue.self = links.get("self")
+            git_lab_issue.link_award_emoji = links.get("award_emoji")
+            git_lab_issue.link_notes = links.get("notes")
+            git_lab_issue.link_project = links.get("project")
+            git_lab_issue.link_self = links.get("self")
         git_lab_issue.save()
     return JsonResponse(data=issue_dicts, safe=False)
