@@ -5,10 +5,10 @@ from core.models.common.abstract.abstract_version import AbstractVersion
 from core.models.common.enums.data_storage_form_choices import DATA_STORAGE_FORM_CHOICES
 from core.models.common.enums.database_flavor_choices import DATABASE_FLAVOR_CHOICES
 from core.models.common.enums.environment_choices import ENVIRONMENT_CHOICES
-from core.models.common.field_factories.create_generic_enum import create_generic_enum
-from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.encryption import encrypt_secret, decrypt_secret
 
 

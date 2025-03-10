@@ -2,7 +2,7 @@ from datetime import date
 
 from django.db.models import Model
 
-from core.models.common.field_factories.create_generic_date import create_generic_date
+from django_generic_model_fields.create_generic_date import create_generic_date
 
 
 class AbstractStartEndDates(Model):

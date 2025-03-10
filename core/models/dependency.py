@@ -4,9 +4,9 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_version import AbstractVersion
 from core.models.common.enums.programing_concept_choices import PROGRAMING_CONCEPT_CHOICES
-from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
-from core.models.common.field_factories.create_generic_enum import create_generic_enum
-from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
+from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 
 
 class Dependency(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion):

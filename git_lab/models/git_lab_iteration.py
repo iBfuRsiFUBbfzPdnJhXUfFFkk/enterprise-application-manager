@@ -1,17 +1,14 @@
 from datetime import date
 
+from django_generic_model_fields.create_generic_date import create_generic_date
+from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-from core.models.common.abstract.abstract_name import AbstractName
-from core.models.common.field_factories.create_generic_date import create_generic_date
-from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
 from core.utilities.cast_query_set import cast_query_set
-from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_description import AbstractGitLabDescription
 from git_lab.models.common.abstract.abstract_git_lab_internal_identification import AbstractGitLabInternalIdentification
-from git_lab.models.common.abstract.abstract_git_lab_path import AbstractGitLabPath
 from git_lab.models.common.abstract.abstract_git_lab_primary_key import AbstractGitLabPrimaryKey
 from git_lab.models.common.abstract.abstract_git_lab_title import AbstractGitLabTitle
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt

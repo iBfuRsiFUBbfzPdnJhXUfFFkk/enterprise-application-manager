@@ -5,12 +5,12 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScrumCapacityBase
 from core.models.common.enums.git_lab_api_version_choices import GIT_LAB_API_VERSION_CHOICES, GIT_LAB_API_VERSION_FOUR
-from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
-from core.models.common.field_factories.create_generic_enum import create_generic_enum
-from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
-from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_decimal import create_generic_decimal
+from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.models.role import Role
 from core.models.secret import Secret
 

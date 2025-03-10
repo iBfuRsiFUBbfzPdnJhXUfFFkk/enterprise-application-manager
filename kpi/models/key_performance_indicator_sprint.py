@@ -4,9 +4,9 @@ from math import ceil
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScrumCapacityBase
-from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
-from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_decimal import create_generic_decimal
+from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
 from core.models.person import Person
 from core.models.sprint import Sprint
 from core.models.this_server_configuration import ThisServerConfiguration

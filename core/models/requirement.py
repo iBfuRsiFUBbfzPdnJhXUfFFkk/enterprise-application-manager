@@ -2,8 +2,8 @@ from core.models.application import Application
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
-from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
-from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
+from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 
 
 class Requirement(AbstractBaseModel, AbstractComment, AbstractName):

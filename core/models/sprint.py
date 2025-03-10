@@ -1,15 +1,15 @@
 from datetime import date
 from typing import Optional
 
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet
 
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
-from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_decimal import create_generic_decimal
+from django_generic_model_fields.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.cast_query_set import cast_query_set

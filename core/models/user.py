@@ -3,8 +3,8 @@ from simple_history.models import HistoricalRecords
 
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_enumeration_attack_uuid import AbstractEnumerationAttackUuid
-from core.models.common.field_factories.create_generic_one_to_one_fk import create_generic_one_to_one_fk
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_one_to_one_fk import create_generic_one_to_one_fk
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.models.person import Person
 
 

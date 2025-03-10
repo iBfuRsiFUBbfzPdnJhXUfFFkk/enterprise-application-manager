@@ -1,7 +1,7 @@
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
-from core.models.common.field_factories.create_generic_date import create_generic_date
+from django_generic_model_fields.create_generic_date import create_generic_date
 
 
 class ReleaseBundle(AbstractBaseModel, AbstractComment, AbstractName):

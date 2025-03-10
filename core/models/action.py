@@ -2,9 +2,9 @@ from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_uniform_resource_locator import AbstractUniformResourceLocator
-from core.models.common.field_factories.create_generic_datetime import create_generic_datetime
-from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_datetime import create_generic_datetime
+from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
 from core.models.user import User
 
 

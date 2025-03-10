@@ -2,7 +2,7 @@ from typing import Optional
 
 from django.db.models import Model
 
-from core.models.common.field_factories.create_generic_uuid import create_generic_uuid
+from django_generic_model_fields.create_generic_uuid import create_generic_uuid
 
 
 class AbstractEnumerationAttackUuid(Model):

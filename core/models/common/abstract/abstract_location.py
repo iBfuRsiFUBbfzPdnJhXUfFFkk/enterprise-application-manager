@@ -1,9 +1,9 @@
 from django.db.models import Model
 
 from core.models.common.enums.us_state_choices import US_STATE_CHOICES
-from core.models.common.field_factories.create_generic_decimal import create_generic_decimal
-from core.models.common.field_factories.create_generic_enum import create_generic_enum
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_decimal import create_generic_decimal
+from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class AbstractLocation(Model):

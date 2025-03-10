@@ -1,3 +1,5 @@
+from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+
 from core.models.application_group import ApplicationGroup
 from core.models.common.abstract.abstract_acronym import AbstractAcronym
 from core.models.common.abstract.abstract_alias import AbstractAlias
@@ -9,13 +11,12 @@ from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CH
 from core.models.common.enums.deployment_medium_choices import DEPLOYMENT_MEDIUM_CHOICES
 from core.models.common.enums.lifecycle_choices import LIFECYCLE_CHOICES
 from core.models.common.enums.platform_target_choices import PLATFORM_TARGET_CHOICES
-from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
-from core.models.common.field_factories.create_generic_date import create_generic_date
-from core.models.common.field_factories.create_generic_enum import create_generic_enum
-from core.models.common.field_factories.create_generic_fk import create_generic_fk
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
-from core.models.common.field_factories.create_generic_m2m import create_generic_m2m
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_date import create_generic_date
+from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.models.person import Person
 from core.models.service_provider import ServiceProvider
 from core.models.tool import Tool

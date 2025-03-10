@@ -2,9 +2,9 @@ from datetime import datetime
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
-from core.models.common.field_factories.create_generic_boolean import create_generic_boolean
-from core.models.common.field_factories.create_generic_datetime import create_generic_datetime
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+from django_generic_model_fields.create_generic_datetime import create_generic_datetime
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt

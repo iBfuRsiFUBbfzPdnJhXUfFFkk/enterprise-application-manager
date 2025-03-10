@@ -1,10 +1,11 @@
+from django_generic_model_fields.create_generic_blob import create_generic_blob
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_version import AbstractVersion
-from core.models.common.field_factories.create_generic_blob import create_generic_blob
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion):

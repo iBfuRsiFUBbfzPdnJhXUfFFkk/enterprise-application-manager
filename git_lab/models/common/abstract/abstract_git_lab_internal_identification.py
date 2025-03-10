@@ -1,6 +1,6 @@
 from django.db.models import Model
 
-from core.models.common.field_factories.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_integer import create_generic_integer
 
 
 class AbstractGitLabInternalIdentification(Model):

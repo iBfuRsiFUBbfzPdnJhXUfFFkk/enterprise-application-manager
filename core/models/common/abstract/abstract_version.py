@@ -1,6 +1,6 @@
 from django.db.models import Model
 
-from core.models.common.field_factories.create_generic_varchar import create_generic_varchar
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class AbstractVersion(Model):
