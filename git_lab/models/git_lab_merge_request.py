@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from django_generic_model_fields.create_generic_boolean import create_generic_boolean
 from django_generic_model_fields.create_generic_datetime import create_generic_datetime
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_closed_at import AbstractGitLabClosedAt
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_description import AbstractGitLabDescription
@@ -20,6 +21,7 @@ from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractG
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 class GitLabMergeRequest(
@@ -50,6 +52,7 @@ class GitLabMergeRequest(
     reviewers: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_reviewed", to=GitLabUser)
     sha: str | None = create_generic_varchar()
     source_branch: str | None = create_generic_varchar()
+    sprint: ScrumSprint | None = create_generic_fk(related_name="merge_requests", to=ScrumSprint)
     target_branch: str | None = create_generic_varchar()
 
     def __str__(self) -> str:

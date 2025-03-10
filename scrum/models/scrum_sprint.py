@@ -16,6 +16,7 @@ class ScrumSprint(
     AbstractStartEndDates,
 ):
     cached_total_number_of_issues: int | None = create_generic_integer()
+    cached_total_number_of_merge_requests: int | None = create_generic_integer()
 
     @property
     def iterations(self):
@@ -23,6 +24,14 @@ class ScrumSprint(
         return cast_query_set(
             typ=GitLabIteration,
             val=GitLabIteration.objects.filter(group=self)
+        )
+
+    @property
+    def merge_requests(self):
+        from git_lab.models.git_lab_merge_request import GitLabMergeRequest
+        return cast_query_set(
+            typ=GitLabMergeRequest,
+            val=GitLabMergeRequest.objects.filter(iteration=self)
         )
 
     def __str__(self) -> str:

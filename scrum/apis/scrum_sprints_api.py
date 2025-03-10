@@ -6,6 +6,7 @@ from django.http import HttpRequest, JsonResponse, HttpResponse
 from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.git_lab_issue import GitLabIssue
 from git_lab.models.git_lab_iteration import GitLabIteration
+from git_lab.models.git_lab_merge_request import GitLabMergeRequest
 from scrum.models.scrum_sprint import ScrumSprint
 
 
@@ -42,6 +43,18 @@ def scrum_sprints_api(
             iteration.save()
             issues: QuerySet[GitLabIssue] = iteration.issues
             total_issues += issues.count()
+        merge_requests: QuerySet[GitLabMergeRequest] = cast_query_set(
+            typ=GitLabMergeRequest,
+            val=GitLabMergeRequest.objects.filter(
+                state="merged",
+                merged_at__gte=scrum_sprint.date_start,
+                merged_at__lte=scrum_sprint.date_end,
+            )
+        )
+        for merge_request in merge_requests:
+            merge_request.sprint = scrum_sprint
+            merge_request.save()
         scrum_sprint.cached_total_number_of_issues = total_issues
+        scrum_sprint.cached_total_number_of_merge_requests = merge_requests.count()
         scrum_sprint.save()
     return JsonResponse(data={}, safe=False)
