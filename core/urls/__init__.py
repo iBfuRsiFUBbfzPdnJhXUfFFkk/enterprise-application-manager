@@ -41,8 +41,9 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_release_bundle,
     *urlpatterns_secret,
     *urlpatterns_this_api,
-    path('kpi/', include('kpi.urls')),
-    path('git-lab/', include('git_lab.urls')),
+    path(route='kpi/', view=include(arg=u'kpi.urls')),
+    path(route='git-lab/', view=include(arg=u'git_lab.urls')),
+    path(route='scrum/', view=include(arg=u'scrum.urls')),
 ]
 
 urlpatterns: list[URLPattern | URLResolver] = [
