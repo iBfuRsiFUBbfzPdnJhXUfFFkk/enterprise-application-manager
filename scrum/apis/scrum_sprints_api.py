@@ -47,8 +47,8 @@ def scrum_sprints_api(
             typ=GitLabMergeRequest,
             val=GitLabMergeRequest.objects.filter(
                 state="merged",
-                merged_at__gte=scrum_sprint.date_start,
-                merged_at__lte=scrum_sprint.date_end,
+                merged_at__date__gte=scrum_sprint.date_start,
+                merged_at__date__lte=scrum_sprint.date_end,
             )
         )
         for merge_request in merge_requests:
