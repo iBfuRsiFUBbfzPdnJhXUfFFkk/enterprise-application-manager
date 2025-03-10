@@ -28,8 +28,8 @@ def scrum_sprints_api(
     for key, grouping_set in iteration_groupings.items():
         date_start, date_end = key.split("=>")
         scrum_sprint: ScrumSprint = ScrumSprint.objects.filter(
-            end_date=date_end,
-            start_date=date_start,
+            date_end=date_end,
+            date_start=date_start,
         ).first() or ScrumSprint.objects.create()
         scrum_sprint.date_end = datetime.strptime(date_end, "%Y-%m-%d")
         scrum_sprint.date_start = datetime.strptime(date_start, "%Y-%m-%d")
