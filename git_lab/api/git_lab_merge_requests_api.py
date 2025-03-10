@@ -24,6 +24,7 @@ from git_lab.models.git_lab_user import GitLabUser
 def git_lab_merge_requests_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
+    fetch_per_group: int = request.GET.get('fetch_per_group', 25)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -38,7 +39,7 @@ def git_lab_merge_requests_api(
             continue
         merge_requests: list[GroupMergeRequest] = cast(
             typ=list[GroupMergeRequest],
-            val=group.mergerequests.list(all=True)
+            val=group.mergerequests.list(page=1, per_page=fetch_per_group)
         )
         for merge_request in merge_requests:
             all_merge_requests.add(merge_request)
