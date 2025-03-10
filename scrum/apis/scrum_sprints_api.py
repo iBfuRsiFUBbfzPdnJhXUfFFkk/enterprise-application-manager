@@ -4,6 +4,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 
 from core.utilities.cast_query_set import cast_query_set
+from git_lab.models.git_lab_issue import GitLabIssue
 from git_lab.models.git_lab_iteration import GitLabIteration
 from scrum.models.scrum_sprint import ScrumSprint
 
@@ -35,7 +36,12 @@ def scrum_sprints_api(
         scrum_sprint.date_start = datetime.strptime(date_start, "%Y-%m-%d")
         scrum_sprint.name = key
         scrum_sprint.save()
+        total_issues: int = 0
         for iteration in grouping_set:
             iteration.sprint = scrum_sprint
             iteration.save()
+            issues: QuerySet[GitLabIssue] = iteration.issues
+            total_issues += issues.count()
+        scrum_sprint.cached_total_number_of_issues = total_issues
+        scrum_sprint.save()
     return JsonResponse(data={}, safe=False)

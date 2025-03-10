@@ -1,3 +1,5 @@
+from django_generic_model_fields.create_generic_integer import create_generic_integer
+
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -13,6 +15,8 @@ class ScrumSprint(
     AbstractName,
     AbstractStartEndDates,
 ):
+    cached_total_number_of_issues: int | None = create_generic_integer()
+
     @property
     def iterations(self):
         from git_lab.models.git_lab_iteration import GitLabIteration
