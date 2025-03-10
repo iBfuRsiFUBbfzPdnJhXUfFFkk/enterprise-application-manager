@@ -1,22 +1,14 @@
-from typing import cast
-
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
-from gitlab import Gitlab
-from gitlab.v4.objects import GroupMember, Group
 
 from core.utilities.cast_query_set import cast_query_set
-from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
-from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
-from core.views.generic.generic_500 import generic_500
-from git_lab.models.common.typed_dicts.git_lab_user_typed_dict import GitLabUserTypedDict
-from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_iteration import GitLabIteration
-from git_lab.models.git_lab_user import GitLabUser
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 def get_iteration_key(iteration: GitLabIteration) -> str:
     return f"{iteration.start_date}=>{iteration.due_date}"
+
 
 def scrum_sprints_api(
         request: HttpRequest,
@@ -31,4 +23,17 @@ def scrum_sprints_api(
         if key not in iteration_groupings:
             iteration_groupings[key] = set()
         iteration_groupings[key].add(git_lab_iteration)
-    return JsonResponse(data=iteration_groupings, safe=False)
+    for key, grouping_set in iteration_groupings.items():
+        date_start, date_end = key.split("=>")
+        scrum_sprint: ScrumSprint = ScrumSprint.objects.filter(
+            end_date=date_end,
+            start_date=date_start,
+        ).first() or ScrumSprint.objects.create()
+        scrum_sprint.end_date = date_end
+        scrum_sprint.start_date = date_start
+        scrum_sprint.name = key
+        scrum_sprint.save()
+        for iteration in grouping_set:
+            iteration.sprint = scrum_sprint
+            iteration.save()
+    return JsonResponse(data={}, safe=False)

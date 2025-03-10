@@ -14,6 +14,7 @@ from git_lab.models.common.abstract.abstract_git_lab_title import AbstractGitLab
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
 from git_lab.models.git_lab_group import GitLabGroup
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 class GitLabIteration(
@@ -29,6 +30,7 @@ class GitLabIteration(
     due_date: date | None = create_generic_date()
     group: GitLabGroup | None = create_generic_fk(related_name="iterations", to=GitLabGroup)
     sequence: int | None = create_generic_integer()
+    sprint: ScrumSprint | None = create_generic_fk(related_name="iterations", to=ScrumSprint)
     start_date: date | None = create_generic_date()
     state: int | None = create_generic_integer()
 
