@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 
@@ -29,8 +31,8 @@ def scrum_sprints_api(
             end_date=date_end,
             start_date=date_start,
         ).first() or ScrumSprint.objects.create()
-        scrum_sprint.end_date = date_end
-        scrum_sprint.start_date = date_start
+        scrum_sprint.date_end = datetime.strptime(date_end, "%Y-%m-%d")
+        scrum_sprint.date_start = datetime.strptime(date_start, "%Y-%m-%d")
         scrum_sprint.name = key
         scrum_sprint.save()
         for iteration in grouping_set:
