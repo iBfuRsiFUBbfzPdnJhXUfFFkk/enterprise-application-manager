@@ -134,6 +134,7 @@ def git_lab_changes_api(
             git_lab_change.start_sha = diff_refs.get("start_sha")
         git_lab_change.state = change_dict.get("state")
         git_lab_change.total_files_added = total_files_created
+        git_lab_change.total_files_changed = len((changes or []))
         git_lab_change.total_files_deleted = total_files_deleted
         git_lab_change.total_files_generated = total_files_generated
         git_lab_change.total_files_renamed = total_files_renamed

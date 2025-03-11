@@ -59,6 +59,7 @@ class GitLabChange(
     start_sha: str | None = create_generic_varchar()
     state: str | None = create_generic_varchar()
     total_files_added: int | None = create_generic_integer()
+    total_files_changed: int | None = create_generic_integer()
     total_files_deleted: int | None = create_generic_integer()
     total_files_generated: int | None = create_generic_integer()
     total_files_renamed: int | None = create_generic_integer()
