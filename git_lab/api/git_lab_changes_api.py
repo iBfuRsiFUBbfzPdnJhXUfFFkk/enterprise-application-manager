@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
-from gitlab import Gitlab
+from gitlab import Gitlab, GitlabListError
 from gitlab.v4.objects import ProjectMergeRequest
 
 from core.utilities.cast_query_set import cast_query_set
@@ -56,21 +56,25 @@ def git_lab_changes_api(
     )
     all_project_merge_requests: set[ProjectMergeRequest] = set()
     for git_lab_project in git_lab_projects:
-        project_merge_requests: list[ProjectMergeRequest] | None = git_lab_client.projects.get(
-            id=git_lab_project.id, lazy=True
-        ).mergerequests.list(
-            all=all_parameter,
-            assignee_id=assignee_id,
-            author_id=author_id,
-            created_after=created_after_dt,
-            created_before=created_before_dt,
-            iteration_id=iteration_id,
-            page=page,
-            per_page=per_page,
-            state=state,
-            updated_after=updated_after_dt,
-            updated_before=updated_before_dt,
-        )
+        try:
+            project_merge_requests: list[ProjectMergeRequest] | None = git_lab_client.projects.get(
+                id=git_lab_project.id, lazy=True
+            ).mergerequests.list(
+                all=all_parameter,
+                assignee_id=assignee_id,
+                author_id=author_id,
+                created_after=created_after_dt,
+                created_before=created_before_dt,
+                iteration_id=iteration_id,
+                page=page,
+                per_page=per_page,
+                state=state,
+                updated_after=updated_after_dt,
+                updated_before=updated_before_dt,
+            )
+        except GitlabListError as error:
+            print(f"GitLabListError on {git_lab_project.name_with_namespace}: {error.error_message}")
+            continue
         if project_merge_requests is None:
             continue
         for project_merge_request in project_merge_requests:
