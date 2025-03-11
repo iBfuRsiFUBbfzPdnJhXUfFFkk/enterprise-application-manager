@@ -1,16 +1,15 @@
-from typing import cast, Any
+from re import search
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab
-from gitlab.v4.objects import MergeRequest, ProjectMergeRequest
+from gitlab.v4.objects import ProjectMergeRequest
 
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.common.typed_dicts.git_lab_change_typed_dict import GitLabChangeTypedDict, \
     GitLabMergeRequestChangesTypedDict
-from git_lab.models.git_lab_merge_request import GitLabMergeRequest
 from git_lab.models.git_lab_project import GitLabProject
 
 
@@ -37,8 +36,7 @@ def git_lab_changes_api(
                 diff: str | None = change.get("diff")
                 if diff is None:
                     continue
-                for line in diff.split("\n"):
-                    print(line)
+                print(search(pattern=r'@@ -\d+,\d+ \+\d+,\d+ @@', string=diff).group(0))
     # merge_request_dicts: list[GitLabMergeRequestTypedDict] = [project.asdict() for project in list(all_merge_request_changes)]
     for merge_request_change in list(all_merge_request_changes):
         continue
