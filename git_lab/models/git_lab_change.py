@@ -63,6 +63,7 @@ class GitLabChange(
     total_files_deleted: int | None = create_generic_integer()
     total_files_generated: int | None = create_generic_integer()
     total_files_renamed: int | None = create_generic_integer()
+    total_files_updated: int | None = create_generic_integer()
     total_lines_added: int | None = create_generic_integer()
     total_lines_removed: int | None = create_generic_integer()
 

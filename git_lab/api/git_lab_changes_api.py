@@ -54,6 +54,7 @@ def git_lab_changes_api(
         total_files_generated: int = 0
         total_files_created: int = 0
         total_files_renamed: int = 0
+        total_files_updated: int = 0
         for change in changes:
             if change.get("deleted_file") is True:
                 total_files_deleted += 1
@@ -63,6 +64,13 @@ def git_lab_changes_api(
                 total_files_created += 1
             if change.get("renamed_file") is True:
                 total_files_renamed += 1
+            if (
+                change.get("deleted_file") is False
+                and change.get("generated_file") is False
+                and change.get("new_file") is False
+                and change.get("renamed_file") is False
+            ):
+                total_files_updated += 1
             diff: str | None = change.get("diff")
             if diff is None or len(diff.strip()) == 0:
                 continue
@@ -140,5 +148,6 @@ def git_lab_changes_api(
         git_lab_change.total_files_renamed = total_files_renamed
         git_lab_change.total_lines_added = total_lines_added
         git_lab_change.total_lines_removed = total_lines_removed
+        git_lab_change.total_files_updated = total_files_updated
         git_lab_change.save()
     return JsonResponse(data=change_dicts, safe=False)
