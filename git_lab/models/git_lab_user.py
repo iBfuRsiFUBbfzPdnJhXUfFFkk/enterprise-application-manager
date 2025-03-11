@@ -51,6 +51,14 @@ class GitLabUser(
         )
 
     @property
+    def kpi_sprints(self):
+        from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(group=self)
+        )
+
+    @property
     def merge_requests_assigned(self):
         from git_lab.models.git_lab_merge_request import GitLabMergeRequest
         return cast_query_set(

@@ -4,6 +4,7 @@ from django.urls import URLPattern, URLResolver, path, include
 
 from core.urls.urlpatterns_acronym import urlpatterns_acronym
 from core.urls.urlpatterns_action import urlpatterns_action
+from core.urls.urlpatterns_api import urlpatterns_api
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
 from core.urls.urlpatterns_database import urlpatterns_database
@@ -44,6 +45,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     path(route='kpi/', view=include(arg=u'kpi.urls')),
     path(route='git-lab/', view=include(arg=u'git_lab.urls')),
     path(route='scrum/', view=include(arg=u'scrum.urls')),
+    *urlpatterns_api
 ]
 
 urlpatterns: list[URLPattern | URLResolver] = [
