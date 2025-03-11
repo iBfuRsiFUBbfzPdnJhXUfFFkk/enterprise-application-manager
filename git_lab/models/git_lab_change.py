@@ -38,7 +38,6 @@ class GitLabChange(
     AbstractGitLabTitle,
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
-    AbstractName,
 ):
     assignees: set[GitLabUser] | None = create_generic_m2m(related_name="changes_assigned", to=GitLabUser)
     author: GitLabUser | None = create_generic_fk(related_name="changes_authored", to=GitLabUser)
