@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import cast
 
 from django.db.models import QuerySet
@@ -31,7 +32,24 @@ def git_lab_issues_api(
     per_page: int | None = request.GET.get('per_page', None)
     author_id: int | None = request.GET.get('author_id', None)
     assignee_id: int | None  = request.GET.get('assignee_id', None)
+    iteration_id: int | None  = request.GET.get('iteration_id', None)
     state: str | None  = request.GET.get('state', None)
+    created_before: str | None  = request.GET.get('created_before', None)
+    created_after: str | None  = request.GET.get('created_after', None)
+    updated_after: str | None  = request.GET.get('updated_after', None)
+    updated_before: str | None  = request.GET.get('updated_before', None)
+    created_before_dt: datetime | None  = None
+    created_after_dt: datetime | None  = None
+    updated_after_dt: datetime | None  = None
+    updated_before_dt: datetime | None  = None
+    if created_before is not None:
+        created_before_dt = datetime.strptime(created_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if created_after is not None:
+        created_after_dt = datetime.strptime(created_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if updated_after is not None:
+        updated_after_dt = datetime.strptime(updated_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if updated_before is not None:
+        updated_before_dt = datetime.strptime(updated_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -50,9 +68,14 @@ def git_lab_issues_api(
                 all=all_parameter,
                 assignee_id=assignee_id,
                 author_id=author_id,
+                created_after=created_after_dt,
+                created_before=created_before_dt,
+                iteration_id=iteration_id,
                 page=page,
                 per_page=per_page,
                 state=state,
+                updated_after=updated_after_dt,
+                updated_before=updated_before_dt,
             )
         )
         for issue in issues:
