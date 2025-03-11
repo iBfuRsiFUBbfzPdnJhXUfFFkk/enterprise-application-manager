@@ -26,9 +26,12 @@ from git_lab.models.git_lab_user import GitLabUser
 def git_lab_issues_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    all: bool = request.GET.get('all', True)
-    page: int = request.GET.get('page', 1)
-    per_page: int = request.GET.get('per_page', 25)
+    all_parameter: bool = request.GET.get('all', True)
+    page: int | None = request.GET.get('page', None)
+    per_page: int | None = request.GET.get('per_page', None)
+    author_id: int | None = request.GET.get('author_id', None)
+    assignee_id: int | None  = request.GET.get('assignee_id', None)
+    state: str | None  = request.GET.get('state', None)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -44,9 +47,12 @@ def git_lab_issues_api(
         issues: list[ProjectIssue] = cast(
             typ=list[ProjectIssue],
             val=project.issues.list(
-                all=all,
+                all=all_parameter,
+                assignee_id=assignee_id,
+                author_id=author_id,
                 page=page,
                 per_page=per_page,
+                state=state,
             )
         )
         for issue in issues:
