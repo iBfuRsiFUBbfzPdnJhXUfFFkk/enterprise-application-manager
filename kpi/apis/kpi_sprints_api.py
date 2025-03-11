@@ -26,7 +26,6 @@ def kpi_sprints_api(
     )
     for scrum_sprint in scrum_sprints:
         for git_lab_user in git_lab_users:
-            print(f"{scrum_sprint.name} - {git_lab_user.username}")
             iterations: QuerySet[GitLabIteration] = scrum_sprint.iterations.all()
             kpi_sprint: KeyPerformanceIndicatorSprint = KeyPerformanceIndicatorSprint.objects.filter(
                 git_lab_user=git_lab_user,
@@ -35,10 +34,24 @@ def kpi_sprints_api(
                 git_lab_user=git_lab_user,
                 scrum_sprint=scrum_sprint,
             )
+            issues_authored: QuerySet[GitLabIssue] = git_lab_user.issues_authored.filter(iteration__in=iterations)
+            issues_assigned: QuerySet[GitLabIssue] = git_lab_user.issues_assigned.filter(iteration__in=iterations)
+            issues_closed: QuerySet[GitLabIssue] = issues_assigned.filter(state="closed")
             kpi_sprint.name = f"{scrum_sprint.name} - {git_lab_user.username}"
-            issues: QuerySet[GitLabIssue] = git_lab_user.issues_authored.filter(iteration__in=iterations)
-            print(iterations)
-            print(issues)
-            kpi_sprint.number_of_issues_written = issues.count()
+            kpi_sprint.git_lab_iterations.add(*iterations)
+            kpi_sprint.git_lab_issues.add(*issues_authored)
+            kpi_sprint.number_of_issues_written = issues_authored.count()
+            kpi_sprint.number_of_story_points_committed_to = sum([
+                issue.weight
+                for issue
+                in issues_assigned.all()
+                if issue.weight is not None
+            ])
+            kpi_sprint.number_of_story_points_delivered = sum([
+                issue.weight
+                for issue
+                in issues_closed.all()
+                if issue.weight is not None
+            ])
             kpi_sprint.save()
     return JsonResponse(data={}, safe=False)

@@ -1,4 +1,5 @@
 from django.db.models import QuerySet, Q
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from math import ceil
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -14,6 +15,8 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.coerce_float import coerce_float
 from core.utilities.coerce_integer import coerce_integer
 from core.utilities.safe_divide import safe_divide
+from git_lab.models.git_lab_issue import GitLabIssue
+from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_user import GitLabUser
 from scrum.models.scrum_sprint import ScrumSprint
 
@@ -27,6 +30,8 @@ class KeyPerformanceIndicatorSprint(
     cached_capacity_base_velocity: float | None = create_generic_decimal()
     cached_capacity_per_day: float | None = create_generic_decimal()
     cached_commitment_accuracy: float | None = create_generic_decimal()
+    git_lab_issues: set[GitLabIssue] | None = create_generic_m2m(related_name="kpi_sprints", to=GitLabIssue)
+    git_lab_iterations: set[GitLabIteration] | None = create_generic_m2m(related_name="kpi_sprints", to=GitLabIteration)
     git_lab_user: GitLabUser | None = create_generic_fk(related_name="kpi_sprints", to=GitLabUser)
     number_of_code_lines_added: int | None = create_generic_integer()
     number_of_code_lines_removed: int | None = create_generic_integer()

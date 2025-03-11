@@ -4,6 +4,8 @@ from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_integer import create_generic_integer
 from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+
+from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_closed_at import AbstractGitLabClosedAt
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_description import AbstractGitLabDescription
@@ -51,6 +53,14 @@ class GitLabIssue(
     type: str | None = create_generic_varchar()
     user_notes_count: int | None = create_generic_integer()
     weight: int | None = create_generic_integer()
+
+    @property
+    def kpi_sprints(self):
+        from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(git_lab_issues__in=[self])
+        )
 
     def __str__(self) -> str:
         return f"{self.references_long}"

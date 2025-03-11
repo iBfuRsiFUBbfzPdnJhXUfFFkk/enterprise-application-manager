@@ -42,6 +42,14 @@ class GitLabIteration(
             val=GitLabIssue.objects.filter(iteration=self)
         )
 
+    @property
+    def kpi_sprints(self):
+        from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
+        return cast_query_set(
+            typ=KeyPerformanceIndicatorSprint,
+            val=KeyPerformanceIndicatorSprint.objects.filter(git_lab_iteration__in=[self])
+        )
+
     def __str__(self) -> str:
         return f"{self.title}"
 
