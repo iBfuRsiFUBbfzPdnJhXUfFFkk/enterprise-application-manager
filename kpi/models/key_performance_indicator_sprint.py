@@ -226,6 +226,6 @@ class KeyPerformanceIndicatorSprint(
         return f"{str(self.sprint)} - {str(self.person_developer)}"
 
     class Meta:
-        ordering = ['-sprint__date_end', '-id']
+        ordering = ['-scrum_sprint__date_end', '-sprint__date_end', '-id']
         verbose_name = 'Key Performance Indicator (KPI) Sprint'
         verbose_name_plural = 'Key Performance Indicator (KPI) Sprints'
