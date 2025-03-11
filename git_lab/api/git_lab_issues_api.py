@@ -33,7 +33,7 @@ def git_lab_issues_api(
     author_id: int | None = request.GET.get('author_id', None)
     assignee_id: int | None  = request.GET.get('assignee_id', None)
     iteration_id: int | None  = request.GET.get('iteration_id', None)
-    state: str | None  = request.GET.get('state', None)
+    state: str  = request.GET.get('state', "all")
     created_before: str | None  = request.GET.get('created_before', None)
     created_after: str | None  = request.GET.get('created_after', None)
     updated_after: str | None  = request.GET.get('updated_after', None)
