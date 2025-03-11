@@ -23,7 +23,7 @@ def kpi_sprints_api(
     )
     for scrum_sprint in scrum_sprints:
         for git_lab_user in git_lab_users:
-            iterations: QuerySet[GitLabIteration] = scrum_sprint.iterations
+            iterations: QuerySet[GitLabIteration] = scrum_sprint.iterations.all()
             kpi_sprint: KeyPerformanceIndicatorSprint = KeyPerformanceIndicatorSprint.objects.filter(
                 git_lab_user=git_lab_user,
                 scrum_sprint=scrum_sprint,
