@@ -33,10 +33,13 @@ def git_lab_changes_api(
             continue
         all_project_merge_requests.add(*project_merge_requests)
 
-    project_merge_request_dicts: list[dict] = [project_merge_request.asdict() for project_merge_request in list(all_project_merge_requests)]
-    for project_merge_request in all_project_merge_requests:
-        merge_request_change: GitLabMergeRequestChangesTypedDict = project_merge_request.changes()
-        merge_request_changes: list[GitLabChangeTypedDict] | None = merge_request_change.get("changes")
+    change_dicts: list[GitLabMergeRequestChangesTypedDict] = [
+        project_merge_request.changes()
+        for project_merge_request
+        in list(all_project_merge_requests)
+    ]
+    for change_dict in change_dicts:
+        merge_request_changes: list[GitLabChangeTypedDict] | None = change_dict.get("changes")
         total_lines_added: int = 0
         total_lines_removed: int = 0
         for change in merge_request_changes:
@@ -56,4 +59,4 @@ def git_lab_changes_api(
             total_lines_added += int(lines_added)
         print(f"total_lines_added: {total_lines_added}")
         print(f"total_lines_removed: {total_lines_removed}")
-    return JsonResponse(data=project_merge_request_dicts, safe=False)
+    return JsonResponse(data=change_dicts, safe=False)
