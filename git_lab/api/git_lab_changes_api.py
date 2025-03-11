@@ -55,6 +55,14 @@ def git_lab_changes_api(
         total_files_created: int = 0
         total_files_renamed: int = 0
         for change in changes:
+            if change.get("deleted_file") is True:
+                total_files_deleted += 1
+            if change.get("generated_file") is True:
+                total_files_generated += 1
+            if change.get("new_file") is True:
+                total_files_created += 1
+            if change.get("renamed_file") is True:
+                total_files_renamed += 1
             diff: str | None = change.get("diff")
             if diff is None or len(diff.strip()) == 0:
                 continue
@@ -69,14 +77,6 @@ def git_lab_changes_api(
             lines_added: str = added_split.split(",")[1]
             total_lines_removed += int(lines_removed)
             total_lines_added += int(lines_added)
-            if change.get("deleted_file") is True:
-                total_files_deleted += 1
-            if change.get("generated_file") is True:
-                total_files_generated += 1
-            if change.get("new_file") is True:
-                total_files_created += 1
-            if change.get("renamed_file") is True:
-                total_files_renamed += 1
         git_lab_change: GitLabChange = GitLabChange.objects.get_or_create(id=change_dict.get("id"))[0]
         git_lab_change.created_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("created_at"))
         git_lab_change.updated_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("updated_at"))
