@@ -34,7 +34,7 @@ def kpi_sprints_api(
             kpi_sprint.name = f"{scrum_sprint.name} - {git_lab_user.name}"
             total_issues: int = 0
             for iteration in iterations:
-                issues: QuerySet[GitLabIssue] = git_lab_user.issues_authored.filter(iteration=iterations)
+                issues: QuerySet[GitLabIssue] = git_lab_user.issues_authored.filter(iteration=iteration)
                 total_issues += issues.count()
             kpi_sprint.number_of_issues_written = total_issues
             kpi_sprint.save()
