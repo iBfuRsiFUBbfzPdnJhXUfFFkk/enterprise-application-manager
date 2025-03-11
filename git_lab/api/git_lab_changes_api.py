@@ -73,8 +73,8 @@ def git_lab_changes_api(
         )
         if project_merge_requests is None:
             continue
-        all_project_merge_requests.add(*project_merge_requests)
-
+        for project_merge_request in project_merge_requests:
+            all_project_merge_requests.add(project_merge_request)
     change_dicts: list[GitLabMergeRequestChangesTypedDict] = [
         project_merge_request.changes()
         for project_merge_request
