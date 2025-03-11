@@ -51,7 +51,7 @@ def kpi_sprints_api(
                 issue.weight
                 for issue
                 in issues_closed.all()
-                if issue.weight is not None
+                if issue.weight is not None and issue.closed_at.date() <= scrum_sprint.date_end
             ])
             kpi_sprint.save()
     return JsonResponse(data={}, safe=False)
