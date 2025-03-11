@@ -223,7 +223,7 @@ class KeyPerformanceIndicatorSprint(
         )
 
     def __str__(self) -> str:
-        return f"{str(self.sprint)} - {str(self.person_developer)}"
+        return f"{self.scrum_sprint.name} - {self.git_lab_user.username}"
 
     class Meta:
         ordering = ['-scrum_sprint__date_end', '-sprint__date_end', '-id']
