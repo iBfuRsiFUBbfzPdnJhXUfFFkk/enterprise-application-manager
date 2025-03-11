@@ -115,6 +115,14 @@ class Person(
         return self.user_mapping.is_superuser if self.user_mapping else False
 
     @property
+    def organizations(self):
+        from core.models.organization import Organization
+        return cast_query_set(
+            typ=Organization,
+            val=Organization.objects.filter(people__in=[self])
+        )
+
+    @property
     def username(self) -> str | None:
         return self.user_mapping.username if self.user_mapping else None
 
