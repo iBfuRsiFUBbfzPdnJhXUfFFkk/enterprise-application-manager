@@ -1,4 +1,4 @@
-from re import search
+from re import search, Match
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
@@ -32,11 +32,25 @@ def git_lab_changes_api(
         for project_merge_request in project_merge_requests:
             merge_request_change: GitLabMergeRequestChangesTypedDict = project_merge_request.changes()
             merge_request_changes: list[GitLabChangeTypedDict] | None = merge_request_change.get("changes")
+            total_lines_added: int = 0
+            total_lines_removed: int = 0
             for change in merge_request_changes:
                 diff: str | None = change.get("diff")
-                if diff is None:
+                if diff is None or len(diff.strip()) == 0:
                     continue
-                print(search(pattern=r'@@ -\d+,\d+ \+\d+,\d+ @@', string=diff).group(0))
+                match: Match[str] | None = search(pattern=r'@@ -\d+,\d+ \+\d+,\d+ @@', string=diff)
+                if match is None:
+                    continue
+                group: str = match.group(0)
+                round_one_split: list[str] = group.split(" ")
+                removed_split: str = round_one_split[1]
+                added_split: str = round_one_split[2]
+                lines_removed: str = removed_split.split(",")[1]
+                lines_added: str = added_split.split(",")[1]
+                total_lines_removed += int(lines_removed)
+                total_lines_added += int(lines_added)
+            print(f"total_lines_added: {total_lines_added}")
+            print(f"total_lines_removed: {total_lines_removed}")
     # merge_request_dicts: list[GitLabMergeRequestTypedDict] = [project.asdict() for project in list(all_merge_request_changes)]
     for merge_request_change in list(all_merge_request_changes):
         continue
