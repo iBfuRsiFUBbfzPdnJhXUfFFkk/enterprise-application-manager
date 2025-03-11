@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 
@@ -13,9 +15,10 @@ def kpi_sprints_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
     fetch_per_group: int = request.GET.get('fetch_per_group', 2)
+    current_date = date.today()
     scrum_sprints: QuerySet[ScrumSprint] = cast_query_set(
         typ=ScrumSprint,
-        val=ScrumSprint.objects.all()[::fetch_per_group]
+        val=ScrumSprint.objects.filter(date_start__lte=current_date)[::fetch_per_group]
     )
     git_lab_users: QuerySet[GitLabUser] = cast_query_set(
         typ=GitLabUser,
