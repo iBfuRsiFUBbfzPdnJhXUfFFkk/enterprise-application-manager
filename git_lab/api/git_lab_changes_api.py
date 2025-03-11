@@ -35,4 +35,5 @@ def git_lab_changes_api(
     # merge_request_dicts: list[GitLabMergeRequestTypedDict] = [project.asdict() for project in list(all_merge_request_changes)]
     for merge_request_change in list(all_merge_request_changes):
         continue
-    return JsonResponse(data=list(all_merge_request_changes), safe=False)
+    print(all_merge_request_changes)
+    return JsonResponse(data={}, safe=False)
