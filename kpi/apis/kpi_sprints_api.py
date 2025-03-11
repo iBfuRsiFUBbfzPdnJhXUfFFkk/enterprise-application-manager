@@ -18,7 +18,7 @@ def kpi_sprints_api(
     current_date = date.today()
     scrum_sprints: QuerySet[ScrumSprint] = cast_query_set(
         typ=ScrumSprint,
-        val=ScrumSprint.objects.filter(date_start__lte=current_date)[::fetch_per_group]
+        val=ScrumSprint.objects.filter(date_end__lte=current_date)
     )
     git_lab_users: QuerySet[GitLabUser] = cast_query_set(
         typ=GitLabUser,
