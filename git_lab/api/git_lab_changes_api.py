@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab
@@ -22,19 +24,53 @@ from git_lab.models.git_lab_user import GitLabUser
 def git_lab_changes_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    fetch_per_group: int = request.GET.get('fetch_per_group', 25)
+    all_parameter: bool = request.GET.get('all', True)
+    page: int | None = request.GET.get('page', None)
+    per_page: int | None = request.GET.get('per_page', None)
+    author_id: int | None = request.GET.get('author_id', None)
+    assignee_id: int | None = request.GET.get('assignee_id', None)
+    iteration_id: int | None = request.GET.get('iteration_id', None)
+    state: str = request.GET.get('state', "all")
+    created_before: str | None = request.GET.get('created_before', None)
+    created_after: str | None = request.GET.get('created_after', None)
+    updated_after: str | None = request.GET.get('updated_after', None)
+    updated_before: str | None = request.GET.get('updated_before', None)
+    created_before_dt: datetime | None = None
+    created_after_dt: datetime | None = None
+    updated_after_dt: datetime | None = None
+    updated_before_dt: datetime | None = None
+    if created_before is not None:
+        created_before_dt = datetime.strptime(created_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if created_after is not None:
+        created_after_dt = datetime.strptime(created_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if updated_after is not None:
+        updated_after_dt = datetime.strptime(updated_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    if updated_before is not None:
+        updated_before_dt = datetime.strptime(updated_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
     git_lab_projects: QuerySet[GitLabProject] = cast_query_set(
         typ=GitLabProject,
-        val=GitLabProject.objects.filter(id=284)
+        val=GitLabProject.objects.all()
     )
     all_project_merge_requests: set[ProjectMergeRequest] = set()
     for git_lab_project in git_lab_projects:
         project_merge_requests: list[ProjectMergeRequest] | None = git_lab_client.projects.get(
             id=git_lab_project.id, lazy=True
-        ).mergerequests.list(all=False, page=1, per_page=1, lazy=True)
+        ).mergerequests.list(
+            all=all_parameter,
+            assignee_id=assignee_id,
+            author_id=author_id,
+            created_after=created_after_dt,
+            created_before=created_before_dt,
+            iteration_id=iteration_id,
+            page=page,
+            per_page=per_page,
+            state=state,
+            updated_after=updated_after_dt,
+            updated_before=updated_before_dt,
+        )
         if project_merge_requests is None:
             continue
         all_project_merge_requests.add(*project_merge_requests)
