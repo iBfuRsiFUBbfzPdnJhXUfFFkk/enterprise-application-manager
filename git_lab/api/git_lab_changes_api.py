@@ -1,5 +1,3 @@
-from re import search, Match
-
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab
@@ -65,26 +63,20 @@ def git_lab_changes_api(
             if change.get("renamed_file") is True:
                 total_files_renamed += 1
             if (
-                change.get("deleted_file") is False
-                and change.get("generated_file") is False
-                and change.get("new_file") is False
-                and change.get("renamed_file") is False
+                    change.get("deleted_file") is False
+                    and change.get("generated_file") is False
+                    and change.get("new_file") is False
+                    and change.get("renamed_file") is False
             ):
                 total_files_updated += 1
             diff: str | None = change.get("diff")
             if diff is None or len(diff.strip()) == 0:
                 continue
-            match: Match[str] | None = search(pattern=r'@@ -\d+,\d+ \+\d+,\d+ @@', string=diff)
-            if match is None:
-                continue
-            group: str = match.group(0)
-            round_one_split: list[str] = group.split(" ")
-            removed_split: str = round_one_split[1]
-            added_split: str = round_one_split[2]
-            lines_removed: str = removed_split.split(",")[1]
-            lines_added: str = added_split.split(",")[1]
-            total_lines_removed += int(lines_removed)
-            total_lines_added += int(lines_added)
+            for diff_line in diff.splitlines():
+                if diff_line.startswith("-"):
+                    total_lines_removed += 1
+                if diff_line.startswith("+"):
+                    total_lines_added += 1
         git_lab_change: GitLabChange = GitLabChange.objects.get_or_create(id=change_dict.get("id"))[0]
         git_lab_change.created_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("created_at"))
         git_lab_change.updated_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("updated_at"))
