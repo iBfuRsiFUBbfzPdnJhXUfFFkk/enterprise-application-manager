@@ -21,13 +21,13 @@ def git_lab_changes_api(
         return generic_500(request=request)
     git_lab_projects: QuerySet[GitLabProject] = cast_query_set(
         typ=GitLabProject,
-        val=GitLabProject.objects.all()[::5],
+        val=GitLabProject.objects.filter(id=284)
     )
     all_merge_request_changes: set[dict[str, Any]] = set()
     for git_lab_project in git_lab_projects:
         changes: list[dict[str, Any]] | None = [x.changes for x in git_lab_client.projects.get(
             id=git_lab_project.id, lazy=True
-        ).mergerequests.list(all=True, lazy=True)]
+        ).mergerequests.list(all=False, page=1, per_page=1, lazy=True)]
         if changes is None:
             continue
         for change in changes:
