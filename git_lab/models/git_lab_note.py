@@ -11,6 +11,7 @@ from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractG
 from git_lab.models.git_lab_discussion import GitLabDiscussion
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 class GitLabNote(
@@ -26,6 +27,7 @@ class GitLabNote(
     noteable_iid: int | None = create_generic_integer()
     noteable_type: str | None = create_generic_varchar()
     project: GitLabProject | None = create_generic_fk(related_name="notes", to=GitLabProject)
+    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="notes", to=ScrumSprint)
     system: bool | None = create_generic_boolean()
     type: str | None = create_generic_varchar()
 

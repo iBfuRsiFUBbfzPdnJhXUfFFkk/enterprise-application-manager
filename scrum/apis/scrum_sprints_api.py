@@ -8,6 +8,7 @@ from git_lab.models.git_lab_change import GitLabChange
 from git_lab.models.git_lab_issue import GitLabIssue
 from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
+from git_lab.models.git_lab_note import GitLabNote
 from scrum.models.scrum_sprint import ScrumSprint
 
 
@@ -72,6 +73,18 @@ def scrum_sprints_api(
             total_lines_added += change.total_lines_added
             change.scrum_sprint = scrum_sprint
             change.save()
+        notes: QuerySet[GitLabNote] = cast_query_set(
+            typ=GitLabNote,
+            val=GitLabNote.objects.filter(
+                created_at__date__gte=scrum_sprint.date_start,
+                created_at__date__lte=scrum_sprint.date_end,
+                system=False,
+            )
+        )
+        for note in notes:
+            note.scrum_sprint = scrum_sprint
+            note.save()
+        scrum_sprint.cached_total_number_of_comments_made = notes.count()
         scrum_sprint.cached_total_number_of_lines_added = total_lines_added
         scrum_sprint.cached_total_number_of_lines_removed = total_lines_removed
         scrum_sprint.save()

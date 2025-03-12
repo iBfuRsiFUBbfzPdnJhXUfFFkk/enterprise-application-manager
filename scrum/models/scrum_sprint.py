@@ -15,6 +15,7 @@ class ScrumSprint(
     AbstractName,
     AbstractStartEndDates,
 ):
+    cached_total_number_of_comments_made: int | None = create_generic_integer()
     cached_total_number_of_issues: int | None = create_generic_integer()
     cached_total_number_of_lines_added: int | None = create_generic_integer()
     cached_total_number_of_lines_removed: int | None = create_generic_integer()
@@ -50,6 +51,14 @@ class ScrumSprint(
         return cast_query_set(
             typ=GitLabMergeRequest,
             val=GitLabMergeRequest.objects.filter(sprint=self)
+        )
+
+    @property
+    def notes(self):
+        from git_lab.models.git_lab_note import GitLabNote
+        return cast_query_set(
+            typ=GitLabNote,
+            val=GitLabNote.objects.filter(scrum_sprint=self)
         )
 
     def __str__(self) -> str:
