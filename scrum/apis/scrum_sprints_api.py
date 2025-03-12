@@ -4,6 +4,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 
 from core.utilities.cast_query_set import cast_query_set
+from git_lab.models.git_lab_change import GitLabChange
 from git_lab.models.git_lab_issue import GitLabIssue
 from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
@@ -56,5 +57,20 @@ def scrum_sprints_api(
             merge_request.save()
         scrum_sprint.cached_total_number_of_issues = total_issues
         scrum_sprint.cached_total_number_of_merge_requests = merge_requests.count()
+        total_lines_added: int = 0
+        total_lines_removed: int = 0
+        changes: QuerySet[GitLabChange] = cast_query_set(
+            typ=GitLabChange,
+            val=GitLabChange.objects.filter(
+                state="merged",
+                merged_at__date__gte=scrum_sprint.date_start,
+                merged_at__date__lte=scrum_sprint.date_end,
+            )
+        )
+        for change in changes:
+            total_lines_removed += change.total_lines_removed
+            total_lines_added += change.total_lines_added
+        scrum_sprint.cached_total_number_of_lines_added = total_lines_added
+        scrum_sprint.cached_total_number_of_lines_removed = total_lines_removed
         scrum_sprint.save()
     return JsonResponse(data={}, safe=False)

@@ -16,6 +16,8 @@ class ScrumSprint(
     AbstractStartEndDates,
 ):
     cached_total_number_of_issues: int | None = create_generic_integer()
+    cached_total_number_of_lines_added: int | None = create_generic_integer()
+    cached_total_number_of_lines_removed: int | None = create_generic_integer()
     cached_total_number_of_merge_requests: int | None = create_generic_integer()
 
     @property
