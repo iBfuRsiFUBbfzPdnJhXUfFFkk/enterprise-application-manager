@@ -130,6 +130,14 @@ class GitLabUser(
             val=GitLabMergeRequest.objects.filter(reviewers__in=[self])
         )
 
+    @property
+    def notes_authored(self):
+        from git_lab.models.git_lab_note import GitLabNote
+        return cast_query_set(
+            typ=GitLabNote,
+            val=GitLabNote.objects.filter(author=self)
+        )
+
     def __str__(self) -> str:
         return f"{self.username}"
 
