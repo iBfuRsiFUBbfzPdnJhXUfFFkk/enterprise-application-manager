@@ -18,7 +18,7 @@ def action_run_view(request: HttpRequest, model_id: int) -> HttpResponse:
     user_id: int = user.id
     user_instance: User | None = User.objects.filter(id=user_id).first()
     action: Action = get_object_or_404(Action, id=model_id)
-    response: Response = get(cookies=request.COOKIES, timeout=180, url=action.url)
+    response: Response = get(cookies=request.COOKIES, timeout=(60 * 60), url=action.url)
     response.raise_for_status()
     action.number_of_times_run = (action.number_of_times_run or 0) + 1
     action.user_of_last_run = user_instance
