@@ -70,6 +70,8 @@ def scrum_sprints_api(
         for change in changes:
             total_lines_removed += change.total_lines_removed
             total_lines_added += change.total_lines_added
+            change.scrum_sprint = scrum_sprint
+            change.save()
         scrum_sprint.cached_total_number_of_lines_added = total_lines_added
         scrum_sprint.cached_total_number_of_lines_removed = total_lines_removed
         scrum_sprint.save()
