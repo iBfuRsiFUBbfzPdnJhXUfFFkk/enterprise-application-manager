@@ -5,16 +5,12 @@ from django_generic_model_fields.create_generic_datetime import create_generic_d
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_integer import create_generic_integer
 from django_generic_model_fields.create_generic_m2m import create_generic_m2m
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
-from core.utilities.cast_query_set import cast_query_set
-from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_description import AbstractGitLabDescription
 from git_lab.models.common.abstract.abstract_git_lab_internal_identification import AbstractGitLabInternalIdentification
-from git_lab.models.common.abstract.abstract_git_lab_path import AbstractGitLabPath
 from git_lab.models.common.abstract.abstract_git_lab_primary_key import AbstractGitLabPrimaryKey
 from git_lab.models.common.abstract.abstract_git_lab_references import AbstractGitLabReferences
 from git_lab.models.common.abstract.abstract_git_lab_task_completion_status import AbstractGitLabTaskCompletionStatus
@@ -24,6 +20,7 @@ from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractG
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 class GitLabChange(
@@ -54,6 +51,7 @@ class GitLabChange(
     merged_by: GitLabUser | None = create_generic_fk(related_name="changes_merged", to=GitLabUser)
     prepared_at: datetime | None = create_generic_datetime()
     project: GitLabProject | None = create_generic_fk(related_name="changes", to=GitLabProject)
+    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="changes", to=ScrumSprint)
     sha: str | None = create_generic_varchar()
     squash_commit_sha: str | None = create_generic_varchar()
     start_sha: str | None = create_generic_varchar()
@@ -66,7 +64,6 @@ class GitLabChange(
     total_files_updated: int | None = create_generic_integer()
     total_lines_added: int | None = create_generic_integer()
     total_lines_removed: int | None = create_generic_integer()
-
 
     def __str__(self) -> str:
         return f"{self.references_long}"

@@ -21,11 +21,19 @@ class ScrumSprint(
     cached_total_number_of_merge_requests: int | None = create_generic_integer()
 
     @property
+    def changes(self):
+        from git_lab.models.git_lab_change import GitLabChange
+        return cast_query_set(
+            typ=GitLabChange,
+            val=GitLabChange.objects.filter(scrum_sprint=self)
+        )
+
+    @property
     def iterations(self):
         from git_lab.models.git_lab_iteration import GitLabIteration
         return cast_query_set(
             typ=GitLabIteration,
-            val=GitLabIteration.objects.filter(group=self)
+            val=GitLabIteration.objects.filter(sprint=self)
         )
 
     @property
@@ -33,7 +41,7 @@ class ScrumSprint(
         from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
         return cast_query_set(
             typ=KeyPerformanceIndicatorSprint,
-            val=KeyPerformanceIndicatorSprint.objects.filter(group=self)
+            val=KeyPerformanceIndicatorSprint.objects.filter(scrum_sprint=self)
         )
 
     @property
@@ -41,7 +49,7 @@ class ScrumSprint(
         from git_lab.models.git_lab_merge_request import GitLabMergeRequest
         return cast_query_set(
             typ=GitLabMergeRequest,
-            val=GitLabMergeRequest.objects.filter(iteration=self)
+            val=GitLabMergeRequest.objects.filter(sprint=self)
         )
 
     def __str__(self) -> str:
