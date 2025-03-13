@@ -26,7 +26,9 @@ def kpi_sprints_api(
         val=GitLabUser.objects.all()
     )
     for scrum_sprint in scrum_sprints[::number_of_sprints]:
+        print(f"Calculating KPI for {scrum_sprint.name}")
         for git_lab_user in git_lab_users:
+            print(f"Calculating KPI for {scrum_sprint.name} - {git_lab_user.username}")
             iterations: QuerySet[GitLabIteration] = scrum_sprint.iterations.all()
             kpi_sprint: KeyPerformanceIndicatorSprint = KeyPerformanceIndicatorSprint.objects.filter(
                 git_lab_user=git_lab_user,
@@ -59,5 +61,9 @@ def kpi_sprints_api(
                 in issues_closed.all()
                 if issue.weight is not None and issue.closed_at.date() <= scrum_sprint.date_end
             ])
+            project_set: set[int] = set()
+            for issue_assigned in issues_assigned.all():
+                project_set.add(issue_assigned.project.id)
+            kpi_sprint.number_of_context_switches = len(project_set)
             kpi_sprint.save()
     return JsonResponse(data={}, safe=False)
