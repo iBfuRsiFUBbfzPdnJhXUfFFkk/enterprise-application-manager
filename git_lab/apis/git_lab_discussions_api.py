@@ -86,6 +86,7 @@ def git_lab_discussions_api(
                 git_lab_note.noteable_id = note.get("noteable_id")
                 git_lab_note.noteable_iid = note.get("noteable_iid")
                 git_lab_note.noteable_type = note.get("noteable_type")
+                print(type(note.get("system")))
                 git_lab_note.system = note.get("system") or True
                 git_lab_note.type = note.get("type")
                 git_lab_note.created_at = convert_and_enforce_utc_timezone(datetime_string=note.get("created_at"))
