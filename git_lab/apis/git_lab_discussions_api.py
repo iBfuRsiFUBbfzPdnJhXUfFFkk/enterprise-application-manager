@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import cast
 
 from django.db.models import QuerySet
-from django.http import HttpRequest, JsonResponse, HttpResponse
+from django.http import HttpRequest, JsonResponse, HttpResponse, QueryDict
 from gitlab import Gitlab, GitlabListError
 from gitlab.v4.objects import ProjectMergeRequest, ProjectMergeRequestDiscussion, Project
 
@@ -18,12 +19,16 @@ from git_lab.models.git_lab_note import GitLabNote
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 from scrum.models.scrum_sprint import ScrumSprint
-
+from dateutil.relativedelta import relativedelta
 
 def git_lab_discussions_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(request=request)
+    query_dict: QueryDict = request.GET
+    now = datetime.now()
+
+    # Subtract one month
+    one_month_ago = now - relativedelta(months=1)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -40,7 +45,14 @@ def git_lab_discussions_api(
                 continue
             project_merge_requests: list[ProjectMergeRequest] = cast(
                 typ=list[ProjectMergeRequest],
-                val=project.mergerequests.list(all=True, lazy=True)
+                val=project.mergerequests.list(
+                    all=True,
+                    lazy=True,
+                    state=(query_dict.get("state") or "all"),
+                    order_by=(query_dict.get("order_by") or "created_at"),
+                    sort=(query_dict.get("sort") or "desc"),
+                    created_after=one_month_ago,
+                )
             )
         except GitlabListError as error:
             print(f"GitLabListError on {git_lab_project.name_with_namespace}: {error.error_message}")
