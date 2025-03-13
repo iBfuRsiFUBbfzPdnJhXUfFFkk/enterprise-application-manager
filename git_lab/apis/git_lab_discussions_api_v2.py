@@ -31,9 +31,8 @@ def git_lab_discussions_api_v2(
         val=GitLabProject.objects.filter(~Q(should_skip=True))
     )
     for git_lab_project in iter(git_lab_projects.all()):
-        project_dict: GitLabProjectTypedDict = git_lab_project.asdict()
         if DEBUG is True:
-            print(f"Processing PROJECT: {project_dict.get("web_url")}")
+            print(f"Processing PROJECT: {git_lab_project.web_url}")
         project_id: int = git_lab_project.id
         project: Project | None = git_lab_client.projects.get(id=project_id, lazy=False)
         if project is None:
