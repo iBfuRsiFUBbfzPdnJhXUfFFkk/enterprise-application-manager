@@ -15,7 +15,7 @@ from scrum.models.scrum_sprint import ScrumSprint
 def kpi_sprints_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    number_of_sprints: int = request.GET.get("number_of_sprints") or 1
+    number_of_sprints: int = int(request.GET.get("number_of_sprints") or "1")
     current_date = date.today()
     scrum_sprints: QuerySet[ScrumSprint] = cast_query_set(
         typ=ScrumSprint,
