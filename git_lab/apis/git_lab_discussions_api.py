@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import cast
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from django.http import HttpRequest, JsonResponse, HttpResponse, QueryDict
 from gitlab import Gitlab, GitlabListError
 from gitlab.v4.objects import ProjectMergeRequest, ProjectMergeRequestDiscussion, Project
@@ -34,7 +34,7 @@ def git_lab_discussions_api(
         return generic_500(request=request)
     git_lab_projects: QuerySet[GitLabProject] = cast_query_set(
         typ=GitLabProject,
-        val=GitLabProject.objects.all()
+        val=GitLabProject.objects.filter(~Q(should_skip=True))
     )
     all_project_merge_requests: set[ProjectMergeRequest] = set()
     for git_lab_project in git_lab_projects:
@@ -86,9 +86,8 @@ def git_lab_discussions_api(
                 git_lab_note.noteable_id = note.get("noteable_id")
                 git_lab_note.noteable_iid = note.get("noteable_iid")
                 git_lab_note.noteable_type = note.get("noteable_type")
-                print(type(note.get("system")))
-                print(note.get("system"))
-                git_lab_note.system = note.get("system") == "true"
+                system: bool | None = note.get("system")
+                git_lab_note.system = system or True
                 git_lab_note.type = note.get("type")
                 git_lab_note.created_at = convert_and_enforce_utc_timezone(datetime_string=note.get("created_at"))
                 git_lab_note.updated_at = convert_and_enforce_utc_timezone(datetime_string=note.get("updated_at"))

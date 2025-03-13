@@ -12,6 +12,6 @@ class GitLabNoteTypedDict(TypedDict):
     noteable_iid: int | None
     noteable_type: str | None
     project_id: int | None
-    system: str | None # but really a bool
+    system: bool | None
     type: str | None
     updated_at: str | None

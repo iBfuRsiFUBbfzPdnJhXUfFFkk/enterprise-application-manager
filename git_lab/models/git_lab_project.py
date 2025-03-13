@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from django_generic_model_fields.create_generic_datetime import create_generic_datetime
@@ -45,6 +47,7 @@ class GitLabProject(
     open_issues_count: int | None = create_generic_integer()
     path_with_namespace: str | None = create_generic_varchar()
     readme_url: str | None = create_generic_varchar()
+    should_skip: bool | None = create_generic_boolean()
     ssh_url_to_repo: str | None = create_generic_varchar()
 
     @property
