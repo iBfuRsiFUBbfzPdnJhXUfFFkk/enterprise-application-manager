@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import cast
 
+from dateutil.relativedelta import relativedelta
 from django.db.models import QuerySet, Q
 from django.http import HttpRequest, JsonResponse, HttpResponse, QueryDict
 from gitlab import Gitlab, GitlabListError
@@ -10,7 +11,6 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
-from git_lab.apis.common.get_common_query_parameters import GitLabApiCommonQueryParameters, get_common_query_parameters
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
 from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
@@ -19,7 +19,7 @@ from git_lab.models.git_lab_note import GitLabNote
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 from scrum.models.scrum_sprint import ScrumSprint
-from dateutil.relativedelta import relativedelta
+
 
 def git_lab_discussions_api(
         request: HttpRequest,
@@ -86,8 +86,7 @@ def git_lab_discussions_api(
                 git_lab_note.noteable_id = note.get("noteable_id")
                 git_lab_note.noteable_iid = note.get("noteable_iid")
                 git_lab_note.noteable_type = note.get("noteable_type")
-                system: bool | None = note.get("system")
-                git_lab_note.system = system is True
+                git_lab_note.system = note.get("system")
                 git_lab_note.type = note.get("type")
                 git_lab_note.created_at = convert_and_enforce_utc_timezone(datetime_string=note.get("created_at"))
                 git_lab_note.updated_at = convert_and_enforce_utc_timezone(datetime_string=note.get("updated_at"))
@@ -124,4 +123,15 @@ def git_lab_discussions_api(
                 git_lab_note.save()
                 note_counter += 1
         git_lab_discussion.save()
-    return JsonResponse(data=all_discussion_dicts, safe=False)
+    return JsonResponse(
+        data={
+            "discussions": [
+                {
+                    "id": discussion_dict.get("id"),
+                }
+                for discussion_dict
+                in all_discussion_dicts
+            ]
+        },
+        safe=False
+    )
