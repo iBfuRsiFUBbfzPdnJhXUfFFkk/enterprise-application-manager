@@ -8,6 +8,7 @@ from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_primary_key import AbstractGitLabPrimaryKey
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
+from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
 from git_lab.models.git_lab_discussion import GitLabDiscussion
 from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_project import GitLabProject
@@ -20,6 +21,7 @@ class GitLabNote(
     AbstractGitLabCreatedAt,
     AbstractGitLabPrimaryKey,
     AbstractGitLabUpdatedAt,
+    AbstractGitLabWebUrl,
 ):
     author: GitLabUser | None = create_generic_fk(related_name="notes_authored", to=GitLabUser)
     body: str | None = create_generic_text()
