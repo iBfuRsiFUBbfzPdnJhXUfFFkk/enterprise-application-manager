@@ -1,4 +1,5 @@
 from datetime import datetime
+from time import time
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import QuerySet, Q
@@ -14,71 +15,10 @@ from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_projec
     git_lab_discussions_api_process_project
 from git_lab.models.git_lab_project import GitLabProject
 
-def filter_merge_requests(merge_requests: dict[int, GitLabDiscussionsApiPayloadMergeRequest]) -> dict[int, GitLabDiscussionsApiPayloadMergeRequest]:
-    filtered = {}
-    for mr_id, mr in merge_requests.items():
-        discussions = mr.get("discussions")
-        # Keep only merge requests that have a non-empty "discussions" dictionary.
-        if discussions and isinstance(discussions, dict) and len(discussions) > 0:
-            filtered[mr_id] = mr
-    return filtered
-
-
-def filter_projects(payload: GitLabDiscussionsApiPayload) -> GitLabDiscussionsApiPayload:
-    projects = payload.get("projects")
-    if not projects:
-        return payload
-
-    filtered_projects = {}
-    for project_id, project in projects.items():
-        merge_requests = project.get("merge_requests")
-        if not merge_requests or not isinstance(merge_requests, dict):
-            continue
-
-        # Filter merge requests for the project.
-        filtered_mrs = filter_merge_requests(merge_requests)
-        # Only include the project if there is at least one merge request remaining.
-        if filtered_mrs:
-            project["merge_requests"] = filtered_mrs
-            filtered_projects[project_id] = project
-
-    payload["projects"] = filtered_projects
-    return payload
-
-
-# Example of combining with previous filtering (removing projects without any notes)
-def process_payload(payload: GitLabDiscussionsApiPayload) -> GitLabDiscussionsApiPayload:
-    # First, filter out projects without any notes
-    projects = payload.get("projects")
-    if projects:
-        filtered_projects = {}
-        for project_id, project in projects.items():
-            merge_requests = project.get("merge_requests")
-            if not merge_requests:
-                continue
-
-            project_has_notes = False
-            for mr in merge_requests.values():
-                discussions = mr.get("discussions")
-                if not discussions:
-                    continue
-                for discussion in discussions.values():
-                    notes = discussion.get("notes")
-                    if notes and isinstance(notes, dict) and len(notes) > 0:
-                        project_has_notes = True
-                        break
-                if project_has_notes:
-                    break
-            if project_has_notes:
-                filtered_projects[project_id] = project
-
-        payload["projects"] = filtered_projects
-    payload = filter_projects(payload)
-    return payload
-
 def git_lab_discussions_api_v2(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
+    start_time: float = time()
     now: datetime = datetime.now()
     one_month_ago: datetime = now - relativedelta(months=1)
     git_lab_client: Gitlab | None = get_git_lab_client()
@@ -100,7 +40,12 @@ def git_lab_discussions_api_v2(
             model_project=model_project,
             payload=payload,
         )
+    end_time: float = time()
+    execution_time_in_seconds: float = end_time - start_time
     return JsonResponse(
-        data=process_payload(payload),
+        data={
+            **payload,
+            "execution_time_in_seconds": execution_time_in_seconds,
+        },
         safe=False
     )
