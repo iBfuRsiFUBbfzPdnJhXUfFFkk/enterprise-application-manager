@@ -32,10 +32,13 @@ def git_lab_users_api(
             group: Group | None = git_lab_client.groups.get(id=git_lab_group.id)
             if group is None:
                 continue
-            query_parameters["state"] = "all"
             members: list[GroupMemberAll] = cast(
                 typ=list[GroupMemberAll],
-                val=group.members_all.list(**query_parameters)
+                val=group.members_all.list(
+                    all=query_parameters["all"],
+                    page=query_parameters["page"],
+                    per_page=query_parameters["per_page"],
+                )
             )
         except GitlabListError as error:
             print(f"GitLabListError on {git_lab_group.full_path}: {error.error_message}")
