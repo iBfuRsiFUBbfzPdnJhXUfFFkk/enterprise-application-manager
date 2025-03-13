@@ -56,6 +56,14 @@ class GitLabGroup(
         )
 
     @property
+    def merge_requests(self):
+        from git_lab.models.git_lab_merge_request import GitLabMergeRequest
+        return cast_query_set(
+            typ=GitLabMergeRequest,
+            val=GitLabMergeRequest.objects.filter(group=self)
+        )
+
+    @property
     def notes(self):
         from git_lab.models.git_lab_note import GitLabNote
         return cast_query_set(
