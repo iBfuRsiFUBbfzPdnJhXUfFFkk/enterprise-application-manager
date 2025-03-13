@@ -40,7 +40,7 @@ def git_lab_discussions_api(
                 continue
             project_merge_requests: list[ProjectMergeRequest] = cast(
                 typ=list[ProjectMergeRequest],
-                val=project.mergerequests.list(**query_parameters)
+                val=project.mergerequests.list(all=True, lazy=True)
             )
         except GitlabListError as error:
             print(f"GitLabListError on {git_lab_project.name_with_namespace}: {error.error_message}")
@@ -50,7 +50,7 @@ def git_lab_discussions_api(
     for project_merge_request in list(all_project_merge_requests):
         discussions: list[ProjectMergeRequestDiscussion] = cast(
             typ=list[ProjectMergeRequestDiscussion],
-            val=project_merge_request.discussions.list(**query_parameters)
+            val=project_merge_request.discussions.list(get_all=True, lazy=False)
         )
         all_discussions.update(discussions)
     all_discussion_dicts: list[GitLabDiscussionTypedDict] = [discussion.asdict() for discussion in all_discussions]
