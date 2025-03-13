@@ -35,7 +35,7 @@ def git_lab_users_api(
             members: list[GroupMemberAll] = cast(
                 typ=list[GroupMemberAll],
                 val=group.members_all.list(
-                    all=query_parameters["all"],
+                    get_all=query_parameters["all"],
                     page=query_parameters["page"],
                     per_page=query_parameters["per_page"],
                 )
