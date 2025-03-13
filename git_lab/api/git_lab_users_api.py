@@ -34,11 +34,7 @@ def git_lab_users_api(
                 continue
             members: list[GroupMemberAll] = cast(
                 typ=list[GroupMemberAll],
-                val=group.members_all.list(
-                    get_all=query_parameters["all"],
-                    page=query_parameters["page"],
-                    per_page=query_parameters["per_page"],
-                )
+                val=group.members_all.list(get_all=True)
             )
         except GitlabListError as error:
             print(f"GitLabListError on {git_lab_group.full_path}: {error.error_message}")
