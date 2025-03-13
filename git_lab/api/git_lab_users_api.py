@@ -3,7 +3,7 @@ from typing import cast
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab, GitlabListError
-from gitlab.v4.objects import GroupMember, Group
+from gitlab.v4.objects import Group, GroupMemberAll
 
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
@@ -13,6 +13,7 @@ from git_lab.api.common.get_common_query_parameters import GitLabApiCommonQueryP
 from git_lab.models.common.typed_dicts.git_lab_user_typed_dict import GitLabUserTypedDict
 from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_user import GitLabUser
+
 
 def git_lab_users_api(
         request: HttpRequest,
@@ -25,15 +26,15 @@ def git_lab_users_api(
         typ=GitLabGroup,
         val=GitLabGroup.objects.all(),
     )
-    all_members: set[GroupMember] = set()
+    all_members: set[GroupMemberAll] = set()
     for git_lab_group in git_lab_groups:
         try:
             group: Group | None = git_lab_client.groups.get(id=git_lab_group.id)
             if group is None:
                 continue
-            members: list[GroupMember] = cast(
-                typ=list[GroupMember],
-                val=group.members.list(**query_parameters)
+            members: list[GroupMemberAll] = cast(
+                typ=list[GroupMemberAll],
+                val=group.members_all.list(**query_parameters)
             )
         except GitlabListError as error:
             print(f"GitLabListError on {git_lab_group.full_path}: {error.error_message}")
