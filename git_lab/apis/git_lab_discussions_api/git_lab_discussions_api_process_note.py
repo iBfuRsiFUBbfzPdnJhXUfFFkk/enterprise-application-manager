@@ -4,6 +4,7 @@ from core.settings.common.developer import DEBUG
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload, \
     initial_git_lab_discussions_api_payload
+from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
 from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
 from git_lab.models.git_lab_discussion import GitLabDiscussion
@@ -15,8 +16,8 @@ from scrum.models.scrum_sprint import ScrumSprint
 
 
 def git_lab_discussions_api_process_note(
+        discussion_dict: GitLabDiscussionTypedDict | None = None,
         index: int | None = None,
-        model_discussion: GitLabDiscussion | None = None,
         model_merge_request: GitLabMergeRequest | None = None,
         note_dict: GitLabNoteTypedDict | None = None,
         payload: GitLabDiscussionsApiPayload | None = None,
@@ -25,9 +26,9 @@ def git_lab_discussions_api_process_note(
         payload: GitLabDiscussionsApiPayload = initial_git_lab_discussions_api_payload
     if model_merge_request is None:
         return payload
-    if model_discussion is None:
+    if discussion_dict is None:
         if DEBUG is True:
-            print("------------N: model_discussion is None")
+            print("------------N: discussion_dict is None")
         return payload
     if index is None:
         if DEBUG is True:
@@ -72,6 +73,15 @@ def git_lab_discussions_api_process_note(
         print(f"------------N: {author.get('name')}")
         print(f"------------N: {author.get('username')}")
         print(f"------------N: {body}")
+    discussion_id: str = discussion_dict.get("id")
+    get_or_create_tuple: tuple[GitLabDiscussion, bool] = GitLabDiscussion.objects.get_or_create(id=discussion_id)
+    model_discussion: GitLabDiscussion = get_or_create_tuple[0]
+    did_create: bool = get_or_create_tuple[1]
+    if did_create is True:
+        payload["total_number_of_discussions_created"] += 1
+    else:
+        payload["total_number_of_discussions_updated"] += 1
+    model_discussion.individual_note = discussion_dict.get("individual_note")
     get_or_create_tuple: tuple[GitLabNote, bool] = GitLabNote.objects.get_or_create(id=note_id)
     model_note: GitLabNote = get_or_create_tuple[0]
     did_create: bool = get_or_create_tuple[1]

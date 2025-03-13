@@ -9,14 +9,22 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload, \
-    initial_git_lab_discussions_api_payload
+    initial_git_lab_discussions_api_payload, GitLabDiscussionsApiPayloadMergeRequest
 from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_project import \
     git_lab_discussions_api_process_project
 from git_lab.models.git_lab_project import GitLabProject
 
-def remove_projects_without_notes(
-    payload: GitLabDiscussionsApiPayload
-) -> GitLabDiscussionsApiPayload:
+def filter_merge_requests(merge_requests: dict[int, GitLabDiscussionsApiPayloadMergeRequest]) -> dict[int, GitLabDiscussionsApiPayloadMergeRequest]:
+    filtered = {}
+    for mr_id, mr in merge_requests.items():
+        discussions = mr.get("discussions")
+        # Keep only merge requests that have a non-empty "discussions" dictionary.
+        if discussions and isinstance(discussions, dict) and len(discussions) > 0:
+            filtered[mr_id] = mr
+    return filtered
+
+
+def filter_projects(payload: GitLabDiscussionsApiPayload) -> GitLabDiscussionsApiPayload:
     projects = payload.get("projects")
     if not projects:
         return payload
@@ -24,61 +32,48 @@ def remove_projects_without_notes(
     filtered_projects = {}
     for project_id, project in projects.items():
         merge_requests = project.get("merge_requests")
-        if not merge_requests:
+        if not merge_requests or not isinstance(merge_requests, dict):
             continue
 
-        project_has_notes = False
-        # Loop over merge requests
-        for mr in merge_requests.values():
-            discussions = mr.get("discussions")
-            if not discussions:
-                continue
-
-            # Loop over discussions in the merge request
-            for discussion in discussions.values():
-                notes = discussion.get("notes")
-                # Check if notes exists and has at least one entry
-                if notes and isinstance(notes, dict) and len(notes) > 0:
-                    project_has_notes = True
-                    break
-            if project_has_notes:
-                break
-
-        if project_has_notes:
+        # Filter merge requests for the project.
+        filtered_mrs = filter_merge_requests(merge_requests)
+        # Only include the project if there is at least one merge request remaining.
+        if filtered_mrs:
+            project["merge_requests"] = filtered_mrs
             filtered_projects[project_id] = project
 
     payload["projects"] = filtered_projects
     return payload
 
 
-def clean_empty_objects(obj):
-    """
-    Recursively remove keys in dictionaries whose values are empty dictionaries.
-    For any dict, if a value is a dictionary, it will be processed recursively.
-    If after cleaning, the dictionary is empty, it will be replaced with None.
-    """
-    if isinstance(obj, dict):
-        # Create a new dict with cleaned values
-        cleaned = {}
-        for key, value in obj.items():
-            new_value = clean_empty_objects(value)
-            # Only keep the key if the cleaned value is not an empty dict
-            # You may decide to also remove None values if that fits your needs.
-            if new_value != {} and new_value is not None:
-                cleaned[key] = new_value
-        return cleaned
-    elif isinstance(obj, list):
-        # Process list items if necessary.
-        return [clean_empty_objects(item) for item in obj if item != {}]
-    else:
-        return obj
-
-
+# Example of combining with previous filtering (removing projects without any notes)
 def process_payload(payload: GitLabDiscussionsApiPayload) -> GitLabDiscussionsApiPayload:
-    # First remove projects without any notes
-    payload = remove_projects_without_notes(payload)
-    # Then recursively clean empty dictionaries
-    payload = clean_empty_objects(payload)
+    # First, filter out projects without any notes
+    projects = payload.get("projects")
+    if projects:
+        filtered_projects = {}
+        for project_id, project in projects.items():
+            merge_requests = project.get("merge_requests")
+            if not merge_requests:
+                continue
+
+            project_has_notes = False
+            for mr in merge_requests.values():
+                discussions = mr.get("discussions")
+                if not discussions:
+                    continue
+                for discussion in discussions.values():
+                    notes = discussion.get("notes")
+                    if notes and isinstance(notes, dict) and len(notes) > 0:
+                        project_has_notes = True
+                        break
+                if project_has_notes:
+                    break
+            if project_has_notes:
+                filtered_projects[project_id] = project
+
+        payload["projects"] = filtered_projects
+    payload = filter_projects(payload)
     return payload
 
 def git_lab_discussions_api_v2(

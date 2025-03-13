@@ -5,7 +5,6 @@ from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_note i
     git_lab_discussions_api_process_note
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
-from git_lab.models.git_lab_discussion import GitLabDiscussion
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
 from git_lab.models.git_lab_project import GitLabProject
 
@@ -21,14 +20,6 @@ def git_lab_discussions_api_process_discussion(
     if discussion_dict is None:
         return payload
     discussion_id: str = discussion_dict.get("id")
-    get_or_create_tuple: tuple[GitLabDiscussion, bool] = GitLabDiscussion.objects.get_or_create(id=discussion_id)
-    model_discussion: GitLabDiscussion = get_or_create_tuple[0]
-    did_create: bool = get_or_create_tuple[1]
-    if did_create is True:
-        payload["total_number_of_discussions_created"] += 1
-    else:
-        payload["total_number_of_discussions_updated"] += 1
-    model_discussion.individual_note = discussion_dict.get("individual_note")
     if DEBUG is True:
         print(f"--------D: {discussion_id}")
     note_dicts: list[GitLabNoteTypedDict] | None = discussion_dict.get("notes")
@@ -40,9 +31,10 @@ def git_lab_discussions_api_process_discussion(
     for index, note_dict in enumerate(iter(note_dicts)):
         note_dict: GitLabNoteTypedDict = note_dict
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_note(
+            discussion_dict=discussion_dict,
             index=index,
-            model_discussion=model_discussion,
             model_merge_request=model_merge_request,
             note_dict=note_dict,
+            payload=payload,
         )
     return payload
