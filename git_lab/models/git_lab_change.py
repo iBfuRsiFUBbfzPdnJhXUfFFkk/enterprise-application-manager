@@ -69,6 +69,6 @@ class GitLabChange(
         return f"{self.references_long}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-updated_at']
         verbose_name = "GitLab Change"
         verbose_name_plural = "GitLab Changes"

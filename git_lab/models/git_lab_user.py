@@ -142,6 +142,6 @@ class GitLabUser(
         return f"{self.username}"
 
     class Meta:
-        ordering = ['username']
+        ordering = ['-created_at']
         verbose_name = "GitLab User"
         verbose_name_plural = "GitLab Users"

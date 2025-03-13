@@ -35,6 +35,6 @@ class GitLabNote(
         return f"{self.id}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-updated_at']
         verbose_name = "GitLab Note"
         verbose_name_plural = "GitLab Notes"

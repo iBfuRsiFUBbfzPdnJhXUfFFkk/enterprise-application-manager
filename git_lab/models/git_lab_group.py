@@ -43,6 +43,6 @@ class GitLabGroup(
         return f"{self.full_path}"
 
     class Meta:
-        ordering = ['full_path']
+        ordering = ['-created_at']
         verbose_name = "GitLab Group"
         verbose_name_plural = "GitLab Groups"

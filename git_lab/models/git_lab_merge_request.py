@@ -59,6 +59,6 @@ class GitLabMergeRequest(
         return f"{self.references_relative}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-updated_at']
         verbose_name = "GitLab Merge Request"
         verbose_name_plural = "GitLab Merge Requests"

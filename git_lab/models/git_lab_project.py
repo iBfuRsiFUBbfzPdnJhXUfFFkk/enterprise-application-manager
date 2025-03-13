@@ -91,6 +91,6 @@ class GitLabProject(
         return f"{self.path_with_namespace}"
 
     class Meta:
-        ordering = ['path_with_namespace']
+        ordering = ['-updated_at']
         verbose_name = "GitLab Project"
         verbose_name_plural = "GitLab Projects"

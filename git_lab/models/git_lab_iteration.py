@@ -54,6 +54,6 @@ class GitLabIteration(
         return f"{self.title}"
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-updated_at']
         verbose_name = "GitLab Iteration"
         verbose_name_plural = "GitLab Iterations"
