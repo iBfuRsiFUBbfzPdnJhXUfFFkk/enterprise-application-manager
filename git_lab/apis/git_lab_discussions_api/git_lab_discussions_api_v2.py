@@ -14,6 +14,43 @@ from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_projec
     git_lab_discussions_api_process_project
 from git_lab.models.git_lab_project import GitLabProject
 
+def remove_projects_without_notes(
+    payload: GitLabDiscussionsApiPayload
+) -> GitLabDiscussionsApiPayload:
+    projects = payload.get("projects")
+    if not projects:
+        return payload
+
+    filtered_projects = {}
+    for project_id, project in projects.items():
+        merge_requests = project.get("merge_requests")
+        if not merge_requests:
+            continue
+
+        project_has_notes = False
+        # Loop over merge requests
+        for mr in merge_requests.values():
+            discussions = mr.get("discussions")
+            if not discussions:
+                continue
+
+            # Loop over discussions in the merge request
+            for discussion in discussions.values():
+                notes = discussion.get("notes")
+                # Check if notes exists and has at least one entry
+                if notes and isinstance(notes, dict) and len(notes) > 0:
+                    project_has_notes = True
+                    break
+            if project_has_notes:
+                break
+
+        if project_has_notes:
+            filtered_projects[project_id] = project
+
+    # Update the payload with only projects that have notes
+    payload["projects"] = filtered_projects
+    return payload
+
 
 def git_lab_discussions_api_v2(
         request: HttpRequest,
@@ -40,6 +77,6 @@ def git_lab_discussions_api_v2(
             payload=payload,
         )
     return JsonResponse(
-        data=payload,
+        data=remove_projects_without_notes(payload),
         safe=False
     )
