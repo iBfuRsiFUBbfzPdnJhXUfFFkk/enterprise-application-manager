@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import cast
 
 from django.db.models import QuerySet
@@ -10,6 +9,7 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.api.common.get_common_query_parameters import get_common_query_parameters, GitLabApiCommonQueryParameters
 from git_lab.models.common.typed_dicts.git_lab_issue_typed_dict import GitLabIssueTypedDict
 from git_lab.models.common.typed_dicts.git_lab_iteration_typed_dict import GitLabIterationTypedDict
 from git_lab.models.common.typed_dicts.git_lab_links_typed_dict import GitLabLinksTypedDict
@@ -27,29 +27,7 @@ from git_lab.models.git_lab_user import GitLabUser
 def git_lab_issues_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    all_parameter: bool = request.GET.get('all', True)
-    page: int | None = request.GET.get('page', None)
-    per_page: int | None = request.GET.get('per_page', None)
-    author_id: int | None = request.GET.get('author_id', None)
-    assignee_id: int | None  = request.GET.get('assignee_id', None)
-    iteration_id: int | None  = request.GET.get('iteration_id', None)
-    state: str  = request.GET.get('state', "all")
-    created_before: str | None  = request.GET.get('created_before', None)
-    created_after: str | None  = request.GET.get('created_after', None)
-    updated_after: str | None  = request.GET.get('updated_after', None)
-    updated_before: str | None  = request.GET.get('updated_before', None)
-    created_before_dt: datetime | None  = None
-    created_after_dt: datetime | None  = None
-    updated_after_dt: datetime | None  = None
-    updated_before_dt: datetime | None  = None
-    if created_before is not None:
-        created_before_dt = datetime.strptime(created_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if created_after is not None:
-        created_after_dt = datetime.strptime(created_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if updated_after is not None:
-        updated_after_dt = datetime.strptime(updated_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if updated_before is not None:
-        updated_before_dt = datetime.strptime(updated_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(request=request)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -59,57 +37,49 @@ def git_lab_issues_api(
     )
     all_issues: set[ProjectIssue] = set()
     for git_lab_project in git_lab_projects:
-        project: Project | None = git_lab_client.projects.get(id=git_lab_project.id)
+        project_id: int = git_lab_project.id
+        project: Project | None = git_lab_client.projects.get(id=project_id, lazy=True)
         if project is None:
             continue
         issues: list[ProjectIssue] = cast(
             typ=list[ProjectIssue],
-            val=project.issues.list(
-                all=all_parameter,
-                assignee_id=assignee_id,
-                author_id=author_id,
-                created_after=created_after_dt,
-                created_before=created_before_dt,
-                iteration_id=iteration_id,
-                page=page,
-                per_page=per_page,
-                state=state,
-                updated_after=updated_after_dt,
-                updated_before=updated_before_dt,
-            )
+            val=project.issues.list(**query_parameters)
         )
-        for issue in issues:
-            all_issues.add(issue)
+        all_issues.update(issues)
     issue_dicts: list[GitLabIssueTypedDict] = [issue.asdict() for issue in list(all_issues)]
     for issue_dict in issue_dicts:
         issue_id: int | None = issue_dict.get("id")
         if issue_id is None:
             continue
-        git_lab_issue: GitLabIssue = GitLabIssue.objects.get_or_create(id=issue_id)[0]
-
-        git_lab_issue.blocking_issues_count = issue_dict.get("blocking_issues_count")
-        git_lab_issue.closed_at = convert_and_enforce_utc_timezone(
-            datetime_string=issue_dict.get("closed_at"))
-        git_lab_issue.created_at = convert_and_enforce_utc_timezone(
-            datetime_string=issue_dict.get("created_at"))
+        get_or_create_tuple: tuple[GitLabIssue, bool] = GitLabIssue.objects.get_or_create(id=issue_id)
+        git_lab_issue: GitLabIssue = get_or_create_tuple[0]
+        git_lab_issue.blocking_issues_count = issue_dict.get("blocking_issues_count") or 0
         git_lab_issue.description = issue_dict.get("description")
-        git_lab_issue.has_tasks = issue_dict.get("has_tasks")
+        git_lab_issue.has_tasks = issue_dict.get("has_tasks") or False
         git_lab_issue.iid = issue_dict.get("iid")
         git_lab_issue.issue_type = issue_dict.get("issue_type")
         git_lab_issue.state = issue_dict.get("state")
         git_lab_issue.title = issue_dict.get("title")
-        git_lab_issue.updated_at = convert_and_enforce_utc_timezone(
-            datetime_string=issue_dict.get("updated_at"))
-        git_lab_issue.user_notes_count = issue_dict.get("user_notes_count")
+        git_lab_issue.user_notes_count = issue_dict.get("user_notes_count") or 0
         git_lab_issue.web_url = issue_dict.get("web_url")
-        git_lab_issue.weight = issue_dict.get("weight")
+        git_lab_issue.weight = issue_dict.get("weight") or 0
+        git_lab_issue.closed_at = convert_and_enforce_utc_timezone(
+            datetime_string=issue_dict.get("closed_at")
+        )
+        git_lab_issue.created_at = convert_and_enforce_utc_timezone(
+            datetime_string=issue_dict.get("created_at")
+        )
+        git_lab_issue.updated_at = convert_and_enforce_utc_timezone(
+            datetime_string=issue_dict.get("updated_at")
+        )
         references: GitLabReferencesTypedDict | None = issue_dict.get("references")
         if references is not None:
             git_lab_issue.references_long = references.get("full")
             git_lab_issue.references_relative = references.get("relative")
             git_lab_issue.references_short = references.get("short")
         task_completion_status: GitLabTaskCompletionStatusTypedDict | None = issue_dict.get(
-            "task_completion_status")
+            "task_completion_status"
+        )
         if task_completion_status is not None:
             git_lab_issue.task_completion_status_completed_count = task_completion_status.get("completed_count")
             git_lab_issue.task_completion_status_count = task_completion_status.get("count")
@@ -125,7 +95,10 @@ def git_lab_issues_api(
         author: GitLabUserReferenceTypedDict | None = issue_dict.get("author")
         if author is not None:
             git_lab_issue.author = GitLabUser.objects.filter(id=author.get("id")).first()
-        git_lab_issue.project = GitLabProject.objects.filter(id=issue_dict.get("project_id")).first()
+        project: GitLabProject | None = GitLabProject.objects.filter(id=issue_dict.get("project_id")).first()
+        if project is not None:
+            git_lab_issue.project = project
+            git_lab_issue.group = project.group
         assignees: list[GitLabUserReferenceTypedDict] | None = issue_dict.get("assignees")
         if assignees is not None:
             for assignee in assignees:
@@ -140,6 +113,9 @@ def git_lab_issues_api(
             git_lab_issue.link_self = links.get("self")
         iteration: GitLabIterationTypedDict | None = issue_dict.get("iteration")
         if iteration is not None:
-            git_lab_issue.iteration = GitLabIteration.objects.filter(id=iteration.get("id")).first()
+            git_lab_iteration: GitLabIteration | None = GitLabIteration.objects.filter(id=iteration.get("id")).first()
+            if git_lab_iteration is not None:
+                git_lab_issue.iteration = git_lab_iteration
+                git_lab_issue.scrum_sprint = git_lab_iteration.scrum_sprint
         git_lab_issue.save()
     return JsonResponse(data=issue_dicts, safe=False)

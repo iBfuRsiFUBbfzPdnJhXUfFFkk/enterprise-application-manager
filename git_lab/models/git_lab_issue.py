@@ -18,9 +18,11 @@ from git_lab.models.common.abstract.abstract_git_lab_time_stats import AbstractG
 from git_lab.models.common.abstract.abstract_git_lab_title import AbstractGitLabTitle
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
+from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 class GitLabIssue(
@@ -42,6 +44,7 @@ class GitLabIssue(
     author: GitLabUser | None = create_generic_fk(related_name="issues_authored", to=GitLabUser)
     blocking_issues_count: int | None = create_generic_integer()
     closed_by: GitLabUser | None = create_generic_fk(related_name="issues_closed", to=GitLabUser)
+    group: GitLabGroup | None = create_generic_fk(related_name="issues", to=GitLabGroup)
     has_tasks: bool | None = create_generic_boolean()
     issue_type: str | None = create_generic_varchar()
     iteration: GitLabIteration | None = create_generic_fk(related_name="issues", to=GitLabIteration)
@@ -50,6 +53,7 @@ class GitLabIssue(
     link_project: str | None = create_generic_varchar()
     link_self: str | None = create_generic_varchar()
     project: GitLabProject | None = create_generic_fk(related_name="issues", to=GitLabProject)
+    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="issues", to=ScrumSprint)
     type: str | None = create_generic_varchar()
     user_notes_count: int | None = create_generic_integer()
     weight: int | None = create_generic_integer()

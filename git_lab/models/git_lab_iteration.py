@@ -30,7 +30,7 @@ class GitLabIteration(
     due_date: date | None = create_generic_date()
     group: GitLabGroup | None = create_generic_fk(related_name="iterations", to=GitLabGroup)
     sequence: int | None = create_generic_integer()
-    sprint: ScrumSprint | None = create_generic_fk(related_name="iterations", to=ScrumSprint)
+    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="iterations", to=ScrumSprint)
     start_date: date | None = create_generic_date()
     state: int | None = create_generic_integer()
 

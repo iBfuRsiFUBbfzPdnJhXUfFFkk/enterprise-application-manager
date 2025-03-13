@@ -52,7 +52,7 @@ class GitLabMergeRequest(
     reviewers: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_reviewed", to=GitLabUser)
     sha: str | None = create_generic_varchar()
     source_branch: str | None = create_generic_varchar()
-    sprint: ScrumSprint | None = create_generic_fk(related_name="merge_requests", to=ScrumSprint)
+    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="merge_requests", to=ScrumSprint)
     target_branch: str | None = create_generic_varchar()
 
     def __str__(self) -> str:

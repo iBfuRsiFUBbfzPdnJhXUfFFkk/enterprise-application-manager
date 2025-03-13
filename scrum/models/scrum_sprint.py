@@ -34,7 +34,7 @@ class ScrumSprint(
         from git_lab.models.git_lab_iteration import GitLabIteration
         return cast_query_set(
             typ=GitLabIteration,
-            val=GitLabIteration.objects.filter(sprint=self)
+            val=GitLabIteration.objects.filter(scrum_sprint=self)
         )
 
     @property
@@ -50,7 +50,7 @@ class ScrumSprint(
         from git_lab.models.git_lab_merge_request import GitLabMergeRequest
         return cast_query_set(
             typ=GitLabMergeRequest,
-            val=GitLabMergeRequest.objects.filter(sprint=self)
+            val=GitLabMergeRequest.objects.filter(scrum_sprint=self)
         )
 
     @property
