@@ -64,9 +64,9 @@ def git_lab_discussions_api_v2(
                 for index, note_dict in enumerate(iter(note_dicts)):
                     note_dict: GitLabNoteTypedDict = note_dict
                     git_lab_discussions_api_process_note(
-                        model_merge_request=GitLabMergeRequest.objects.filter(id=merge_request_dict.get("id")).first(),
-                        git_lab_discussion=GitLabDiscussion.objects.filter(id=discussion_dict.get("id")).first(),
                         index=index,
+                        model_discussion=GitLabDiscussion.objects.filter(id=discussion_dict.get("id")).first(),
+                        model_merge_request=GitLabMergeRequest.objects.filter(id=merge_request_dict.get("id")).first(),
                         note_dict=note_dict,
                     )
     return JsonResponse(

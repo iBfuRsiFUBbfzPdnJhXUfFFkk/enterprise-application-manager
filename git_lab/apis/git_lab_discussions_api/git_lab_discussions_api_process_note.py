@@ -18,12 +18,28 @@ class GitLabDiscussionsApiProcessNoteReturn(TypedDict):
 
 
 def git_lab_discussions_api_process_note(
-        model_merge_request: GitLabMergeRequest,
-        git_lab_discussion: GitLabDiscussion,
-        index: int,
-        note_dict: GitLabNoteTypedDict,
+        index: int | None = None,
+        model_discussion: GitLabDiscussion | None = None,
+        model_merge_request: GitLabMergeRequest | None = None,
+        note_dict: GitLabNoteTypedDict | None = None,
 ) -> GitLabDiscussionsApiProcessNoteReturn:
     return_object: GitLabDiscussionsApiProcessNoteReturn = {}
+    if model_merge_request is None:
+        if DEBUG is True:
+            print("------------N: model_merge_request is None")
+        return return_object
+    if model_discussion is None:
+        if DEBUG is True:
+            print("------------N: model_discussion is None")
+        return return_object
+    if index is None:
+        if DEBUG is True:
+            print("------------N: index is None")
+        return return_object
+    if note_dict is None:
+        if DEBUG is True:
+            print("------------N: note_dict is None")
+        return return_object
     note_id: int | None = note_dict.get("id")
     is_system_note: bool | None = note_dict.get("system")
     body: str | None = note_dict.get("body")
@@ -50,34 +66,34 @@ def git_lab_discussions_api_process_note(
     git_lab_note.type = note_dict.get("type")
     git_lab_note.created_at = convert_and_enforce_utc_timezone(datetime_string=note_dict.get("created_at"))
     git_lab_note.updated_at = convert_and_enforce_utc_timezone(datetime_string=note_dict.get("updated_at"))
-    git_lab_note.discussion = git_lab_discussion
+    git_lab_note.discussion = model_discussion
     author: GitLabUserReferenceTypedDict | None = note_dict.get("author")
     if author is not None:
         git_lab_note.author = GitLabUser.objects.filter(id=author.get("id")).first()
     project: GitLabProject | None = GitLabProject.objects.filter(id=note_dict.get("project_id")).first()
     if project is not None:
         git_lab_note.project = project
-        git_lab_discussion.project = project
+        model_discussion.project = project
         git_lab_note.group = project.group
-        git_lab_discussion.group = project.group
+        model_discussion.group = project.group
     scrum_sprint: ScrumSprint | None = ScrumSprint.objects.filter(
         date_start__lte=git_lab_note.created_at,
         date_end__gte=git_lab_note.created_at,
     ).first()
     if scrum_sprint is not None:
         git_lab_note.scrum_sprint = scrum_sprint
-        git_lab_discussion.scrum_sprint = scrum_sprint
+        model_discussion.scrum_sprint = scrum_sprint
     if index == 0:
-        git_lab_discussion.created_at = convert_and_enforce_utc_timezone(
+        model_discussion.created_at = convert_and_enforce_utc_timezone(
             datetime_string=note_dict.get("created_at")
         )
-        git_lab_discussion.updated_at = convert_and_enforce_utc_timezone(
+        model_discussion.updated_at = convert_and_enforce_utc_timezone(
             datetime_string=note_dict.get("updated_at")
         )
         if author is not None:
-            git_lab_discussion.started_by = GitLabUser.objects.filter(id=author.get("id")).first()
+            model_discussion.started_by = GitLabUser.objects.filter(id=author.get("id")).first()
     else:
-        git_lab_discussion.updated_at = convert_and_enforce_utc_timezone(
+        model_discussion.updated_at = convert_and_enforce_utc_timezone(
             datetime_string=note_dict.get("updated_at")
         )
     git_lab_note.save()
