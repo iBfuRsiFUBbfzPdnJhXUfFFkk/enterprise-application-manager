@@ -131,11 +131,12 @@ def git_lab_merge_requests_api(
                 user: GitLabUser | None = GitLabUser.objects.filter(id=assignee.get("id")).first()
                 if user is not None:
                     git_lab_merge_request.assignees.add(user)
-        scrum_sprint: ScrumSprint | None = ScrumSprint.objects.filter(
-            date_start__lte=git_lab_merge_request.merged_at,
-            date_end__gte=git_lab_merge_request.merged_at,
-        ).first()
-        if scrum_sprint is not None:
-            git_lab_merge_request.scrum_sprint = scrum_sprint
+        if git_lab_merge_request.merged_at is not None:
+            scrum_sprint: ScrumSprint | None = ScrumSprint.objects.filter(
+                date_start__lte=git_lab_merge_request.merged_at,
+                date_end__gte=git_lab_merge_request.merged_at,
+            ).first()
+            if scrum_sprint is not None:
+                git_lab_merge_request.scrum_sprint = scrum_sprint
         git_lab_merge_request.save()
     return JsonResponse(data=merge_request_dicts, safe=False)
