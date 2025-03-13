@@ -7,11 +7,13 @@ from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitL
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
 from git_lab.models.git_lab_discussion import GitLabDiscussion
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
+from git_lab.models.git_lab_project import GitLabProject
 
 
 def git_lab_discussions_api_process_discussion(
         discussion_dict: GitLabDiscussionTypedDict | None = None,
         model_merge_request: GitLabMergeRequest | None = None,
+        model_project: GitLabProject | None = None,
         payload: GitLabDiscussionsApiPayload | None = None,
 ) -> GitLabDiscussionsApiPayload:
     if payload is None:
@@ -27,7 +29,9 @@ def git_lab_discussions_api_process_discussion(
     note_dicts: list[GitLabNoteTypedDict] | None = discussion_dict.get("notes")
     if note_dicts is None:
         return payload
-    payload["discussions"][discussion_dict.get("id")] = {"notes": {}}
+    payload["projects"][model_project.id]["merge_requests"][model_merge_request.id]["discussions"][discussion_dict.get("id")] = {
+        "notes": {}
+    }
     for index, note_dict in enumerate(iter(note_dicts)):
         note_dict: GitLabNoteTypedDict = note_dict
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_note(

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from gitlab import Gitlab
+from gitlab import Gitlab, GitlabListError, GitlabAuthenticationError
 from gitlab.base import RESTObjectList
 from gitlab.v4.objects import Project
 
@@ -30,15 +30,23 @@ def git_lab_discussions_api_process_project(
     rest_object_project: Project | None = git_lab_client.projects.get(id=project_id, lazy=False)
     if rest_object_project is None:
         return payload
-    generator_merge_requests: RESTObjectList = rest_object_project.mergerequests.list(
-        created_after=created_after,
-        iterator=True,
-        order_by="created_at",
-        sort="desc",
-        state="all",
-    )
+    try:
+        generator_merge_requests: RESTObjectList = rest_object_project.mergerequests.list(
+            created_after=created_after,
+            iterator=True,
+            order_by="created_at",
+            sort="desc",
+            state="all",
+        )
+    except GitlabListError as error:
+        print(f"GitLabListError on {model_project.name_with_namespace}: {error.error_message}")
+        return payload
+    except GitlabAuthenticationError as error:
+        print(f"GitlabAuthenticationError on {model_project.name_with_namespace}: {error.error_message}")
+        return payload
     for project_merge_request_rest_object in generator_merge_requests:
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_merge_request(
+            model_project=model_project,
             project_merge_request_rest_object=project_merge_request_rest_object,
             payload=payload,
         )
