@@ -2,7 +2,8 @@ from datetime import datetime
 
 from core.settings.common.developer import DEBUG
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
-from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload
+from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload, \
+    initial_git_lab_discussions_api_payload
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
 from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
 from git_lab.models.git_lab_discussion import GitLabDiscussion
@@ -21,7 +22,7 @@ def git_lab_discussions_api_process_note(
         payload: GitLabDiscussionsApiPayload | None = None,
 ) -> GitLabDiscussionsApiPayload:
     if payload is None:
-        payload: GitLabDiscussionsApiPayload = {}
+        payload: GitLabDiscussionsApiPayload = initial_git_lab_discussions_api_payload
     if model_merge_request is None:
         return payload
     if model_discussion is None:

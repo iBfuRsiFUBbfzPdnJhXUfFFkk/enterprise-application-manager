@@ -8,7 +8,8 @@ from gitlab import Gitlab
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
-from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload
+from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload, \
+    initial_git_lab_discussions_api_payload
 from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_project import \
     git_lab_discussions_api_process_project
 from git_lab.models.git_lab_project import GitLabProject
@@ -26,7 +27,7 @@ def git_lab_discussions_api_v2(
         typ=GitLabProject,
         val=GitLabProject.objects.filter(~Q(should_skip=True))
     )
-    payload: GitLabDiscussionsApiPayload = {}
+    payload: GitLabDiscussionsApiPayload = initial_git_lab_discussions_api_payload
     for model_project in iter(model_projects.all()):
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_project(
             created_after=one_month_ago,

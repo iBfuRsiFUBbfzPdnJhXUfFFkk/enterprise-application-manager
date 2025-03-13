@@ -1,5 +1,6 @@
 from core.settings.common.developer import DEBUG
-from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload
+from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_payload import GitLabDiscussionsApiPayload, \
+    initial_git_lab_discussions_api_payload
 from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_note import \
     git_lab_discussions_api_process_note
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
@@ -14,7 +15,7 @@ def git_lab_discussions_api_process_discussion(
         payload: GitLabDiscussionsApiPayload | None = None,
 ) -> GitLabDiscussionsApiPayload:
     if payload is None:
-        payload: GitLabDiscussionsApiPayload = {}
+        payload: GitLabDiscussionsApiPayload = initial_git_lab_discussions_api_payload
     if discussion_dict is None:
         return payload
     discussion_id: str = discussion_dict.get("id")
