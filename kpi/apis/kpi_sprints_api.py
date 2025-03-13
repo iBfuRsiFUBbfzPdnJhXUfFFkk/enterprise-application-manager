@@ -4,6 +4,7 @@ from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 
 from core.utilities.cast_query_set import cast_query_set
+from git_lab.models.git_lab_change import GitLabChange
 from git_lab.models.git_lab_issue import GitLabIssue
 from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
@@ -62,8 +63,20 @@ def kpi_sprints_api(
                 if issue.weight is not None and issue.closed_at.date() <= scrum_sprint.date_end
             ])
             project_set: set[int] = set()
+            for issue_assigned in issues_authored.all():
+                project_set.add(issue_assigned.project.id)
             for issue_assigned in issues_assigned.all():
                 project_set.add(issue_assigned.project.id)
+            for issue_assigned in issues_closed.all():
+                project_set.add(issue_assigned.project.id)
+            changes: QuerySet[GitLabChange] = scrum_sprint.changes
+            lines_added: int = 0
+            lines_removed: int = 0
+            for change in changes.all():
+                lines_added += change.total_lines_added or 0
+                lines_removed += change.total_lines_removed or 0
+            kpi_sprint.number_of_code_lines_added = lines_added
+            kpi_sprint.number_of_code_lines_removed = lines_removed
             kpi_sprint.number_of_context_switches = len(project_set)
             kpi_sprint.save()
     return JsonResponse(data={}, safe=False)
