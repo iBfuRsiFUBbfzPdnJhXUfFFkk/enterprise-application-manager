@@ -1,16 +1,13 @@
-from datetime import datetime
 from typing import cast
 
-from dateutil.relativedelta import relativedelta
-from django.db.models import QuerySet, Q
-from django.http import HttpRequest, JsonResponse, HttpResponse, QueryDict
-from gitlab import Gitlab, GitlabListError
-from gitlab.v4.objects import ProjectMergeRequest, ProjectMergeRequestDiscussion, Project
+from django.http import HttpRequest, JsonResponse, HttpResponse
+from gitlab import Gitlab
+from gitlab.v4.objects import ProjectMergeRequest, ProjectMergeRequestDiscussion
 
-from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.apis.common.get_git_lab_project_merge_requests import get_git_lab_project_merge_requests
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
 from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
@@ -24,42 +21,14 @@ from scrum.models.scrum_sprint import ScrumSprint
 def git_lab_discussions_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    query_dict: QueryDict = request.GET
-    now = datetime.now()
-
-    # Subtract one month
-    one_month_ago = now - relativedelta(months=1)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
-    git_lab_projects: QuerySet[GitLabProject] = cast_query_set(
-        typ=GitLabProject,
-        val=GitLabProject.objects.filter(~Q(should_skip=True))
+    all_project_merge_requests: list[ProjectMergeRequest] = get_git_lab_project_merge_requests(
+        git_lab_client=git_lab_client,
     )
-    all_project_merge_requests: set[ProjectMergeRequest] = set()
-    for git_lab_project in git_lab_projects:
-        try:
-            project_id: int = git_lab_project.id
-            project: Project | None = git_lab_client.projects.get(id=project_id, lazy=True)
-            if project is None:
-                continue
-            project_merge_requests: list[ProjectMergeRequest] = cast(
-                typ=list[ProjectMergeRequest],
-                val=project.mergerequests.list(
-                    all=True,
-                    lazy=True,
-                    state=(query_dict.get("state") or "all"),
-                    order_by=(query_dict.get("order_by") or "created_at"),
-                    sort=(query_dict.get("sort") or "desc"),
-                    created_after=one_month_ago,
-                )
-            )
-        except GitlabListError as error:
-            print(f"GitLabListError on {git_lab_project.name_with_namespace}: {error.error_message}")
-            continue
-        all_project_merge_requests.update(project_merge_requests)
     all_discussions: set[ProjectMergeRequestDiscussion] = set()
-    for project_merge_request in list(all_project_merge_requests):
+    for project_merge_request in all_project_merge_requests:
         discussions: list[ProjectMergeRequestDiscussion] = cast(
             typ=list[ProjectMergeRequestDiscussion],
             val=project_merge_request.discussions.list(get_all=True, lazy=False)
