@@ -10,6 +10,7 @@ class GitLabApiCommonQueryParameters(TypedDict):
     author_id: int | None
     created_after: datetime | None
     created_before: datetime | None
+    get_all: bool | None
     iteration_id: int | None
     order_by: str | None
     page: int | None
@@ -27,6 +28,7 @@ def get_initial_gitlab_api_common_query_parameters() -> GitLabApiCommonQueryPara
         "author_id": None,
         "created_after": None,
         "created_before": None,
+        "get_all": True,
         "iteration_id": None,
         "order_by": "updated_at",
         "page": None,
@@ -49,6 +51,7 @@ def get_common_query_parameters(
     return_dict["assignee_id"] = query_dict.get('assignee_id', None)
     return_dict["author_id"] = query_dict.get('author_id', None)
     return_dict["iteration_id"] = query_dict.get('iteration_id', None)
+    return_dict["get_all"] = query_dict.get('all', True)
     return_dict["order_by"] = query_dict.get('updated_at', None)
     return_dict["page"] = query_dict.get('page', None)
     return_dict["per_page"] = query_dict.get('per_page', None)
