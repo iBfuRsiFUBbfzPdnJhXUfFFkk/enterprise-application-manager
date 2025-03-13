@@ -63,6 +63,7 @@ def git_lab_discussions_api(
         git_lab_discussion.individual_note = discussion_dict.get("individual_note")
         notes: list[GitLabNoteTypedDict] | None = discussion_dict.get("notes")
         if notes is not None:
+            note_counter: int = 0
             for note in notes:
                 note_id: int | None = note.get("id")
                 if note_id is None:
@@ -94,6 +95,20 @@ def git_lab_discussions_api(
                 if scrum_sprint is not None:
                     git_lab_note.scrum_sprint = scrum_sprint
                     git_lab_discussion.scrum_sprint = scrum_sprint
+                if note_counter == 0:
+                    git_lab_discussion.created_at = convert_and_enforce_utc_timezone(
+                        datetime_string=note.get("created_at")
+                    )
+                    git_lab_discussion.updated_at = convert_and_enforce_utc_timezone(
+                        datetime_string=note.get("updated_at")
+                    )
+                    if author is not None:
+                        git_lab_discussion.started_by = GitLabUser.objects.filter(id=author.get("id")).first()
+                else:
+                    git_lab_discussion.updated_at = convert_and_enforce_utc_timezone(
+                        datetime_string=note.get("updated_at")
+                    )
                 git_lab_note.save()
+                note_counter += 1
         git_lab_discussion.save()
     return JsonResponse(data=all_discussion_dicts, safe=False)

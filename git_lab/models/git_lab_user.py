@@ -59,6 +59,14 @@ class GitLabUser(
         )
 
     @property
+    def discussions_started(self):
+        from git_lab.models.git_lab_discussion import GitLabDiscussion
+        return cast_query_set(
+            typ=GitLabDiscussion,
+            val=GitLabDiscussion.objects.filter(started_by=self)
+        )
+
+    @property
     def issues_assigned(self):
         from git_lab.models.git_lab_issue import GitLabIssue
         return cast_query_set(
