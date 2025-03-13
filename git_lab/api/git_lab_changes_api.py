@@ -171,8 +171,8 @@ def git_lab_changes_api(
             git_lab_change.base_sha = diff_refs.get("base_sha")
             git_lab_change.start_sha = diff_refs.get("start_sha")
         scrum_sprint: ScrumSprint | None = ScrumSprint.objects.filter(
-            date_start__gte=git_lab_change.created_at,
-            date_end__lte=git_lab_change.created_at,
+            date_start__lte=git_lab_change.created_at,
+            date_end__gte=git_lab_change.created_at,
         ).first()
         if scrum_sprint is not None:
             git_lab_change.scrum_sprint = scrum_sprint
