@@ -25,7 +25,7 @@ def kpi_sprints_api(
         typ=GitLabUser,
         val=GitLabUser.objects.all()
     )
-    for scrum_sprint in scrum_sprints[::number_of_sprints]:
+    for scrum_sprint in scrum_sprints[:number_of_sprints]:
         print(f"Calculating KPI for {scrum_sprint.name}")
         for git_lab_user in git_lab_users:
             print(f"Calculating KPI for {scrum_sprint.name} - {git_lab_user.username}")
