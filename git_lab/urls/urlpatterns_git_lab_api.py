@@ -1,13 +1,13 @@
 from django.urls import URLPattern, URLResolver, path
 
-from git_lab.api.git_lab_changes_api import git_lab_changes_api
-from git_lab.api.git_lab_discussions_api import git_lab_discussions_api
-from git_lab.api.git_lab_groups_api import git_lab_groups_api
-from git_lab.api.git_lab_issues_api import git_lab_issues_api
-from git_lab.api.git_lab_iterations_api import git_lab_iterations_api
-from git_lab.api.git_lab_merge_requests_api import git_lab_merge_requests_api
-from git_lab.api.git_lab_projects_api import git_lab_projects_api
-from git_lab.api.git_lab_users_api import git_lab_users_api
+from git_lab.apis.git_lab_changes_api import git_lab_changes_api
+from git_lab.apis.git_lab_discussions_api import git_lab_discussions_api
+from git_lab.apis.git_lab_groups_api import git_lab_groups_api
+from git_lab.apis.git_lab_issues_api import git_lab_issues_api
+from git_lab.apis.git_lab_iterations_api import git_lab_iterations_api
+from git_lab.apis.git_lab_merge_requests_api import git_lab_merge_requests_api
+from git_lab.apis.git_lab_projects_api import git_lab_projects_api
+from git_lab.apis.git_lab_users_api import git_lab_users_api
 
 urlpatterns_git_lab_api: list[URLPattern | URLResolver] = [
     path(name='git_lab_api_changes', route='change/', view=git_lab_changes_api),

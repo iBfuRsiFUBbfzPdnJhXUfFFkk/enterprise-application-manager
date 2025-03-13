@@ -9,7 +9,6 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
-from git_lab.api.common.get_common_query_parameters import GitLabApiCommonQueryParameters, get_common_query_parameters
 from git_lab.models.common.typed_dicts.git_lab_user_typed_dict import GitLabUserTypedDict
 from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_user import GitLabUser
@@ -18,7 +17,6 @@ from git_lab.models.git_lab_user import GitLabUser
 def git_lab_users_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(request=request)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)

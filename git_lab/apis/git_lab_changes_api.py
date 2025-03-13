@@ -9,7 +9,7 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
-from git_lab.api.common.get_common_query_parameters import GitLabApiCommonQueryParameters, get_common_query_parameters
+from git_lab.apis.common.get_common_query_parameters import GitLabApiCommonQueryParameters, get_common_query_parameters
 from git_lab.models.common.typed_dicts.git_lab_change_typed_dict import GitLabChangeTypedDict, \
     GitLabMergeRequestChangesTypedDict, GitLabMergeRequestChangeDiffRefsTypedDict
 from git_lab.models.common.typed_dicts.git_lab_references_typed_dict import GitLabReferencesTypedDict
