@@ -69,7 +69,7 @@ def kpi_sprints_api(
                 project_set.add(issue_assigned.project.id)
             for issue_assigned in issues_closed.all():
                 project_set.add(issue_assigned.project.id)
-            changes: QuerySet[GitLabChange] = scrum_sprint.changes
+            changes: QuerySet[GitLabChange] = scrum_sprint.changes.filter(author=git_lab_user)
             lines_added: int = 0
             lines_removed: int = 0
             for change in changes.all():
