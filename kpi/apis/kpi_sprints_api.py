@@ -15,6 +15,7 @@ from scrum.models.scrum_sprint import ScrumSprint
 def kpi_sprints_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
+    number_of_sprints: int = request.GET.get("number_of_sprints") or 1
     current_date = date.today()
     scrum_sprints: QuerySet[ScrumSprint] = cast_query_set(
         typ=ScrumSprint,
@@ -24,7 +25,7 @@ def kpi_sprints_api(
         typ=GitLabUser,
         val=GitLabUser.objects.all()
     )
-    for scrum_sprint in scrum_sprints:
+    for scrum_sprint in scrum_sprints[::number_of_sprints]:
         for git_lab_user in git_lab_users:
             iterations: QuerySet[GitLabIteration] = scrum_sprint.iterations.all()
             kpi_sprint: KeyPerformanceIndicatorSprint = KeyPerformanceIndicatorSprint.objects.filter(
