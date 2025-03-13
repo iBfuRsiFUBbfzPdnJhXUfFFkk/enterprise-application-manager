@@ -38,7 +38,7 @@ class GitLabNote(
     type: str | None = create_generic_varchar()
 
     def __str__(self) -> str:
-        return f"{self.id}"
+        return f"{self.title}"
 
     class Meta:
         ordering = ['-updated_at']
