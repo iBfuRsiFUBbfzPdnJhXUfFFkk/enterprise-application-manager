@@ -61,6 +61,14 @@ class ScrumSprint(
             val=GitLabNote.objects.filter(scrum_sprint=self)
         )
 
+    @property
+    def discussions(self):
+        from git_lab.models.git_lab_discussion import GitLabDiscussion
+        return cast_query_set(
+            typ=GitLabDiscussion,
+            val=GitLabDiscussion.objects.filter(scrum_sprint=self)
+        )
+
     def __str__(self) -> str:
         return f"{self.name}"
 

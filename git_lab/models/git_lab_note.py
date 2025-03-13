@@ -9,6 +9,7 @@ from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractG
 from git_lab.models.common.abstract.abstract_git_lab_primary_key import AbstractGitLabPrimaryKey
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
 from git_lab.models.git_lab_discussion import GitLabDiscussion
+from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 from scrum.models.scrum_sprint import ScrumSprint
@@ -23,6 +24,7 @@ class GitLabNote(
     author: GitLabUser | None = create_generic_fk(related_name="notes_authored", to=GitLabUser)
     body: str | None = create_generic_text()
     discussion: GitLabDiscussion | None = create_generic_fk(related_name="notes", to=GitLabDiscussion)
+    group: GitLabGroup | None = create_generic_fk(related_name="notes", to=GitLabGroup)
     noteable_id: int | None = create_generic_integer()
     noteable_iid: int | None = create_generic_integer()
     noteable_type: str | None = create_generic_varchar()

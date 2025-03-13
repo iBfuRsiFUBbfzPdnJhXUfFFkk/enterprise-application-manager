@@ -32,6 +32,14 @@ class GitLabGroup(
         )
 
     @property
+    def discussions(self):
+        from git_lab.models.git_lab_discussion import GitLabDiscussion
+        return cast_query_set(
+            typ=GitLabDiscussion,
+            val=GitLabDiscussion.objects.filter(group=self)
+        )
+
+    @property
     def issues(self):
         from git_lab.models.git_lab_issue import GitLabIssue
         return cast_query_set(
@@ -45,6 +53,14 @@ class GitLabGroup(
         return cast_query_set(
             typ=GitLabIteration,
             val=GitLabIteration.objects.filter(group=self)
+        )
+
+    @property
+    def notes(self):
+        from git_lab.models.git_lab_note import GitLabNote
+        return cast_query_set(
+            typ=GitLabNote,
+            val=GitLabNote.objects.filter(group=self)
         )
 
     @property
