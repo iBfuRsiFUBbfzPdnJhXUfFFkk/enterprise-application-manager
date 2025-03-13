@@ -13,6 +13,8 @@ from core.utilities.cast_query_set import cast_query_set
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
+from git_lab.models.common.typed_dicts.git_lab_merge_request_typed_dict import GitLabMergeRequestTypedDict
+from git_lab.models.common.typed_dicts.git_lab_project_typed_dict import GitLabProjectTypedDict
 from git_lab.models.git_lab_project import GitLabProject
 
 
@@ -29,8 +31,9 @@ def git_lab_discussions_api_v2(
         val=GitLabProject.objects.filter(~Q(should_skip=True))
     )
     for git_lab_project in iter(git_lab_projects.all()):
+        project_dict: GitLabProjectTypedDict = git_lab_project.asdict()
         if DEBUG is True:
-            print(f"Processing PROJECT: {git_lab_project.full_path}")
+            print(f"Processing PROJECT: {project_dict.get("web_url")}")
         project_id: int = git_lab_project.id
         project: Project | None = git_lab_client.projects.get(id=project_id, lazy=False)
         if project is None:
@@ -47,8 +50,9 @@ def git_lab_discussions_api_v2(
                 typ=ProjectMergeRequest,
                 val=project_merge_request,
             )
+            merge_request_dict: GitLabMergeRequestTypedDict = project_merge_request.asdict()
             if DEBUG is True:
-                print(f"----Processing MERGE REQUEST: {project_merge_request.web_url}")
+                print(f"----Processing MERGE REQUEST: {merge_request_dict.get('web_url')}")
             discussion_generator: RESTObjectList = project_merge_request.discussions.list(
                 iterator=True,
             )
