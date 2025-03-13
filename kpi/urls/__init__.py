@@ -8,9 +8,7 @@ from kpi.views.kpi_sprint_export_view import kpi_sprint_export_view
 from kpi.views.sprint.kpi_sprint_view import kpi_sprint_view
 from kpi.views.sprint.kpi_sprints_view import kpi_sprints_view
 
-app_name: str = 'kpi'
-
-urlpatterns: list[URLPattern | URLResolver] = [
+urlpatterns_kpi: list[URLPattern | URLResolver] = [
     path(
         name='kpi_chart_data_for_developer_ajax',
         route='chart-data/<uuid:uuid>/',

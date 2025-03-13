@@ -18,6 +18,7 @@ from core.urls.urlpatterns_release_bundle import urlpatterns_release_bundle
 from core.urls.urlpatterns_secret import urlpatterns_secret
 from core.urls.urlpatterns_this_api import urlpatterns_this_api
 from core.views import home_view
+from kpi.urls import urlpatterns_kpi
 
 urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     # HOME (INDEX)
@@ -42,9 +43,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_release_bundle,
     *urlpatterns_secret,
     *urlpatterns_this_api,
-    path(route='kpi/', view=include(arg=u'kpi.urls')),
-    path(route='git-lab/', view=include(arg=u'git_lab.urls')),
-    path(route='scrum/', view=include(arg=u'scrum.urls')),
+    path(name="kpi", route='kpi/', view=include(arg=(urlpatterns_kpi, 'kpi'), namespace="kpi")),
     *urlpatterns_api
 ]
 
