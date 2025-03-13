@@ -32,6 +32,7 @@ def git_lab_users_api(
             group: Group | None = git_lab_client.groups.get(id=git_lab_group.id)
             if group is None:
                 continue
+            query_parameters["state"] = "all"
             members: list[GroupMemberAll] = cast(
                 typ=list[GroupMemberAll],
                 val=group.members_all.list(**query_parameters)
