@@ -7,6 +7,8 @@ from gitlab.v4.objects import ProjectMergeRequest, ProjectMergeRequestDiscussion
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.apis.common.get_git_lab_project_merge_request_discussions import \
+    get_git_lab_project_merge_request_discussions
 from git_lab.apis.common.get_git_lab_project_merge_requests import get_git_lab_project_merge_requests
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
@@ -27,13 +29,9 @@ def git_lab_discussions_api(
     all_project_merge_requests: list[ProjectMergeRequest] = get_git_lab_project_merge_requests(
         git_lab_client=git_lab_client,
     )
-    all_discussions: set[ProjectMergeRequestDiscussion] = set()
-    for project_merge_request in all_project_merge_requests:
-        discussions: list[ProjectMergeRequestDiscussion] = cast(
-            typ=list[ProjectMergeRequestDiscussion],
-            val=project_merge_request.discussions.list(get_all=True, lazy=False)
-        )
-        all_discussions.update(discussions)
+    all_discussions: list[ProjectMergeRequestDiscussion] = get_git_lab_project_merge_request_discussions(
+        all_project_merge_requests=all_project_merge_requests
+    )
     all_discussion_dicts: list[GitLabDiscussionTypedDict] = [discussion.asdict() for discussion in all_discussions]
     for discussion_dict in all_discussion_dicts:
         discussion_id: str | None = discussion_dict.get("id")

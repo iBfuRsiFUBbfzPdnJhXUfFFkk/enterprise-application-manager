@@ -33,8 +33,8 @@ def get_git_lab_project_merge_requests(
                     created_after=one_month_ago,
                 )
             for project_merge_request in project_merge_request_generator:
-                if DEBUG is True:
-                    print(f"project_merge_request: {project_merge_request}")
+                if DEBUG is True and project_merge_request not in all_project_merge_requests:
+                    print(f"project_merge_request: {project_merge_request.asdict().get("id")}")
                 all_project_merge_requests.add(
                     cast(
                         typ=ProjectMergeRequest,
