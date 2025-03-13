@@ -1,8 +1,7 @@
 from django.urls import URLPattern, URLResolver, path
 
 from git_lab.apis.git_lab_changes_api import git_lab_changes_api
-from git_lab.apis.git_lab_discussions_api import git_lab_discussions_api
-from git_lab.apis.git_lab_discussions_api_v2 import git_lab_discussions_api_v2
+from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_v2 import git_lab_discussions_api_v2
 from git_lab.apis.git_lab_groups_api import git_lab_groups_api
 from git_lab.apis.git_lab_issues_api import git_lab_issues_api
 from git_lab.apis.git_lab_iterations_api import git_lab_iterations_api

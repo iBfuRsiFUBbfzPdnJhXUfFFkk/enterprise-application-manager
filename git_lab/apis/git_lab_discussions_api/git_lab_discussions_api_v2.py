@@ -1,21 +1,23 @@
 from datetime import datetime
-from typing import cast
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import QuerySet, Q
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab
 from gitlab.base import RESTObjectList
-from gitlab.v4.objects import ProjectMergeRequest, Project
+from gitlab.v4.objects import Project
 
 from core.settings.common.developer import DEBUG
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_note import \
+    git_lab_discussions_api_process_note
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_merge_request_typed_dict import GitLabMergeRequestTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
-from git_lab.models.common.typed_dicts.git_lab_project_typed_dict import GitLabProjectTypedDict
+from git_lab.models.git_lab_discussion import GitLabDiscussion
+from git_lab.models.git_lab_merge_request import GitLabMergeRequest
 from git_lab.models.git_lab_project import GitLabProject
 
 
@@ -59,16 +61,14 @@ def git_lab_discussions_api_v2(
                 note_dicts: list[GitLabNoteTypedDict] | None = discussion_dict.get("notes")
                 if note_dicts is None:
                     continue
-                for note_dict in iter(note_dicts):
-                    note: GitLabNoteTypedDict = note_dict
-                    is_system_note: bool | None = note.get("system")
-                    if is_system_note:
-                        continue
-                    if DEBUG is True:
-                        print(f"------------N: {note.get("id")}")
-                        print(f"------------N: {note.get("author").get('name')}")
-                        print(f"------------N: {note.get("author").get('username')}")
-                        print(f"------------N: {note.get("body")}")
+                for index, note_dict in enumerate(iter(note_dicts)):
+                    note_dict: GitLabNoteTypedDict = note_dict
+                    git_lab_discussions_api_process_note(
+                        model_merge_request=GitLabMergeRequest.objects.filter(id=merge_request_dict.get("id")).first(),
+                        git_lab_discussion=GitLabDiscussion.objects.filter(id=discussion_dict.get("id")).first(),
+                        index=index,
+                        note_dict=note_dict,
+                    )
     return JsonResponse(
         data={},
         safe=False
