@@ -1,14 +1,15 @@
-from datetime import datetime, timezone
+from typing import cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, JsonResponse, HttpResponse
 from gitlab import Gitlab, GitlabListError
-from gitlab.v4.objects import ProjectMergeRequest
+from gitlab.v4.objects import ProjectMergeRequest, Project
 
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from core.views.generic.generic_500 import generic_500
+from git_lab.api.common.get_common_query_parameters import GitLabApiCommonQueryParameters, get_common_query_parameters
 from git_lab.models.common.typed_dicts.git_lab_change_typed_dict import GitLabChangeTypedDict, \
     GitLabMergeRequestChangesTypedDict, GitLabMergeRequestChangeDiffRefsTypedDict
 from git_lab.models.common.typed_dicts.git_lab_references_typed_dict import GitLabReferencesTypedDict
@@ -19,34 +20,13 @@ from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import 
 from git_lab.models.git_lab_change import GitLabChange
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
+from scrum.models.scrum_sprint import ScrumSprint
 
 
 def git_lab_changes_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
-    all_parameter: bool = request.GET.get('all', True)
-    page: int | None = request.GET.get('page', None)
-    per_page: int | None = request.GET.get('per_page', None)
-    author_id: int | None = request.GET.get('author_id', None)
-    assignee_id: int | None = request.GET.get('assignee_id', None)
-    iteration_id: int | None = request.GET.get('iteration_id', None)
-    state: str = request.GET.get('state', "all")
-    created_before: str | None = request.GET.get('created_before', None)
-    created_after: str | None = request.GET.get('created_after', None)
-    updated_after: str | None = request.GET.get('updated_after', None)
-    updated_before: str | None = request.GET.get('updated_before', None)
-    created_before_dt: datetime | None = None
-    created_after_dt: datetime | None = None
-    updated_after_dt: datetime | None = None
-    updated_before_dt: datetime | None = None
-    if created_before is not None:
-        created_before_dt = datetime.strptime(created_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if created_after is not None:
-        created_after_dt = datetime.strptime(created_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if updated_after is not None:
-        updated_after_dt = datetime.strptime(updated_after, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    if updated_before is not None:
-        updated_before_dt = datetime.strptime(updated_before, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(request=request)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -57,28 +37,18 @@ def git_lab_changes_api(
     all_project_merge_requests: set[ProjectMergeRequest] = set()
     for git_lab_project in git_lab_projects:
         try:
-            project_merge_requests: list[ProjectMergeRequest] | None = git_lab_client.projects.get(
-                id=git_lab_project.id, lazy=True
-            ).mergerequests.list(
-                all=all_parameter,
-                assignee_id=assignee_id,
-                author_id=author_id,
-                created_after=created_after_dt,
-                created_before=created_before_dt,
-                iteration_id=iteration_id,
-                page=page,
-                per_page=per_page,
-                state=state,
-                updated_after=updated_after_dt,
-                updated_before=updated_before_dt,
+            project_id: int = git_lab_project.id
+            project: Project | None = git_lab_client.projects.get(id=project_id, lazy=True)
+            if project is None:
+                continue
+            project_merge_requests: list[ProjectMergeRequest] = cast(
+                typ=list[ProjectMergeRequest],
+                val=project.mergerequests.list(**query_parameters)
             )
         except GitlabListError as error:
             print(f"GitLabListError on {git_lab_project.name_with_namespace}: {error.error_message}")
             continue
-        if project_merge_requests is None:
-            continue
-        for project_merge_request in project_merge_requests:
-            all_project_merge_requests.add(project_merge_request)
+        all_project_merge_requests.update(project_merge_requests)
     change_dicts: list[GitLabMergeRequestChangesTypedDict] = [
         project_merge_request.changes()
         for project_merge_request
@@ -86,13 +56,15 @@ def git_lab_changes_api(
     ]
     for change_dict in change_dicts:
         changes: list[GitLabChangeTypedDict] | None = change_dict.get("changes")
-        total_lines_added: int = 0
-        total_lines_removed: int = 0
+        if changes is None:
+            continue
+        total_files_created: int = 0
         total_files_deleted: int = 0
         total_files_generated: int = 0
-        total_files_created: int = 0
         total_files_renamed: int = 0
         total_files_updated: int = 0
+        total_lines_added: int = 0
+        total_lines_removed: int = 0
         for change in changes:
             if change.get("deleted_file") is True:
                 total_files_deleted += 1
@@ -117,19 +89,48 @@ def git_lab_changes_api(
                     total_lines_removed += 1
                 if diff_line.startswith("+"):
                     total_lines_added += 1
-        git_lab_change: GitLabChange = GitLabChange.objects.get_or_create(id=change_dict.get("id"))[0]
-        git_lab_change.created_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("created_at"))
-        git_lab_change.updated_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("updated_at"))
-        git_lab_change.latest_build_finished_at = convert_and_enforce_utc_timezone(
-            datetime_string=change_dict.get("latest_build_finished_at"))
-        git_lab_change.latest_build_started_at = convert_and_enforce_utc_timezone(
-            datetime_string=change_dict.get("latest_build_started_at"))
-        git_lab_change.merged_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("merged_at"))
-        git_lab_change.prepared_at = convert_and_enforce_utc_timezone(datetime_string=change_dict.get("prepared_at"))
+        change_id: int | None = change_dict.get("id")
+        if change_id is None:
+            continue
+        get_or_create_tuple: tuple[GitLabChange, bool] = GitLabChange.objects.get_or_create(id=change_id)
+        git_lab_change: GitLabChange = get_or_create_tuple[0]
+        git_lab_change.changes_count = change_dict.get("changes_count") or 0
         git_lab_change.description = change_dict.get("description")
-        git_lab_change.title = change_dict.get("title")
+        git_lab_change.draft = change_dict.get("draft") or False
+        git_lab_change.has_conflicts = change_dict.get("has_conflicts") or False
         git_lab_change.iid = change_dict.get("iid")
+        git_lab_change.merge_commit_sha = change_dict.get("merge_commit_sha")
+        git_lab_change.sha = change_dict.get("sha")
+        git_lab_change.squash_commit_sha = change_dict.get("squash_commit_sha")
+        git_lab_change.state = change_dict.get("state")
+        git_lab_change.title = change_dict.get("title")
+        git_lab_change.total_files_added = total_files_created
+        git_lab_change.total_files_changed = len((changes or []))
+        git_lab_change.total_files_deleted = total_files_deleted
+        git_lab_change.total_files_generated = total_files_generated
+        git_lab_change.total_files_renamed = total_files_renamed
+        git_lab_change.total_files_updated = total_files_updated
+        git_lab_change.total_lines_added = total_lines_added
+        git_lab_change.total_lines_removed = total_lines_removed
         git_lab_change.web_url = change_dict.get("web_url")
+        git_lab_change.created_at = convert_and_enforce_utc_timezone(
+            datetime_string=change_dict.get("created_at")
+        )
+        git_lab_change.updated_at = convert_and_enforce_utc_timezone(
+            datetime_string=change_dict.get("updated_at")
+        )
+        git_lab_change.latest_build_finished_at = convert_and_enforce_utc_timezone(
+            datetime_string=change_dict.get("latest_build_finished_at")
+        )
+        git_lab_change.latest_build_started_at = convert_and_enforce_utc_timezone(
+            datetime_string=change_dict.get("latest_build_started_at")
+        )
+        git_lab_change.merged_at = convert_and_enforce_utc_timezone(
+            datetime_string=change_dict.get("merged_at")
+        )
+        git_lab_change.prepared_at = convert_and_enforce_utc_timezone(
+            datetime_string=change_dict.get("prepared_at")
+        )
         references: GitLabReferencesTypedDict | None = change_dict.get("references")
         task_completion_status: GitLabTaskCompletionStatusTypedDict | None = change_dict.get("task_completion_status")
         time_stats: GitLabTimeStatsTypedDict | None = change_dict.get("time_stats")
@@ -160,26 +161,20 @@ def git_lab_changes_api(
         author: GitLabUserReferenceTypedDict | None = change_dict.get("author")
         if author is not None:
             git_lab_change.author = GitLabUser.objects.filter(id=author.get("id")).first()
-        git_lab_change.project = GitLabProject.objects.filter(id=change_dict.get("project_id")).first()
-        git_lab_change.changes_count = change_dict.get("changes_count")
-        git_lab_change.draft = change_dict.get("draft")
-        git_lab_change.has_conflicts = change_dict.get("has_conflicts")
-        git_lab_change.merge_commit_sha = change_dict.get("merge_commit_sha")
-        git_lab_change.sha = change_dict.get("sha")
-        git_lab_change.squash_commit_sha = change_dict.get("squash_commit_sha")
+        project: GitLabProject | None = GitLabProject.objects.filter(id=change_dict.get("project_id")).first()
+        if project is not None:
+            git_lab_change.project = project
+            git_lab_change.group = project.group
         diff_refs: GitLabMergeRequestChangeDiffRefsTypedDict | None = change_dict.get("diff_refs")
         if diff_refs is not None:
             git_lab_change.head_sha = diff_refs.get("head_sha")
             git_lab_change.base_sha = diff_refs.get("base_sha")
             git_lab_change.start_sha = diff_refs.get("start_sha")
-        git_lab_change.state = change_dict.get("state")
-        git_lab_change.total_files_added = total_files_created
-        git_lab_change.total_files_changed = len((changes or []))
-        git_lab_change.total_files_deleted = total_files_deleted
-        git_lab_change.total_files_generated = total_files_generated
-        git_lab_change.total_files_renamed = total_files_renamed
-        git_lab_change.total_lines_added = total_lines_added
-        git_lab_change.total_lines_removed = total_lines_removed
-        git_lab_change.total_files_updated = total_files_updated
+        scrum_sprint: ScrumSprint | None = ScrumSprint.objects.filter(
+            date_start__gte=git_lab_change.created_at,
+            date_end__lte=git_lab_change.created_at,
+        ).first()
+        if scrum_sprint is not None:
+            git_lab_change.scrum_sprint = scrum_sprint
         git_lab_change.save()
     return JsonResponse(data=change_dicts, safe=False)

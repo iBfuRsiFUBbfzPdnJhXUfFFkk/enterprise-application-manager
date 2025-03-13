@@ -18,6 +18,7 @@ from git_lab.models.common.abstract.abstract_git_lab_time_stats import AbstractG
 from git_lab.models.common.abstract.abstract_git_lab_title import AbstractGitLabTitle
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
+from git_lab.models.git_lab_group import GitLabGroup
 from git_lab.models.git_lab_project import GitLabProject
 from git_lab.models.git_lab_user import GitLabUser
 from scrum.models.scrum_sprint import ScrumSprint
@@ -42,6 +43,7 @@ class GitLabChange(
     changes_count: str | None = create_generic_varchar()
     closed_by: GitLabUser | None = create_generic_fk(related_name="changes_closed", to=GitLabUser)
     draft: bool | None = create_generic_boolean()
+    group: GitLabGroup | None = create_generic_fk(related_name="changes", to=GitLabGroup)
     has_conflicts: bool | None = create_generic_boolean()
     head_sha: str | None = create_generic_varchar()
     latest_build_finished_at: datetime | None = create_generic_datetime()

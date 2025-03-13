@@ -24,6 +24,14 @@ class GitLabGroup(
     full_path: str | None = create_generic_varchar()
 
     @property
+    def changes(self):
+        from git_lab.models.git_lab_change import GitLabChange
+        return cast_query_set(
+            typ=GitLabChange,
+            val=GitLabChange.objects.filter(group=self)
+        )
+
+    @property
     def issues(self):
         from git_lab.models.git_lab_issue import GitLabIssue
         return cast_query_set(
