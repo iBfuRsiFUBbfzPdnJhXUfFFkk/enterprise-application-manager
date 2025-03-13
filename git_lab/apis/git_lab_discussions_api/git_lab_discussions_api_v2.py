@@ -47,10 +47,39 @@ def remove_projects_without_notes(
         if project_has_notes:
             filtered_projects[project_id] = project
 
-    # Update the payload with only projects that have notes
     payload["projects"] = filtered_projects
     return payload
 
+
+def clean_empty_objects(obj):
+    """
+    Recursively remove keys in dictionaries whose values are empty dictionaries.
+    For any dict, if a value is a dictionary, it will be processed recursively.
+    If after cleaning, the dictionary is empty, it will be replaced with None.
+    """
+    if isinstance(obj, dict):
+        # Create a new dict with cleaned values
+        cleaned = {}
+        for key, value in obj.items():
+            new_value = clean_empty_objects(value)
+            # Only keep the key if the cleaned value is not an empty dict
+            # You may decide to also remove None values if that fits your needs.
+            if new_value != {} and new_value is not None:
+                cleaned[key] = new_value
+        return cleaned
+    elif isinstance(obj, list):
+        # Process list items if necessary.
+        return [clean_empty_objects(item) for item in obj if item != {}]
+    else:
+        return obj
+
+
+def process_payload(payload: GitLabDiscussionsApiPayload) -> GitLabDiscussionsApiPayload:
+    # First remove projects without any notes
+    payload = remove_projects_without_notes(payload)
+    # Then recursively clean empty dictionaries
+    payload = clean_empty_objects(payload)
+    return payload
 
 def git_lab_discussions_api_v2(
         request: HttpRequest,
@@ -77,6 +106,6 @@ def git_lab_discussions_api_v2(
             payload=payload,
         )
     return JsonResponse(
-        data=remove_projects_without_notes(payload),
+        data=process_payload(payload),
         safe=False
     )

@@ -21,9 +21,14 @@ def git_lab_discussions_api_process_discussion(
     if discussion_dict is None:
         return payload
     discussion_id: str = discussion_dict.get("id")
-    model_discussion: GitLabDiscussion | None = GitLabDiscussion.objects.filter(id=discussion_id).first()
-    if model_discussion is None:
-        return payload
+    get_or_create_tuple: tuple[GitLabDiscussion, bool] = GitLabDiscussion.objects.get_or_create(id=discussion_id)
+    model_discussion: GitLabDiscussion = get_or_create_tuple[0]
+    did_create: bool = get_or_create_tuple[1]
+    if did_create is True:
+        payload["total_number_of_discussions_created"] += 1
+    else:
+        payload["total_number_of_discussions_updated"] += 1
+    model_discussion.individual_note = discussion_dict.get("individual_note")
     if DEBUG is True:
         print(f"--------D: {discussion_id}")
     note_dicts: list[GitLabNoteTypedDict] | None = discussion_dict.get("notes")
