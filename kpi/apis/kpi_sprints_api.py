@@ -8,6 +8,7 @@ from git_lab.models.git_lab_change import GitLabChange
 from git_lab.models.git_lab_issue import GitLabIssue
 from git_lab.models.git_lab_iteration import GitLabIteration
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
+from git_lab.models.git_lab_note import GitLabNote
 from git_lab.models.git_lab_user import GitLabUser
 from kpi.models.key_performance_indicator_sprint import KeyPerformanceIndicatorSprint
 from scrum.models.scrum_sprint import ScrumSprint
@@ -69,12 +70,20 @@ def kpi_sprints_api(
                 project_set.add(issue_assigned.project.id)
             for issue_assigned in issues_closed.all():
                 project_set.add(issue_assigned.project.id)
+            notes: QuerySet[GitLabNote] = scrum_sprint.notes.filter(author=git_lab_user, system=False)
             changes: QuerySet[GitLabChange] = scrum_sprint.changes.filter(author=git_lab_user)
             lines_added: int = 0
             lines_removed: int = 0
             for change in changes.all():
                 lines_added += change.total_lines_added or 0
                 lines_removed += change.total_lines_removed or 0
+            comments: int = 0
+            discussions_set: set[str] = set()
+            for note in notes.all():
+                comments += 1
+                discussions_set.add(note.discussion.id)
+            kpi_sprint.number_of_comments_made = comments
+            kpi_sprint.number_of_threads_made = len(discussions_set)
             kpi_sprint.number_of_code_lines_added = lines_added
             kpi_sprint.number_of_code_lines_removed = lines_removed
             kpi_sprint.number_of_context_switches = len(project_set)
