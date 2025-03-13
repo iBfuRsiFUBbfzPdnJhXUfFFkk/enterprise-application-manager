@@ -7,6 +7,7 @@ from django_generic_model_fields.create_generic_varchar import create_generic_va
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
 from git_lab.models.common.abstract.abstract_git_lab_primary_key import AbstractGitLabPrimaryKey
+from git_lab.models.common.abstract.abstract_git_lab_title import AbstractGitLabTitle
 from git_lab.models.common.abstract.abstract_git_lab_updated_at import AbstractGitLabUpdatedAt
 from git_lab.models.common.abstract.abstract_git_lab_web_url import AbstractGitLabWebUrl
 from git_lab.models.git_lab_discussion import GitLabDiscussion
@@ -20,6 +21,7 @@ class GitLabNote(
     AbstractBaseModel,
     AbstractGitLabCreatedAt,
     AbstractGitLabPrimaryKey,
+    AbstractGitLabTitle,
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):

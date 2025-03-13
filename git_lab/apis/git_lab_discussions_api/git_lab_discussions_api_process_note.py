@@ -79,6 +79,7 @@ def git_lab_discussions_api_process_note(
     if author is not None:
         model_note.author = GitLabUser.objects.filter(id=author.get("id")).first()
     project: GitLabProject | None = GitLabProject.objects.filter(id=note_dict.get("project_id")).first()
+    model_note.title = f"{author.get('username')} on {model_merge_request.title} for {project}"
     if project is not None:
         model_note.project = project
         model_discussion.project = project
