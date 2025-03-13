@@ -12,9 +12,11 @@ from core.views.generic.generic_500 import generic_500
 from git_lab.apis.common.get_common_query_parameters import GitLabApiCommonQueryParameters, get_common_query_parameters
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_note_typed_dict import GitLabNoteTypedDict
+from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
 from git_lab.models.git_lab_discussion import GitLabDiscussion
 from git_lab.models.git_lab_note import GitLabNote
 from git_lab.models.git_lab_project import GitLabProject
+from git_lab.models.git_lab_user import GitLabUser
 from scrum.models.scrum_sprint import ScrumSprint
 
 
@@ -76,6 +78,9 @@ def git_lab_discussions_api(
                 git_lab_note.created_at = convert_and_enforce_utc_timezone(datetime_string=note.get("created_at"))
                 git_lab_note.updated_at = convert_and_enforce_utc_timezone(datetime_string=note.get("updated_at"))
                 git_lab_note.discussion = git_lab_discussion
+                author: GitLabUserReferenceTypedDict | None = note.get("author")
+                if author is not None:
+                    git_lab_note.author = GitLabUser.objects.filter(id=author.get("id")).first()
                 project: GitLabProject | None = GitLabProject.objects.filter(id=note.get("project_id")).first()
                 if project is not None:
                     git_lab_note.project = project
