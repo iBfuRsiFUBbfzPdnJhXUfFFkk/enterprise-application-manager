@@ -47,6 +47,7 @@ def git_lab_discussions_api_process_note(
     if is_system_note is True:
         if DEBUG is True:
             print("------------N: skipping system note")
+        payload["total_number_of_system_notes_skipped"] += 1
         return payload
     body: str | None = note_dict.get("body")
     created_at: str | None = note_dict.get("created_at")

@@ -25,7 +25,13 @@ def git_lab_discussions_api_process_discussion(
     note_dicts: list[GitLabNoteTypedDict] | None = discussion_dict.get("notes")
     if note_dicts is None or len(note_dicts) == 0:
         return payload
-    payload["projects"][model_project.id]["merge_requests"][model_merge_request.id]["discussions"][discussion_dict.get("id")] = {
+    payload["projects"][
+        model_project.id
+    ]["merge_requests"][
+        model_merge_request.id
+    ]["discussions"][
+        discussion_dict.get("id")
+    ] = {
         "notes": {}
     }
     for index, note_dict in enumerate(iter(note_dicts)):

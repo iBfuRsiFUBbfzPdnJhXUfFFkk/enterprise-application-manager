@@ -40,9 +40,11 @@ def git_lab_discussions_api_process_project(
         )
     except GitlabListError as error:
         print(f"GitLabListError on {model_project.name_with_namespace}: {error.error_message}")
+        payload["total_number_of_projects_denied_access"] += 1
         return payload
     except GitlabAuthenticationError as error:
         print(f"GitlabAuthenticationError on {model_project.name_with_namespace}: {error.error_message}")
+        payload["total_number_of_projects_denied_access"] += 1
         return payload
     for project_merge_request_rest_object in generator_merge_requests:
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_merge_request(
