@@ -80,7 +80,7 @@ def git_lab_discussions_api_process_note(
     did_create: bool = get_or_create_tuple[1]
     if did_create is True:
         payload["total_number_of_discussions_created"] += 1
-    else:
+    elif did_create is False and index == 0:
         payload["total_number_of_discussions_updated"] += 1
     model_discussion.individual_note = discussion_dict.get("individual_note")
     get_or_create_tuple: tuple[GitLabNote, bool] = GitLabNote.objects.get_or_create(id=note_id)
