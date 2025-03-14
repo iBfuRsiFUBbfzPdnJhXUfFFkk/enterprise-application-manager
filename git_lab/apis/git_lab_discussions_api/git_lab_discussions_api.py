@@ -20,7 +20,8 @@ def git_lab_discussions_api(
         request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
     start_time: float = time()
-    weeks_back: int = request.GET.get("weeks_back", 5)
+    weeks_back_str: str = request.GET.get("weeks_back", "5")
+    weeks_back: int = int(weeks_back_str)
     now: datetime = datetime.now()
     one_month_ago: datetime = now - relativedelta(weeks=weeks_back)
     git_lab_client: Gitlab | None = get_git_lab_client()
