@@ -48,7 +48,6 @@ def git_lab_discussions_api_process_project(
         return payload
     for project_merge_request_rest_object in generator_merge_requests:
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_merge_request(
-            model_project=model_project,
             project_merge_request_rest_object=project_merge_request_rest_object,
             payload=payload,
         )

@@ -10,11 +10,9 @@ from git_lab.apis.git_lab_discussions_api.git_lab_discussions_api_process_discus
 from git_lab.models.common.typed_dicts.git_lab_discussion_typed_dict import GitLabDiscussionTypedDict
 from git_lab.models.common.typed_dicts.git_lab_merge_request_typed_dict import GitLabMergeRequestTypedDict
 from git_lab.models.git_lab_merge_request import GitLabMergeRequest
-from git_lab.models.git_lab_project import GitLabProject
 
 
 def git_lab_discussions_api_process_merge_request(
-        model_project: GitLabProject | None = None,
         project_merge_request_rest_object: RESTObject | None = None,
         payload: GitLabDiscussionsApiPayload | None = None,
 ) -> GitLabDiscussionsApiPayload:
@@ -25,10 +23,6 @@ def git_lab_discussions_api_process_merge_request(
     merge_request_dict: GitLabMergeRequestTypedDict = project_merge_request_rest_object.asdict()
     merge_request_id: int = merge_request_dict.get("id")
     web_url: str | None = merge_request_dict.get("web_url")
-    payload["projects"][model_project.id]["merge_requests"][merge_request_id] = {
-        "discussions": {},
-        "web_url": web_url,
-    }
     if DEBUG is True:
         print(f"----M: {web_url}")
     model_merge_request: GitLabMergeRequest | None = GitLabMergeRequest.objects.filter(id=merge_request_id).first()
@@ -48,7 +42,6 @@ def git_lab_discussions_api_process_merge_request(
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_discussion(
             discussion_dict=discussion_dict,
             model_merge_request=model_merge_request,
-            model_project=model_project,
             payload=payload,
         )
     return payload

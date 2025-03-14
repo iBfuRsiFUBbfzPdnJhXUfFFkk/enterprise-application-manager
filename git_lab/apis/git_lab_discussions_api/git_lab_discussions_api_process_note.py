@@ -90,18 +90,6 @@ def git_lab_discussions_api_process_note(
         payload["total_number_of_notes_created"] += 1
     else:
         payload["total_number_of_notes_updated"] += 1
-    payload["projects"][
-        project_id
-    ]["merge_requests"][
-        model_merge_request.id
-    ]["discussions"][
-        model_discussion.id
-    ]["notes"][
-        note_id
-    ] = {
-        "title": title,
-        "web_url": web_url,
-    }
     model_discussion.group = model_project.group
     model_discussion.project = model_project
     model_discussion.scrum_sprint = model_scrum_sprint
