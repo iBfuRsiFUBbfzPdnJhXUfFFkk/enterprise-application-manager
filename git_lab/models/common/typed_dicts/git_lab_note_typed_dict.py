@@ -1,17 +1,21 @@
-from typing import TypedDict
+from git_lab.models.common.typed_dicts.bases.base_git_lab_author_typed_dict import BaseGitLabAuthorTypedDict
+from git_lab.models.common.typed_dicts.bases.base_git_lab_created_at_typed_dict import BaseGitLabCreatedAtTypedDict
+from git_lab.models.common.typed_dicts.bases.base_git_lab_id_typed_dict import BaseGitLabIdTypedDict
+from git_lab.models.common.typed_dicts.bases.base_git_lab_project_id_typed_dict import BaseGitLabProjectIdTypedDict
+from git_lab.models.common.typed_dicts.bases.base_git_lab_type_typed_dict import BaseGitLabTypeTypedDict
+from git_lab.models.common.typed_dicts.bases.base_git_lab_updated_at_typed_dict import BaseGitLabUpdatedAtTypedDict
 
-from git_lab.models.common.typed_dicts.git_lab_user_reference_typed_dict import GitLabUserReferenceTypedDict
 
-
-class GitLabNoteTypedDict(TypedDict):
-    author: GitLabUserReferenceTypedDict | None
+class GitLabNoteTypedDict(
+    BaseGitLabAuthorTypedDict,
+    BaseGitLabCreatedAtTypedDict,
+    BaseGitLabIdTypedDict,
+    BaseGitLabProjectIdTypedDict,
+    BaseGitLabTypeTypedDict,
+    BaseGitLabUpdatedAtTypedDict,
+):
     body: str | None
-    created_at: str | None
-    id: int
     noteable_id: int | None
     noteable_iid: int | None
     noteable_type: str | None
-    project_id: int | None
     system: bool | None
-    type: str | None
-    updated_at: str | None
