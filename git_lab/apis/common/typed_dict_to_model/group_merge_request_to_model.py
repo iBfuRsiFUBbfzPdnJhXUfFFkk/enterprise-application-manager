@@ -1,4 +1,5 @@
 from core.utilities.convert_and_enforce_utc_timezone import convert_and_enforce_utc_timezone
+from git_lab.apis.common.typed_dict_to_model.description_to_model import description_to_model
 from git_lab.models.common.typed_dicts.git_lab_merge_request_typed_dict import GitLabMergeRequestTypedDict
 from git_lab.models.common.typed_dicts.git_lab_references_typed_dict import GitLabReferencesTypedDict
 from git_lab.models.common.typed_dicts.git_lab_task_completion_status_typed_dict import \
@@ -20,6 +21,7 @@ def group_merge_request_to_model(
     get_or_create_tuple: tuple[GitLabMergeRequest, bool] = GitLabMergeRequest.objects.get_or_create(id=merge_request_id)
     git_lab_merge_request: GitLabMergeRequest = get_or_create_tuple[0]
     git_lab_merge_request.blocking_discussions_resolved = merge_request_dict.get("blocking_discussions_resolved")
+    git_lab_merge_request = description_to_model(model=git_lab_merge_request, typed_dict=merge_request_dict)
     git_lab_merge_request.description = merge_request_dict.get("description")
     git_lab_merge_request.draft = merge_request_dict.get("draft") or False
     git_lab_merge_request.has_conflicts = merge_request_dict.get("has_conflicts") or False
