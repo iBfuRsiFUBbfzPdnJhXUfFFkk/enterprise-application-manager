@@ -23,7 +23,7 @@ def git_lab_discussions_api(
     weeks_back_str: str = request.GET.get("weeks_back", "5")
     weeks_back: int = int(weeks_back_str)
     now: datetime = datetime.now()
-    one_month_ago: datetime = now - relativedelta(weeks=weeks_back)
+    created_after: datetime = now - relativedelta(weeks=weeks_back)
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         return generic_500(request=request)
@@ -34,7 +34,7 @@ def git_lab_discussions_api(
     payload: GitLabDiscussionsApiPayload = initial_git_lab_discussions_api_payload
     for model_project in iter(model_projects.all()):
         payload: GitLabDiscussionsApiPayload = git_lab_discussions_api_process_project(
-            created_after=one_month_ago,
+            created_after=created_after,
             git_lab_client=git_lab_client,
             model_project=model_project,
             payload=payload,
