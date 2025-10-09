@@ -21,7 +21,7 @@
 
     <!-- Form Section -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="space-y-6">
@@ -40,15 +40,41 @@
                             {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
+                            <label for="{{ form.version.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The version number of this document">
+                                Version
+                            </label>
+                            {{ form.version }}
+                            {% if form.version.errors %}<p class="mt-2 text-sm text-red-600">{{ form.version.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
                             <label for="{{ form.blob_filename.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The actual filename of the uploaded file">
-                                Filename 
+                                Filename
                             </label>
                             {{ form.blob_filename }}
                             {% if form.blob_filename.errors %}<p class="mt-2 text-sm text-red-600">{{ form.blob_filename.errors.0 }}</p>{% endif %}
                         </div>
+                        <div>
+                            <label for="{{ form.blob_data.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Upload a file to attach to this document">
+                                Upload File {% if form.blob_data.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.blob_data }}
+                            {% if form.instance.pk and form.instance.blob_filename %}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Current file: <span class="font-semibold">{{ form.instance.blob_filename }}</span> ({{ form.instance.blob_size|filesizeformat }})
+                                </p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">
+                                {% if form.instance.pk %}
+                                    Upload a new file to replace the current one, or leave blank to keep the existing file.
+                                {% else %}
+                                    Select a file to upload.
+                                {% endif %}
+                            </p>
+                            {% if form.blob_data.errors %}<p class="mt-2 text-sm text-red-600">{{ form.blob_data.errors.0 }}</p>{% endif %}
+                        </div>
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Notes or description of this document">
-                                Comment 
+                                Comment
                             </label>
                             {{ form.comment }}
                             <p class="mt-1 text-xs text-gray-500">
@@ -117,6 +143,25 @@
         select:focus {
             color: #1f2937;
             background-color: #ffffff;
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #1f2937;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+
+        input[type="file"]:focus {
             border-color: #3b82f6;
             outline: 0;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);

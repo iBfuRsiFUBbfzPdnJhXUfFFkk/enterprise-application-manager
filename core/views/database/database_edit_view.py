@@ -22,7 +22,13 @@ def database_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
     else:
         form = DatabaseForm(instance=database)
 
-    context: Mapping[str, Any] = {'form': form}
+    context: Mapping[str, Any] = {
+        'form': form,
+        'decrypted_username': database.get_encrypted_username(),
+        'encrypted_username': database.encrypted_username,
+        'decrypted_password': database.get_encrypted_password(),
+        'encrypted_password': database.encrypted_password,
+    }
     return base_render(
         context=context,
         request=request,
