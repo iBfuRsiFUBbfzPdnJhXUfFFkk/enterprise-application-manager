@@ -22,7 +22,11 @@ def secret_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
     else:
         form = SecretForm(instance=secret)
 
-    context: Mapping[str, Any] = {'form': form}
+    context: Mapping[str, Any] = {
+        'form': form,
+        'decrypted_value': secret.get_encrypted_value(),
+        'encrypted_value': secret.encrypted_value,
+    }
     return base_render(
         context=context,
         request=request,
