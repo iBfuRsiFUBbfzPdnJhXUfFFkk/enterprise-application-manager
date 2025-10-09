@@ -85,18 +85,32 @@
                     </div>
                     <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label for="{{ form.type_job_title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Current job title or position">
-                                Job Title
+                            <label for="{{ form.type_job_title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Current job title or position (enum)">
+                                Job Title (Type)
                             </label>
                             {{ form.type_job_title }}
                             {% if form.type_job_title.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_job_title.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
-                            <label for="{{ form.type_job_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Job level or seniority (Junior, Senior, Lead, etc.)">
-                                Job Level
+                            <label for="{{ form.type_job_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Job level or seniority (enum - Junior, Senior, Lead, etc.)">
+                                Job Level (Type)
                             </label>
                             {{ form.type_job_level }}
                             {% if form.type_job_level.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_job_level.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.job_title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Job title reference from JobTitle model">
+                                Job Title (FK)
+                            </label>
+                            {{ form.job_title }}
+                            {% if form.job_title.errors %}<p class="mt-2 text-sm text-red-600">{{ form.job_title.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.job_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Job level reference from JobLevel model">
+                                Job Level (FK)
+                            </label>
+                            {{ form.job_level }}
+                            {% if form.job_level.errors %}<p class="mt-2 text-sm text-red-600">{{ form.job_level.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
                             <label for="{{ form.date_hired.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Date when the person was hired">
@@ -118,6 +132,165 @@
                             </label>
                             {{ form.date_birthday }}
                             {% if form.date_birthday.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_birthday.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.scrum_capacity_base.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Base scrum capacity points for sprint planning">
+                                Scrum Capacity Base
+                            </label>
+                            {{ form.scrum_capacity_base }}
+                            {% if form.scrum_capacity_base.errors %}<p class="mt-2 text-sm text-red-600">{{ form.scrum_capacity_base.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Location</h2>
+                        <p class="mt-1 text-sm text-gray-500">Address and geographic information</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="{{ form.location_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Street address line 1">
+                                Address
+                            </label>
+                            {{ form.location_address }}
+                            {% if form.location_address.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_address.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.location_address_continued.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Street address line 2 (apartment, suite, etc.)">
+                                Address Line 2
+                            </label>
+                            {{ form.location_address_continued }}
+                            {% if form.location_address_continued.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_address_continued.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="City name">
+                                City
+                            </label>
+                            {{ form.location_city }}
+                            {% if form.location_city.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_city.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_state_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="State or province code">
+                                State
+                            </label>
+                            {{ form.location_state_code }}
+                            {% if form.location_state_code.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_state_code.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_postal_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="ZIP or postal code">
+                                Postal Code
+                            </label>
+                            {{ form.location_postal_code }}
+                            {% if form.location_postal_code.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_postal_code.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_county.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="County or region name">
+                                County
+                            </label>
+                            {{ form.location_county }}
+                            {% if form.location_county.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_county.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_latitude.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Geographic latitude coordinate">
+                                Latitude
+                            </label>
+                            {{ form.location_latitude }}
+                            {% if form.location_latitude.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_latitude.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.location_longitude.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Geographic longitude coordinate">
+                                Longitude
+                            </label>
+                            {{ form.location_longitude }}
+                            {% if form.location_longitude.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_longitude.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GitLab Sync -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">GitLab Sync</h2>
+                        <p class="mt-1 text-sm text-gray-500">GitLab synchronization data</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.gitlab_sync_username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab username">
+                                GitLab Username
+                            </label>
+                            {{ form.gitlab_sync_username }}
+                            {% if form.gitlab_sync_username.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_username.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab display name">
+                                GitLab Name
+                            </label>
+                            {{ form.gitlab_sync_name }}
+                            {% if form.gitlab_sync_name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab user ID">
+                                GitLab ID
+                            </label>
+                            {{ form.gitlab_sync_id }}
+                            {% if form.gitlab_sync_id.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_id.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_state.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab account state">
+                                GitLab State
+                            </label>
+                            {{ form.gitlab_sync_state }}
+                            {% if form.gitlab_sync_state.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_state.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_access_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab access level">
+                                Access Level
+                            </label>
+                            {{ form.gitlab_sync_access_level }}
+                            {% if form.gitlab_sync_access_level.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_access_level.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_membership_state.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab membership state">
+                                Membership State
+                            </label>
+                            {{ form.gitlab_sync_membership_state }}
+                            {% if form.gitlab_sync_membership_state.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_membership_state.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.gitlab_sync_is_locked }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.gitlab_sync_is_locked.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Whether the GitLab account is locked">Is Locked</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_datetime_created_at.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab account creation date">
+                                Created At
+                            </label>
+                            {{ form.gitlab_sync_datetime_created_at }}
+                            {% if form.gitlab_sync_datetime_created_at.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_datetime_created_at.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_datetime_expires_at.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab account expiration date">
+                                Expires At
+                            </label>
+                            {{ form.gitlab_sync_datetime_expires_at }}
+                            {% if form.gitlab_sync_datetime_expires_at.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_datetime_expires_at.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.gitlab_sync_web_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab profile URL">
+                                GitLab Web URL
+                            </label>
+                            {{ form.gitlab_sync_web_url }}
+                            {% if form.gitlab_sync_web_url.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_web_url.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.gitlab_sync_avatar_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="GitLab avatar image URL">
+                                Avatar URL
+                            </label>
+                            {{ form.gitlab_sync_avatar_url }}
+                            {% if form.gitlab_sync_avatar_url.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_avatar_url.errors.0 }}</p>{% endif %}
                         </div>
                     </div>
                 </div>
