@@ -1,0 +1,162 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load templatetags_markdown %}
+{% load humanize %}
+
+{% block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'action' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ model.name }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">Action details</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'action_run' model_id=model.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Run Action
+                    </a>
+                    <a href="{% url 'action_edit' model_id=model.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="space-y-6">
+            <!-- Action Information -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Action Information</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div class="md:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500">Name</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ model.name }}</dd>
+                        </div>
+                        {% if model.link %}
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Link / URL</dt>
+                                <dd class="mt-1 text-sm">
+                                    <a href="{{ model.link }}" target="_blank" class="text-blue-600 hover:text-blue-900 transition-colors inline-flex items-center">
+                                        {{ model.link }}
+                                        <svg class="h-4 w-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                    </a>
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Execution Statistics -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Execution Statistics</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Estimated Run Time</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if model.estimated_run_time_in_seconds %}
+                                    {{ model.estimated_run_time_in_seconds }} seconds
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Times Run</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ model.number_of_times_run|default:"0" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Last Run</dt>
+                            <dd class="mt-1 text-sm text-gray-900" title="{{ model.datetime_of_last_run }}">
+                                {% if model.datetime_of_last_run %}
+                                    {{ model.datetime_of_last_run|naturaltime }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Last Run By</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if model.user_of_last_run %}
+                                    {{ model.user_of_last_run.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            {% if model.comment %}
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Comments</h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="prose max-w-none text-sm text-gray-700">
+                            {{ model.comment|markdown }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Created</dt>
+                            <dd class="mt-1 text-sm text-gray-900" title="{{ created_record.history_date }}">
+                                {{ created_record.history_date|naturaltime }}
+                                {% if created_record.history_user %}
+                                    by {{ created_record.history_user.username }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                            <dd class="mt-1 text-sm text-gray-900" title="{{ updated_record.history_date }}">
+                                {{ updated_record.history_date|naturaltime }}
+                                {% if updated_record.history_user %}
+                                    by {{ updated_record.history_user.username }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
