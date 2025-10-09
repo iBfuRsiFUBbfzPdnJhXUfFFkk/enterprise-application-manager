@@ -1,39 +1,178 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% load templatetags_markdown %}
+{% load humanize %}
+
 {% block content %}
-    <div><a href="{% url 'release_edit' model_id=model.id %}">Edit This Record</a></div>
-    <h1>
-        Release of {{ model.application.name }} v{{ model.version }}
-        {% if model.type_product_owner_sign_off == "Approved" %}
-            <span class="text-success">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-                     class="bi bi-check-square-fill" viewBox="0 0 16 16">
-                  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"></path>
-                </svg>
-            </span>
-        {% elif model.type_product_owner_sign_off == "Denied" %}
-            <span class="text-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-                     class="bi bi-x-square-fill" viewBox="0 0 16 16">
-                  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"></path>
-                </svg>
-            </span>
-        {% else %}
-            <span class="text-warning">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
-                     class="bi bi-exclamation-square-fill" viewBox="0 0 16 16">
-                  <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"></path>
-                </svg>
-            </span>
-        {% endif %}
-    </h1>
-    {% if model.release_bundle %}
-        <span class="caption">
-            Part of the <a href="{% url 'release_bundle_edit' model_id=model.release_bundle.id %}">
-            {{ model.release_bundle.name }}
-            </a> release bundle
-        </span>
-    {% endif %}
-    <h2 class="mt-5">Comments</h2>
-    <div class="border border-1 mt-1 p-1">{{ model.comment|markdown }}</div>
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'release' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                            {{ model.application.name }} v{{ model.version }}
+                            {% if model.type_product_owner_sign_off == "Approved" %}
+                                <span class="ml-3 text-green-600">
+                                    <svg class="h-8 w-8 inline" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm10.03 4.97a.75.75 0 0 1 .011 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.75.75 0 0 1 1.08-.022z"/>
+                                    </svg>
+                                </span>
+                            {% elif model.type_product_owner_sign_off == "Denied" %}
+                                <span class="ml-3 text-red-600">
+                                    <svg class="h-8 w-8 inline" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm3.354 4.646L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 1 1 .708-.708"/>
+                                    </svg>
+                                </span>
+                            {% else %}
+                                <span class="ml-3 text-yellow-600">
+                                    <svg class="h-8 w-8 inline" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                                    </svg>
+                                </span>
+                            {% endif %}
+                        </h1>
+                        {% if model.release_bundle %}
+                            <p class="mt-1 text-sm text-gray-500">
+                                Part of the <a href="{% url 'release_bundle_detail' model_id=model.release_bundle.id %}" class="text-blue-600 hover:text-blue-900 transition-colors">{{ model.release_bundle.name }}</a> release bundle
+                            </p>
+                        {% else %}
+                            <p class="mt-1 text-sm text-gray-500">Release details</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'release_edit' model_id=model.id %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="space-y-6">
+            <!-- Release Information -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Release Information</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Application</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                <a href="{% url 'application_detail' model_id=model.application.id %}" class="text-blue-600 hover:text-blue-900 transition-colors">
+                                    {{ model.application.name }}
+                                </a>
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Version</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ model.version|default:"-" }}</dd>
+                        </div>
+                        {% if model.release_bundle %}
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Release Bundle</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    <a href="{% url 'release_bundle_detail' model_id=model.release_bundle.id %}" class="text-blue-600 hover:text-blue-900 transition-colors">
+                                        {{ model.release_bundle.name }}
+                                    </a>
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Approval Status -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Approval Status</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 gap-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Product Owner Sign Off</dt>
+                            <dd class="mt-1 text-sm">
+                                {% if model.type_product_owner_sign_off == "Approved" %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                        <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+                                        </svg>
+                                        Approved
+                                    </span>
+                                {% elif model.type_product_owner_sign_off == "Denied" %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                        <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                                        </svg>
+                                        Denied
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                        <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+                                        </svg>
+                                        {{ model.type_product_owner_sign_off|default:"Pending" }}
+                                    </span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Comments -->
+            {% if model.comment %}
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Comments</h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="prose max-w-none text-sm text-gray-700">
+                            {{ model.comment|markdown }}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Created</dt>
+                            <dd class="mt-1 text-sm text-gray-900" title="{{ created_record.history_date }}">
+                                {{ created_record.history_date|naturaltime }}
+                                {% if created_record.history_user %}
+                                    by {{ created_record.history_user.username }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                            <dd class="mt-1 text-sm text-gray-900" title="{{ updated_record.history_date }}">
+                                {{ updated_record.history_date|naturaltime }}
+                                {% if updated_record.history_user %}
+                                    by {{ updated_record.history_user.username }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
