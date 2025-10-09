@@ -1,0 +1,347 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'person' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Person</h1>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update person details{% else %}Add a new team member{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Personal and contact details</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.name_first.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Person's given name">
+                                First Name
+                            </label>
+                            {{ form.name_first }}
+                            {% if form.name_first.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name_first.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.name_last.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Person's family name or surname">
+                                Last Name
+                            </label>
+                            {{ form.name_last }}
+                            {% if form.name_last.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name_last.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.name_preferred.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Preferred name or nickname">
+                                Preferred Name
+                            </label>
+                            {{ form.name_preferred }}
+                            {% if form.name_preferred.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name_preferred.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.pronunciation.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="How to pronounce the person's name">
+                                Pronunciation
+                            </label>
+                            {{ form.pronunciation }}
+                            {% if form.pronunciation.errors %}<p class="mt-2 text-sm text-red-600">{{ form.pronunciation.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.communication_email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Primary email address for communication">
+                                Email
+                            </label>
+                            {{ form.communication_email }}
+                            {% if form.communication_email.errors %}<p class="mt-2 text-sm text-red-600">{{ form.communication_email.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_timezone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The timezone where this person is located">
+                                Timezone
+                            </label>
+                            {{ form.type_timezone }}
+                            {% if form.type_timezone.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_timezone.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employment Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Employment Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Job and work-related details</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.type_job_title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Current job title or position">
+                                Job Title
+                            </label>
+                            {{ form.type_job_title }}
+                            {% if form.type_job_title.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_job_title.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_job_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Job level or seniority (Junior, Senior, Lead, etc.)">
+                                Job Level
+                            </label>
+                            {{ form.type_job_level }}
+                            {% if form.type_job_level.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_job_level.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_hired.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Date when the person was hired">
+                                Date Hired
+                            </label>
+                            {{ form.date_hired }}
+                            {% if form.date_hired.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_hired.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_left.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Date when the person left the organization (if applicable)">
+                                Date Left
+                            </label>
+                            {{ form.date_left }}
+                            {% if form.date_left.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_left.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_birthday.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Person's date of birth">
+                                Birthday
+                            </label>
+                            {{ form.date_birthday }}
+                            {% if form.date_birthday.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_birthday.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles & Capabilities -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Roles & Capabilities</h2>
+                        <p class="mt-1 text-sm text-gray-500">Job functions and skills</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_product_owner }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_product_owner.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Product Owner">Product Owner</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_product_manager }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_product_manager.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Product Manager">Product Manager</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_project_manager }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_project_manager.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Project Manager">Project Manager</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_scrum_master }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_scrum_master.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Scrum Master">Scrum Master</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_architect }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_architect.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Architect">Architect</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_lead_developer }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_lead_developer.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Lead Developer">Lead Developer</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_developer }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_developer.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Works as a Developer">Developer</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_stakeholder }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_stakeholder.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Can serve as Stakeholder">Stakeholder</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_bot }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_bot.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Automated bot or service account">Bot Account</label>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label for="{{ form.roles.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Assigned organizational roles">
+                                Roles
+                            </label>
+                            {{ form.roles }}
+                            {% if form.roles.errors %}<p class="mt-2 text-sm text-red-600">{{ form.roles.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-3">
+                            <label for="{{ form.skills.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Technical and professional skills">
+                                Skills
+                            </label>
+                            {{ form.skills }}
+                            {% if form.skills.errors %}<p class="mt-2 text-sm text-red-600">{{ form.skills.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Status</h2>
+                        <p class="mt-1 text-sm text-gray-500">Employment and system access status</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_active }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_active.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Person is currently active in the system">Active</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_employee }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_employee.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Person is a direct employee">Employee</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Links & References</h2>
+                        <p class="mt-1 text-sm text-gray-500">External profiles and resources</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="{{ form.link_sharepoint_profile.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to SharePoint profile page">
+                                SharePoint Profile
+                            </label>
+                            {{ form.link_sharepoint_profile }}
+                            {% if form.link_sharepoint_profile.errors %}<p class="mt-2 text-sm text-red-600">{{ form.link_sharepoint_profile.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Additional notes or information">
+                                Comment
+                            </label>
+                            {{ form.comment }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+                            </p>
+                            {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                        <a href="{% url 'person' %}"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {% if form.instance.pk %}Update Person{% else %}Create Person{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        /* Style Django form fields with Tailwind */
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="url"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="password"],
+        textarea,
+        select {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #1f2937;
+            background-color: #ffffff;
+            background-clip: padding-box;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        input[type="url"]:focus,
+        input[type="date"]:focus,
+        input[type="datetime-local"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            color: #1f2937;
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select[multiple] {
+            height: 10rem;
+            padding: 0.5rem;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            color: #3b82f6;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"]:focus {
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #9ca3af;
+            opacity: 1;
+        }
+    </style>
+{% endblock %}

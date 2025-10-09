@@ -1,16 +1,30 @@
+from typing import Mapping, Any
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 
 from core.forms.database_form import DatabaseForm
 from core.models.database import Database
-from core.views.generic.generic_edit_view import generic_edit_view
+from core.utilities.base_render import base_render
+from core.views.generic.generic_500 import generic_500
 
 
 def database_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
-    return generic_edit_view(
-        decrypt_fields=['encrypted_password', 'encrypted_username'],
-        form_cls=DatabaseForm,
-        model_cls=Database,
-        model_id=model_id,
+    try:
+        database = Database.objects.get(id=model_id)
+    except Database.DoesNotExist:
+        return generic_500(request=request)
+
+    if request.method == 'POST':
+        form = DatabaseForm(request.POST, instance=database)
+        if form.is_valid():
+            form.save()
+            return redirect(to='database')
+    else:
+        form = DatabaseForm(instance=database)
+
+    context: Mapping[str, Any] = {'form': form}
+    return base_render(
+        context=context,
         request=request,
-        success_route='database',
+        template_name='authenticated/database/database_form.html'
     )

@@ -1,12 +1,23 @@
+from typing import Mapping, Any
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 
 from core.forms.person_form import PersonForm
-from core.views.generic.generic_add_view import generic_add_view
+from core.utilities.base_render import base_render
 
 
 def person_add_view(request: HttpRequest) -> HttpResponse:
-    return generic_add_view(
-        form_cls=PersonForm,
+    if request.method == 'POST':
+        form = PersonForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(to='person')
+    else:
+        form = PersonForm()
+
+    context: Mapping[str, Any] = {'form': form}
+    return base_render(
+        context=context,
         request=request,
-        success_route='person',
+        template_name='authenticated/person/person_form.html'
     )

@@ -1,27 +1,79 @@
 {% extends 'authenticated/base_authenticated.html' %}
+{% load templatetags_markdown %}
 {% block content %}
-    <a href="{% url "acronym_new" %}">New</a>
-    <table id="data-table" class="display">
-        <thead>
-        <tr>
-            <td>Acronym</td>
-            <td>Name</td>
-            <td>Comment</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for model in models %}
-            <tr ondblclick='window.location.href = "{% url 'acronym_edit' model_id=model.id %}"'>
-                <td>{{ model.acronym }}</td>
-                <td>{{ model.name }}</td>
-                <td>{{ model.comment }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Acronyms</h1>
+                    <p class="mt-1 text-sm text-gray-500">Manage acronym definitions and meanings</p>
+                </div>
+                <a href="{% url 'acronym_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Acronym
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table id="data-table" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acronym</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for model in models %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150 cursor-pointer" ondblclick="window.location.href='{% url 'acronym_detail' model_id=model.id %}'">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{% url 'acronym_detail' model_id=model.id %}" class="text-gray-900 hover:text-blue-600 transition-colors duration-150">
+                                    {{ model.acronym }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <a href="{% url 'acronym_detail' model_id=model.id %}"
+                                   class="text-green-600 hover:text-green-900 transition-colors duration-150">View</a>
+                                <a href="{% url 'acronym_edit' model_id=model.id %}"
+                                   class="text-blue-600 hover:text-blue-900 transition-colors duration-150">Edit</a>
+                                <a href="#" onclick="confirmDelete({{ model.id }}, '{{ model.acronym|escapejs }}', '{{ model.name|escapejs }}'); return false;"
+                                   class="text-red-600 hover:text-red-900 transition-colors duration-150">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
-            $('#data-table').DataTable({"pageLength": 100});
+            $('#data-table').DataTable({
+                "pageLength": 100,
+                "order": [[0, "asc"]],
+                "language": {
+                    "search": "Search acronyms:",
+                    "lengthMenu": "Show _MENU_ acronyms per page",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ acronyms",
+                    "infoEmpty": "No acronyms available",
+                    "infoFiltered": "(filtered from _MAX_ total acronyms)"
+                }
+            });
         });
+
+        function confirmDelete(id, acronym, name) {
+            if (confirm('Are you sure you want to delete this acronym?\n\nAcronym: ' + acronym + '\nName: ' + name + '\n\nThis action cannot be undone.')) {
+                window.location.href = "{% url 'acronym_delete' model_id=0 %}".replace('0', id);
+            }
+        }
     </script>
 {% endblock %}

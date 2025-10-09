@@ -1,12 +1,23 @@
+from typing import Mapping, Any
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 
 from core.forms.secret_form import SecretForm
-from core.views.generic.generic_add_view import generic_add_view
+from core.utilities.base_render import base_render
 
 
 def secret_add_view(request: HttpRequest) -> HttpResponse:
-    return generic_add_view(
-        form_cls=SecretForm,
+    if request.method == 'POST':
+        form = SecretForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(to='secret')
+    else:
+        form = SecretForm()
+
+    context: Mapping[str, Any] = {'form': form}
+    return base_render(
+        context=context,
         request=request,
-        success_route='secret',
+        template_name='authenticated/secret/secret_form.html'
     )

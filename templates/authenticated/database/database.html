@@ -1,31 +1,74 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
-    <a href="{% url "database_new" %}">New</a>
-    <table id="data-table" class="display">
-        <thead>
-        <tr>
-            <td>Application</td>
-            <td>Environment</td>
-            <td>Version</td>
-            <td>Storage Model</td>
-            <td>Flavor</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for model in models %}
-            <tr ondblclick='window.location.href = "{% url 'database_edit' model_id=model.id %}"'>
-                <td>{{ model.application.name }}</td>
-                <td>{{ model.type_environment }}</td>
-                <td>{{ model.version }}</td>
-                <td>{{ model.type_data_storage_form }}</td>
-                <td>{{ model.type_database_flavor }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Databases</h1>
+                    <p class="mt-1 text-sm text-gray-500">Manage database instances and configurations</p>
+                </div>
+                <a href="{% url 'database_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Database
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table id="data-table" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Environment</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flavor</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Storage Model</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for model in models %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ model.application.name|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ model.type_environment|default:"-" }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.type_database_flavor|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.version|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.type_data_storage_form|default:"-" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <a href="{% url 'database_edit' model_id=model.id %}"
+                                   class="text-blue-600 hover:text-blue-900 transition-colors duration-150">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function () {
-            $('#data-table').DataTable({"pageLength": 100});
+            $('#data-table').DataTable({
+                "pageLength": 100,
+                "order": [[0, "asc"], [1, "asc"]],
+                "language": {
+                    "search": "Search databases:",
+                    "lengthMenu": "Show _MENU_ databases per page",
+                    "info": "Showing _START_ to _END_ of _TOTAL_ databases",
+                    "infoEmpty": "No databases available",
+                    "infoFiltered": "(filtered from _MAX_ total databases)"
+                }
+            });
         });
     </script>
 {% endblock %}

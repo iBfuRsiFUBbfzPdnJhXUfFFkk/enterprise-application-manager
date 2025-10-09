@@ -1,0 +1,577 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'application' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Application</h1>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update application details{% else %}Add a new application to the system{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Core details about the application</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The full, official name of the application">
+                                Name {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.acronym.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Short abbreviation or acronym for the application name">
+                                Acronym {% if form.acronym.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.acronym }}
+                            {% if form.acronym.errors %}<p class="mt-2 text-sm text-red-600">{{ form.acronym.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.aliases_csv.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Alternative names or nicknames used to refer to the application, separated by commas">
+                                Aliases (CSV) {% if form.aliases_csv.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.aliases_csv }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Enter multiple aliases separated by commas (e.g., "App Name, Nick Name, Legacy Name")
+                            </p>
+                            {% if form.aliases_csv.errors %}<p class="mt-2 text-sm text-red-600">{{ form.aliases_csv.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Additional notes, description, or comments about this application">
+                                Comment {% if form.comment.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.comment }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+                            </p>
+                            {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technical Configuration -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Technical Configuration</h2>
+                        <p class="mt-1 text-sm text-gray-500">Platform and deployment details</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.type_platform_target.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The target platform where the application runs (e.g., Web, Mobile, Desktop)">
+                                Platform Target
+                            </label>
+                            {{ form.type_platform_target }}
+                            {% if form.type_platform_target.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_platform_target.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_deployment_medium.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="How the application is deployed (e.g., Cloud, On-Premise, Hybrid)">
+                                Deployment Medium
+                            </label>
+                            {{ form.type_deployment_medium }}
+                            {% if form.type_deployment_medium.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_deployment_medium.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_authentication.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The method used to verify user identity (e.g., LDAP, OAuth, SAML)">
+                                Authentication Type
+                            </label>
+                            {{ form.type_authentication }}
+                            {% if form.type_authentication.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_authentication.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_authorization.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The method used to control access and permissions (e.g., RBAC, ABAC)">
+                                Authorization Type
+                            </label>
+                            {{ form.type_authorization }}
+                            {% if form.type_authorization.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_authorization.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_lifecycle.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Current stage in the application's lifecycle (e.g., Development, Production, Deprecated)">
+                                Lifecycle
+                            </label>
+                            {{ form.type_lifecycle }}
+                            {% if form.type_lifecycle.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_lifecycle.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.application_group_platform.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The primary platform group this application belongs to">
+                                Platform Group
+                            </label>
+                            {{ form.application_group_platform }}
+                            {% if form.application_group_platform.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application_group_platform.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.peak_userbase.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Maximum number of concurrent or active users the application supports">
+                                Peak Userbase
+                            </label>
+                            {{ form.peak_userbase }}
+                            {% if form.peak_userbase.errors %}<p class="mt-2 text-sm text-red-600">{{ form.peak_userbase.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_launch.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The date when the application was first launched or went live">
+                                Launch Date
+                            </label>
+                            {{ form.date_launch }}
+                            {% if form.date_launch.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_launch.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.application_groups.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="All application groups this application is associated with">
+                                Application Groups
+                            </label>
+                            {{ form.application_groups }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple groups
+                            </p>
+                            {% if form.application_groups.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application_groups.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Members -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Team Members</h2>
+                        <p class="mt-1 text-sm text-gray-500">Assign roles and responsibilities</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.person_product_owner.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The person responsible for maximizing product value and managing the product backlog">
+                                Product Owner
+                            </label>
+                            {{ form.person_product_owner }}
+                            {% if form.person_product_owner.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_product_owner.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_product_manager.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The person responsible for product strategy, roadmap, and feature definition">
+                                Product Manager
+                            </label>
+                            {{ form.person_product_manager }}
+                            {% if form.person_product_manager.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_product_manager.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_project_manager.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The person responsible for planning, executing, and closing projects">
+                                Project Manager
+                            </label>
+                            {{ form.person_project_manager }}
+                            {% if form.person_project_manager.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_project_manager.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_scrum_master.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The person who facilitates Scrum processes and removes impediments for the team">
+                                Scrum Master
+                            </label>
+                            {{ form.person_scrum_master }}
+                            {% if form.person_scrum_master.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_scrum_master.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_architect.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The person responsible for technical design, architecture decisions, and system structure">
+                                Architect
+                            </label>
+                            {{ form.person_architect }}
+                            {% if form.person_architect.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_architect.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_lead_developer.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The senior developer who leads the development team and makes technical decisions">
+                                Lead Developer
+                            </label>
+                            {{ form.person_lead_developer }}
+                            {% if form.person_lead_developer.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_lead_developer.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.person_developers.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Team members who write, test, and maintain the application code">
+                                Developers
+                            </label>
+                            {{ form.person_developers }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple developers
+                            </p>
+                            {% if form.person_developers.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_developers.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.person_stakeholders.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Individuals or groups with interest in or influence over the application's success">
+                                Stakeholders
+                            </label>
+                            {{ form.person_stakeholders }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple stakeholders
+                            </p>
+                            {% if form.person_stakeholders.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_stakeholders.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dependencies & Integrations -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Dependencies & Integrations</h2>
+                        <p class="mt-1 text-sm text-gray-500">External tools and services</p>
+                    </div>
+                    <div class="px-6 py-6 space-y-6">
+                        <div>
+                            <label for="{{ form.application_upstream_dependencies.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications or services that this application depends on or consumes data from">
+                                Upstream Dependencies
+                            </label>
+                            {{ form.application_upstream_dependencies }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple applications
+                            </p>
+                            {% if form.application_upstream_dependencies.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application_upstream_dependencies.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.application_downstream_dependencies.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications or services that depend on this application or consume its data">
+                                Downstream Dependencies
+                            </label>
+                            {{ form.application_downstream_dependencies }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple applications
+                            </p>
+                            {% if form.application_downstream_dependencies.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application_downstream_dependencies.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.service_providers.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Third-party companies or vendors providing services to this application">
+                                Service Providers
+                            </label>
+                            {{ form.service_providers }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple providers
+                            </p>
+                            {% if form.service_providers.errors %}<p class="mt-2 text-sm text-red-600">{{ form.service_providers.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.tools.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Software tools, libraries, or frameworks used in this application">
+                                Tools
+                            </label>
+                            {{ form.tools }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search, click to select multiple tools
+                            </p>
+                            {% if form.tools.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tools.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Links & Resources -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Links & Resources</h2>
+                        <p class="mt-1 text-sm text-gray-500">URLs and external references</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <!-- Development Links -->
+                        <div class="mb-6">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                </svg>
+                                Development & Code
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="{{ form.link_gitlab_repository.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the GitLab repository containing the application's source code">GitLab Repository</label>
+                                    {{ form.link_gitlab_repository }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_gitlab_wiki.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the GitLab wiki with documentation and project information">GitLab Wiki</label>
+                                    {{ form.link_gitlab_wiki }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_divio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the Divio cloud platform instance for this application">Divio</label>
+                                    {{ form.link_divio }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_postman.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to Postman workspace or collection for API testing and documentation">Postman</label>
+                                    {{ form.link_postman }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Environment Links -->
+                        <div class="mb-6 pt-6 border-t border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/>
+                                </svg>
+                                Environments
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="{{ form.link_development_server.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the development environment where active development and testing occurs">Development Server</label>
+                                    {{ form.link_development_server }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_staging_server.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the staging environment for pre-production testing and validation">Staging Server</label>
+                                    {{ form.link_staging_server }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_production_server.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the internal production server used by end users">Production Server</label>
+                                    {{ form.link_production_server }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_production_server_external.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to the external-facing production server accessible from outside the organization">Production (External) Server</label>
+                                    {{ form.link_production_server_external }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monitoring & Tools -->
+                        <div class="mb-6 pt-6 border-t border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                Monitoring & Tools
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="{{ form.link_sentry_io.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to Sentry.io project for error tracking and performance monitoring">Sentry.io</label>
+                                    {{ form.link_sentry_io }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_logs.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to centralized logging system or log aggregation platform">Logs</label>
+                                    {{ form.link_logs }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_open_ai.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to OpenAI dashboard or API configuration for AI integration">OpenAI</label>
+                                    {{ form.link_open_ai }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_software_bill_of_materials_sbom.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to Software Bill of Materials (SBOM) - a comprehensive inventory of all components and dependencies">Software Bill of Materials (SBOM)</label>
+                                    {{ form.link_software_bill_of_materials_sbom }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Communication & Documentation -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                </svg>
+                                Communication & Documentation
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="{{ form.link_teams_channel.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to Microsoft Teams channel for team communication and collaboration">Teams Channel</label>
+                                    {{ form.link_teams_channel }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_support_email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Email address for user support requests and assistance">Support Email</label>
+                                    {{ form.link_support_email }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_ticket_submission.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to ticketing system or portal for submitting support requests and bug reports">Ticket Submission</label>
+                                    {{ form.link_ticket_submission }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_training.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to training materials, tutorials, or onboarding resources">Training</label>
+                                    {{ form.link_training }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_whiteboard.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to digital whiteboard platform for brainstorming and collaborative planning">Whiteboard</label>
+                                    {{ form.link_whiteboard }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_lucid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to Lucidchart workspace for creating diagrams and flowcharts">Lucid</label>
+                                    {{ form.link_lucid }}
+                                </div>
+                                <div>
+                                    <label for="{{ form.link_wrike.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="URL to Wrike project management workspace for task and project tracking">Wrike</label>
+                                    {{ form.link_wrike }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compliance & Security -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Compliance & Security</h2>
+                        <p class="mt-1 text-sm text-gray-500">Regulatory and security requirements</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_externally_facing }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_externally_facing.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application is accessible from outside the organization's network">Externally Facing</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_legacy }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_legacy.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if this is an older application that may use outdated technologies">Legacy</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_using_artificial_intelligence }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_using_artificial_intelligence.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application uses Artificial Intelligence (AI) or machine learning capabilities">Using Artificial Intelligence (AI)</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_storing_personally_identifiable_information_pii }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_storing_personally_identifiable_information_pii.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application stores Personally Identifiable Information (PII) - data that can identify a specific individual">Stores Personally Identifiable Information (PII)</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_storing_protected_health_information_phi }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_storing_protected_health_information_phi.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application stores Protected Health Information (PHI) - medical records or health data protected under HIPAA">Stores Protected Health Information (PHI)</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_storing_nonpublic_personal_information_npi }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_storing_nonpublic_personal_information_npi.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application stores Nonpublic Personal Information (NPI) - financial or other sensitive personal data">Stores Nonpublic Personal Information (NPI)</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_required_to_adhere_to_general_data_protection_regulation_gdpr }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_required_to_adhere_to_general_data_protection_regulation_gdpr.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application must comply with General Data Protection Regulation (GDPR) - EU privacy law">General Data Protection Regulation (GDPR) Required</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_required_to_adhere_to_california_consumer_privacy_act_ccpa }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_required_to_adhere_to_california_consumer_privacy_act_ccpa.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application must comply with California Consumer Privacy Act (CCPA) - California state privacy law">California Consumer Privacy Act (CCPA) Required</label>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5 mt-1">{{ form.is_required_to_adhere_to_payment_card_industry_data_security_standard_pci_dss }}</div>
+                            <div class="ml-3">
+                                <label for="{{ form.is_required_to_adhere_to_payment_card_industry_data_security_standard_pci_dss.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-help" title="Indicates if the application must comply with Payment Card Industry Data Security Standard (PCI DSS) - security standard for handling credit card data">Payment Card Industry Data Security Standard (PCI DSS) Required</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                        <a href="{% url 'application' %}"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {% if form.instance.pk %}Update Application{% else %}Create Application{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <style>
+        /* Style Django form fields with Tailwind */
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="url"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="password"],
+        textarea,
+        select {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #1f2937;
+            background-color: #ffffff;
+            background-clip: padding-box;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        input[type="url"]:focus,
+        input[type="date"]:focus,
+        input[type="datetime-local"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            color: #1f2937;
+            background-color: #ffffff;
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input[type="text"]:disabled,
+        input[type="email"]:disabled,
+        input[type="number"]:disabled,
+        input[type="url"]:disabled,
+        input[type="date"]:disabled,
+        input[type="datetime-local"]:disabled,
+        input[type="password"]:disabled,
+        textarea:disabled,
+        select:disabled {
+            background-color: #f3f4f6;
+            opacity: 1;
+        }
+
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            color: #3b82f6;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"]:focus {
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        /* Placeholder styling */
+        input::placeholder,
+        textarea::placeholder {
+            color: #9ca3af;
+            opacity: 1;
+        }
+    </style>
+{% endblock %}
