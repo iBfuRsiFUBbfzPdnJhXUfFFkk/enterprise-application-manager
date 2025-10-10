@@ -17,6 +17,7 @@ from core.urls.urlpatterns_profile import urlpatterns_profile
 from core.urls.urlpatterns_release import urlpatterns_release
 from core.urls.urlpatterns_release_bundle import urlpatterns_release_bundle
 from core.urls.urlpatterns_secret import urlpatterns_secret
+from core.urls.urlpatterns_server_configuration import urlpatterns_server_configuration
 from core.urls.urlpatterns_settings import urlpatterns_settings
 from core.urls.urlpatterns_this_api import urlpatterns_this_api
 from core.views import home_view
@@ -45,6 +46,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_release,
     *urlpatterns_release_bundle,
     *urlpatterns_secret,
+    *urlpatterns_server_configuration,
     *urlpatterns_settings,
     *urlpatterns_this_api,
     path(name="kpi", route='kpi/', view=include(arg=(urlpatterns_kpi, 'kpi'), namespace="kpi")),
