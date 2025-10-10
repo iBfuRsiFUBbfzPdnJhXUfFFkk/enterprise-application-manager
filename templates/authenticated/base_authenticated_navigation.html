@@ -25,14 +25,11 @@
 
                 <!-- Applications Dropdown -->
                 <div class="relative nav-dropdown">
-                    <button class="nav-link" type="button" style="width: auto; min-width: fit-content;">
+                    <button class="nav-link" type="button">
                         <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
                         </svg>
                         <span class="hidden lg:inline text-white">Applications</span>
-                        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
                     </button>
                     <div class="nav-dropdown-menu">
                         <a href="{% url 'application' %}" class="nav-dropdown-item">
@@ -52,14 +49,11 @@
 
                 <!-- Resources Dropdown -->
                 <div class="relative nav-dropdown">
-                    <button class="nav-link" type="button" style="width: auto; min-width: fit-content;">
+                    <button class="nav-link" type="button">
                         <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
                         </svg>
                         <span class="hidden lg:inline text-white">Resources</span>
-                        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
                     </button>
                     <div class="nav-dropdown-menu">
                         <a href="{% url 'database' %}" class="nav-dropdown-item">
@@ -79,14 +73,11 @@
 
                 <!-- Documentation Dropdown -->
                 <div class="relative nav-dropdown">
-                    <button class="nav-link" type="button" style="width: auto; min-width: fit-content;">
+                    <button class="nav-link" type="button">
                         <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                         <span class="hidden lg:inline text-white">Documentation</span>
-                        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
                     </button>
                     <div class="nav-dropdown-menu">
                         <a href="{% url 'acronym' %}" class="nav-dropdown-item">
@@ -106,14 +97,11 @@
 
                 <!-- People & Releases Dropdown -->
                 <div class="relative nav-dropdown">
-                    <button class="nav-link" type="button" style="width: auto; min-width: fit-content;">
+                    <button class="nav-link" type="button">
                         <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                         </svg>
                         <span class="hidden lg:inline text-white">People & Releases</span>
-                        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
                     </button>
                     <div class="nav-dropdown-menu">
                         <a href="{% url 'person' %}" class="nav-dropdown-item">
@@ -148,14 +136,11 @@
                 {% if global_context_is_superuser %}
                 <!-- Admin Dropdown -->
                 <div class="relative nav-dropdown">
-                    <button class="nav-link" type="button" style="width: auto; min-width: fit-content;">
+                    <button class="nav-link" type="button">
                         <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                         </svg>
                         <span class="hidden lg:inline text-white">Admin</span>
-                        <svg class="w-4 h-4 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
                     </button>
                     <div class="nav-dropdown-menu">
                         <a href="{% url 'admin:index' %}" class="nav-dropdown-item">
