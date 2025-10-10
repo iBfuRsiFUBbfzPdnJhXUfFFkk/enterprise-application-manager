@@ -6,6 +6,7 @@ from core.views.command import (
     command_delete_view,
     command_detail_view,
     command_edit_view,
+    command_run_view,
     command_view,
 )
 
@@ -24,4 +25,9 @@ urlpatterns_command.append(
 # Add delete view
 urlpatterns_command.append(
     path(name='command_delete', route='command/delete/<int:model_id>/', view=command_delete_view)
+)
+
+# Add run view (for executing Python commands)
+urlpatterns_command.append(
+    path(name='command_run', route='command/run/<int:model_id>/', view=command_run_view)
 )

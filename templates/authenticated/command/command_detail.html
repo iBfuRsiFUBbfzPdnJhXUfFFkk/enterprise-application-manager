@@ -27,6 +27,17 @@
                     </div>
                 </div>
                 <div class="flex space-x-3">
+                    {% if command.is_python %}
+                    <button onclick="runCommand()"
+                       id="runButton"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span id="runButtonText">Run</span>
+                    </button>
+                    {% endif %}
                     <button onclick="copyToClipboard()"
                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,10 +66,33 @@
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
                         <h2 class="text-lg font-semibold text-gray-900">Command</h2>
-                        <span class="text-xs text-gray-500 font-mono">bash</span>
+                        <span class="text-xs text-gray-500 font-mono">{{ command.get_language_display|lower }}</span>
                     </div>
                     <div class="p-6">
-                        <pre class="line-numbers" style="margin: 0;"><code id="commandCode" class="language-bash">{{ command.command }}</code></pre>
+                        <pre class="line-numbers" style="margin: 0;"><code id="commandCode" class="language-{{ command.language }}">{{ command.command }}</code></pre>
+                    </div>
+                </div>
+
+                <!-- Output Section (hidden by default, shown after running) -->
+                <div id="outputSection" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Output</h2>
+                    </div>
+                    <div class="p-6">
+                        <!-- stdout -->
+                        <div id="stdoutSection" class="hidden">
+                            <h3 class="text-sm font-semibold text-green-700 mb-2">Standard Output:</h3>
+                            <pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono"><code id="stdout"></code></pre>
+                        </div>
+                        <!-- stderr -->
+                        <div id="stderrSection" class="hidden mt-4">
+                            <h3 class="text-sm font-semibold text-red-700 mb-2">Standard Error:</h3>
+                            <pre class="bg-gray-900 text-red-400 p-4 rounded-lg overflow-x-auto text-sm font-mono"><code id="stderr"></code></pre>
+                        </div>
+                        <!-- return code -->
+                        <div id="returnCodeSection" class="mt-4">
+                            <span class="text-sm text-gray-600">Return Code: <span id="returnCode" class="font-mono font-semibold"></span></span>
+                        </div>
                     </div>
                 </div>
 
@@ -180,6 +214,90 @@ function copyToClipboard() {
         setTimeout(function() {
             buttonText.textContent = 'Copy';
         }, 2000);
+    });
+}
+
+// Run command functionality (Python only)
+function runCommand() {
+    const runButton = document.getElementById('runButton');
+    const runButtonText = document.getElementById('runButtonText');
+    const outputSection = document.getElementById('outputSection');
+    const stdoutSection = document.getElementById('stdoutSection');
+    const stderrSection = document.getElementById('stderrSection');
+    const stdoutElement = document.getElementById('stdout');
+    const stderrElement = document.getElementById('stderr');
+    const returnCodeElement = document.getElementById('returnCode');
+
+    // Disable button during execution
+    runButton.disabled = true;
+    runButtonText.textContent = 'Running...';
+
+    // Get CSRF token
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                     document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+
+    // Make POST request to run command
+    fetch('{% url "command_run" model_id=command.id %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Show output section
+        outputSection.classList.remove('hidden');
+
+        if (data.success) {
+            // Display stdout
+            if (data.stdout) {
+                stdoutElement.textContent = data.stdout;
+                stdoutSection.classList.remove('hidden');
+            } else {
+                stdoutSection.classList.add('hidden');
+            }
+
+            // Display stderr
+            if (data.stderr) {
+                stderrElement.textContent = data.stderr;
+                stderrSection.classList.remove('hidden');
+            } else {
+                stderrSection.classList.add('hidden');
+            }
+
+            // Display return code with color
+            returnCodeElement.textContent = data.return_code;
+            if (data.return_code === 0) {
+                returnCodeElement.className = 'font-mono font-semibold text-green-600';
+            } else {
+                returnCodeElement.className = 'font-mono font-semibold text-red-600';
+            }
+
+            runButtonText.textContent = 'Run Again';
+        } else {
+            // Show error
+            stdoutSection.classList.add('hidden');
+            stderrElement.textContent = data.error || 'Unknown error occurred';
+            stderrSection.classList.remove('hidden');
+            returnCodeElement.textContent = 'ERROR';
+            returnCodeElement.className = 'font-mono font-semibold text-red-600';
+            runButtonText.textContent = 'Run';
+        }
+    })
+    .catch(error => {
+        // Show error
+        outputSection.classList.remove('hidden');
+        stdoutSection.classList.add('hidden');
+        stderrElement.textContent = 'Network error: ' + error.message;
+        stderrSection.classList.remove('hidden');
+        returnCodeElement.textContent = 'ERROR';
+        returnCodeElement.className = 'font-mono font-semibold text-red-600';
+        runButtonText.textContent = 'Run';
+    })
+    .finally(() => {
+        // Re-enable button
+        runButton.disabled = false;
     });
 }
 </script>

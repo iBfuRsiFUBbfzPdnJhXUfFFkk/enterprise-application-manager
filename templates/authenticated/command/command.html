@@ -40,11 +40,16 @@
                                 <div class="text-sm font-medium text-gray-900">{{ model.name }}</div>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="max-h-32 overflow-hidden relative">
-                                    <pre class="line-numbers" style="margin: 0; max-height: 8rem; font-size: 0.75rem;"><code class="language-bash">{{ model.command }}</code></pre>
-                                    {% if model.command|length > 200 %}
-                                    <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none"></div>
-                                    {% endif %}
+                                <div class="flex items-start space-x-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 flex-shrink-0">
+                                        {{ model.get_language_display }}
+                                    </span>
+                                    <div class="max-h-32 overflow-hidden relative flex-1">
+                                        <pre class="line-numbers" style="margin: 0; max-height: 8rem; font-size: 0.75rem;"><code class="language-{{ model.language }}">{{ model.command }}</code></pre>
+                                        {% if model.command|length > 200 %}
+                                        <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-50 to-transparent pointer-events-none"></div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">

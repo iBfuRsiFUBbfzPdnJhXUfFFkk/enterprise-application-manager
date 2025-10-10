@@ -40,6 +40,16 @@
                             {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
+                            <label for="{{ form.language.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Programming language for syntax highlighting">
+                                Language <span class="text-red-600">*</span>
+                            </label>
+                            {{ form.language }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Select Python to enable the Run feature for this command
+                            </p>
+                            {% if form.language.errors %}<p class="mt-2 text-sm text-red-600">{{ form.language.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
                             <label for="{{ form.command.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The command or code snippet">
                                 Command / Code <span class="text-red-600">*</span>
                             </label>
@@ -47,6 +57,7 @@
                             <div class="mt-2 text-xs text-gray-600 bg-blue-50 border border-blue-200 rounded-lg p-3">
                                 <p class="font-semibold text-blue-900 mb-1">Code will be syntax highlighted automatically!</p>
                                 <p class="text-blue-800">Supports Bash, Python, JavaScript, SQL, and many other languages.</p>
+                                <p class="text-green-700 mt-1 font-semibold">🚀 Python commands can be executed directly from the detail page!</p>
                             </div>
                             {% if form.command.errors %}<p class="mt-2 text-sm text-red-600">{{ form.command.errors.0 }}</p>{% endif %}
                         </div>
