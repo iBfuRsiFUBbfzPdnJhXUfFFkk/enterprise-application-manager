@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -17,8 +18,11 @@ def profile_view(request: HttpRequest) -> HttpResponse:
         form = UserProfileForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            # Redirect to the same page to show updated data
+            messages.success(request, 'Your profile has been updated successfully!')
+            # Redirect to the same page to show updated data and success message
             return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
         form = UserProfileForm(instance=user)
 
