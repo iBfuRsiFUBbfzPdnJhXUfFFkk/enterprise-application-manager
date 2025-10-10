@@ -11,6 +11,7 @@ from core.urls.urlpatterns_billing_code import urlpatterns_billing_code
 from core.urls.urlpatterns_client import urlpatterns_client
 from core.urls.urlpatterns_command import urlpatterns_command
 from core.urls.urlpatterns_cron_job import urlpatterns_cron_job
+from core.urls.urlpatterns_data_point import urlpatterns_data_point
 from core.urls.urlpatterns_database import urlpatterns_database
 from core.urls.urlpatterns_dependency import urlpatterns_dependency
 from core.urls.urlpatterns_document import urlpatterns_document
@@ -46,6 +47,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_client,
     *urlpatterns_command,
     *urlpatterns_cron_job,
+    *urlpatterns_data_point,
     *urlpatterns_database,
     *urlpatterns_dependency,
     *urlpatterns_document,
