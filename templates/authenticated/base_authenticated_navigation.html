@@ -397,13 +397,11 @@
         navDropdowns.forEach(function(dropdown) {
             const button = dropdown.querySelector('button');
             const menu = dropdown.querySelector('.nav-dropdown-menu');
+            let hideTimeout;
 
             if (button && menu) {
-                // Show dropdown on button click
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
+                function showDropdown() {
+                    clearTimeout(hideTimeout);
                     // Close all other dropdowns
                     navDropdowns.forEach(function(otherDropdown) {
                         if (otherDropdown !== dropdown) {
@@ -414,30 +412,40 @@
                         }
                     });
 
-                    // Toggle this dropdown
-                    if (menu.style.display === 'none' || menu.style.display === '') {
-                        const rect = button.getBoundingClientRect();
-                        menu.style.position = 'fixed';
-                        menu.style.top = (rect.bottom + 8) + 'px';
-                        menu.style.left = rect.left + 'px';
-                        menu.style.display = 'block';
-                    } else {
-                        menu.style.display = 'none';
-                    }
-                });
-
-                // Also show dropdown on hover for better UX
-                dropdown.addEventListener('mouseenter', function() {
                     const rect = button.getBoundingClientRect();
                     menu.style.position = 'fixed';
                     menu.style.top = (rect.bottom + 8) + 'px';
                     menu.style.left = rect.left + 'px';
                     menu.style.display = 'block';
+                }
+
+                function hideDropdown() {
+                    hideTimeout = setTimeout(function() {
+                        menu.style.display = 'none';
+                    }, 200);
+                }
+
+                // Show dropdown on button click
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (menu.style.display === 'block') {
+                        menu.style.display = 'none';
+                    } else {
+                        showDropdown();
+                    }
                 });
 
-                dropdown.addEventListener('mouseleave', function() {
-                    menu.style.display = 'none';
+                // Show dropdown on button hover
+                button.addEventListener('mouseenter', showDropdown);
+                button.addEventListener('mouseleave', hideDropdown);
+
+                // Keep dropdown open when hovering over the menu
+                menu.addEventListener('mouseenter', function() {
+                    clearTimeout(hideTimeout);
                 });
+                menu.addEventListener('mouseleave', hideDropdown);
             }
         });
 
@@ -445,7 +453,8 @@
         document.addEventListener('click', function(e) {
             navDropdowns.forEach(function(dropdown) {
                 const menu = dropdown.querySelector('.nav-dropdown-menu');
-                if (menu && !dropdown.contains(e.target)) {
+                const button = dropdown.querySelector('button');
+                if (menu && !button.contains(e.target) && !menu.contains(e.target)) {
                     menu.style.display = 'none';
                 }
             });
