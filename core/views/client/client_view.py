@@ -1,15 +1,15 @@
 from django.http import HttpRequest, HttpResponse
 
 from core.models.client import Client
-from core.utilities.wrap_with_global_context import wrap_with_global_context
+from core.views.generic.generic_view import generic_view
 
 
 def client_view(request: HttpRequest) -> HttpResponse:
     """
     List all clients.
     """
-    return wrap_with_global_context(
-        context={'models': Client.objects.all()},
+    return generic_view(
+        model_cls=Client,
+        name='client',
         request=request,
-        template='authenticated/client/client.html',
     )

@@ -1,10 +1,9 @@
+from typing import Mapping, Any
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 
 from core.forms.client_form import ClientForm
-from core.models.client import Client
-from core.utilities.get_user_from_request import get_user_from_request
-from core.utilities.wrap_with_global_context import wrap_with_global_context
-from core.views.generic.generic_500 import generic_500
+from core.utilities.base_render import base_render
 
 
 def client_add_view(request: HttpRequest) -> HttpResponse:
@@ -13,24 +12,15 @@ def client_add_view(request: HttpRequest) -> HttpResponse:
     """
     if request.method == 'POST':
         form = ClientForm(request.POST)
-
         if form.is_valid():
-            model: Client = form.save(commit=False)
-            user = get_user_from_request(request)
-            model._history_user = user
-            model.save()
-            return wrap_with_global_context(
-                context={'models': Client.objects.all()},
-                request=request,
-                template='authenticated/client/client.html',
-            )
-        else:
-            return generic_500(request, exception=Exception(form.errors))
+            form.save()
+            return redirect(to='client')
+    else:
+        form = ClientForm()
 
-    form = ClientForm()
-
-    return wrap_with_global_context(
-        context={'form': form},
+    context: Mapping[str, Any] = {'form': form}
+    return base_render(
+        context=context,
         request=request,
-        template='authenticated/client/client_form.html',
+        template_name='authenticated/client/client_form.html'
     )
