@@ -1,8 +1,9 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+<div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
-    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Databases</h1>
@@ -19,56 +20,423 @@
         </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <table id="data-table" class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Environment</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flavor</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Storage Model</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for model in models %}
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ model.application.name|default:"-" }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    {{ model.type_environment|default:"-" }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.type_database_flavor|default:"-" }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.version|default:"-" }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ model.type_data_storage_form|default:"-" }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <a href="{% url 'database_edit' model_id=model.id %}"
-                                   class="text-blue-600 hover:text-blue-900 transition-colors duration-150">Edit</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Search and Filter Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <!-- Search -->
+                <div class="lg:col-span-2">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <div class="relative">
+                        <input type="text"
+                               id="search"
+                               placeholder="Search by application, hostname, schema..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Environment Filter -->
+                <div>
+                    <label for="environment-filter" class="block text-sm font-medium text-gray-700 mb-2">Environment</label>
+                    <select id="environment-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">All Environments</option>
+                    </select>
+                </div>
+
+                <!-- Flavor Filter -->
+                <div>
+                    <label for="flavor-filter" class="block text-sm font-medium text-gray-700 mb-2">Database Flavor</label>
+                    <select id="flavor-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">All Flavors</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- View Toggle and Result Count -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing <span id="result-count" class="font-semibold text-gray-900">{{ models|length }}</span> database(s)
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium text-gray-700">View:</span>
+                    <button id="grid-view-btn" class="px-3 py-1 text-sm font-medium rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                    <button id="list-view-btn" class="px-3 py-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-100 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for model in models %}
+            <div class="db-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                 data-application="{{ model.application.name|default:'' }}"
+                 data-hostname="{{ model.hostname|default:'' }}"
+                 data-schema="{{ model.schema|default:'' }}"
+                 data-environment="{{ model.type_environment|default:'' }}"
+                 data-flavor="{{ model.type_database_flavor|default:'' }}"
+                 data-version="{{ model.version|default:'' }}"
+                 ondblclick="window.location.href='{% url 'database_detail' model_id=model.id %}'">
+                <div class="p-6">
+                    <!-- Application Name -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 truncate" title="{{ model.application.name|default:'N/A' }}">
+                                {{ model.application.name|default:"N/A" }}
+                            </h3>
+                            {% if model.application.acronym %}
+                            <p class="text-sm text-gray-500 mt-1">{{ model.application.acronym }}</p>
+                            {% endif %}
+                        </div>
+                        <svg class="h-6 w-6 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
+                        </svg>
+                    </div>
+
+                    <!-- Database Details -->
+                    <div class="space-y-3">
+                        <!-- Environment -->
+                        {% if model.type_environment %}
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if model.type_environment == 'Production' or model.type_environment == 'production' %}bg-red-100 text-red-800
+                                {% elif model.type_environment == 'Staging' or model.type_environment == 'staging' %}bg-yellow-100 text-yellow-800
+                                {% elif model.type_environment == 'Development' or model.type_environment == 'development' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ model.type_environment }}
+                            </span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Flavor and Version -->
+                        <div class="flex items-center space-x-2">
+                            {% if model.type_database_flavor %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ model.type_database_flavor }}
+                            </span>
+                            {% endif %}
+                            {% if model.version %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                v{{ model.version }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Connection Details -->
+                        {% if model.hostname or model.schema %}
+                        <div class="pt-3 border-t border-gray-100">
+                            {% if model.hostname %}
+                            <div class="flex items-start text-xs text-gray-600 mb-1">
+                                <svg class="h-4 w-4 text-gray-400 mr-1.5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/>
+                                </svg>
+                                <span class="break-all">{{ model.hostname }}</span>
+                            </div>
+                            {% endif %}
+                            {% if model.schema %}
+                            <div class="flex items-start text-xs text-gray-600">
+                                <svg class="h-4 w-4 text-gray-400 mr-1.5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                </svg>
+                                <span class="break-all">{{ model.schema }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Storage Model -->
+                        {% if model.type_data_storage_form %}
+                        <div class="text-xs text-gray-500">
+                            <span class="font-medium">Storage:</span> {{ model.type_data_storage_form }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                    <a href="{% url 'database_detail' model_id=model.id %}"
+                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                       onclick="event.stopPropagation()">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        View
+                    </a>
+                    <a href="{% url 'database_edit' model_id=model.id %}"
+                       class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                       onclick="event.stopPropagation()">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View -->
+        <div id="list-view" class="hidden">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Environment</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flavor</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hostname</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schema</th>
+                                <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for model in models %}
+                            <tr class="db-row hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                                data-application="{{ model.application.name|default:'' }}"
+                                data-hostname="{{ model.hostname|default:'' }}"
+                                data-schema="{{ model.schema|default:'' }}"
+                                data-environment="{{ model.type_environment|default:'' }}"
+                                data-flavor="{{ model.type_database_flavor|default:'' }}"
+                                data-version="{{ model.version|default:'' }}"
+                                ondblclick="window.location.href='{% url 'database_detail' model_id=model.id %}'">
+                                <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
+                                    <div class="truncate" title="{{ model.application.name|default:'N/A' }}">
+                                        {{ model.application.name|default:"N/A" }}
+                                    </div>
+                                    {% if model.application.acronym %}
+                                    <div class="text-xs text-gray-500">{{ model.application.acronym }}</div>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                    {% if model.type_environment %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if model.type_environment == 'Production' or model.type_environment == 'production' %}bg-red-100 text-red-800
+                                        {% elif model.type_environment == 'Staging' or model.type_environment == 'staging' %}bg-yellow-100 text-yellow-800
+                                        {% elif model.type_environment == 'Development' or model.type_environment == 'development' %}bg-green-100 text-green-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ model.type_environment }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                    {% if model.type_database_flavor %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ model.type_database_flavor }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {% if model.version %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        v{{ model.version }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 200px;">
+                                    <div class="truncate" title="{{ model.hostname|default:'-' }}">
+                                        {{ model.hostname|default:"-" }}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 150px;">
+                                    <div class="truncate" title="{{ model.schema|default:'-' }}">
+                                        {{ model.schema|default:"-" }}
+                                    </div>
+                                </td>
+                                <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex items-center justify-end space-x-1">
+                                        <a href="{% url 'database_detail' model_id=model.id %}"
+                                           class="inline-flex items-center p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                                           title="View"
+                                           onclick="event.stopPropagation()">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </a>
+                                        <a href="{% url 'database_edit' model_id=model.id %}"
+                                           class="inline-flex items-center p-1 text-gray-600 hover:text-gray-800 transition-colors"
+                                           title="Edit"
+                                           onclick="event.stopPropagation()">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No databases found</h3>
+            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
         </div>
     </div>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            $('#data-table').DataTable({
-                "pageLength": 100,
-                "order": [[0, "asc"], [1, "asc"]],
-                "language": {
-                    "search": "Search databases:",
-                    "lengthMenu": "Show _MENU_ databases per page",
-                    "info": "Showing _START_ to _END_ of _TOTAL_ databases",
-                    "infoEmpty": "No databases available",
-                    "infoFiltered": "(filtered from _MAX_ total databases)"
-                }
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const environmentFilter = document.getElementById('environment-filter');
+    const flavorFilter = document.getElementById('flavor-filter');
+    const gridViewBtn = document.getElementById('grid-view-btn');
+    const listViewBtn = document.getElementById('list-view-btn');
+    const gridView = document.getElementById('grid-view');
+    const listView = document.getElementById('list-view');
+    const emptyState = document.getElementById('empty-state');
+    const resultCount = document.getElementById('result-count');
+
+    // Collect all items
+    const allItems = [];
+    document.querySelectorAll('.db-card').forEach((card, index) => {
+        const row = document.querySelectorAll('.db-row')[index];
+        allItems.push({
+            card: card,
+            row: row,
+            application: card.dataset.application.toLowerCase(),
+            hostname: card.dataset.hostname.toLowerCase(),
+            schema: card.dataset.schema.toLowerCase(),
+            environment: card.dataset.environment,
+            flavor: card.dataset.flavor,
+            version: card.dataset.version.toLowerCase()
         });
-    </script>
+    });
+
+    // Populate environment filter
+    const environments = new Set();
+    allItems.forEach(item => {
+        if (item.environment) environments.add(item.environment);
+    });
+    Array.from(environments).sort().forEach(env => {
+        const option = document.createElement('option');
+        option.value = env;
+        option.textContent = env;
+        environmentFilter.appendChild(option);
+    });
+
+    // Populate flavor filter
+    const flavors = new Set();
+    allItems.forEach(item => {
+        if (item.flavor) flavors.add(item.flavor);
+    });
+    Array.from(flavors).sort().forEach(flavor => {
+        const option = document.createElement('option');
+        option.value = flavor;
+        option.textContent = flavor;
+        flavorFilter.appendChild(option);
+    });
+
+    // Filter function
+    function filterItems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedEnvironment = environmentFilter.value;
+        const selectedFlavor = flavorFilter.value;
+
+        let visibleCount = 0;
+
+        allItems.forEach(item => {
+            const matchesSearch = !searchTerm ||
+                                item.application.includes(searchTerm) ||
+                                item.hostname.includes(searchTerm) ||
+                                item.schema.includes(searchTerm) ||
+                                item.version.includes(searchTerm);
+
+            const matchesEnvironment = !selectedEnvironment || item.environment === selectedEnvironment;
+            const matchesFlavor = !selectedFlavor || item.flavor === selectedFlavor;
+
+            const isVisible = matchesSearch && matchesEnvironment && matchesFlavor;
+
+            if (isVisible) {
+                item.card.classList.remove('hidden');
+                item.row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.card.classList.add('hidden');
+                item.row.classList.add('hidden');
+            }
+        });
+
+        // Update result count
+        resultCount.textContent = visibleCount;
+
+        // Show/hide empty state
+        if (visibleCount === 0) {
+            emptyState.classList.remove('hidden');
+            gridView.classList.add('hidden');
+            listView.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            // Restore current view
+            const currentView = localStorage.getItem('eam_database_view') || 'grid';
+            if (currentView === 'grid') {
+                gridView.classList.remove('hidden');
+                listView.classList.add('hidden');
+            } else {
+                gridView.classList.add('hidden');
+                listView.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Event listeners for filtering
+    searchInput.addEventListener('input', filterItems);
+    environmentFilter.addEventListener('change', filterItems);
+    flavorFilter.addEventListener('change', filterItems);
+
+    // View toggle
+    function setView(view) {
+        if (view === 'grid') {
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            gridViewBtn.classList.add('bg-blue-100', 'text-blue-700');
+            gridViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            listViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+            listViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        } else {
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            listViewBtn.classList.add('bg-blue-100', 'text-blue-700');
+            listViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            gridViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+            gridViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        }
+        localStorage.setItem('eam_database_view', view);
+    }
+
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    // Restore saved view preference
+    const savedView = localStorage.getItem('eam_database_view') || 'grid';
+    setView(savedView);
+});
+</script>
 {% endblock %}
