@@ -1,39 +1,355 @@
 {% extends "authenticated/kpi/kpi_base.html" %}
 
 {% block content_kpi %}
-    <table id="data-table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Date Range</th>
-            <th>Business Days</th>
-            <th>Holidays</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-        </tr>
-        </thead>
-        <tbody>
+<!-- Header -->
+<div class="bg-white shadow-sm rounded-lg mb-6">
+    <div class="px-6 py-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Sprint Overview</h1>
+                <p class="mt-2 text-sm text-gray-600">View and analyze all sprint iterations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="bg-white shadow-sm rounded-lg mb-6">
+    <div class="px-6 py-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Search -->
+            <div>
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                <input type="text"
+                       id="search"
+                       placeholder="Search by sprint name..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <!-- Status Filter -->
+            <div>
+                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+                <select id="statusFilter"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="">All Sprints</option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- View Toggle and Result Count -->
+        <div class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+                Showing <span id="resultCount" class="font-semibold text-gray-900">{{ sprints|length }}</span> sprint{{ sprints|length|pluralize }}
+            </div>
+            <div class="flex space-x-2">
+                <button id="gridViewBtn"
+                        class="px-3 py-2 text-sm font-medium rounded-md bg-indigo-100 text-indigo-700">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                    </svg>
+                </button>
+                <button id="listViewBtn"
+                        class="px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grid View -->
+<div id="gridView">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for sprint in sprints %}
-            <tr ondblclick='window.location.href = "{% url 'kpi:kpi_sprint' uuid=sprint.uuid %}"'>
-                <td>{{ sprint.name }}</td>
-                <td>{{ sprint.date_start|date:"M j" }} - {{ sprint.date_end|date:"M j, Y" }}</td>
-                <td>{{ sprint.coerced_number_of_business_days_in_sprint }}</td>
-                <td>{{ sprint.number_of_holidays_during_sprint }}</td>
-                <td>{{ sprint.date_start|date:"Y-m-d" }}</td>
-                <td>{{ sprint.date_end|date:"Y-m-d" }}</td>
-            </tr>
+        <div class="sprint-card bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 cursor-pointer"
+             ondblclick='window.location.href = "{% url "kpi:kpi_sprint" uuid=sprint.uuid %}"'
+             data-name="{{ sprint.name|lower }}"
+             data-start-date="{{ sprint.date_start|date:'Y-m-d' }}"
+             data-end-date="{{ sprint.date_end|date:'Y-m-d' }}">
+            <div class="p-6">
+                <!-- Header with Icon and Name -->
+                <div class="flex items-start space-x-3 mb-4">
+                    <div class="flex-shrink-0">
+                        <svg class="h-10 w-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg font-semibold text-gray-900 truncate">{{ sprint.name }}</h3>
+                        <p class="text-sm text-gray-500">{{ sprint.date_start|date:"M j" }} - {{ sprint.date_end|date:"M j, Y" }}</p>
+                    </div>
+                </div>
+
+                <!-- Sprint Details -->
+                <div class="space-y-3 mb-4">
+                    <!-- Business Days -->
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600 flex items-center">
+                            <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Business Days:
+                        </span>
+                        <span class="font-medium text-gray-900">{{ sprint.coerced_number_of_business_days_in_sprint }}</span>
+                    </div>
+
+                    <!-- Holidays -->
+                    {% if sprint.number_of_holidays_during_sprint %}
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600 flex items-center">
+                            <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Holidays:
+                        </span>
+                        <span class="font-medium text-gray-900">{{ sprint.number_of_holidays_during_sprint }}</span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Date Range -->
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600 flex items-center">
+                            <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Duration:
+                        </span>
+                        <span class="font-medium text-gray-900">{{ sprint.date_start|date:"Y-m-d" }} to {{ sprint.date_end|date:"Y-m-d" }}</span>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-end">
+                    <a href="{% url 'kpi:kpi_sprint' uuid=sprint.uuid %}"
+                       class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                       onclick="event.stopPropagation()">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
         {% empty %}
-            <tr>
-                <td colspan="7" class="text-center py-4">No sprints found</td>
-            </tr>
+        <div class="col-span-full text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No sprints</h3>
+            <p class="mt-1 text-sm text-gray-500">Sprint data will appear here once sprints are created.</p>
+        </div>
         {% endfor %}
-        </tbody>
-    </table>
-{% endblock %}
-{% block scripts %}
-    <script>
-        $(document).ready(function () {
-            $('#data-table').DataTable({"pageLength": 100});
+    </div>
+
+    <!-- Empty State for Filtered Results -->
+    <div id="emptyStateGrid" class="hidden text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+    </div>
+</div>
+
+<!-- List View -->
+<div id="listView" class="hidden bg-white shadow-sm rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date Range
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Business Days
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Holidays
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Start Date
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        End Date
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for sprint in sprints %}
+                <tr class="sprint-row hover:bg-gray-50 cursor-pointer transition-colors"
+                    ondblclick='window.location.href = "{% url "kpi:kpi_sprint" uuid=sprint.uuid %}"'
+                    data-name="{{ sprint.name|lower }}"
+                    data-start-date="{{ sprint.date_start|date:'Y-m-d' }}"
+                    data-end-date="{{ sprint.date_end|date:'Y-m-d' }}">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8">
+                                <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-gray-900">{{ sprint.name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ sprint.date_start|date:"M j" }} - {{ sprint.date_end|date:"M j, Y" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ sprint.coerced_number_of_business_days_in_sprint }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if sprint.number_of_holidays_during_sprint %}
+                        <div class="text-sm text-gray-900">{{ sprint.number_of_holidays_during_sprint }}</div>
+                        {% else %}
+                        <span class="text-sm text-gray-400">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ sprint.date_start|date:"Y-m-d" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ sprint.date_end|date:"Y-m-d" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a href="{% url 'kpi:kpi_sprint' uuid=sprint.uuid %}"
+                           class="text-indigo-600 hover:text-indigo-900"
+                           onclick="event.stopPropagation()">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State for Filtered Results -->
+    <div id="emptyStateList" class="hidden text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+        <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+    </div>
+</div>
+
+<script>
+    // Get all elements
+    const searchInput = document.getElementById('search');
+    const statusFilter = document.getElementById('statusFilter');
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+    const resultCount = document.getElementById('resultCount');
+    const emptyStateGrid = document.getElementById('emptyStateGrid');
+    const emptyStateList = document.getElementById('emptyStateList');
+
+    // Get today's date for comparison
+    const today = new Date().toISOString().split('T')[0];
+
+    // Collect all items
+    const allItems = [];
+    const cards = document.querySelectorAll('.sprint-card');
+    const rows = document.querySelectorAll('.sprint-row');
+
+    cards.forEach((card, index) => {
+        const row = rows[index];
+        allItems.push({
+            card: card,
+            row: row,
+            name: card.dataset.name,
+            startDate: card.dataset.startDate,
+            endDate: card.dataset.endDate
         });
-    </script>
+    });
+
+    // Filter function
+    function filterItems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const statusValue = statusFilter.value;
+
+        let visibleCount = 0;
+        const hasCards = cards.length > 0;
+
+        allItems.forEach(item => {
+            // Search filter
+            const matchesSearch = !searchTerm || item.name.includes(searchTerm);
+
+            // Status filter
+            let matchesStatus = true;
+            if (statusValue === 'upcoming') {
+                matchesStatus = item.startDate > today;
+            } else if (statusValue === 'active') {
+                matchesStatus = item.startDate <= today && item.endDate >= today;
+            } else if (statusValue === 'completed') {
+                matchesStatus = item.endDate < today;
+            }
+
+            const isVisible = matchesSearch && matchesStatus;
+
+            if (isVisible) {
+                item.card.classList.remove('hidden');
+                item.row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.card.classList.add('hidden');
+                item.row.classList.add('hidden');
+            }
+        });
+
+        // Update result count
+        resultCount.textContent = visibleCount;
+
+        // Show/hide empty states
+        if (hasCards) {
+            if (visibleCount === 0) {
+                emptyStateGrid.classList.remove('hidden');
+                emptyStateList.classList.remove('hidden');
+            } else {
+                emptyStateGrid.classList.add('hidden');
+                emptyStateList.classList.add('hidden');
+            }
+        }
+    }
+
+    // View toggle functions
+    function setView(view) {
+        if (view === 'grid') {
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            gridViewBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+            gridViewBtn.classList.add('bg-indigo-100', 'text-indigo-700');
+            listViewBtn.classList.remove('bg-indigo-100', 'text-indigo-700');
+            listViewBtn.classList.add('text-gray-700', 'hover:bg-gray-100');
+        } else {
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            listViewBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+            listViewBtn.classList.add('bg-indigo-100', 'text-indigo-700');
+            gridViewBtn.classList.remove('bg-indigo-100', 'text-indigo-700');
+            gridViewBtn.classList.add('text-gray-700', 'hover:bg-gray-100');
+        }
+        localStorage.setItem('eam_kpi_sprint_view', view);
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterItems);
+    statusFilter.addEventListener('change', filterItems);
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    // Restore saved view preference
+    const savedView = localStorage.getItem('eam_kpi_sprint_view') || 'grid';
+    setView(savedView);
+</script>
 {% endblock %}
