@@ -1,0 +1,250 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">User Profile</h1>
+        <p class="mt-2 text-sm text-gray-600">View and update your profile information</p>
+    </div>
+
+    <!-- Profile Form -->
+    <div class="bg-white shadow rounded-lg">
+        <form method="post" class="p-6">
+            {% csrf_token %}
+
+            <!-- Account Information Section -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    Account Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Username (Read-only) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Username
+                        </label>
+                        <input
+                            type="text"
+                            value="{{ user.username }}"
+                            readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
+                        />
+                        <p class="mt-1 text-xs text-gray-500">Username cannot be changed</p>
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- First Name -->
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            First Name
+                        </label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Last Name -->
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Last Name
+                        </label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employment Information Section -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    Employment Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Employee Company -->
+                    <div>
+                        <label for="{{ form.employee_company.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Company
+                        </label>
+                        {{ form.employee_company }}
+                        {% if form.employee_company.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.employee_company.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Employee Department -->
+                    <div>
+                        <label for="{{ form.employee_department.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Department
+                        </label>
+                        {{ form.employee_department }}
+                        {% if form.employee_department.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.employee_department.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Employee Title -->
+                    <div>
+                        <label for="{{ form.employee_title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Job Title
+                        </label>
+                        {{ form.employee_title }}
+                        {% if form.employee_title.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.employee_title.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Employee Number -->
+                    <div>
+                        <label for="{{ form.employee_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Employee Number
+                        </label>
+                        {{ form.employee_number }}
+                        {% if form.employee_number.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.employee_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Employee Telephone -->
+                    <div>
+                        <label for="{{ form.employee_telephone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Telephone
+                        </label>
+                        {{ form.employee_telephone }}
+                        {% if form.employee_telephone.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.employee_telephone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information Section -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    Additional Information
+                </h2>
+                <div>
+                    <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Comments / Notes
+                    </label>
+                    {{ form.comment }}
+                    {% if form.comment.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.comment.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Read-only LDAP Information (if available) -->
+            {% if user.ldap_distinguished_name_dn or user.active_directory_globally_unique_identifier_guid %}
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                    Directory Information (Read-only)
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if user.ldap_distinguished_name_dn %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            LDAP Distinguished Name
+                        </label>
+                        <input
+                            type="text"
+                            value="{{ user.ldap_distinguished_name_dn }}"
+                            readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed text-xs"
+                        />
+                    </div>
+                    {% endif %}
+
+                    {% if user.active_directory_globally_unique_identifier_guid %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            AD GUID
+                        </label>
+                        <input
+                            type="text"
+                            value="{{ user.active_directory_globally_unique_identifier_guid }}"
+                            readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed text-xs"
+                        />
+                    </div>
+                    {% endif %}
+
+                    {% if user.active_directory_security_identifier_sid %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            AD Security Identifier (SID)
+                        </label>
+                        <input
+                            type="text"
+                            value="{{ user.active_directory_security_identifier_sid }}"
+                            readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed text-xs"
+                        />
+                    </div>
+                    {% endif %}
+
+                    {% if user.active_directory_security_accounts_manager_account_name %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            AD SAM Account Name
+                        </label>
+                        <input
+                            type="text"
+                            value="{{ user.active_directory_security_accounts_manager_account_name }}"
+                            readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed text-xs"
+                        />
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <a href="{% url 'home' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Style form inputs */
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
+{% endblock %}
