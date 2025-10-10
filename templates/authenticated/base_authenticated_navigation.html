@@ -368,19 +368,13 @@
     }
     .nav-dropdown-menu {
         display: none;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        margin-top: 0.5rem;
+        position: fixed;
         min-width: 14rem;
         background: white;
         border-radius: 0.5rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid #e5e7eb;
         z-index: 9999;
-    }
-    .nav-dropdown:hover .nav-dropdown-menu {
-        display: block;
     }
     .nav-dropdown-item {
         @apply flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors;
@@ -397,6 +391,66 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Navigation dropdowns
+        const navDropdowns = document.querySelectorAll('.nav-dropdown');
+
+        navDropdowns.forEach(function(dropdown) {
+            const button = dropdown.querySelector('button');
+            const menu = dropdown.querySelector('.nav-dropdown-menu');
+
+            if (button && menu) {
+                // Show dropdown on button click
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // Close all other dropdowns
+                    navDropdowns.forEach(function(otherDropdown) {
+                        if (otherDropdown !== dropdown) {
+                            const otherMenu = otherDropdown.querySelector('.nav-dropdown-menu');
+                            if (otherMenu) {
+                                otherMenu.style.display = 'none';
+                            }
+                        }
+                    });
+
+                    // Toggle this dropdown
+                    if (menu.style.display === 'none' || menu.style.display === '') {
+                        const rect = button.getBoundingClientRect();
+                        menu.style.position = 'fixed';
+                        menu.style.top = (rect.bottom + 8) + 'px';
+                        menu.style.left = rect.left + 'px';
+                        menu.style.display = 'block';
+                    } else {
+                        menu.style.display = 'none';
+                    }
+                });
+
+                // Also show dropdown on hover for better UX
+                dropdown.addEventListener('mouseenter', function() {
+                    const rect = button.getBoundingClientRect();
+                    menu.style.position = 'fixed';
+                    menu.style.top = (rect.bottom + 8) + 'px';
+                    menu.style.left = rect.left + 'px';
+                    menu.style.display = 'block';
+                });
+
+                dropdown.addEventListener('mouseleave', function() {
+                    menu.style.display = 'none';
+                });
+            }
+        });
+
+        // Close all nav dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            navDropdowns.forEach(function(dropdown) {
+                const menu = dropdown.querySelector('.nav-dropdown-menu');
+                if (menu && !dropdown.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            });
+        });
+
         // User profile dropdown
         const userButton = document.getElementById('userMenuButton');
         const userMenu = document.getElementById('userDropdownMenu');
