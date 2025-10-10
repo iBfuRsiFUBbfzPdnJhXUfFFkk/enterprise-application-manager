@@ -1,16 +1,310 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% load templatetags_markdown %}
 {% block content %}
-    <div><a href="{% url 'release_bundle_edit' model_id=model.id %}">Edit This Record</a></div>
-    <h1>
-        Release Bundle of {{ model.name }}
-    </h1>
-    <h2 class="mt-5">Applications Involved in Release</h2>
-    <ul>
-        {% for release in model.releases.all %}
-            <li>{{ release.application }}</li>
-        {% endfor %}
-    </ul>
-    <h2 class="mt-5">Comments</h2>
-    <div class="border border-1 mt-1 p-1">{{ model.comment|markdown }}</div>
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <div class="bg-white shadow-sm rounded-lg mb-6">
+            <div class="px-6 py-6">
+                <div class="flex items-center justify-between">
+                    <!-- Back Button and Title -->
+                    <div class="flex items-center space-x-4">
+                        <a href="{% url 'release_bundle' %}"
+                           class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            Back to Release Bundles
+                        </a>
+                        <div class="flex items-center space-x-3">
+                            <svg class="h-10 w-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <h1 class="text-3xl font-bold text-gray-900">{{ model.name }}</h1>
+                        </div>
+                    </div>
+                    <!-- Edit Button -->
+                    <a href="{% url 'release_bundle_edit' model_id=model.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Release Schedule Section -->
+                <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            Release Schedule
+                        </h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="space-y-6">
+                            <!-- Code Freeze Date -->
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-blue-100">
+                                        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-medium text-gray-900">Code Freeze</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Development stops, only critical fixes allowed</p>
+                                    {% if model.date_code_freeze %}
+                                    <p class="mt-2 text-lg font-semibold text-gray-900">{{ model.date_code_freeze|date:"l, F j, Y" }}</p>
+                                    <p class="text-sm text-gray-500">{{ model.date_code_freeze|date:"M d, Y" }}</p>
+                                    {% else %}
+                                    <p class="mt-2 text-sm text-gray-400 italic">Not scheduled</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Demo Date -->
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-indigo-100">
+                                        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-medium text-gray-900">Demo</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Stakeholder demonstration and feedback</p>
+                                    {% if model.date_demo %}
+                                    <p class="mt-2 text-lg font-semibold text-gray-900">{{ model.date_demo|date:"l, F j, Y" }}</p>
+                                    <p class="text-sm text-gray-500">{{ model.date_demo|date:"M d, Y" }}</p>
+                                    {% else %}
+                                    <p class="mt-2 text-sm text-gray-400 italic">Not scheduled</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Release Date -->
+                            <div class="flex items-start space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="flex items-center justify-center h-12 w-12 rounded-lg bg-purple-100">
+                                        <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-medium text-gray-900">Release</h3>
+                                    <p class="mt-1 text-sm text-gray-500">Production deployment date</p>
+                                    {% if model.date_release %}
+                                    <p class="mt-2 text-lg font-semibold text-purple-700">{{ model.date_release|date:"l, F j, Y" }}</p>
+                                    <p class="text-sm text-gray-500">{{ model.date_release|date:"M d, Y" }}</p>
+                                    {% else %}
+                                    <p class="mt-2 text-sm text-gray-400 italic">Not scheduled</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applications Involved Section -->
+                <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Applications Involved in Release
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {{ model.releases.all|length }}
+                            </span>
+                        </h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        {% if model.releases.all %}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {% for release in model.releases.all %}
+                            <a href="{% url 'release_detail' model_id=release.id %}"
+                               class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 transition-colors">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-8 w-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ release.application.name }}</p>
+                                    {% if release.version %}
+                                    <p class="text-xs text-gray-500">v{{ release.version }}</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    {% if release.type_product_owner_sign_off == "Approved" %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </span>
+                                    {% elif release.type_product_owner_sign_off == "Denied" %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">No applications</h3>
+                            <p class="mt-1 text-sm text-gray-500">No releases are associated with this bundle yet.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                {% if model.comment %}
+                <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                            </svg>
+                            Comments
+                        </h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="prose max-w-none text-gray-700">
+                            {{ model.comment|markdown }}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Metadata -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Quick Info Card -->
+                <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Bundle Information
+                        </h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <dl class="space-y-4">
+                            <!-- Name -->
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</dt>
+                                <dd class="mt-1 text-sm font-medium text-gray-900">{{ model.name }}</dd>
+                            </div>
+
+                            <!-- Release Count -->
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Releases</dt>
+                                <dd class="mt-1">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                        {{ model.releases.all|length }} application{{ model.releases.all|length|pluralize }}
+                                    </span>
+                                </dd>
+                            </div>
+
+                            <!-- Approval Status Summary -->
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Approval Status</dt>
+                                <dd class="space-y-2">
+                                    {% with approved=0 denied=0 pending=0 %}
+                                        {% for release in model.releases.all %}
+                                            {% if release.type_product_owner_sign_off == "Approved" %}
+                                                {% with approved=approved|add:1 %}{% endwith %}
+                                            {% elif release.type_product_owner_sign_off == "Denied" %}
+                                                {% with denied=denied|add:1 %}{% endwith %}
+                                            {% else %}
+                                                {% with pending=pending|add:1 %}{% endwith %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-600">Approved:</span>
+                                            <span class="font-medium text-green-700">{{ model.releases.all|length }}</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-600">Denied:</span>
+                                            <span class="font-medium text-red-700">0</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-sm">
+                                            <span class="text-gray-600">Pending:</span>
+                                            <span class="font-medium text-yellow-700">0</span>
+                                        </div>
+                                    {% endwith %}
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Metadata Card -->
+                <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="h-5 w-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Metadata
+                        </h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <dl class="space-y-4">
+                            <!-- Created -->
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Created</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    {{ model.datetime_created|date:"M d, Y" }}
+                                    <span class="text-gray-500 text-xs block">{{ model.datetime_created|date:"g:i A" }}</span>
+                                </dd>
+                            </div>
+
+                            <!-- Last Updated -->
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    {{ model.datetime_updated|date:"M d, Y" }}
+                                    <span class="text-gray-500 text-xs block">{{ model.datetime_updated|date:"g:i A" }}</span>
+                                </dd>
+                            </div>
+
+                            <!-- ID -->
+                            <div>
+                                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">ID</dt>
+                                <dd class="mt-1 text-sm font-mono text-gray-900">{{ model.id }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
