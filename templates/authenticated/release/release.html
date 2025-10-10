@@ -1,25 +1,359 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
-    <a href="{% url "release_new" %}">New</a>
-    <table id="data-table" class="display">
-        <thead>
-        <tr>
-            <td>Application</td>
-            <td>Bundle</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for model in models %}
-            <tr ondblclick='window.location.href = "{% url 'release_detail' model_id=model.id %}"'>
-                <td>{{ model.application.name }}</td>
-                <td>{{ model.release_bundle.name }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <script>
-        $(document).ready(function () {
-            $('#data-table').DataTable({"pageLength": 100});
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Releases</h1>
+                    <p class="mt-1 text-sm text-gray-500">Track application releases and deployment approvals</p>
+                </div>
+                <a href="{% url 'release_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Release
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Search -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <div class="relative">
+                        <input type="text"
+                               id="search"
+                               placeholder="Search by application, bundle, or version..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Approval Status Filter -->
+                <div>
+                    <label for="approval-filter" class="block text-sm font-medium text-gray-700 mb-2">Approval Status</label>
+                    <select id="approval-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">All Statuses</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Denied">Denied</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- View Toggle and Result Count -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing <span id="result-count" class="font-semibold text-gray-900">{{ models|length }}</span> release(s)
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium text-gray-700">View:</span>
+                    <button id="grid-view-btn" class="px-3 py-1 text-sm font-medium rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                    <button id="list-view-btn" class="px-3 py-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-100 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for model in models %}
+            <div class="release-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                 data-application="{{ model.application.name|lower }}"
+                 data-bundle="{{ model.release_bundle.name|lower }}"
+                 data-version="{{ model.version|default:'' }}"
+                 data-approval="{{ model.type_product_owner_sign_off|default:'' }}"
+                 ondblclick="window.location.href='{% url 'release_detail' model_id=model.id %}'">
+                <div class="p-6">
+                    <!-- Application and Version -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 truncate" title="{{ model.application.name }}">
+                                {{ model.application.name }}
+                            </h3>
+                            {% if model.version %}
+                            <p class="text-sm text-gray-500 mt-1">Version {{ model.version }}</p>
+                            {% endif %}
+                        </div>
+                        <svg class="h-8 w-8 text-indigo-500 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                    </div>
+
+                    <!-- Release Details -->
+                    <div class="space-y-3">
+                        <!-- Release Bundle -->
+                        <div class="pt-3 border-t border-gray-100">
+                            <div class="flex items-center text-sm">
+                                <svg class="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                <span class="text-gray-600 truncate" title="{{ model.release_bundle.name }}">
+                                    {{ model.release_bundle.name }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Approval Status -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-600">Product Owner:</span>
+                            {% if model.type_product_owner_sign_off == "Approved" %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Approved
+                            </span>
+                            {% elif model.type_product_owner_sign_off == "Denied" %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Denied
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Pending
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
+                    <a href="{% url 'release_detail' model_id=model.id %}"
+                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                       onclick="event.stopPropagation()">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                        View
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View -->
+        <div id="list-view" class="hidden">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Release Bundle</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approval</th>
+                                <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for model in models %}
+                            <tr class="release-row hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                                data-application="{{ model.application.name|lower }}"
+                                data-bundle="{{ model.release_bundle.name|lower }}"
+                                data-version="{{ model.version|default:'' }}"
+                                data-approval="{{ model.type_product_owner_sign_off|default:'' }}"
+                                ondblclick="window.location.href='{% url 'release_detail' model_id=model.id %}'">
+                                <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
+                                    <div class="truncate" title="{{ model.application.name }}">
+                                        {{ model.application.name }}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {% if model.version %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                                        v{{ model.version }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 200px;">
+                                    <div class="truncate" title="{{ model.release_bundle.name }}">
+                                        {{ model.release_bundle.name }}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                    {% if model.type_product_owner_sign_off == "Approved" %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Approved
+                                    </span>
+                                    {% elif model.type_product_owner_sign_off == "Denied" %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Denied
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Pending
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{% url 'release_detail' model_id=model.id %}"
+                                       class="inline-flex items-center p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                                       title="View"
+                                       onclick="event.stopPropagation()">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No releases found</h3>
+            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const approvalFilter = document.getElementById('approval-filter');
+    const gridViewBtn = document.getElementById('grid-view-btn');
+    const listViewBtn = document.getElementById('list-view-btn');
+    const gridView = document.getElementById('grid-view');
+    const listView = document.getElementById('list-view');
+    const emptyState = document.getElementById('empty-state');
+    const resultCount = document.getElementById('result-count');
+
+    // Collect all items
+    const allItems = [];
+    document.querySelectorAll('.release-card').forEach((card, index) => {
+        const row = document.querySelectorAll('.release-row')[index];
+        allItems.push({
+            card: card,
+            row: row,
+            application: card.dataset.application,
+            bundle: card.dataset.bundle,
+            version: card.dataset.version.toLowerCase(),
+            approval: card.dataset.approval
         });
-    </script>
+    });
+
+    // Filter function
+    function filterItems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedApproval = approvalFilter.value;
+
+        let visibleCount = 0;
+
+        allItems.forEach(item => {
+            const matchesSearch = !searchTerm ||
+                                item.application.includes(searchTerm) ||
+                                item.bundle.includes(searchTerm) ||
+                                item.version.includes(searchTerm);
+
+            const matchesApproval = !selectedApproval || item.approval === selectedApproval;
+
+            const isVisible = matchesSearch && matchesApproval;
+
+            if (isVisible) {
+                item.card.classList.remove('hidden');
+                item.row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.card.classList.add('hidden');
+                item.row.classList.add('hidden');
+            }
+        });
+
+        // Update result count
+        resultCount.textContent = visibleCount;
+
+        // Show/hide empty state
+        if (visibleCount === 0) {
+            emptyState.classList.remove('hidden');
+            gridView.classList.add('hidden');
+            listView.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            // Restore current view
+            const currentView = localStorage.getItem('eam_release_view') || 'grid';
+            if (currentView === 'grid') {
+                gridView.classList.remove('hidden');
+                listView.classList.add('hidden');
+            } else {
+                gridView.classList.add('hidden');
+                listView.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Event listeners for filtering
+    searchInput.addEventListener('input', filterItems);
+    approvalFilter.addEventListener('change', filterItems);
+
+    // View toggle
+    function setView(view) {
+        if (view === 'grid') {
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            gridViewBtn.classList.add('bg-blue-100', 'text-blue-700');
+            gridViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            listViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+            listViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        } else {
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            listViewBtn.classList.add('bg-blue-100', 'text-blue-700');
+            listViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            gridViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+            gridViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        }
+        localStorage.setItem('eam_release_view', view);
+    }
+
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    // Restore saved view preference
+    const savedView = localStorage.getItem('eam_release_view') || 'grid';
+    setView(savedView);
+});
+</script>
 {% endblock %}
