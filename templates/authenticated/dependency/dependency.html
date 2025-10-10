@@ -1,8 +1,9 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
+<div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
-    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Dependencies</h1>
@@ -19,58 +20,365 @@
         </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
-            <table id="data-table" class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for model in models %}
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ model.name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <code class="px-2 py-1 text-xs font-mono bg-gray-100 rounded">{{ model.version|default:"-" }}</code>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {% if model.type_programing_concept %}
+    <!-- Search and Filter Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <!-- Search -->
+                <div class="lg:col-span-1">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <div class="relative">
+                        <input type="text"
+                               id="search"
+                               placeholder="Search by name or version..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Type Filter -->
+                <div>
+                    <label for="type-filter" class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                    <select id="type-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+
+                <!-- Heavy Filter -->
+                <div>
+                    <label for="heavy-filter" class="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                    <select id="heavy-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">All Sizes</option>
+                        <option value="heavy">Heavy</option>
+                        <option value="light">Light</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- View Toggle and Result Count -->
+            <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div class="text-sm text-gray-600">
+                    Showing <span id="result-count" class="font-semibold text-gray-900">{{ models|length }}</span> dependenc(y|ies)
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium text-gray-700">View:</span>
+                    <button id="grid-view-btn" class="px-3 py-1 text-sm font-medium rounded-md bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                    <button id="list-view-btn" class="px-3 py-1 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-100 transition-colors">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="grid-view" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {% for model in models %}
+            <div class="dep-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                 data-name="{{ model.name|lower }}"
+                 data-version="{{ model.version|default:'' }}"
+                 data-type="{{ model.type_programing_concept|default:'' }}"
+                 data-heavy="{{ model.is_heavy|yesno:'true,false' }}"
+                 ondblclick="window.location.href='{% url 'dependency_edit' model_id=model.id %}'">
+                <div class="p-6">
+                    <!-- Name -->
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 truncate" title="{{ model.name }}">
+                                {{ model.name }}
+                            </h3>
+                        </div>
+                        <svg class="h-6 w-6 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
+                    </div>
+
+                    <!-- Version and Type -->
+                    <div class="space-y-3">
+                        <!-- Version -->
+                        {% if model.version %}
+                        <div class="flex items-center">
+                            <code class="px-2.5 py-1 text-xs font-mono bg-gray-100 text-gray-800 rounded">v{{ model.version }}</code>
+                        </div>
+                        {% endif %}
+
+                        <!-- Type and Heavy Badge -->
+                        <div class="flex items-center space-x-2 flex-wrap gap-2">
+                            {% if model.type_programing_concept %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {{ model.type_programing_concept }}
+                            </span>
+                            {% endif %}
+                            {% if model.is_heavy %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                Heavy
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Applications Count -->
+                        {% if model.applications.count > 0 %}
+                        <div class="pt-3 border-t border-gray-100">
+                            <div class="flex items-center text-xs text-gray-600">
+                                <svg class="h-4 w-4 text-gray-400 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <span>{{ model.applications.count }} application{{ model.applications.count|pluralize }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
+                    <a href="{% url 'dependency_edit' model_id=model.id %}"
+                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                       onclick="event.stopPropagation()">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View -->
+        <div id="list-view" class="hidden">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
+                                <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for model in models %}
+                            <tr class="dep-row hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
+                                data-name="{{ model.name|lower }}"
+                                data-version="{{ model.version|default:'' }}"
+                                data-type="{{ model.type_programing_concept|default:'' }}"
+                                data-heavy="{{ model.is_heavy|yesno:'true,false' }}"
+                                ondblclick="window.location.href='{% url 'dependency_edit' model_id=model.id %}'">
+                                <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
+                                    <div class="truncate" title="{{ model.name }}">
+                                        {{ model.name }}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                    {% if model.version %}
+                                    <code class="px-2.5 py-1 text-xs font-mono bg-gray-100 text-gray-800 rounded">v{{ model.version }}</code>
+                                    {% else %}
+                                    <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                    {% if model.type_programing_concept %}
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                         {{ model.type_programing_concept }}
                                     </span>
-                                {% else %}
+                                    {% else %}
                                     <span class="text-gray-400">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                <a href="{% url 'dependency_edit' model_id=model.id %}"
-                                   class="text-blue-600 hover:text-blue-900 transition-colors duration-150">Edit</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                    {% if model.is_heavy %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        Heavy
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Light
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                                    {% if model.applications.count > 0 %}
+                                    <span class="inline-flex items-center text-xs">
+                                        <svg class="h-4 w-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                        </svg>
+                                        {{ model.applications.count }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-gray-400">0</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{% url 'dependency_edit' model_id=model.id %}"
+                                       class="inline-flex items-center p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                                       title="Edit"
+                                       onclick="event.stopPropagation()">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No dependencies found</h3>
+            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter criteria.</p>
         </div>
     </div>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            $('#data-table').DataTable({
-                "pageLength": 100,
-                "order": [[0, "asc"]],
-                "language": {
-                    "search": "Search dependencies:",
-                    "lengthMenu": "Show _MENU_ dependencies per page",
-                    "info": "Showing _START_ to _END_ of _TOTAL_ dependencies",
-                    "infoEmpty": "No dependencies available",
-                    "infoFiltered": "(filtered from _MAX_ total dependencies)"
-                }
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search');
+    const typeFilter = document.getElementById('type-filter');
+    const heavyFilter = document.getElementById('heavy-filter');
+    const gridViewBtn = document.getElementById('grid-view-btn');
+    const listViewBtn = document.getElementById('list-view-btn');
+    const gridView = document.getElementById('grid-view');
+    const listView = document.getElementById('list-view');
+    const emptyState = document.getElementById('empty-state');
+    const resultCount = document.getElementById('result-count');
+
+    // Collect all items
+    const allItems = [];
+    document.querySelectorAll('.dep-card').forEach((card, index) => {
+        const row = document.querySelectorAll('.dep-row')[index];
+        allItems.push({
+            card: card,
+            row: row,
+            name: card.dataset.name,
+            version: card.dataset.version.toLowerCase(),
+            type: card.dataset.type,
+            heavy: card.dataset.heavy === 'true'
         });
-    </script>
+    });
+
+    // Populate type filter
+    const types = new Set();
+    allItems.forEach(item => {
+        if (item.type) types.add(item.type);
+    });
+    Array.from(types).sort().forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        typeFilter.appendChild(option);
+    });
+
+    // Filter function
+    function filterItems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedType = typeFilter.value;
+        const selectedHeavy = heavyFilter.value;
+
+        let visibleCount = 0;
+
+        allItems.forEach(item => {
+            const matchesSearch = !searchTerm ||
+                                item.name.includes(searchTerm) ||
+                                item.version.includes(searchTerm);
+
+            const matchesType = !selectedType || item.type === selectedType;
+
+            let matchesHeavy = true;
+            if (selectedHeavy === 'heavy') {
+                matchesHeavy = item.heavy === true;
+            } else if (selectedHeavy === 'light') {
+                matchesHeavy = item.heavy === false;
+            }
+
+            const isVisible = matchesSearch && matchesType && matchesHeavy;
+
+            if (isVisible) {
+                item.card.classList.remove('hidden');
+                item.row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.card.classList.add('hidden');
+                item.row.classList.add('hidden');
+            }
+        });
+
+        // Update result count
+        resultCount.textContent = visibleCount;
+
+        // Show/hide empty state
+        if (visibleCount === 0) {
+            emptyState.classList.remove('hidden');
+            gridView.classList.add('hidden');
+            listView.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            // Restore current view
+            const currentView = localStorage.getItem('eam_dependency_view') || 'grid';
+            if (currentView === 'grid') {
+                gridView.classList.remove('hidden');
+                listView.classList.add('hidden');
+            } else {
+                gridView.classList.add('hidden');
+                listView.classList.remove('hidden');
+            }
+        }
+    }
+
+    // Event listeners for filtering
+    searchInput.addEventListener('input', filterItems);
+    typeFilter.addEventListener('change', filterItems);
+    heavyFilter.addEventListener('change', filterItems);
+
+    // View toggle
+    function setView(view) {
+        if (view === 'grid') {
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            gridViewBtn.classList.add('bg-blue-100', 'text-blue-700');
+            gridViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            listViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+            listViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        } else {
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            listViewBtn.classList.add('bg-blue-100', 'text-blue-700');
+            listViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+            gridViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+            gridViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+        }
+        localStorage.setItem('eam_dependency_view', view);
+    }
+
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    // Restore saved view preference
+    const savedView = localStorage.getItem('eam_dependency_view') || 'grid';
+    setView(savedView);
+});
+</script>
 {% endblock %}
