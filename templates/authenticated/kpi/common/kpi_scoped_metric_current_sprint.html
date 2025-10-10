@@ -1,33 +1,53 @@
 {% load templatetags_percentages %}
-<div class="card p-0">
-    <div class="card-header">
-        Current Sprint
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <svg class="h-5 w-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Current Sprint
+        </h3>
     </div>
-    <div class="card-body">
-        <p>
-            <strong>
-                <a href="{% url 'kpi:kpi_sprint' uuid=current_sprint.uuid %}">
+    <div class="px-6 py-6">
+        {% if current_sprint %}
+        <div class="space-y-4">
+            <!-- Sprint Name -->
+            <div>
+                <a href="{% url 'kpi:kpi_sprint' uuid=current_sprint.uuid %}"
+                   class="text-xl font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
                     {{ current_sprint.name }}
                 </a>
-            </strong>
-        </p>
-        <p>
-            Sprint Dates:
-            <span class="fw-lighter">
-                {{ current_sprint.date_start }} - {{ current_sprint.date_end }}
-            </span>
-        </p>
-        <p>
-            Capacity Velocity:
-            <span class="fw-lighter">
-                {{ current_sprint_scoped_metric.total_velocity_of_capacity|percentage }}
-            </span>
-        </p>
-        <p>
-            Commitment Accuracy:
-            <span class="fw-lighter">
-                {{ current_sprint_scoped_metric.total_accuracy_on_committed_to_story_points|percentage }}
-            </span>
-        </p>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ current_sprint.date_start|date:"M j" }} - {{ current_sprint.date_end|date:"M j, Y" }}
+                </p>
+            </div>
+
+            <!-- Metrics -->
+            <div class="grid grid-cols-2 gap-4 pt-4">
+                <!-- Capacity Velocity -->
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">Capacity Velocity</div>
+                    <div class="text-2xl font-bold text-gray-900">
+                        {{ current_sprint_scoped_metric.total_velocity_of_capacity|percentage }}
+                    </div>
+                </div>
+
+                <!-- Commitment Accuracy -->
+                <div class="bg-green-50 rounded-lg p-4">
+                    <div class="text-xs font-medium text-green-600 uppercase tracking-wider mb-1">Commitment Accuracy</div>
+                    <div class="text-2xl font-bold text-gray-900">
+                        {{ current_sprint_scoped_metric.total_accuracy_on_committed_to_story_points|percentage }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <p class="mt-2 text-sm text-gray-500">No current sprint</p>
+        </div>
+        {% endif %}
     </div>
 </div>

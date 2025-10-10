@@ -1,32 +1,47 @@
 {% load templatetags_percentages %}
-<div class="card p-0">
-    <div class="card-header">
-        Avg. Last 5 Sprints
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
+        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+            <svg class="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Avg. Last 5 Sprints
+        </h3>
     </div>
-    <div class="card-body">
-        <p>
-            Capacity Velocity:
-            <span class="fw-lighter">
-                {{ last_five_sprints_scoped_metric.total_velocity_of_capacity|percentage }}
-            </span>
-        </p>
-        <p>
-            Commitment Accuracy:
-            <span class="fw-lighter">
-                {{ last_five_sprints_scoped_metric.total_accuracy_on_committed_to_story_points|percentage }}
-            </span>
-        </p>
-        <p>
-            Avg Delivered:
-            <span class="fw-lighter">
-                {{ last_five_sprints_scoped_metric.total_story_points_delivered }}
-            </span>
-        </p>
-        <p>
-            Avg Code Reviews:
-            <span class="fw-lighter">
-                {{ last_five_sprints_scoped_metric.total_merge_requests_approved }}
-            </span>
-        </p>
+    <div class="px-6 py-6">
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Capacity Velocity -->
+            <div class="bg-blue-50 rounded-lg p-4">
+                <div class="text-xs font-medium text-blue-600 uppercase tracking-wider mb-1">Capacity Velocity</div>
+                <div class="text-2xl font-bold text-gray-900">
+                    {{ last_five_sprints_scoped_metric.total_velocity_of_capacity|percentage }}
+                </div>
+            </div>
+
+            <!-- Commitment Accuracy -->
+            <div class="bg-green-50 rounded-lg p-4">
+                <div class="text-xs font-medium text-green-600 uppercase tracking-wider mb-1">Commitment Accuracy</div>
+                <div class="text-2xl font-bold text-gray-900">
+                    {{ last_five_sprints_scoped_metric.total_accuracy_on_committed_to_story_points|percentage }}
+                </div>
+            </div>
+
+            <!-- Avg Delivered -->
+            <div class="bg-purple-50 rounded-lg p-4">
+                <div class="text-xs font-medium text-purple-600 uppercase tracking-wider mb-1">Avg Delivered</div>
+                <div class="text-2xl font-bold text-gray-900">
+                    {{ last_five_sprints_scoped_metric.total_story_points_delivered }}
+                    <span class="text-sm text-gray-500">pts</span>
+                </div>
+            </div>
+
+            <!-- Avg Code Reviews -->
+            <div class="bg-indigo-50 rounded-lg p-4">
+                <div class="text-xs font-medium text-indigo-600 uppercase tracking-wider mb-1">Avg Code Reviews</div>
+                <div class="text-2xl font-bold text-gray-900">
+                    {{ last_five_sprints_scoped_metric.total_merge_requests_approved }}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
