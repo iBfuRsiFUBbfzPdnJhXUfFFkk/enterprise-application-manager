@@ -60,9 +60,9 @@
                                 {% endif %}
                             </td>
                             <td class="px-3 py-3 text-sm text-gray-900">
-                                {% if model.uniform_resource_locator %}
-                                <a href="{{ model.uniform_resource_locator }}" target="_blank" class="text-blue-600 hover:text-blue-900 hover:underline" style="max-width: 300px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ model.uniform_resource_locator }}">
-                                    {{ model.uniform_resource_locator }}
+                                {% if model.url %}
+                                <a href="{{ model.url }}" target="_blank" class="text-blue-600 hover:text-blue-900 hover:underline" style="max-width: 300px; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ model.url }}">
+                                    {{ model.url }}
                                 </a>
                                 {% else %}
                                 <span class="text-gray-400">-</span>
