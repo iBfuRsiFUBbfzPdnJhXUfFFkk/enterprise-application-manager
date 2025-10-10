@@ -20,6 +20,7 @@ from core.urls.urlpatterns_external_blocker import urlpatterns_external_blocker
 from core.urls.urlpatterns_formula import urlpatterns_formula
 from core.urls.urlpatterns_hotfix import urlpatterns_hotfix
 from core.urls.urlpatterns_incident import urlpatterns_incident
+from core.urls.urlpatterns_job_level import urlpatterns_job_level
 from core.urls.urlpatterns_job_title import urlpatterns_job_title
 from core.urls.urlpatterns_login import urlpatterns_login
 from core.urls.urlpatterns_logout import urlpatterns_logout
@@ -61,6 +62,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_formula,
     *urlpatterns_hotfix,
     *urlpatterns_incident,
+    *urlpatterns_job_level,
     *urlpatterns_job_title,
     *urlpatterns_logout,
     *urlpatterns_person,
