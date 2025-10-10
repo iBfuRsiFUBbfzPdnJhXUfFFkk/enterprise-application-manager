@@ -8,6 +8,7 @@ from core.urls.urlpatterns_api import urlpatterns_api
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
 from core.urls.urlpatterns_billing_code import urlpatterns_billing_code
+from core.urls.urlpatterns_command import urlpatterns_command
 from core.urls.urlpatterns_database import urlpatterns_database
 from core.urls.urlpatterns_dependency import urlpatterns_dependency
 from core.urls.urlpatterns_document import urlpatterns_document
@@ -40,6 +41,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_application,
     *urlpatterns_application_group,
     *urlpatterns_billing_code,
+    *urlpatterns_command,
     *urlpatterns_database,
     *urlpatterns_dependency,
     *urlpatterns_document,
