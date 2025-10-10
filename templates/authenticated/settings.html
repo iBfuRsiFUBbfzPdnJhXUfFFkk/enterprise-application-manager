@@ -1,0 +1,224 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+        <p class="mt-2 text-sm text-gray-600">Manage your application preferences and data</p>
+    </div>
+
+    <!-- Settings Sections -->
+    <div class="space-y-6">
+        <!-- Preferences Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Preferences</h2>
+
+            <div class="space-y-4">
+                <!-- Theme Setting -->
+                <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                    <div>
+                        <label for="themeSetting" class="block text-sm font-medium text-gray-700">
+                            Theme
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">Choose your preferred color theme</p>
+                    </div>
+                    <select
+                        id="themeSetting"
+                        class="mt-1 block w-40 pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="auto">Auto</option>
+                    </select>
+                </div>
+
+                <!-- Compact Mode -->
+                <div class="flex items-center justify-between py-3 border-b border-gray-200">
+                    <div>
+                        <label for="compactMode" class="block text-sm font-medium text-gray-700">
+                            Compact Mode
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">Display more content with less spacing</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="compactMode" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <!-- Auto-refresh -->
+                <div class="flex items-center justify-between py-3">
+                    <div>
+                        <label for="autoRefresh" class="block text-sm font-medium text-gray-700">
+                            Auto-refresh Data
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1">Automatically refresh page data</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="autoRefresh" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="mt-6 flex justify-end">
+                <button
+                    id="saveSettingsBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Save Preferences
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Management Section -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Data Management</h2>
+
+            <div class="space-y-4">
+                <!-- Storage Info -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Local Storage Usage</h3>
+                            <p class="mt-1 text-xs text-blue-700" id="storageInfo">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clear Data Button -->
+                <div class="flex items-center justify-between py-3 border-t border-gray-200 pt-4">
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Clear Site Data</h3>
+                        <p class="text-xs text-gray-500 mt-1">Remove all saved preferences and cached data</p>
+                    </div>
+                    <button
+                        id="clearDataBtn"
+                        class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                        Clear All Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="hidden">
+            <!-- Messages will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        const STORAGE_PREFIX = 'eam_';
+
+        // Settings keys
+        const SETTINGS_KEYS = {
+            theme: STORAGE_PREFIX + 'theme',
+            compactMode: STORAGE_PREFIX + 'compact_mode',
+            autoRefresh: STORAGE_PREFIX + 'auto_refresh'
+        };
+
+        // Elements
+        const themeSelect = document.getElementById('themeSetting');
+        const compactModeToggle = document.getElementById('compactMode');
+        const autoRefreshToggle = document.getElementById('autoRefresh');
+        const saveBtn = document.getElementById('saveSettingsBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const storageInfo = document.getElementById('storageInfo');
+        const messageContainer = document.getElementById('messageContainer');
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const theme = localStorage.getItem(SETTINGS_KEYS.theme) || 'light';
+            const compactMode = localStorage.getItem(SETTINGS_KEYS.compactMode) === 'true';
+            const autoRefresh = localStorage.getItem(SETTINGS_KEYS.autoRefresh) === 'true';
+
+            themeSelect.value = theme;
+            compactModeToggle.checked = compactMode;
+            autoRefreshToggle.checked = autoRefresh;
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            localStorage.setItem(SETTINGS_KEYS.theme, themeSelect.value);
+            localStorage.setItem(SETTINGS_KEYS.compactMode, compactModeToggle.checked);
+            localStorage.setItem(SETTINGS_KEYS.autoRefresh, autoRefreshToggle.checked);
+
+            showMessage('Settings saved successfully!', 'success');
+            updateStorageInfo();
+        }
+
+        // Clear all site data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all site data? This will remove all saved preferences and you will be logged out.')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                showMessage('All site data cleared successfully! Redirecting to login...', 'success');
+
+                setTimeout(function() {
+                    window.location.href = '{% url "logout" %}';
+                }, 2000);
+            }
+        }
+
+        // Update storage info
+        function updateStorageInfo() {
+            let totalSize = 0;
+            let itemCount = 0;
+
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    itemCount++;
+                    totalSize += localStorage[key].length + key.length;
+                }
+            }
+
+            // Convert to KB
+            const sizeKB = (totalSize / 1024).toFixed(2);
+            storageInfo.textContent = `${itemCount} items stored (approximately ${sizeKB} KB)`;
+        }
+
+        // Show message
+        function showMessage(message, type) {
+            const bgColor = type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+            const textColor = type === 'success' ? 'text-green-800' : 'text-red-800';
+            const iconColor = type === 'success' ? 'text-green-400' : 'text-red-400';
+            const icon = type === 'success'
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+
+            messageContainer.innerHTML = `
+                <div class="${bgColor} border rounded-lg p-4">
+                    <div class="flex">
+                        <svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${icon}
+                        </svg>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium ${textColor}">${message}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messageContainer.classList.remove('hidden');
+
+            setTimeout(function() {
+                messageContainer.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Event listeners
+        saveBtn.addEventListener('click', saveSettings);
+        clearDataBtn.addEventListener('click', clearAllData);
+
+        // Initialize
+        loadSettings();
+        updateStorageInfo();
+    })();
+</script>
+{% endblock %}
