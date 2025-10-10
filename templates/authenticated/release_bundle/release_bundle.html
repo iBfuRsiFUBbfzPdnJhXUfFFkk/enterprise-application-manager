@@ -1,23 +1,384 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% block content %}
-    <a href="{% url "release_bundle_new" %}">New</a>
-    <table id="data-table" class="display">
-        <thead>
-        <tr>
-            <td>Name</td>
-        </tr>
-        </thead>
-        <tbody>
-        {% for model in models %}
-            <tr ondblclick='window.location.href = "{% url 'release_bundle_edit' model_id=model.id %}"'>
-                <td>{{ model.name }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <script>
-        $(document).ready(function () {
-            $('#data-table').DataTable({"pageLength": 100});
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white shadow-sm rounded-lg mb-6">
+            <div class="px-6 py-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Release Bundles</h1>
+                        <p class="mt-2 text-sm text-gray-600">Manage release schedules with code freeze, demo, and release dates</p>
+                    </div>
+                    <a href="{% url 'release_bundle_new' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Release Bundle
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-white shadow-sm rounded-lg mb-6">
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Search -->
+                    <div>
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                        <input type="text"
+                               id="search"
+                               placeholder="Search by name or comment..."
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+
+                    <!-- Date Filter -->
+                    <div>
+                        <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-2">Filter by Date</label>
+                        <select id="dateFilter"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">All Bundles</option>
+                            <option value="upcoming">Upcoming Releases</option>
+                            <option value="past">Past Releases</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- View Toggle and Result Count -->
+                <div class="mt-4 flex justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        Showing <span id="resultCount" class="font-semibold text-gray-900">{{ models|length }}</span> release bundle{{ models|length|pluralize }}
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="gridViewBtn"
+                                class="px-3 py-2 text-sm font-medium rounded-md bg-indigo-100 text-indigo-700">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                        </button>
+                        <button id="listViewBtn"
+                                class="px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="gridView">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for model in models %}
+                <div class="release-bundle-card bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 cursor-pointer"
+                     ondblclick='window.location.href = "{% url "release_bundle_detail" model_id=model.id %}"'
+                     data-name="{{ model.name|lower }}"
+                     data-comment="{{ model.comment|default:''|lower }}"
+                     data-date-release="{{ model.date_release|date:'Y-m-d'|default:'' }}">
+                    <div class="p-6">
+                        <!-- Header with Icon and Name -->
+                        <div class="flex items-start space-x-3 mb-4">
+                            <div class="flex-shrink-0">
+                                <svg class="h-10 w-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg font-semibold text-gray-900 truncate">{{ model.name }}</h3>
+                            </div>
+                        </div>
+
+                        <!-- Important Dates -->
+                        <div class="space-y-3 mb-4">
+                            {% if model.date_code_freeze %}
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600 flex items-center">
+                                    <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    Code Freeze:
+                                </span>
+                                <span class="font-medium text-gray-900">{{ model.date_code_freeze|date:"M d, Y" }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if model.date_demo %}
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600 flex items-center">
+                                    <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    Demo:
+                                </span>
+                                <span class="font-medium text-gray-900">{{ model.date_demo|date:"M d, Y" }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if model.date_release %}
+                            <div class="flex items-center justify-between text-sm">
+                                <span class="text-gray-600 flex items-center">
+                                    <svg class="h-4 w-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                                    </svg>
+                                    Release:
+                                </span>
+                                <span class="font-medium text-purple-700">{{ model.date_release|date:"M d, Y" }}</span>
+                            </div>
+                            {% endif %}
+
+                            {% if not model.date_code_freeze and not model.date_demo and not model.date_release %}
+                            <div class="text-sm text-gray-500 italic">No dates scheduled</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Comment Preview -->
+                        {% if model.comment %}
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-600 line-clamp-2">{{ model.comment|truncatewords:15 }}</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="mt-4 pt-4 border-t border-gray-200 flex justify-end space-x-2">
+                            <a href="{% url 'release_bundle_detail' model_id=model.id %}"
+                               class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                               onclick="event.stopPropagation()">
+                                View
+                            </a>
+                            <a href="{% url 'release_bundle_edit' model_id=model.id %}"
+                               class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                               onclick="event.stopPropagation()">
+                                Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No release bundles</h3>
+                    <p class="mt-1 text-sm text-gray-500">Get started by creating a new release bundle.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Empty State for Filtered Results -->
+            <div id="emptyStateGrid" class="hidden text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+                <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+            </div>
+        </div>
+
+        <!-- List View -->
+        <div id="listView" class="hidden bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Code Freeze
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Demo
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Release
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for model in models %}
+                        <tr class="release-bundle-row hover:bg-gray-50 cursor-pointer transition-colors"
+                            ondblclick='window.location.href = "{% url "release_bundle_detail" model_id=model.id %}"'
+                            data-name="{{ model.name|lower }}"
+                            data-comment="{{ model.comment|default:''|lower }}"
+                            data-date-release="{{ model.date_release|date:'Y-m-d'|default:'' }}">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-8 w-8">
+                                        <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <div class="text-sm font-medium text-gray-900">{{ model.name }}</div>
+                                        {% if model.comment %}
+                                        <div class="text-sm text-gray-500 truncate max-w-xs">{{ model.comment|truncatewords:10 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if model.date_code_freeze %}
+                                <div class="text-sm text-gray-900">{{ model.date_code_freeze|date:"M d, Y" }}</div>
+                                {% else %}
+                                <span class="text-sm text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if model.date_demo %}
+                                <div class="text-sm text-gray-900">{{ model.date_demo|date:"M d, Y" }}</div>
+                                {% else %}
+                                <span class="text-sm text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if model.date_release %}
+                                <div class="text-sm font-medium text-purple-700">{{ model.date_release|date:"M d, Y" }}</div>
+                                {% else %}
+                                <span class="text-sm text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                <a href="{% url 'release_bundle_detail' model_id=model.id %}"
+                                   class="text-indigo-600 hover:text-indigo-900"
+                                   onclick="event.stopPropagation()">View</a>
+                                <a href="{% url 'release_bundle_edit' model_id=model.id %}"
+                                   class="text-indigo-600 hover:text-indigo-900"
+                                   onclick="event.stopPropagation()">Edit</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State for Filtered Results -->
+            <div id="emptyStateList" class="hidden text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No results found</h3>
+                <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filter to find what you're looking for.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get all elements
+    const searchInput = document.getElementById('search');
+    const dateFilter = document.getElementById('dateFilter');
+    const gridViewBtn = document.getElementById('gridViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    const gridView = document.getElementById('gridView');
+    const listView = document.getElementById('listView');
+    const resultCount = document.getElementById('resultCount');
+    const emptyStateGrid = document.getElementById('emptyStateGrid');
+    const emptyStateList = document.getElementById('emptyStateList');
+
+    // Collect all items
+    const allItems = [];
+    const cards = document.querySelectorAll('.release-bundle-card');
+    const rows = document.querySelectorAll('.release-bundle-row');
+
+    cards.forEach((card, index) => {
+        const row = rows[index];
+        allItems.push({
+            card: card,
+            row: row,
+            name: card.dataset.name,
+            comment: card.dataset.comment,
+            dateRelease: card.dataset.dateRelease
         });
-    </script>
+    });
+
+    // Filter function
+    function filterItems() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const dateFilterValue = dateFilter.value;
+        const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+        let visibleCount = 0;
+        const hasCards = cards.length > 0;
+
+        allItems.forEach(item => {
+            // Search filter
+            const matchesSearch = !searchTerm ||
+                item.name.includes(searchTerm) ||
+                item.comment.includes(searchTerm);
+
+            // Date filter
+            let matchesDate = true;
+            if (dateFilterValue === 'upcoming' && item.dateRelease) {
+                matchesDate = item.dateRelease >= today;
+            } else if (dateFilterValue === 'past' && item.dateRelease) {
+                matchesDate = item.dateRelease < today;
+            } else if (dateFilterValue === 'upcoming' && !item.dateRelease) {
+                matchesDate = false;
+            } else if (dateFilterValue === 'past' && !item.dateRelease) {
+                matchesDate = false;
+            }
+
+            const isVisible = matchesSearch && matchesDate;
+
+            if (isVisible) {
+                item.card.classList.remove('hidden');
+                item.row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.card.classList.add('hidden');
+                item.row.classList.add('hidden');
+            }
+        });
+
+        // Update result count
+        resultCount.textContent = visibleCount;
+
+        // Show/hide empty states
+        if (hasCards) {
+            if (visibleCount === 0) {
+                emptyStateGrid.classList.remove('hidden');
+                emptyStateList.classList.remove('hidden');
+            } else {
+                emptyStateGrid.classList.add('hidden');
+                emptyStateList.classList.add('hidden');
+            }
+        }
+    }
+
+    // View toggle functions
+    function setView(view) {
+        if (view === 'grid') {
+            gridView.classList.remove('hidden');
+            listView.classList.add('hidden');
+            gridViewBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+            gridViewBtn.classList.add('bg-indigo-100', 'text-indigo-700');
+            listViewBtn.classList.remove('bg-indigo-100', 'text-indigo-700');
+            listViewBtn.classList.add('text-gray-700', 'hover:bg-gray-100');
+        } else {
+            gridView.classList.add('hidden');
+            listView.classList.remove('hidden');
+            listViewBtn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+            listViewBtn.classList.add('bg-indigo-100', 'text-indigo-700');
+            gridViewBtn.classList.remove('bg-indigo-100', 'text-indigo-700');
+            gridViewBtn.classList.add('text-gray-700', 'hover:bg-gray-100');
+        }
+        localStorage.setItem('eam_release_bundle_view', view);
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', filterItems);
+    dateFilter.addEventListener('change', filterItems);
+    gridViewBtn.addEventListener('click', () => setView('grid'));
+    listViewBtn.addEventListener('click', () => setView('list'));
+
+    // Restore saved view preference
+    const savedView = localStorage.getItem('eam_release_bundle_view') || 'grid';
+    setView(savedView);
+</script>
 {% endblock %}
