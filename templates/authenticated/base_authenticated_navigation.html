@@ -359,12 +359,15 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         border: 1px solid #e5e7eb;
         z-index: 9999;
+        flex-direction: column;
     }
     .nav-dropdown-item {
         @apply flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors;
         white-space: nowrap;
-        min-width: fit-content;
+        min-width: 100%;
         flex-wrap: nowrap;
+        display: flex;
+        width: 100%;
     }
     .nav-dropdown-item svg {
         margin-right: 0.75rem;
