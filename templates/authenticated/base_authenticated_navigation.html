@@ -15,11 +15,12 @@
 
             <!-- Desktop Navigation -->
             <div class="hidden md:flex md:items-center md:space-x-1 flex-1 mx-6 overflow-x-auto">
+                <!-- Core Section -->
                 <a class="nav-link" href="{% url 'home' %}" title="Home">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                     </svg>
-                    <span class="hidden lg:inline">Home</span>
+                    <span class="hidden lg:inline text-white">Home</span>
                 </a>
 
                 {% if global_context_is_superuser %}
@@ -27,86 +28,110 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                     </svg>
-                    <span class="hidden lg:inline">Admin</span>
+                    <span class="hidden lg:inline text-white">Admin</span>
                 </a>
                 {% endif %}
 
-                <a class="nav-link" href="{% url 'acronym' %}" title="Acronyms">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                    </svg>
-                    <span class="hidden lg:inline">Acronyms</span>
-                </a>
+                <!-- Separator -->
+                <div class="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
 
+                <!-- Applications Section -->
                 <a class="nav-link" href="{% url 'application' %}" title="Applications">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
                     </svg>
-                    <span class="hidden lg:inline">Apps</span>
+                    <span class="hidden lg:inline text-white">Apps</span>
                 </a>
 
                 <a class="nav-link" href="{% url 'application_group' %}" title="Application Groups">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
-                    <span class="hidden lg:inline">Groups</span>
+                    <span class="hidden lg:inline text-white">Groups</span>
                 </a>
 
+                <!-- Separator -->
+                <div class="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
+
+                <!-- Resources Section -->
                 <a class="nav-link" href="{% url 'database' %}" title="Databases">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
                     </svg>
-                    <span class="hidden lg:inline">Databases</span>
+                    <span class="hidden lg:inline text-white">Databases</span>
                 </a>
 
                 <a class="nav-link" href="{% url 'dependency' %}" title="Dependencies">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                     </svg>
-                    <span class="hidden lg:inline">Dependencies</span>
+                    <span class="hidden lg:inline text-white">Dependencies</span>
+                </a>
+
+                <!-- Separator -->
+                <div class="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
+
+                <!-- Documentation Section -->
+                <a class="nav-link" href="{% url 'acronym' %}" title="Acronyms">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                    </svg>
+                    <span class="hidden lg:inline text-white">Acronyms</span>
                 </a>
 
                 <a class="nav-link" href="{% url 'document' %}" title="Documents">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    <span class="hidden lg:inline">Documents</span>
+                    <span class="hidden lg:inline text-white">Documents</span>
                 </a>
 
+                <!-- Separator -->
+                <div class="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
+
+                <!-- People & Releases Section -->
                 <a class="nav-link" href="{% url 'person' %}" title="People">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                     </svg>
-                    <span class="hidden lg:inline">People</span>
+                    <span class="hidden lg:inline text-white">People</span>
                 </a>
 
                 <a class="nav-link" href="{% url 'release' %}" title="Releases">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                     </svg>
-                    <span class="hidden lg:inline">Releases</span>
+                    <span class="hidden lg:inline text-white">Releases</span>
                 </a>
 
                 <a class="nav-link" href="{% url 'release_bundle' %}" title="Release Bundles">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                     </svg>
-                    <span class="hidden lg:inline">Bundles</span>
+                    <span class="hidden lg:inline text-white">Bundles</span>
                 </a>
 
+                <!-- Separator -->
+                <div class="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
+
+                <!-- Analytics Section -->
                 <a class="nav-link" href="{% url 'kpi:kpi_dashboard' %}" title="KPI Dashboard">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
-                    <span class="hidden lg:inline">KPI</span>
+                    <span class="hidden lg:inline text-white">KPI</span>
                 </a>
 
                 {% if global_context_is_superuser %}
+                <!-- Separator -->
+                <div class="hidden lg:block h-6 w-px bg-white/20 mx-2"></div>
+
+                <!-- Admin Tools Section -->
                 <a class="nav-link" href="{% url 'secret' %}" title="Secrets">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                     </svg>
-                    <span class="hidden lg:inline">Secrets</span>
+                    <span class="hidden lg:inline text-white">Secrets</span>
                 </a>
 
                 <a class="nav-link" href="{% url 'action' %}" title="Actions">
@@ -114,7 +139,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    <span class="hidden lg:inline">Actions</span>
+                    <span class="hidden lg:inline text-white">Actions</span>
                 </a>
                 {% endif %}
             </div>
@@ -131,8 +156,8 @@
                         <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-indigo-600 font-bold text-sm shadow-md">
                             {{ user.username|slice:":1"|upper }}
                         </div>
-                        <span class="hidden lg:block font-medium">{{ user.username }}</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span class="hidden lg:block font-medium text-white">{{ user.username }}</span>
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
@@ -199,93 +224,113 @@
     <!-- Mobile Menu -->
     <div class="md:hidden hidden" id="mobileMenu">
         <div class="px-2 pt-2 pb-3 space-y-1 bg-indigo-700 shadow-inner">
+            <!-- Core -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider">Core</div>
             <a href="{% url 'home' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                Home
+                <span class="text-white">Home</span>
             </a>
             {% if global_context_is_superuser %}
             <a href="{% url 'admin:index' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                 </svg>
-                Admin
+                <span class="text-white">Admin</span>
             </a>
             {% endif %}
-            <a href="{% url 'acronym' %}" class="mobile-nav-link">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
-                </svg>
-                Acronyms
-            </a>
+
+            <!-- Applications -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider mt-3">Applications</div>
             <a href="{% url 'application' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
                 </svg>
-                Applications
+                <span class="text-white">Applications</span>
             </a>
             <a href="{% url 'application_group' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
-                Application Groups
+                <span class="text-white">Application Groups</span>
             </a>
+
+            <!-- Resources -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider mt-3">Resources</div>
             <a href="{% url 'database' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
                 </svg>
-                Databases
+                <span class="text-white">Databases</span>
             </a>
             <a href="{% url 'dependency' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                 </svg>
-                Dependencies
+                <span class="text-white">Dependencies</span>
+            </a>
+
+            <!-- Documentation -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider mt-3">Documentation</div>
+            <a href="{% url 'acronym' %}" class="mobile-nav-link">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                </svg>
+                <span class="text-white">Acronyms</span>
             </a>
             <a href="{% url 'document' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                Documents
+                <span class="text-white">Documents</span>
             </a>
+
+            <!-- People & Releases -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider mt-3">People & Releases</div>
             <a href="{% url 'person' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                 </svg>
-                People
+                <span class="text-white">People</span>
             </a>
             <a href="{% url 'release' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                 </svg>
-                Releases
+                <span class="text-white">Releases</span>
             </a>
             <a href="{% url 'release_bundle' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
-                Release Bundles
+                <span class="text-white">Release Bundles</span>
             </a>
+
+            <!-- Analytics -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider mt-3">Analytics</div>
             <a href="{% url 'kpi:kpi_dashboard' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                 </svg>
-                KPI Dashboard
+                <span class="text-white">KPI Dashboard</span>
             </a>
+
             {% if global_context_is_superuser %}
+            <!-- Admin Tools -->
+            <div class="px-3 py-2 text-xs font-semibold text-white/60 uppercase tracking-wider mt-3">Admin Tools</div>
             <a href="{% url 'secret' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
-                Secrets
+                <span class="text-white">Secrets</span>
             </a>
             <a href="{% url 'action' %}" class="mobile-nav-link">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                Actions
+                <span class="text-white">Actions</span>
             </a>
             {% endif %}
         </div>
@@ -294,7 +339,7 @@
 
 <style>
     .nav-link {
-        @apply inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all duration-150 text-sm font-medium;
+        @apply inline-flex items-center space-x-2 px-3 py-2 rounded-lg text-white hover:text-white hover:bg-white/10 transition-all duration-150 text-sm font-medium;
     }
     .mobile-nav-link {
         @apply flex items-center space-x-3 px-3 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-colors text-base font-medium;
