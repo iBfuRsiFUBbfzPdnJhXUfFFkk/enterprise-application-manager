@@ -30,6 +30,7 @@ from core.urls.urlpatterns_organization import urlpatterns_organization
 from core.urls.urlpatterns_person import urlpatterns_person
 from core.urls.urlpatterns_policy import urlpatterns_policy
 from core.urls.urlpatterns_profile import urlpatterns_profile
+from core.urls.urlpatterns_project import urlpatterns_project
 from core.urls.urlpatterns_release import urlpatterns_release
 from core.urls.urlpatterns_release_bundle import urlpatterns_release_bundle
 from core.urls.urlpatterns_secret import urlpatterns_secret
@@ -75,6 +76,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_person,
     *urlpatterns_policy,
     *urlpatterns_profile,
+    *urlpatterns_project,
     *urlpatterns_release,
     *urlpatterns_release_bundle,
     *urlpatterns_secret,
