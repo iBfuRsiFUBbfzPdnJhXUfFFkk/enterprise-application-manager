@@ -52,13 +52,13 @@
                             <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ link.name }}</dd>
                         </div>
-                        {% if link.uniform_resource_locator %}
+                        {% if link.url %}
                         <div>
                             <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">URL</dt>
                             <dd class="mt-1">
-                                <a href="{{ link.uniform_resource_locator }}" target="_blank" rel="noopener noreferrer"
+                                <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
                                    class="text-green-600 hover:text-green-800 flex items-center space-x-2">
-                                    <span class="break-all">{{ link.uniform_resource_locator }}</span>
+                                    <span class="break-all">{{ link.url }}</span>
                                     <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                     </svg>

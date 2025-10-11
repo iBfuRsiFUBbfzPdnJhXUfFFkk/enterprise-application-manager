@@ -50,11 +50,11 @@
                                         </div>
                                     </td>
                                     <td class="px-3 py-3 text-sm">
-                                        {% if link.uniform_resource_locator %}
-                                        <a href="{{ link.uniform_resource_locator }}" target="_blank" rel="noopener noreferrer"
+                                        {% if link.url %}
+                                        <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
                                            class="text-green-600 hover:text-green-800 flex items-center space-x-1"
                                            onclick="event.stopPropagation()">
-                                            <span class="truncate" style="max-width: 300px;" title="{{ link.uniform_resource_locator }}">{{ link.uniform_resource_locator }}</span>
+                                            <span class="truncate" style="max-width: 300px;" title="{{ link.url }}">{{ link.url }}</span>
                                             <svg class="h-3 w-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                             </svg>
