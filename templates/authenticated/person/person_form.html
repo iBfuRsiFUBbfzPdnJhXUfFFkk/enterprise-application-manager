@@ -180,9 +180,20 @@
                         <p class="mt-1 text-sm text-gray-500">Address and geographic information</p>
                     </div>
                     <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if google_maps_enabled %}
+                        <div class="md:col-span-2">
+                            <label for="location_search" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Search for an address using Google Maps">
+                                Location Search
+                            </label>
+                            <div id="location_search_container"></div>
+                            <p class="mt-1 text-xs text-gray-500">
+                                Start typing to search for an address. Selecting a location will auto-fill the fields below.
+                            </p>
+                        </div>
+                        {% endif %}
                         <div class="md:col-span-2">
                             <label for="{{ form.location_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Street address line 1">
-                                Address
+                                Address Line 1
                             </label>
                             {{ form.location_address }}
                             {% if form.location_address.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_address.errors.0 }}</p>{% endif %}
@@ -501,11 +512,6 @@
             const employeeOnlySections = document.querySelectorAll('.employee-only-section');
             const humanOnlyFields = document.querySelectorAll('.human-only-field');
 
-            console.log('Found employee field:', isEmployeeField);
-            console.log('Found bot field:', isBotField);
-            console.log('Employee sections:', employeeOnlySections.length);
-            console.log('Human-only fields:', humanOnlyFields.length);
-
             if (!isEmployeeField || !isBotField) {
                 console.error('Required fields not found');
                 return;
@@ -523,8 +529,6 @@
             function toggleSections() {
                 const isEmployee = getFieldValue(isEmployeeField, isEmployeeSelect);
                 const isBot = getFieldValue(isBotField, isBotSelect);
-
-                console.log('Toggling sections - isEmployee:', isEmployee, 'isBot:', isBot);
 
                 // Toggle employee-only sections
                 employeeOnlySections.forEach(section => {
@@ -557,21 +561,50 @@
     <!-- Google Maps Autocomplete -->
     {% if google_maps_enabled %}
     <script src="{% static 'js/google_maps_autocomplete.js' %}"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&libraries=places&callback=initGoogleMapsAutocomplete" async defer></script>
     <script>
         // Initialize Google Maps autocomplete for address fields
         function initGoogleMapsAutocomplete() {
             initializeAddressAutocomplete({
-                addressField: '{{ form.location_address.id_for_label }}',
-                cityField: '{{ form.location_city.id_for_label }}',
-                stateField: '{{ form.location_state_code.id_for_label }}',
-                postalCodeField: '{{ form.location_postal_code.id_for_label }}',
-                countyField: '{{ form.location_county.id_for_label }}',
-                latitudeField: '{{ form.location_latitude.id_for_label }}',
-                longitudeField: '{{ form.location_longitude.id_for_label }}'
+                searchContainerId: 'location_search_container',
+                addressField: '{{ form.location_address.auto_id }}',
+                cityField: '{{ form.location_city.auto_id }}',
+                stateField: '{{ form.location_state_code.auto_id }}',
+                postalCodeField: '{{ form.location_postal_code.auto_id }}',
+                countyField: '{{ form.location_county.auto_id }}',
+                latitudeField: '{{ form.location_latitude.auto_id }}',
+                longitudeField: '{{ form.location_longitude.auto_id }}'
             });
         }
+
+        // Load Google Maps API with async attribute
+        (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[_]/g,""),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+            key: "{{ google_maps_api_key }}",
+            v: "weekly",
+        });
+
+        // Load the Places library and initialize autocomplete
+        async function loadAndInitialize() {
+            try {
+                // Import the places library
+                await google.maps.importLibrary("places");
+                // Import the core library for geocoding if needed
+                await google.maps.importLibrary("core");
+                // Initialize the autocomplete
+                await initGoogleMapsAutocomplete();
+            } catch (error) {
+                console.error("Error loading Google Maps libraries:", error);
+            }
+        }
+
+        // Start loading when the script is ready
+        loadAndInitialize();
     </script>
+    {% else %}
+    <!-- Google Maps autocomplete is not enabled. To enable:
+         1. Create a Secret with your Google Maps API key
+         2. Go to /authenticated/server-configuration/
+         3. Select the Secret in "Google Maps API Key (Secret)" field
+         4. Save the configuration -->
 
     <style>
         /* Google Maps autocomplete indicator */

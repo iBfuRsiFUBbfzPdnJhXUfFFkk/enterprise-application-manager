@@ -37,7 +37,7 @@ class ThisServerConfiguration(
     def google_maps_api_key_decrypted(self) -> str | None:
         """Returns the decrypted Google Maps API key if configured, None otherwise."""
         if self.connection_google_maps_api_key:
-            return self.connection_google_maps_api_key.decrypted_value
+            return self.connection_google_maps_api_key.get_encrypted_value()
         return None
 
     @property

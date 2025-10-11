@@ -5,6 +5,8 @@
  * It automatically populates address, city, state, postal code, county, and coordinates
  * when a user selects a place from the autocomplete dropdown.
  *
+ * Updated to use the modern PlaceAutocompleteElement API (2025)
+ *
  * Usage:
  * 1. Include this script after the Google Maps API script
  * 2. Call initializeAddressAutocomplete() with field IDs
@@ -27,8 +29,10 @@ let autocompleteInstance = null;
 
 /**
  * Initialize Google Maps Places Autocomplete on an address field
+ * Uses the modern PlaceAutocompleteElement or falls back to classic Autocomplete
  * @param {Object} config - Configuration object with field IDs
- * @param {string} config.addressField - ID of the address input field
+ * @param {string} config.searchContainerId - ID of the container where the search input will be placed
+ * @param {string} config.addressField - ID of the address input field (will be populated, not replaced)
  * @param {string} [config.cityField] - ID of the city input field
  * @param {string} [config.stateField] - ID of the state input field
  * @param {string} [config.postalCodeField] - ID of the postal code input field
@@ -36,10 +40,16 @@ let autocompleteInstance = null;
  * @param {string} [config.latitudeField] - ID of the latitude input field
  * @param {string} [config.longitudeField] - ID of the longitude input field
  */
-function initializeAddressAutocomplete(config) {
+async function initializeAddressAutocomplete(config) {
     // Wait for Google Maps API to be available
     if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
         console.warn('Google Maps API not loaded. Autocomplete will not be available.');
+        return;
+    }
+
+    const searchContainer = document.getElementById(config.searchContainerId);
+    if (!searchContainer) {
+        console.error(`Search container with ID "${config.searchContainerId}" not found`);
         return;
     }
 
@@ -49,87 +59,293 @@ function initializeAddressAutocomplete(config) {
         return;
     }
 
-    // Initialize autocomplete
-    autocompleteInstance = new google.maps.places.Autocomplete(addressInput, {
-        types: ['address'],
-        fields: ['address_components', 'geometry', 'formatted_address']
-    });
+    try {
+        // Use the classic Autocomplete widget since PlaceAutocompleteElement events don't work
+        // Create a search input element
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200';
+        searchInput.placeholder = 'Start typing an address...';
+        searchInput.id = 'google_maps_search_input';
 
-    // Add visual indicator that autocomplete is active
-    addressInput.setAttribute('placeholder', 'Start typing address...');
-    addressInput.setAttribute('title', 'Google Maps autocomplete enabled. Start typing to see suggestions.');
+        // Clear container and add search input
+        searchContainer.innerHTML = '';
+        searchContainer.appendChild(searchInput);
 
-    // Add a subtle visual indicator
-    const existingClass = addressInput.className;
-    addressInput.className = existingClass + ' google-autocomplete-enabled';
+        // Create Autocomplete instance
+        const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+            types: ['address'],
+            componentRestrictions: { country: 'us' },
+            fields: ['address_components', 'geometry', 'formatted_address', 'name']
+        });
 
-    // Listen for place selection
-    autocompleteInstance.addListener('place_changed', function() {
-        const place = autocompleteInstance.getPlace();
+        // Listen for place selection
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
 
-        if (!place.address_components) {
-            console.warn('No address components found for selected place');
+            if (!place.geometry || !place.geometry.location) {
+                console.warn('No geometry found for place');
+                return;
+            }
+
+            // Clear all location fields first
+            clearAddressFields(config);
+
+            // Populate the address field (Address Line 1)
+            const streetNumber = getAddressComponent(place.address_components, 'street_number');
+            const route = getAddressComponent(place.address_components, 'route');
+            const addressLine = `${streetNumber} ${route}`.trim() || place.formatted_address?.split(',')[0] || '';
+            addressInput.value = addressLine;
+
+            // Populate city
+            if (config.cityField) {
+                const city = getAddressComponent(place.address_components, 'locality') ||
+                            getAddressComponent(place.address_components, 'sublocality_level_1');
+                const cityField = document.getElementById(config.cityField);
+                if (cityField && city) {
+                    cityField.value = city;
+                }
+            }
+
+            // Populate state
+            if (config.stateField) {
+                const state = getAddressComponent(place.address_components, 'administrative_area_level_1', 'short_name');
+                const stateField = document.getElementById(config.stateField);
+                if (stateField && state) {
+                    stateField.value = state;
+                }
+            }
+
+            // Populate postal code
+            if (config.postalCodeField) {
+                const postalCode = getAddressComponent(place.address_components, 'postal_code');
+                const postalCodeField = document.getElementById(config.postalCodeField);
+                if (postalCodeField && postalCode) {
+                    postalCodeField.value = postalCode;
+                }
+            }
+
+            // Populate county
+            if (config.countyField) {
+                const county = getAddressComponent(place.address_components, 'administrative_area_level_2');
+                const countyField = document.getElementById(config.countyField);
+                if (countyField && county) {
+                    countyField.value = county;
+                }
+            }
+
+            // Populate coordinates
+            if (place.geometry && place.geometry.location) {
+                if (config.latitudeField) {
+                    const latField = document.getElementById(config.latitudeField);
+                    if (latField) {
+                        const lat = place.geometry.location.lat();
+                        latField.value = lat.toFixed(7);
+                    }
+                }
+                if (config.longitudeField) {
+                    const lngField = document.getElementById(config.longitudeField);
+                    if (lngField) {
+                        const lng = place.geometry.location.lng();
+                        lngField.value = lng.toFixed(7);
+                    }
+                }
+            }
+
+            // Trigger change events on all populated fields
+            triggerChangeEvents(config);
+        });
+
+    } catch (error) {
+        // Fall back on error
+        console.error('Error with Autocomplete:', error);
+        initializeFallbackInput(config, searchContainer);
+    }
+}
+
+/**
+ * New handler function for place selection
+ */
+async function handlePlaceSelectionNew(place, config, addressInput) {
+    try {
+        if (!place) {
+            console.warn('No place provided');
             return;
         }
 
-        // Clear all fields first
-        clearAddressFields(config);
-
-        // Parse address components
-        const addressComponents = parseAddressComponents(place.address_components);
-
-        // Populate address field with formatted address
-        if (config.addressField && place.formatted_address) {
-            const addressField = document.getElementById(config.addressField);
-            if (addressField) {
-                // Use street number + route for the address field
-                const streetNumber = addressComponents.street_number || '';
-                const route = addressComponents.route || '';
-                addressField.value = `${streetNumber} ${route}`.trim() || place.formatted_address.split(',')[0];
-            }
+        // Fetch additional place details if needed
+        if (place.fetchFields) {
+            await place.fetchFields({
+                fields: ['displayName', 'formattedAddress', 'addressComponents', 'location']
+            });
         }
 
+        // Clear all location fields first
+        clearAddressFields(config);
+
+        // Populate the address field (Address Line 1)
+        const streetNumber = getAddressComponent(place.addressComponents, 'street_number');
+        const route = getAddressComponent(place.addressComponents, 'route');
+        const addressLine = `${streetNumber} ${route}`.trim() || place.formattedAddress?.split(',')[0] || '';
+        addressInput.value = addressLine;
+
         // Populate city
-        if (config.cityField && addressComponents.locality) {
+        if (config.cityField) {
+            const city = getAddressComponent(place.addressComponents, 'locality') ||
+                        getAddressComponent(place.addressComponents, 'sublocality_level_1');
             const cityField = document.getElementById(config.cityField);
-            if (cityField) cityField.value = addressComponents.locality;
+            if (cityField && city) {
+                cityField.value = city;
+            }
         }
 
         // Populate state
-        if (config.stateField && addressComponents.administrative_area_level_1) {
+        if (config.stateField) {
+            const state = getAddressComponent(place.addressComponents, 'administrative_area_level_1', 'short_name');
             const stateField = document.getElementById(config.stateField);
-            if (stateField) stateField.value = addressComponents.administrative_area_level_1;
+            if (stateField && state) {
+                stateField.value = state;
+            }
         }
 
         // Populate postal code
-        if (config.postalCodeField && addressComponents.postal_code) {
+        if (config.postalCodeField) {
+            const postalCode = getAddressComponent(place.addressComponents, 'postal_code');
             const postalCodeField = document.getElementById(config.postalCodeField);
-            if (postalCodeField) postalCodeField.value = addressComponents.postal_code;
+            if (postalCodeField && postalCode) {
+                postalCodeField.value = postalCode;
+            }
         }
 
         // Populate county
-        if (config.countyField && addressComponents.administrative_area_level_2) {
+        if (config.countyField) {
+            const county = getAddressComponent(place.addressComponents, 'administrative_area_level_2');
             const countyField = document.getElementById(config.countyField);
-            if (countyField) countyField.value = addressComponents.administrative_area_level_2;
+            if (countyField && county) {
+                countyField.value = county;
+            }
         }
 
         // Populate coordinates
-        if (place.geometry && place.geometry.location) {
+        if (place.location) {
             if (config.latitudeField) {
                 const latField = document.getElementById(config.latitudeField);
-                if (latField) latField.value = place.geometry.location.lat().toFixed(7);
+                if (latField && place.location.lat) {
+                    latField.value = (typeof place.location.lat === 'function' ? place.location.lat() : place.location.lat).toFixed(7);
+                }
             }
             if (config.longitudeField) {
                 const lngField = document.getElementById(config.longitudeField);
-                if (lngField) lngField.value = place.geometry.location.lng().toFixed(7);
+                if (lngField && place.location.lng) {
+                    lngField.value = (typeof place.location.lng === 'function' ? place.location.lng() : place.location.lng).toFixed(7);
+                }
             }
         }
 
         // Trigger change events on all populated fields
         triggerChangeEvents(config);
-    });
 
-    console.log('Google Maps autocomplete initialized successfully');
+    } catch (error) {
+        console.error('Error in handlePlaceSelectionNew:', error);
+    }
+}
+
+/**
+ * Helper function to extract address component by type
+ */
+function getAddressComponent(addressComponents, type, nameType = 'long_name') {
+    if (!addressComponents || !Array.isArray(addressComponents)) return '';
+
+    for (const component of addressComponents) {
+        if (component.types && component.types.includes(type)) {
+            return component[nameType] || component.longText || component.shortText || '';
+        }
+    }
+    return '';
+}
+
+/**
+ * Fallback for when PlaceAutocompleteElement is not available
+ * Creates a simple text input with instructions
+ */
+function initializeFallbackInput(config, searchContainer) {
+    // Display a message in the search container
+    searchContainer.innerHTML = '<p class="text-sm text-gray-500">Google Maps autocomplete is not available in your browser. Please enter your address manually in the fields below.</p>';
+
+    console.warn('PlaceAutocompleteElement not available. Manual address entry required.');
+}
+
+/**
+ * Handle place selection and populate form fields
+ */
+function handlePlaceSelection(place, config, isModernAPI) {
+    // Handle different API response structures
+    const addressComponents = isModernAPI ? place.addressComponents : place.address_components;
+    const location = isModernAPI ? place.location : (place.geometry ? place.geometry.location : null);
+
+    if (!addressComponents) {
+        console.warn('No address components found for selected place');
+        return;
+    }
+
+    // Clear all fields first
+    clearAddressFields(config);
+
+    // Parse address components
+    const parsedComponents = parseAddressComponents(addressComponents);
+
+    // Populate address field with formatted address
+    if (config.addressField && (place.formattedAddress || place.formatted_address)) {
+        const addressField = document.getElementById(config.addressField);
+        if (addressField && !addressField.style.display) { // Only update if not hidden
+            // Use street number + route for the address field
+            const streetNumber = parsedComponents.street_number || '';
+            const route = parsedComponents.route || '';
+            const formattedAddr = place.formattedAddress || place.formatted_address;
+            addressField.value = `${streetNumber} ${route}`.trim() || formattedAddr.split(',')[0];
+        }
+    }
+
+    // Populate city
+    if (config.cityField && parsedComponents.locality) {
+        const cityField = document.getElementById(config.cityField);
+        if (cityField) cityField.value = parsedComponents.locality;
+    }
+
+    // Populate state
+    if (config.stateField && parsedComponents.administrative_area_level_1) {
+        const stateField = document.getElementById(config.stateField);
+        if (stateField) stateField.value = parsedComponents.administrative_area_level_1;
+    }
+
+    // Populate postal code
+    if (config.postalCodeField && parsedComponents.postal_code) {
+        const postalCodeField = document.getElementById(config.postalCodeField);
+        if (postalCodeField) postalCodeField.value = parsedComponents.postal_code;
+    }
+
+    // Populate county
+    if (config.countyField && parsedComponents.administrative_area_level_2) {
+        const countyField = document.getElementById(config.countyField);
+        if (countyField) countyField.value = parsedComponents.administrative_area_level_2;
+    }
+
+    // Populate coordinates
+    if (location) {
+        if (config.latitudeField) {
+            const latField = document.getElementById(config.latitudeField);
+            const lat = typeof location.lat === 'function' ? location.lat() : location.lat;
+            if (latField && lat) latField.value = lat.toFixed(7);
+        }
+        if (config.longitudeField) {
+            const lngField = document.getElementById(config.longitudeField);
+            const lng = typeof location.lng === 'function' ? location.lng() : location.lng;
+            if (lngField && lng) lngField.value = lng.toFixed(7);
+        }
+    }
+
+    // Trigger change events on all populated fields
+    triggerChangeEvents(config);
 }
 
 /**
