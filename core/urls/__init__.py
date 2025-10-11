@@ -33,8 +33,23 @@ from core.urls.urlpatterns_profile import urlpatterns_profile
 from core.urls.urlpatterns_project import urlpatterns_project
 from core.urls.urlpatterns_release import urlpatterns_release
 from core.urls.urlpatterns_release_bundle import urlpatterns_release_bundle
+from core.urls.urlpatterns_report import urlpatterns_report
+from core.urls.urlpatterns_requirement import urlpatterns_requirement
+from core.urls.urlpatterns_risk import urlpatterns_risk
+from core.urls.urlpatterns_role import urlpatterns_role
 from core.urls.urlpatterns_secret import urlpatterns_secret
+from core.urls.urlpatterns_server import urlpatterns_server
 from core.urls.urlpatterns_server_configuration import urlpatterns_server_configuration
+from core.urls.urlpatterns_service_provider import urlpatterns_service_provider
+from core.urls.urlpatterns_service_provider_security_requirements_document import urlpatterns_service_provider_security_requirements_document
+from core.urls.urlpatterns_skill import urlpatterns_skill
+from core.urls.urlpatterns_software_bill_of_material import urlpatterns_software_bill_of_material
+from core.urls.urlpatterns_sprint import urlpatterns_sprint
+from core.urls.urlpatterns_task import urlpatterns_task
+from core.urls.urlpatterns_team import urlpatterns_team
+from core.urls.urlpatterns_term import urlpatterns_term
+from core.urls.urlpatterns_tool import urlpatterns_tool
+from core.urls.urlpatterns_vulnerability import urlpatterns_vulnerability
 from core.urls.urlpatterns_settings import urlpatterns_settings
 from core.urls.urlpatterns_this_api import urlpatterns_this_api
 from core.views import home_view
@@ -79,10 +94,25 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_project,
     *urlpatterns_release,
     *urlpatterns_release_bundle,
+    *urlpatterns_report,
+    *urlpatterns_requirement,
+    *urlpatterns_risk,
+    *urlpatterns_role,
     *urlpatterns_secret,
+    *urlpatterns_server,
     *urlpatterns_server_configuration,
+    *urlpatterns_service_provider,
+    *urlpatterns_service_provider_security_requirements_document,
     *urlpatterns_settings,
+    *urlpatterns_skill,
+    *urlpatterns_software_bill_of_material,
+    *urlpatterns_sprint,
+    *urlpatterns_task,
+    *urlpatterns_team,
+    *urlpatterns_term,
     *urlpatterns_this_api,
+    *urlpatterns_tool,
+    *urlpatterns_vulnerability,
     path(name="kpi", route='kpi/', view=include(arg=(urlpatterns_kpi, 'kpi'), namespace="kpi")),
     *urlpatterns_api
 ]

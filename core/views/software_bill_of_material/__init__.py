@@ -1,0 +1,13 @@
+from core.views.software_bill_of_material.software_bill_of_material_add_view import software_bill_of_material_add_view
+from core.views.software_bill_of_material.software_bill_of_material_delete_view import software_bill_of_material_delete_view
+from core.views.software_bill_of_material.software_bill_of_material_detail_view import software_bill_of_material_detail_view
+from core.views.software_bill_of_material.software_bill_of_material_edit_view import software_bill_of_material_edit_view
+from core.views.software_bill_of_material.software_bill_of_material_view import software_bill_of_material_view
+
+__all__ = [
+    'software_bill_of_material_add_view',
+    'software_bill_of_material_delete_view',
+    'software_bill_of_material_detail_view',
+    'software_bill_of_material_edit_view',
+    'software_bill_of_material_view',
+]
