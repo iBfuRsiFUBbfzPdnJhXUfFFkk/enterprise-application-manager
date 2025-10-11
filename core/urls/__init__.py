@@ -23,6 +23,7 @@ from core.urls.urlpatterns_incident import urlpatterns_incident
 from core.urls.urlpatterns_job_level import urlpatterns_job_level
 from core.urls.urlpatterns_job_title import urlpatterns_job_title
 from core.urls.urlpatterns_link import urlpatterns_link
+from core.urls.urlpatterns_onboard_procedure import urlpatterns_onboard_procedure
 from core.urls.urlpatterns_login import urlpatterns_login
 from core.urls.urlpatterns_logout import urlpatterns_logout
 from core.urls.urlpatterns_person import urlpatterns_person
@@ -66,6 +67,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_job_level,
     *urlpatterns_job_title,
     *urlpatterns_link,
+    *urlpatterns_onboard_procedure,
     *urlpatterns_logout,
     *urlpatterns_person,
     *urlpatterns_profile,
