@@ -13,7 +13,7 @@
                 </a>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Link</h1>
-                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update link details{% else %}Add a new link or resource{% endif %}</p>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update link details{% else %}Add a new link to the system{% endif %}</p>
                 </div>
             </div>
         </div>
@@ -25,40 +25,30 @@
             {% csrf_token %}
 
             <div class="space-y-6">
-                <!-- Link Information -->
+                <!-- Basic Information -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Link Information</h2>
-                        <p class="mt-1 text-sm text-gray-500">Basic details about the link</p>
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Core details about the link</p>
                     </div>
                     <div class="px-6 py-6 grid grid-cols-1 gap-6">
                         <div>
-                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Descriptive name for the link">
-                                Name <span class="text-red-600">*</span>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The descriptive name of the link">
+                                Name {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
                             {{ form.name }}
                             {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
                             <label for="{{ form.url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Full URL of the resource">
-                                URL <span class="text-red-600">*</span>
+                                URL {% if form.url.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
                             {{ form.url }}
                             {% if form.url.errors %}<p class="mt-2 text-sm text-red-600">{{ form.url.errors.0 }}</p>{% endif %}
                         </div>
-                    </div>
-                </div>
-
-                <!-- Additional Information -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Additional Information</h2>
-                        <p class="mt-1 text-sm text-gray-500">Link description and notes</p>
-                    </div>
-                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
                         <div>
-                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Additional notes or description">
-                                Comment
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Additional notes, description, or comments about this link">
+                                Comment {% if form.comment.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
                             {{ form.comment }}
                             <p class="mt-1 text-xs text-gray-500">
@@ -73,14 +63,14 @@
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
                         <a href="{% url 'link' %}"
-                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-150">
                             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                             Cancel
                         </a>
                         <button type="submit"
-                                class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                                class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-150">
                             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
@@ -127,9 +117,22 @@
         select:focus {
             color: #1f2937;
             background-color: #ffffff;
-            border-color: #3b82f6;
+            border-color: #0891b2;
             outline: 0;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        }
+
+        input[type="text"]:disabled,
+        input[type="email"]:disabled,
+        input[type="number"]:disabled,
+        input[type="url"]:disabled,
+        input[type="date"]:disabled,
+        input[type="datetime-local"]:disabled,
+        input[type="password"]:disabled,
+        textarea:disabled,
+        select:disabled {
+            background-color: #f3f4f6;
+            opacity: 1;
         }
 
         textarea {
@@ -137,6 +140,28 @@
             resize: vertical;
         }
 
+        input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            color: #0891b2;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"]:focus {
+            border-color: #0891b2;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #0891b2;
+            border-color: #0891b2;
+        }
+
+        /* Placeholder styling */
         input::placeholder,
         textarea::placeholder {
             color: #9ca3af;

@@ -1,162 +1,133 @@
 {% extends 'authenticated/base_authenticated.html' %}
-{% load static %}
 {% load templatetags_markdown %}
+{% load humanize %}
 
 {% block content %}
-<div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
-    <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <a href="{% url 'link' %}" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <div class="flex items-center">
+                    <a href="{% url 'link' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                         </svg>
                     </a>
-                    <div class="flex items-center space-x-3">
-                        <div class="flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-                            <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-3xl font-bold text-gray-900">{{ link.name }}</h1>
-                            <p class="text-sm text-gray-500">Link Details</p>
-                        </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ link.name|default:"Link" }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">Link Details</p>
                     </div>
                 </div>
-                <a href="{% url 'link_edit' model_id=link.id %}"
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    Edit
-                </a>
+                <div class="flex gap-3">
+                    <a href="{% url 'link_edit' model_id=link.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                    <button onclick="confirmDelete()"
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Content -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Basic Information -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
-                    </div>
-                    <div class="px-6 py-6 space-y-4">
+    <!-- Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="space-y-6">
+            <!-- Basic Information -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 gap-6">
                         <div>
-                            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Name</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ link.name }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
+                            <dd class="text-lg text-gray-900">{{ link.name|default:"-" }}</dd>
                         </div>
                         {% if link.url %}
                         <div>
-                            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">URL</dt>
-                            <dd class="mt-1">
+                            <dt class="text-sm font-medium text-gray-500 mb-1">URL</dt>
+                            <dd class="text-base">
                                 <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
-                                   class="text-green-600 hover:text-green-800 flex items-center space-x-2">
-                                    <span class="break-all">{{ link.url }}</span>
-                                    <svg class="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                   class="text-cyan-600 hover:text-cyan-800 flex items-center space-x-2 break-all">
+                                    <span>{{ link.url }}</span>
+                                    <svg class="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                     </svg>
                                 </a>
                             </dd>
                         </div>
                         {% endif %}
-                    </div>
-                </div>
-
-                <!-- Description -->
-                {% if link.comment %}
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Description</h2>
-                    </div>
-                    <div class="px-6 py-6 prose max-w-none">
-                        {{ link.comment|markdown }}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- History -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Change History</h2>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                {% for record in historical_records %}
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ record.history_date|date:"M j, Y g:i A" }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ record.history_user|default:"System" }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        {% if record.history_type == '+' %}
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            Created
-                                        </span>
-                                        {% elif record.history_type == '~' %}
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                            Updated
-                                        </span>
-                                        {% elif record.history_type == '-' %}
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                            Deleted
-                                        </span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
-                                        No history available
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                    </dl>
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="space-y-6">
-                <!-- Metadata -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+            <!-- Description/Comment Section -->
+            {% if link.comment %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Description</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose max-w-none">
+                        {{ link.comment|markdown }}
                     </div>
-                    <div class="px-6 py-4 space-y-3">
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if created_record %}
                         <div>
-                            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Created</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ link.datetime_created|date:"M j, Y g:i A" }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
+                                {% if created_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
+                                {% endif %}
+                            </dd>
                         </div>
+                        {% endif %}
+                        {% if updated_record %}
                         <div>
-                            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ link.datetime_updated|date:"M j, Y g:i A" }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
+                                {% if updated_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
+                                {% endif %}
+                            </dd>
                         </div>
+                        {% endif %}
                         <div>
-                            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">ID</dt>
-                            <dd class="mt-1 text-sm font-mono text-gray-900">{{ link.id }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
+                            <dd class="text-base text-gray-900 font-mono">{{ link.id }}</dd>
                         </div>
-                    </div>
+                    </dl>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+    <script>
+        function confirmDelete() {
+            if (confirm('Are you sure you want to delete this link?\n\nLink: {{ link.name|escapejs }}\n\nThis action cannot be undone.')) {
+                window.location.href = "{% url 'link' %}delete/{{ link.id }}/";
+            }
+        }
+    </script>
 {% endblock %}

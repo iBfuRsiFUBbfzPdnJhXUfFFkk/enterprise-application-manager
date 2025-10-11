@@ -1,46 +1,190 @@
 {%extends 'authenticated/base_authenticated.html' %}
+{%load static %}
 
-{% block title %}{% if form.instance.pk %}Edit ServiceProviderSecurityRequirementsDocument{% else %}New ServiceProviderSecurityRequirementsDocument{% endif %}{% endblock %}
-
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="mb-8">
-        <a href="{% url 'service_provider_security_requirements_document' %}" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4">
-            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            Back to Service Provider Security Requirements Documents
-        </a>
-        <h1 class="text-3xl font-bold text-gray-900 flex items-center space-x-3">
-            <svg class="h-8 w-8 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
-            <span>{% if form.instance.pk %}Edit ServiceProviderSecurityRequirementsDocument{% else %}New ServiceProviderSecurityRequirementsDocument{% endif %}</span>
-        </h1>
+{%block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{%url 'service_provider_security_requirements_document' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{%if form.instance.pk %}Edit{%else %}Create{%endif %} Service Provider Security Requirements Document</h1>
+                    <p class="mt-1 text-sm text-gray-500">{%if form.instance.pk %}Update service provider security requirements document details{%else %}Add a new service provider security requirements document to the system{%endif %}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Form -->
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <form method="post" class="p-6">
-            {% csrf_token %}
-            {{ form.as_p }}
+    <!-- Form Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST">
+            {%csrf_token %}
 
-            <!-- Form Actions -->
-            <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <a href="{% url 'service_provider_security_requirements_document' %}"
-                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fuchsia-500">
-                    Cancel
-                </a>
-                <button type="submit"
-                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-fuchsia-600 hover:bg-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fuchsia-500">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    {% if form.instance.pk %}Update ServiceProviderSecurityRequirementsDocument{% else %}Create ServiceProviderSecurityRequirementsDocument{% endif %}
-                </button>
+            <div class="space-y-6">
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Core details about the service provider security requirements document</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Document name">
+                                Name <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.name }}
+                            {%if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{%endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Document description and notes">
+                                Comment 
+                            </label>
+                            {{ form.comment }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+                            </p>
+                            {%if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{%endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.applications.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Related applications">
+                                Applications 
+                            </label>
+                            {{ form.applications }}
+                            {%if form.applications.errors %}<p class="mt-2 text-sm text-red-600">{{ form.applications.errors.0 }}</p>{%endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.clients.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Related clients">
+                                Clients 
+                            </label>
+                            {{ form.clients }}
+                            {%if form.clients.errors %}<p class="mt-2 text-sm text-red-600">{{ form.clients.errors.0 }}</p>{%endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.requirements.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Security requirements">
+                                Requirements 
+                            </label>
+                            {{ form.requirements }}
+                            {%if form.requirements.errors %}<p class="mt-2 text-sm text-red-600">{{ form.requirements.errors.0 }}</p>{%endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                        <a href="{%url 'service_provider_security_requirements_document' %}"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fuchsia-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-fuchsia-600 hover:bg-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fuchsia-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            {%if form.instance.pk %}Update Service Provider Security Requirements Document{%else %}Create Service Provider Security Requirements Document{%endif %}
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
-</div>
-{% endblock %}
+
+    <style>
+        /* Style Django form fields with Tailwind */
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="url"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="password"],
+        textarea,
+        select {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #1f2937;
+            background-color: #ffffff;
+            background-clip: padding-box;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        input[type="url"]:focus,
+        input[type="date"]:focus,
+        input[type="datetime-local"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
+            color: #1f2937;
+            background-color: #ffffff;
+            border-color: #d946ef;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(217, 70, 239, 0.1);
+        }
+
+        input[type="text"]:disabled,
+        input[type="email"]:disabled,
+        input[type="number"]:disabled,
+        input[type="url"]:disabled,
+        input[type="date"]:disabled,
+        input[type="datetime-local"]:disabled,
+        input[type="password"]:disabled,
+        textarea:disabled,
+        select:disabled {
+            background-color: #f3f4f6;
+            opacity: 1;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            color: #d946ef;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"]:focus {
+            border-color: #d946ef;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(217, 70, 239, 0.1);
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #d946ef;
+            border-color: #d946ef;
+        }
+
+        /* Placeholder styling */
+        input::placeholder,
+        textarea::placeholder {
+            color: #9ca3af;
+            opacity: 1;
+        }
+
+        /* Multi-select styling */
+        select[multiple] {
+            min-height: 120px;
+        }
+    </style>
+{%endblock %}
