@@ -26,6 +26,7 @@ from core.urls.urlpatterns_link import urlpatterns_link
 from core.urls.urlpatterns_onboard_procedure import urlpatterns_onboard_procedure
 from core.urls.urlpatterns_login import urlpatterns_login
 from core.urls.urlpatterns_logout import urlpatterns_logout
+from core.urls.urlpatterns_organization import urlpatterns_organization
 from core.urls.urlpatterns_person import urlpatterns_person
 from core.urls.urlpatterns_profile import urlpatterns_profile
 from core.urls.urlpatterns_release import urlpatterns_release
@@ -69,6 +70,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_link,
     *urlpatterns_onboard_procedure,
     *urlpatterns_logout,
+    *urlpatterns_organization,
     *urlpatterns_person,
     *urlpatterns_profile,
     *urlpatterns_release,
