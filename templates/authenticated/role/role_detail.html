@@ -102,6 +102,57 @@
                 </div>
             </div>
 
+            <!-- Description/Comment Section -->
+            {%if role.comment %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Description</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose max-w-none">
+                        {{ role.comment|markdown }}
+                    </div>
+                </div>
+            </div>
+            {%endif %}
+
+            <!-- Metadata -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {%if created_record %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
+                                {%if created_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
+                                {%endif %}
+                            </dd>
+                        </div>
+                        {%endif %}
+                        {%if updated_record %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
+                                {%if updated_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
+                                {%endif %}
+                            </dd>
+                        </div>
+                        {%endif %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
+                            <dd class="text-base text-gray-900 font-mono">{{ role.id }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
             <!-- People with this Role -->
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -190,57 +241,6 @@
                     <p class="mt-1 text-sm text-gray-500">No one currently has this role assigned to them.</p>
                 </div>
                 {%endif %}
-            </div>
-
-            <!-- Description/Comment Section -->
-            {%if role.comment %}
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Description</h2>
-                </div>
-                <div class="px-6 py-6">
-                    <div class="prose max-w-none">
-                        {{ role.comment|markdown }}
-                    </div>
-                </div>
-            </div>
-            {%endif %}
-
-            <!-- Metadata -->
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
-                </div>
-                <div class="px-6 py-6">
-                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {%if created_record %}
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
-                            <dd class="text-base text-gray-900">
-                                <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
-                                {%if created_record.history_user %}
-                                    <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
-                                {%endif %}
-                            </dd>
-                        </div>
-                        {%endif %}
-                        {%if updated_record %}
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
-                            <dd class="text-base text-gray-900">
-                                <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
-                                {%if updated_record.history_user %}
-                                    <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
-                                {%endif %}
-                            </dd>
-                        </div>
-                        {%endif %}
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
-                            <dd class="text-base text-gray-900 font-mono">{{ role.id }}</dd>
-                        </div>
-                    </dl>
-                </div>
             </div>
         </div>
     </div>
