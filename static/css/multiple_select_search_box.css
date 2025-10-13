@@ -55,23 +55,12 @@
 }
 
 /* Search input field */
-/* Higher specificity to override inline form styles */
-input.chip-search-input,
-input[type="text"].chip-search-input {
-    border: none !important;
+.chip-search-input {
+    border: none;
     outline: none;
     width: 100%;
-    padding: 0.25rem !important;
+    padding: 0.25rem;
     font-size: 0.875rem;
-    box-shadow: none !important;
-    background-color: transparent !important;
-}
-
-input.chip-search-input:focus,
-input[type="text"].chip-search-input:focus {
-    border: none !important;
-    outline: none;
-    box-shadow: none !important;
 }
 
 /* Dropdown container */
