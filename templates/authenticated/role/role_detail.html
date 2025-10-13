@@ -88,22 +88,16 @@
                     <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
-                            <dd class="text-lg text-gray-900">{{ role_name|default:"-" }}</dd>
+                            <dd class="text-lg text-gray-900">{{ role.name|default:"-" }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">Acronym</dt>
-                            <dd class="text-lg text-gray-900">{{ role_acronym|default:"-" }}</dd>
+                            <dd class="text-lg text-gray-900">{{ role.acronym|default:"-" }}</dd>
                         </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">Alias</dt>
-                            <dd class="text-lg text-gray-900">{{ role_alias|default:"-" }}</dd>
+                        <div class="md:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Aliases</dt>
+                            <dd class="text-lg text-gray-900">{{ role.aliases_csv|default:"-" }}</dd>
                         </div>
-                        {%if role.acronym %}
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">Acronym</dt>
-                            <dd class="text-lg font-semibold text-gray-900">{{ role.acronym }}</dd>
-                        </div>
-                        {%endif %}
                     </dl>
                 </div>
             </div>
