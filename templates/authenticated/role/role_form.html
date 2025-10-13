@@ -41,17 +41,20 @@
                         </div>
                         <div>
                             <label for="{{ form.acronym.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Short abbreviation for the role">
-                                Acronym 
+                                Acronym
                             </label>
                             {{ form.acronym }}
                             {%if form.acronym.errors %}<p class="mt-2 text-sm text-red-600">{{ form.acronym.errors.0 }}</p>{%endif %}
                         </div>
-                        <div>
-                            <label for="{{ form.alias.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Alternative name for the role">
-                                Alias 
+                        <div class="md:col-span-2">
+                            <label for="{{ form.aliases_csv.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Alternative names for the role (comma-separated)">
+                                Aliases
                             </label>
-                            {{ form.alias }}
-                            {%if form.alias.errors %}<p class="mt-2 text-sm text-red-600">{{ form.alias.errors.0 }}</p>{%endif %}
+                            {{ form.aliases_csv }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Enter multiple aliases separated by commas (e.g., "Tech Lead, Development Lead, Lead Engineer")
+                            </p>
+                            {%if form.aliases_csv.errors %}<p class="mt-2 text-sm text-red-600">{{ form.aliases_csv.errors.0 }}</p>{%endif %}
                         </div>
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Role description and responsibilities">
