@@ -366,6 +366,94 @@
                     </div>
                 </div>
 
+                <!-- Applications (Stakeholder) - Employee Only, Stakeholder Only -->
+                <div class="bg-white shadow-md rounded-lg overflow-visible employee-only-section stakeholder-only-section">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Applications (Stakeholder)</h2>
+                        <p class="mt-1 text-sm text-gray-500">Applications where this person is a stakeholder</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="applications_stakeholder_search" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications where this person is a stakeholder">
+                                Stakeholder Applications
+                            </label>
+
+                            <!-- Search input and dropdown -->
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    id="applications_stakeholder_search"
+                                    placeholder="Search applications..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    autocomplete="off"
+                                />
+                                <div id="applications_stakeholder_dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                    <!-- Dropdown items will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Selected chips container -->
+                            <div id="applications_stakeholder_chips" class="mt-3 flex flex-wrap gap-2">
+                                <!-- Selected chips will be populated by JavaScript -->
+                            </div>
+
+                            <!-- Hidden checkboxes (keep original form field hidden) -->
+                            <div class="hidden">
+                                {{ form.applications_stakeholder_of }}
+                            </div>
+
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search and select multiple applications
+                            </p>
+                            {% if form.applications_stakeholder_of.errors %}<p class="mt-2 text-sm text-red-600">{{ form.applications_stakeholder_of.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Applications (Developer) - Employee Only, Developer/Lead Developer Only -->
+                <div class="bg-white shadow-md rounded-lg overflow-visible employee-only-section developer-only-section">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Applications (Developer)</h2>
+                        <p class="mt-1 text-sm text-gray-500">Applications where this person is a developer</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="applications_developer_search" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications where this person is a developer">
+                                Developer Applications
+                            </label>
+
+                            <!-- Search input and dropdown -->
+                            <div class="relative">
+                                <input
+                                    type="text"
+                                    id="applications_developer_search"
+                                    placeholder="Search applications..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    autocomplete="off"
+                                />
+                                <div id="applications_developer_dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                    <!-- Dropdown items will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Selected chips container -->
+                            <div id="applications_developer_chips" class="mt-3 flex flex-wrap gap-2">
+                                <!-- Selected chips will be populated by JavaScript -->
+                            </div>
+
+                            <!-- Hidden checkboxes (keep original form field hidden) -->
+                            <div class="hidden">
+                                {{ form.applications_developer_of }}
+                            </div>
+
+                            <p class="mt-1 text-xs text-gray-500">
+                                Type to search and select multiple applications
+                            </p>
+                            {% if form.applications_developer_of.errors %}<p class="mt-2 text-sm text-red-600">{{ form.applications_developer_of.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Links -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -482,21 +570,121 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
+        input[type="checkbox"]:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+
         input::placeholder,
         textarea::placeholder {
             color: #9ca3af;
             opacity: 1;
         }
 
-        /* Employee-only and human-only sections visibility */
+        /* Chip/tag styling for checkbox lists */
+        #id_applications_stakeholder_of,
+        #id_roles,
+        #id_skills,
+        #id_application_groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+            padding: 0;
+        }
+
+        #id_applications_stakeholder_of li,
+        #id_roles li,
+        #id_skills li,
+        #id_application_groups li {
+            list-style: none;
+            margin: 0;
+        }
+
+        #id_applications_stakeholder_of label,
+        #id_roles label,
+        #id_skills label,
+        #id_application_groups label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        #id_applications_stakeholder_of label:hover,
+        #id_roles label:hover,
+        #id_skills label:hover,
+        #id_application_groups label:hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        #id_applications_stakeholder_of input[type="checkbox"]:checked + label,
+        #id_roles input[type="checkbox"]:checked + label,
+        #id_skills input[type="checkbox"]:checked + label,
+        #id_application_groups input[type="checkbox"]:checked + label {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        #id_applications_stakeholder_of input[type="checkbox"],
+        #id_roles input[type="checkbox"],
+        #id_skills input[type="checkbox"],
+        #id_application_groups input[type="checkbox"] {
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Employee-only, human-only, stakeholder-only, and developer-only sections visibility */
         .employee-only-section,
-        .human-only-field {
+        .human-only-field,
+        .stakeholder-only-section,
+        .developer-only-section {
             transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
         }
 
         .employee-only-section.hidden,
-        .human-only-field.hidden {
+        .human-only-field.hidden,
+        .stakeholder-only-section.hidden,
+        .developer-only-section.hidden {
             display: none;
+        }
+
+        /* Chip selector styles */
+        .application-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.375rem 0.75rem;
+            background-color: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1e40af;
+        }
+
+        .application-chip button {
+            margin-left: 0.5rem;
+            color: #1e40af;
+            hover:color: #1e3a8a;
+            cursor: pointer;
+        }
+
+        #applications_dropdown div {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        #applications_dropdown div:hover {
+            background-color: #f3f4f6;
         }
     </style>
 
@@ -506,11 +694,16 @@
             let isEmployeeField = document.querySelector('input[name="is_employee"]') || document.querySelector('select[name="is_employee"]');
             let isBotField = document.querySelector('input[name="is_bot"]') || document.querySelector('select[name="is_bot"]');
 
+            // Roles field uses CheckboxSelectMultiple, so we need to find all checkboxes with name="roles"
+            let rolesCheckboxes = document.querySelectorAll('input[name="roles"]');
+
             const isEmployeeSelect = isEmployeeField && isEmployeeField.tagName === 'SELECT';
             const isBotSelect = isBotField && isBotField.tagName === 'SELECT';
 
             const employeeOnlySections = document.querySelectorAll('.employee-only-section');
             const humanOnlyFields = document.querySelectorAll('.human-only-field');
+            const stakeholderOnlySections = document.querySelectorAll('.stakeholder-only-section');
+            const developerOnlySections = document.querySelectorAll('.developer-only-section');
 
             if (!isEmployeeField || !isBotField) {
                 console.error('Required fields not found');
@@ -526,9 +719,43 @@
                 }
             }
 
+            function isStakeholderSelected() {
+                if (!rolesCheckboxes || rolesCheckboxes.length === 0) return false;
+
+                // Check if any role checkbox with "Stakeholder" label is checked
+                for (let checkbox of rolesCheckboxes) {
+                    if (checkbox.checked) {
+                        // Find the associated label
+                        const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                        if (label && label.textContent.includes('Stakeholder')) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function isDeveloperSelected() {
+                if (!rolesCheckboxes || rolesCheckboxes.length === 0) return false;
+
+                // Check if any role checkbox with "Developer" or "Lead Developer" label is checked
+                for (let checkbox of rolesCheckboxes) {
+                    if (checkbox.checked) {
+                        // Find the associated label
+                        const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                        if (label && (label.textContent.includes('Developer') || label.textContent.includes('Lead Developer'))) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
             function toggleSections() {
                 const isEmployee = getFieldValue(isEmployeeField, isEmployeeSelect);
                 const isBot = getFieldValue(isBotField, isBotSelect);
+                const isStakeholder = isStakeholderSelected();
+                const isDeveloper = isDeveloperSelected();
 
                 // Toggle employee-only sections
                 employeeOnlySections.forEach(section => {
@@ -547,6 +774,24 @@
                         field.classList.remove('hidden');
                     }
                 });
+
+                // Toggle stakeholder-only sections (visible if employee AND stakeholder)
+                stakeholderOnlySections.forEach(section => {
+                    if (isEmployee && isStakeholder) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+
+                // Toggle developer-only sections (visible if employee AND developer)
+                developerOnlySections.forEach(section => {
+                    if (isEmployee && isDeveloper) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
             }
 
             // Initialize on page load
@@ -555,6 +800,233 @@
             // Toggle when fields change
             isEmployeeField.addEventListener('change', toggleSections);
             isBotField.addEventListener('change', toggleSections);
+
+            // Add change listeners to all role checkboxes
+            rolesCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', toggleSections);
+            });
+
+            // === Stakeholder Application Chip Selector ===
+            const stakeholderSearchInput = document.getElementById('applications_stakeholder_search');
+            const stakeholderDropdown = document.getElementById('applications_stakeholder_dropdown');
+            const stakeholderChipsContainer = document.getElementById('applications_stakeholder_chips');
+            const stakeholderCheckboxContainer = document.getElementById('id_applications_stakeholder_of');
+
+            if (stakeholderSearchInput && stakeholderDropdown && stakeholderChipsContainer && stakeholderCheckboxContainer) {
+                // Build applications list from checkboxes
+                const stakeholderApplications = [];
+                const stakeholderCheckboxes = stakeholderCheckboxContainer.querySelectorAll('input[type="checkbox"]');
+                stakeholderCheckboxes.forEach(checkbox => {
+                    const label = stakeholderCheckboxContainer.querySelector(`label[for="${checkbox.id}"]`);
+                    if (label) {
+                        stakeholderApplications.push({
+                            id: checkbox.value,
+                            name: label.textContent.trim(),
+                            checkbox: checkbox
+                        });
+                    }
+                });
+
+                // Render selected chips
+                function renderStakeholderChips() {
+                    stakeholderChipsContainer.innerHTML = '';
+                    stakeholderApplications.forEach(app => {
+                        if (app.checkbox.checked) {
+                            const chip = document.createElement('div');
+                            chip.className = 'application-chip';
+                            chip.innerHTML = `
+                                ${app.name}
+                                <button type="button" data-id="${app.id}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            `;
+                            stakeholderChipsContainer.appendChild(chip);
+
+                            // Add remove handler
+                            chip.querySelector('button').addEventListener('click', function() {
+                                const id = this.getAttribute('data-id');
+                                const app = stakeholderApplications.find(a => a.id === id);
+                                if (app) {
+                                    app.checkbox.checked = false;
+                                    renderStakeholderChips();
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Filter and show dropdown
+                function showStakeholderDropdown(searchTerm) {
+                    const filtered = stakeholderApplications.filter(app =>
+                        app.name.toLowerCase().includes(searchTerm.toLowerCase()) && !app.checkbox.checked
+                    );
+
+                    if (filtered.length === 0) {
+                        stakeholderDropdown.classList.add('hidden');
+                        return;
+                    }
+
+                    stakeholderDropdown.innerHTML = '';
+                    filtered.forEach(app => {
+                        const item = document.createElement('div');
+                        item.textContent = app.name;
+                        item.setAttribute('data-id', app.id);
+                        item.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            const selectedApp = stakeholderApplications.find(a => a.id === id);
+                            if (selectedApp) {
+                                selectedApp.checkbox.checked = true;
+                                renderStakeholderChips();
+                                stakeholderSearchInput.value = '';
+                                stakeholderDropdown.classList.add('hidden');
+                            }
+                        });
+                        stakeholderDropdown.appendChild(item);
+                    });
+
+                    stakeholderDropdown.classList.remove('hidden');
+                }
+
+                // Search input handler
+                stakeholderSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.trim();
+                    if (searchTerm.length > 0) {
+                        showStakeholderDropdown(searchTerm);
+                    } else {
+                        stakeholderDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Focus handler
+                stakeholderSearchInput.addEventListener('focus', function() {
+                    if (this.value.trim().length > 0) {
+                        showStakeholderDropdown(this.value.trim());
+                    }
+                });
+
+                // Click outside handler
+                document.addEventListener('click', function(e) {
+                    if (!stakeholderSearchInput.contains(e.target) && !stakeholderDropdown.contains(e.target)) {
+                        stakeholderDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Initialize chips from pre-selected checkboxes
+                renderStakeholderChips();
+            }
+
+            // === Developer Application Chip Selector ===
+            const developerSearchInput = document.getElementById('applications_developer_search');
+            const developerDropdown = document.getElementById('applications_developer_dropdown');
+            const developerChipsContainer = document.getElementById('applications_developer_chips');
+            const developerCheckboxContainer = document.getElementById('id_applications_developer_of');
+
+            if (developerSearchInput && developerDropdown && developerChipsContainer && developerCheckboxContainer) {
+                // Build applications list from checkboxes
+                const developerApplications = [];
+                const developerCheckboxes = developerCheckboxContainer.querySelectorAll('input[type="checkbox"]');
+                developerCheckboxes.forEach(checkbox => {
+                    const label = developerCheckboxContainer.querySelector(`label[for="${checkbox.id}"]`);
+                    if (label) {
+                        developerApplications.push({
+                            id: checkbox.value,
+                            name: label.textContent.trim(),
+                            checkbox: checkbox
+                        });
+                    }
+                });
+
+                // Render selected chips
+                function renderDeveloperChips() {
+                    developerChipsContainer.innerHTML = '';
+                    developerApplications.forEach(app => {
+                        if (app.checkbox.checked) {
+                            const chip = document.createElement('div');
+                            chip.className = 'application-chip';
+                            chip.innerHTML = `
+                                ${app.name}
+                                <button type="button" data-id="${app.id}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                </button>
+                            `;
+                            developerChipsContainer.appendChild(chip);
+
+                            // Add remove handler
+                            chip.querySelector('button').addEventListener('click', function() {
+                                const id = this.getAttribute('data-id');
+                                const app = developerApplications.find(a => a.id === id);
+                                if (app) {
+                                    app.checkbox.checked = false;
+                                    renderDeveloperChips();
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Filter and show dropdown
+                function showDeveloperDropdown(searchTerm) {
+                    const filtered = developerApplications.filter(app =>
+                        app.name.toLowerCase().includes(searchTerm.toLowerCase()) && !app.checkbox.checked
+                    );
+
+                    if (filtered.length === 0) {
+                        developerDropdown.classList.add('hidden');
+                        return;
+                    }
+
+                    developerDropdown.innerHTML = '';
+                    filtered.forEach(app => {
+                        const item = document.createElement('div');
+                        item.textContent = app.name;
+                        item.setAttribute('data-id', app.id);
+                        item.addEventListener('click', function() {
+                            const id = this.getAttribute('data-id');
+                            const selectedApp = developerApplications.find(a => a.id === id);
+                            if (selectedApp) {
+                                selectedApp.checkbox.checked = true;
+                                renderDeveloperChips();
+                                developerSearchInput.value = '';
+                                developerDropdown.classList.add('hidden');
+                            }
+                        });
+                        developerDropdown.appendChild(item);
+                    });
+
+                    developerDropdown.classList.remove('hidden');
+                }
+
+                // Search input handler
+                developerSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.trim();
+                    if (searchTerm.length > 0) {
+                        showDeveloperDropdown(searchTerm);
+                    } else {
+                        developerDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Focus handler
+                developerSearchInput.addEventListener('focus', function() {
+                    if (this.value.trim().length > 0) {
+                        showDeveloperDropdown(this.value.trim());
+                    }
+                });
+
+                // Click outside handler
+                document.addEventListener('click', function(e) {
+                    if (!developerSearchInput.contains(e.target) && !developerDropdown.contains(e.target)) {
+                        developerDropdown.classList.add('hidden');
+                    }
+                });
+
+                // Initialize chips from pre-selected checkboxes
+                renderDeveloperChips();
+            }
         });
     </script>
 
