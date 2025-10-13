@@ -9,6 +9,7 @@ def role_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     try:
         role = Role.objects.get(id=model_id)
         historical_records = role.history.all()
+        people = role.people_who_hold_this_role.all()
     except Role.DoesNotExist:
         return generic_500(request=request)
 
@@ -18,5 +19,6 @@ def role_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
         context={
             'role': role,
             'historical_records': historical_records,
+            'people': people,
         }
     )
