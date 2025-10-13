@@ -493,16 +493,15 @@
 
     <style>
         /* Style Django form fields with Tailwind */
-        /* Exclude chip-search-input from these styles as it has its own styling */
-        input[type="text"]:not(.chip-search-input),
-        input[type="email"]:not(.chip-search-input),
-        input[type="number"]:not(.chip-search-input),
-        input[type="url"]:not(.chip-search-input),
-        input[type="date"]:not(.chip-search-input),
-        input[type="datetime-local"]:not(.chip-search-input),
-        input[type="password"]:not(.chip-search-input),
-        textarea:not(.chip-search-input),
-        select:not(.chip-search-input) {
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        input[type="url"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="password"],
+        textarea,
+        select {
             display: block;
             width: 100%;
             padding: 0.5rem 0.75rem;
@@ -516,15 +515,15 @@
             transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
 
-        input[type="text"]:not(.chip-search-input):focus,
-        input[type="email"]:not(.chip-search-input):focus,
-        input[type="number"]:not(.chip-search-input):focus,
-        input[type="url"]:not(.chip-search-input):focus,
-        input[type="date"]:not(.chip-search-input):focus,
-        input[type="datetime-local"]:not(.chip-search-input):focus,
-        input[type="password"]:not(.chip-search-input):focus,
-        textarea:not(.chip-search-input):focus,
-        select:not(.chip-search-input):focus {
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="number"]:focus,
+        input[type="url"]:focus,
+        input[type="date"]:focus,
+        input[type="datetime-local"]:focus,
+        input[type="password"]:focus,
+        textarea:focus,
+        select:focus {
             color: #1f2937;
             background-color: #ffffff;
             border-color: #3b82f6;
