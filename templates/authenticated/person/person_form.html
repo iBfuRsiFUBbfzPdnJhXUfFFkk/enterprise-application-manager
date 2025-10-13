@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block content %}
+    <!-- Multiple Select Search Box Component Styles -->
+    <link rel="stylesheet" href="{% static 'css/multiple_select_search_box.css' %}">
+
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -374,36 +377,28 @@
                     </div>
                     <div class="px-6 py-6 grid grid-cols-1 gap-6">
                         <div>
-                            <label for="applications_stakeholder_search" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications where this person is a stakeholder">
+                            <label for="{{ form.applications_stakeholder_of.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications where this person is a stakeholder">
                                 Stakeholder Applications
                             </label>
 
-                            <!-- Search input and dropdown -->
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    id="applications_stakeholder_search"
-                                    placeholder="Search applications..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    autocomplete="off"
-                                />
-                                <div id="applications_stakeholder_dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                                    <!-- Dropdown items will be populated by JavaScript -->
-                                </div>
+                            <!-- Custom searchable multi-select container -->
+                            <div class="searchable-select-container">
+                                <div class="selected-chips" id="applications_stakeholder_chips"></div>
+                                <input type="text"
+                                       class="chip-search-input"
+                                       id="applications_stakeholder_search"
+                                       placeholder="Search applications..."
+                                       autocomplete="off">
+                                <div class="search-dropdown hidden" id="applications_stakeholder_dropdown"></div>
                             </div>
 
-                            <!-- Selected chips container -->
-                            <div id="applications_stakeholder_chips" class="mt-3 flex flex-wrap gap-2">
-                                <!-- Selected chips will be populated by JavaScript -->
-                            </div>
-
-                            <!-- Hidden checkboxes (keep original form field hidden) -->
+                            <!-- Hidden native select -->
                             <div class="hidden">
                                 {{ form.applications_stakeholder_of }}
                             </div>
 
                             <p class="mt-1 text-xs text-gray-500">
-                                Type to search and select multiple applications
+                                Type to search, click to add. Click the × on a chip to remove it.
                             </p>
                             {% if form.applications_stakeholder_of.errors %}<p class="mt-2 text-sm text-red-600">{{ form.applications_stakeholder_of.errors.0 }}</p>{% endif %}
                         </div>
@@ -418,36 +413,28 @@
                     </div>
                     <div class="px-6 py-6 grid grid-cols-1 gap-6">
                         <div>
-                            <label for="applications_developer_search" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications where this person is a developer">
+                            <label for="{{ form.applications_developer_of.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Applications where this person is a developer">
                                 Developer Applications
                             </label>
 
-                            <!-- Search input and dropdown -->
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    id="applications_developer_search"
-                                    placeholder="Search applications..."
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    autocomplete="off"
-                                />
-                                <div id="applications_developer_dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                                    <!-- Dropdown items will be populated by JavaScript -->
-                                </div>
+                            <!-- Custom searchable multi-select container -->
+                            <div class="searchable-select-container">
+                                <div class="selected-chips" id="applications_developer_chips"></div>
+                                <input type="text"
+                                       class="chip-search-input"
+                                       id="applications_developer_search"
+                                       placeholder="Search applications..."
+                                       autocomplete="off">
+                                <div class="search-dropdown hidden" id="applications_developer_dropdown"></div>
                             </div>
 
-                            <!-- Selected chips container -->
-                            <div id="applications_developer_chips" class="mt-3 flex flex-wrap gap-2">
-                                <!-- Selected chips will be populated by JavaScript -->
-                            </div>
-
-                            <!-- Hidden checkboxes (keep original form field hidden) -->
+                            <!-- Hidden native select -->
                             <div class="hidden">
                                 {{ form.applications_developer_of }}
                             </div>
 
                             <p class="mt-1 text-xs text-gray-500">
-                                Type to search and select multiple applications
+                                Type to search, click to add. Click the × on a chip to remove it.
                             </p>
                             {% if form.applications_developer_of.errors %}<p class="mt-2 text-sm text-red-600">{{ form.applications_developer_of.errors.0 }}</p>{% endif %}
                         </div>
@@ -751,11 +738,17 @@
                 return false;
             }
 
+            // Store render functions to call when sections become visible
+            let renderStakeholderChipsFunc = null;
+            let renderDeveloperChipsFunc = null;
+
             function toggleSections() {
                 const isEmployee = getFieldValue(isEmployeeField, isEmployeeSelect);
                 const isBot = getFieldValue(isBotField, isBotSelect);
                 const isStakeholder = isStakeholderSelected();
                 const isDeveloper = isDeveloperSelected();
+
+                console.log('Toggle sections:', { isEmployee, isBot, isStakeholder, isDeveloper });
 
                 // Toggle employee-only sections
                 employeeOnlySections.forEach(section => {
@@ -776,6 +769,7 @@
                 });
 
                 // Toggle stakeholder-only sections (visible if employee AND stakeholder)
+                const wasStakeholderHidden = stakeholderOnlySections.length > 0 && stakeholderOnlySections[0].classList.contains('hidden');
                 stakeholderOnlySections.forEach(section => {
                     if (isEmployee && isStakeholder) {
                         section.classList.remove('hidden');
@@ -783,8 +777,14 @@
                         section.classList.add('hidden');
                     }
                 });
+                // Re-render chips if section just became visible
+                if (wasStakeholderHidden && isEmployee && isStakeholder && renderStakeholderChipsFunc) {
+                    console.log('Stakeholder section became visible - re-rendering chips');
+                    renderStakeholderChipsFunc();
+                }
 
                 // Toggle developer-only sections (visible if employee AND developer)
+                const wasDeveloperHidden = developerOnlySections.length > 0 && developerOnlySections[0].classList.contains('hidden');
                 developerOnlySections.forEach(section => {
                     if (isEmployee && isDeveloper) {
                         section.classList.remove('hidden');
@@ -792,6 +792,11 @@
                         section.classList.add('hidden');
                     }
                 });
+                // Re-render chips if section just became visible
+                if (wasDeveloperHidden && isEmployee && isDeveloper && renderDeveloperChipsFunc) {
+                    console.log('Developer section became visible - re-rendering chips');
+                    renderDeveloperChipsFunc();
+                }
             }
 
             // Initialize on page load
@@ -806,229 +811,30 @@
                 checkbox.addEventListener('change', toggleSections);
             });
 
-            // === Stakeholder Application Chip Selector ===
-            const stakeholderSearchInput = document.getElementById('applications_stakeholder_search');
-            const stakeholderDropdown = document.getElementById('applications_stakeholder_dropdown');
-            const stakeholderChipsContainer = document.getElementById('applications_stakeholder_chips');
-            const stakeholderCheckboxContainer = document.getElementById('id_applications_stakeholder_of');
-
-            if (stakeholderSearchInput && stakeholderDropdown && stakeholderChipsContainer && stakeholderCheckboxContainer) {
-                // Build applications list from checkboxes
-                const stakeholderApplications = [];
-                const stakeholderCheckboxes = stakeholderCheckboxContainer.querySelectorAll('input[type="checkbox"]');
-                stakeholderCheckboxes.forEach(checkbox => {
-                    const label = stakeholderCheckboxContainer.querySelector(`label[for="${checkbox.id}"]`);
-                    if (label) {
-                        stakeholderApplications.push({
-                            id: checkbox.value,
-                            name: label.textContent.trim(),
-                            checkbox: checkbox
-                        });
-                    }
-                });
-
-                // Render selected chips
-                function renderStakeholderChips() {
-                    stakeholderChipsContainer.innerHTML = '';
-                    stakeholderApplications.forEach(app => {
-                        if (app.checkbox.checked) {
-                            const chip = document.createElement('div');
-                            chip.className = 'application-chip';
-                            chip.innerHTML = `
-                                ${app.name}
-                                <button type="button" data-id="${app.id}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            `;
-                            stakeholderChipsContainer.appendChild(chip);
-
-                            // Add remove handler
-                            chip.querySelector('button').addEventListener('click', function() {
-                                const id = this.getAttribute('data-id');
-                                const app = stakeholderApplications.find(a => a.id === id);
-                                if (app) {
-                                    app.checkbox.checked = false;
-                                    renderStakeholderChips();
-                                }
-                            });
-                        }
-                    });
+            // Initialize multiple select search boxes
+            initializeMultipleSelectSearchBoxes([
+                {
+                    selectId: 'id_applications_stakeholder_of',
+                    searchInputId: 'applications_stakeholder_search',
+                    chipsContainerId: 'applications_stakeholder_chips',
+                    dropdownId: 'applications_stakeholder_dropdown',
+                    placeholder: 'Search applications...',
+                    emptyMessage: 'No applications found'
+                },
+                {
+                    selectId: 'id_applications_developer_of',
+                    searchInputId: 'applications_developer_search',
+                    chipsContainerId: 'applications_developer_chips',
+                    dropdownId: 'applications_developer_dropdown',
+                    placeholder: 'Search applications...',
+                    emptyMessage: 'No applications found'
                 }
-
-                // Filter and show dropdown
-                function showStakeholderDropdown(searchTerm) {
-                    const filtered = stakeholderApplications.filter(app =>
-                        app.name.toLowerCase().includes(searchTerm.toLowerCase()) && !app.checkbox.checked
-                    );
-
-                    if (filtered.length === 0) {
-                        stakeholderDropdown.classList.add('hidden');
-                        return;
-                    }
-
-                    stakeholderDropdown.innerHTML = '';
-                    filtered.forEach(app => {
-                        const item = document.createElement('div');
-                        item.textContent = app.name;
-                        item.setAttribute('data-id', app.id);
-                        item.addEventListener('click', function() {
-                            const id = this.getAttribute('data-id');
-                            const selectedApp = stakeholderApplications.find(a => a.id === id);
-                            if (selectedApp) {
-                                selectedApp.checkbox.checked = true;
-                                renderStakeholderChips();
-                                stakeholderSearchInput.value = '';
-                                stakeholderDropdown.classList.add('hidden');
-                            }
-                        });
-                        stakeholderDropdown.appendChild(item);
-                    });
-
-                    stakeholderDropdown.classList.remove('hidden');
-                }
-
-                // Search input handler
-                stakeholderSearchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.trim();
-                    if (searchTerm.length > 0) {
-                        showStakeholderDropdown(searchTerm);
-                    } else {
-                        stakeholderDropdown.classList.add('hidden');
-                    }
-                });
-
-                // Focus handler
-                stakeholderSearchInput.addEventListener('focus', function() {
-                    if (this.value.trim().length > 0) {
-                        showStakeholderDropdown(this.value.trim());
-                    }
-                });
-
-                // Click outside handler
-                document.addEventListener('click', function(e) {
-                    if (!stakeholderSearchInput.contains(e.target) && !stakeholderDropdown.contains(e.target)) {
-                        stakeholderDropdown.classList.add('hidden');
-                    }
-                });
-
-                // Initialize chips from pre-selected checkboxes
-                renderStakeholderChips();
-            }
-
-            // === Developer Application Chip Selector ===
-            const developerSearchInput = document.getElementById('applications_developer_search');
-            const developerDropdown = document.getElementById('applications_developer_dropdown');
-            const developerChipsContainer = document.getElementById('applications_developer_chips');
-            const developerCheckboxContainer = document.getElementById('id_applications_developer_of');
-
-            if (developerSearchInput && developerDropdown && developerChipsContainer && developerCheckboxContainer) {
-                // Build applications list from checkboxes
-                const developerApplications = [];
-                const developerCheckboxes = developerCheckboxContainer.querySelectorAll('input[type="checkbox"]');
-                developerCheckboxes.forEach(checkbox => {
-                    const label = developerCheckboxContainer.querySelector(`label[for="${checkbox.id}"]`);
-                    if (label) {
-                        developerApplications.push({
-                            id: checkbox.value,
-                            name: label.textContent.trim(),
-                            checkbox: checkbox
-                        });
-                    }
-                });
-
-                // Render selected chips
-                function renderDeveloperChips() {
-                    developerChipsContainer.innerHTML = '';
-                    developerApplications.forEach(app => {
-                        if (app.checkbox.checked) {
-                            const chip = document.createElement('div');
-                            chip.className = 'application-chip';
-                            chip.innerHTML = `
-                                ${app.name}
-                                <button type="button" data-id="${app.id}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            `;
-                            developerChipsContainer.appendChild(chip);
-
-                            // Add remove handler
-                            chip.querySelector('button').addEventListener('click', function() {
-                                const id = this.getAttribute('data-id');
-                                const app = developerApplications.find(a => a.id === id);
-                                if (app) {
-                                    app.checkbox.checked = false;
-                                    renderDeveloperChips();
-                                }
-                            });
-                        }
-                    });
-                }
-
-                // Filter and show dropdown
-                function showDeveloperDropdown(searchTerm) {
-                    const filtered = developerApplications.filter(app =>
-                        app.name.toLowerCase().includes(searchTerm.toLowerCase()) && !app.checkbox.checked
-                    );
-
-                    if (filtered.length === 0) {
-                        developerDropdown.classList.add('hidden');
-                        return;
-                    }
-
-                    developerDropdown.innerHTML = '';
-                    filtered.forEach(app => {
-                        const item = document.createElement('div');
-                        item.textContent = app.name;
-                        item.setAttribute('data-id', app.id);
-                        item.addEventListener('click', function() {
-                            const id = this.getAttribute('data-id');
-                            const selectedApp = developerApplications.find(a => a.id === id);
-                            if (selectedApp) {
-                                selectedApp.checkbox.checked = true;
-                                renderDeveloperChips();
-                                developerSearchInput.value = '';
-                                developerDropdown.classList.add('hidden');
-                            }
-                        });
-                        developerDropdown.appendChild(item);
-                    });
-
-                    developerDropdown.classList.remove('hidden');
-                }
-
-                // Search input handler
-                developerSearchInput.addEventListener('input', function() {
-                    const searchTerm = this.value.trim();
-                    if (searchTerm.length > 0) {
-                        showDeveloperDropdown(searchTerm);
-                    } else {
-                        developerDropdown.classList.add('hidden');
-                    }
-                });
-
-                // Focus handler
-                developerSearchInput.addEventListener('focus', function() {
-                    if (this.value.trim().length > 0) {
-                        showDeveloperDropdown(this.value.trim());
-                    }
-                });
-
-                // Click outside handler
-                document.addEventListener('click', function(e) {
-                    if (!developerSearchInput.contains(e.target) && !developerDropdown.contains(e.target)) {
-                        developerDropdown.classList.add('hidden');
-                    }
-                });
-
-                // Initialize chips from pre-selected checkboxes
-                renderDeveloperChips();
-            }
+            ]);
         });
     </script>
+
+    <!-- Multiple Select Search Box Component -->
+    <script src="{% static 'js/multiple_select_search_box.js' %}"></script>
 
     <!-- Google Maps Autocomplete -->
     {% if google_maps_enabled %}
