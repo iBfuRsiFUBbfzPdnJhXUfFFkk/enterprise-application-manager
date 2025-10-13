@@ -1,6 +1,10 @@
 {%extends 'authenticated/base_authenticated.html' %}
 {%load static %}
 
+{%block extra_head %}
+    <link rel="stylesheet" href="{%static 'css/multiple_select_search_box.css' %}">
+{%endblock %}
+
 {%block content %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
@@ -65,6 +69,39 @@
                                 Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
                             </p>
                             {%if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{%endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- People with this Role -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">People with this Role</h2>
+                        <p class="mt-1 text-sm text-gray-500">Assign people to this role</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div>
+                            <label for="people_search" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Search and select people to assign this role">
+                                People
+                            </label>
+                            <div class="searchable-select-container">
+                                <div class="selected-chips" id="people_chips"></div>
+                                <input type="text"
+                                       class="chip-search-input"
+                                       id="people_search"
+                                       placeholder="Search people..."
+                                       autocomplete="off">
+                                <div class="search-dropdown hidden" id="people_dropdown"></div>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">
+                                Search and select people to assign them this role
+                            </p>
+                            {%if form.people.errors %}<p class="mt-2 text-sm text-red-600">{{ form.people.errors.0 }}</p>{%endif %}
+                        </div>
+
+                        <!-- Hidden native select for form submission -->
+                        <div class="hidden">
+                            {{ form.people }}
                         </div>
                     </div>
                 </div>
@@ -182,5 +219,27 @@
         select[multiple] {
             min-height: 120px;
         }
+
+        /* Hide the native select for people field */
+        .hidden {
+            display: none;
+        }
     </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize multiple select search box for people
+            initializeMultipleSelectSearchBox({
+                selectId: 'id_people',
+                searchInputId: 'people_search',
+                chipsContainerId: 'people_chips',
+                dropdownId: 'people_dropdown',
+                placeholder: 'Search people...',
+                emptyMessage: 'No people found'
+            });
+        });
+    </script>
+
+    <!-- Multiple Select Search Box Component -->
+    <script src="{%static 'js/multiple_select_search_box.js' %}"></script>
 {%endblock %}
