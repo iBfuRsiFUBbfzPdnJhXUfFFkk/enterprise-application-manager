@@ -4,6 +4,10 @@ from django.urls import URLPattern, URLResolver, path, include
 
 from core.urls.urlpatterns_acronym import urlpatterns_acronym
 from core.urls.urlpatterns_action import urlpatterns_action
+from core.urls.urlpatterns_ai_governance import urlpatterns_ai_governance
+from core.urls.urlpatterns_ai_hallucination import urlpatterns_ai_hallucination
+from core.urls.urlpatterns_ai_use_case import urlpatterns_ai_use_case
+from core.urls.urlpatterns_ai_vendor import urlpatterns_ai_vendor
 from core.urls.urlpatterns_api import urlpatterns_api
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
@@ -68,6 +72,10 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
 
     *urlpatterns_acronym,
     *urlpatterns_action,
+    *urlpatterns_ai_governance,
+    *urlpatterns_ai_hallucination,
+    *urlpatterns_ai_use_case,
+    *urlpatterns_ai_vendor,
     *urlpatterns_application,
     *urlpatterns_application_group,
     *urlpatterns_billing_code,
