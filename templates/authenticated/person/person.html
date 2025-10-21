@@ -153,6 +153,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Level</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Title</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Time</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Links</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -164,6 +165,7 @@
                             data-lastname="{{ model.coerced_name_last|lower }}"
                             data-level="{{ model.type_job_level|default:''|lower }}"
                             data-title="{{ model.type_job_title|default:''|lower }}"
+                            data-timezone="{{ model.type_timezone|default:'' }}"
                             ondblclick='window.location.href = "{% url 'person_detail' model_id=model.id %}"'>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ model.coerced_name_last }}</div>
@@ -182,6 +184,18 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div class="text-sm text-gray-500">{{ model.type_job_title|default:"—" }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="text-sm text-gray-700">
+                                    <span class="person-time" data-timezone="{{ model.type_timezone|default:'' }}">
+                                        {% if model.type_timezone %}
+                                        <span class="time-display">--:--</span>
+                                        <span class="text-xs text-gray-500 ml-1">({{ model.type_timezone }})</span>
+                                        {% else %}
+                                        <span class="text-gray-400 italic">Not Set</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-center">
                                 <div class="flex justify-center space-x-2">
@@ -290,7 +304,55 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial filter
     filterPeople();
+
+    // Initialize and update times
+    updateAllTimes();
+    // Update times every minute
+    setInterval(updateAllTimes, 60000);
 });
+
+// Timezone mapping from abbreviations to IANA timezone identifiers
+const timezoneMap = {
+    'AKST': 'America/Anchorage',      // Alaska Standard Time
+    'AST': 'America/Phoenix',          // Arizona Standard Time (no DST)
+    'CST': 'America/Chicago',          // Central Standard Time
+    'EST': 'America/New_York',         // Eastern Standard Time
+    'HST': 'Pacific/Honolulu',         // Hawaii Standard Time
+    'MST': 'America/Denver',           // Mountain Standard Time
+    'PST': 'America/Los_Angeles'       // Pacific Standard Time
+};
+
+function updateAllTimes() {
+    const timeElements = document.querySelectorAll('.person-time');
+
+    timeElements.forEach(element => {
+        const timezoneCode = element.dataset.timezone;
+        if (!timezoneCode) return;
+
+        const timeDisplay = element.querySelector('.time-display');
+        if (!timeDisplay) return;
+
+        const ianaTimezone = timezoneMap[timezoneCode];
+        if (!ianaTimezone) {
+            timeDisplay.textContent = 'Unknown TZ';
+            return;
+        }
+
+        try {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                timeZone: ianaTimezone,
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            timeDisplay.textContent = timeString;
+        } catch (error) {
+            console.error('Error formatting time for timezone:', timezoneCode, error);
+            timeDisplay.textContent = 'Error';
+        }
+    });
+}
 
 function setView(view) {
     currentView = view;
