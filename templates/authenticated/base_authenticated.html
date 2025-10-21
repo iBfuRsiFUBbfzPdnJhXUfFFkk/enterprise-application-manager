@@ -170,16 +170,98 @@
 </head>
 <body class="bg-gray-50">
 {% include 'authenticated/base_authenticated_navigation.html' %}
-<main class="min-h-screen">
+<main class="min-h-screen pb-8">
     {% block content %}
     {% endblock %}
 </main>
+
+<!-- Compact US Timezone Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg border-t border-slate-700 z-50">
+    <div class="max-w-full px-4 py-1.5">
+        <div class="flex justify-center items-center space-x-6 text-xs">
+            <div class="timezone-display flex items-center space-x-1.5" data-tz="HST">
+                <span class="font-semibold text-slate-300">HI:</span>
+                <span class="timezone-time font-mono text-white">--:--</span>
+            </div>
+            <div class="text-slate-600">|</div>
+            <div class="timezone-display flex items-center space-x-1.5" data-tz="PST">
+                <span class="font-semibold text-slate-300">PT:</span>
+                <span class="timezone-time font-mono text-white">--:--</span>
+            </div>
+            <div class="text-slate-600">|</div>
+            <div class="timezone-display flex items-center space-x-1.5" data-tz="MST">
+                <span class="font-semibold text-slate-300">MT:</span>
+                <span class="timezone-time font-mono text-white">--:--</span>
+            </div>
+            <div class="text-slate-600">|</div>
+            <div class="timezone-display flex items-center space-x-1.5" data-tz="CST">
+                <span class="font-semibold text-slate-300">CT:</span>
+                <span class="timezone-time font-mono text-white">--:--</span>
+            </div>
+            <div class="text-slate-600">|</div>
+            <div class="timezone-display flex items-center space-x-1.5" data-tz="EST">
+                <span class="font-semibold text-slate-300">ET:</span>
+                <span class="timezone-time font-mono text-white">--:--</span>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 <!-- Prism.js Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<!-- Global Timezone Bar Script -->
+<script type="text/javascript">
+// Timezone mapping from abbreviations to IANA timezone identifiers
+const timezoneMap = {
+    'HST': 'Pacific/Honolulu',         // Hawaii Standard Time
+    'PST': 'America/Los_Angeles',      // Pacific Standard Time
+    'MST': 'America/Denver',           // Mountain Standard Time
+    'CST': 'America/Chicago',          // Central Standard Time
+    'EST': 'America/New_York'          // Eastern Standard Time
+};
+
+function updateTimezoneBar() {
+    const timezoneDisplays = document.querySelectorAll('.timezone-display');
+
+    timezoneDisplays.forEach(display => {
+        const timezoneCode = display.dataset.tz;
+        if (!timezoneCode) return;
+
+        const timeElement = display.querySelector('.timezone-time');
+        if (!timeElement) return;
+
+        const ianaTimezone = timezoneMap[timezoneCode];
+        if (!ianaTimezone) {
+            timeElement.textContent = 'Error';
+            return;
+        }
+
+        try {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                timeZone: ianaTimezone,
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            timeElement.textContent = timeString;
+        } catch (error) {
+            console.error('Error formatting time for timezone bar:', timezoneCode, error);
+            timeElement.textContent = 'Error';
+        }
+    });
+}
+
+// Initialize immediately when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    updateTimezoneBar();
+    // Update every second for real-time display
+    setInterval(updateTimezoneBar, 1000);
+});
+</script>
 {% block scripts %}
     <script type="text/javascript">
     </script>

@@ -21,7 +21,7 @@
     </div>
 
     <!-- Search and Filters -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <!-- Search -->
@@ -248,39 +248,6 @@
             <p class="mt-1 text-sm text-gray-500">Try adjusting your search or filters</p>
         </div>
     </div>
-
-    <!-- US Timezone Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg border-t-2 border-blue-800 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex justify-between items-center">
-                <div class="flex-1 text-center timezone-display" data-tz="HST">
-                    <div class="text-xs font-semibold text-blue-100 uppercase tracking-wider mb-1">Hawaii</div>
-                    <div class="text-lg font-bold text-white timezone-time">--:-- --</div>
-                    <div class="text-xs text-blue-200">HST</div>
-                </div>
-                <div class="flex-1 text-center timezone-display" data-tz="PST">
-                    <div class="text-xs font-semibold text-blue-100 uppercase tracking-wider mb-1">Pacific</div>
-                    <div class="text-lg font-bold text-white timezone-time">--:-- --</div>
-                    <div class="text-xs text-blue-200">PST</div>
-                </div>
-                <div class="flex-1 text-center timezone-display" data-tz="MST">
-                    <div class="text-xs font-semibold text-blue-100 uppercase tracking-wider mb-1">Mountain</div>
-                    <div class="text-lg font-bold text-white timezone-time">--:-- --</div>
-                    <div class="text-xs text-blue-200">MST</div>
-                </div>
-                <div class="flex-1 text-center timezone-display" data-tz="CST">
-                    <div class="text-xs font-semibold text-blue-100 uppercase tracking-wider mb-1">Central</div>
-                    <div class="text-lg font-bold text-white timezone-time">--:-- --</div>
-                    <div class="text-xs text-blue-200">CST</div>
-                </div>
-                <div class="flex-1 text-center timezone-display" data-tz="EST">
-                    <div class="text-xs font-semibold text-blue-100 uppercase tracking-wider mb-1">Eastern</div>
-                    <div class="text-lg font-bold text-white timezone-time">--:-- --</div>
-                    <div class="text-xs text-blue-200">EST</div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
@@ -338,18 +305,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial filter
     filterPeople();
 
-    // Initialize and update times
+    // Initialize and update person times in table
     updateAllTimes();
-    updateTimezoneBar();
     // Update times every minute
-    setInterval(() => {
-        updateAllTimes();
-        updateTimezoneBar();
-    }, 60000);
+    setInterval(updateAllTimes, 60000);
 });
 
-// Timezone mapping from abbreviations to IANA timezone identifiers
-const timezoneMap = {
+// Person-specific timezone mapping (includes additional zones not in global bar)
+const personTimezoneMap = {
     'AKST': 'America/Anchorage',      // Alaska Standard Time
     'AST': 'America/Phoenix',          // Arizona Standard Time (no DST)
     'CST': 'America/Chicago',          // Central Standard Time
@@ -369,7 +332,7 @@ function updateAllTimes() {
         const timeDisplay = element.querySelector('.time-display');
         if (!timeDisplay) return;
 
-        const ianaTimezone = timezoneMap[timezoneCode];
+        const ianaTimezone = personTimezoneMap[timezoneCode];
         if (!ianaTimezone) {
             timeDisplay.textContent = 'Unknown TZ';
             return;
@@ -387,38 +350,6 @@ function updateAllTimes() {
         } catch (error) {
             console.error('Error formatting time for timezone:', timezoneCode, error);
             timeDisplay.textContent = 'Error';
-        }
-    });
-}
-
-function updateTimezoneBar() {
-    const timezoneDisplays = document.querySelectorAll('.timezone-display');
-
-    timezoneDisplays.forEach(display => {
-        const timezoneCode = display.dataset.tz;
-        if (!timezoneCode) return;
-
-        const timeElement = display.querySelector('.timezone-time');
-        if (!timeElement) return;
-
-        const ianaTimezone = timezoneMap[timezoneCode];
-        if (!ianaTimezone) {
-            timeElement.textContent = 'Unknown TZ';
-            return;
-        }
-
-        try {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {
-                timeZone: ianaTimezone,
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
-            timeElement.textContent = timeString;
-        } catch (error) {
-            console.error('Error formatting time for timezone bar:', timezoneCode, error);
-            timeElement.textContent = 'Error';
         }
     });
 }
