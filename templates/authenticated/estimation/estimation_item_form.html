@@ -59,6 +59,49 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Estimation Metadata</h3>
+                        <p class="text-sm text-gray-500 mb-4">Complexity, priority, and uncertainty information</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.cone_of_uncertainty.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Cone of Uncertainty {% if form.cone_of_uncertainty.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {{ form.cone_of_uncertainty }}
+                                <p class="mt-1 text-xs text-gray-500">Project phase - indicates typical estimate accuracy range</p>
+                                {% if form.cone_of_uncertainty.errors %}<p class="mt-2 text-sm text-red-600">{{ form.cone_of_uncertainty.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.uncertainty_padding_factor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Uncertainty Padding Factor {% if form.uncertainty_padding_factor.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {{ form.uncertainty_padding_factor }}
+                                <p class="mt-1 text-xs text-gray-500">Multiplier for additional padding (1.0 = no padding, 1.5 = 50% padding)</p>
+                                {% if form.uncertainty_padding_factor.errors %}<p class="mt-2 text-sm text-red-600">{{ form.uncertainty_padding_factor.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.complexity_level.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Complexity Level {% if form.complexity_level.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {{ form.complexity_level }}
+                                <p class="mt-1 text-xs text-gray-500">Technical complexity of this item</p>
+                                {% if form.complexity_level.errors %}<p class="mt-2 text-sm text-red-600">{{ form.complexity_level.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Priority {% if form.priority.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {{ form.priority }}
+                                <p class="mt-1 text-xs text-gray-500">Importance/urgency of this item</p>
+                                {% if form.priority.errors %}<p class="mt-2 text-sm text-red-600">{{ form.priority.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">

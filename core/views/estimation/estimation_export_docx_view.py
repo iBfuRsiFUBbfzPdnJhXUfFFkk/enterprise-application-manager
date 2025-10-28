@@ -66,18 +66,24 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     items = estimation.items.all().order_by('id')
 
     if items:
-        # Create table for items
-        table = document.add_table(rows=1, cols=6)
+        # Create table for items with new columns
+        table = document.add_table(rows=1, cols=12)
         table.style = 'Light Grid Accent 1'
 
         # Header row
         header_cells = table.rows[0].cells
         header_cells[0].text = 'Description'
-        header_cells[1].text = 'Junior'
-        header_cells[2].text = 'Mid'
-        header_cells[3].text = 'Senior'
-        header_cells[4].text = 'Lead'
-        header_cells[5].text = 'Total'
+        header_cells[1].text = 'Complexity'
+        header_cells[2].text = 'Priority'
+        header_cells[3].text = 'Cone of Uncertainty'
+        header_cells[4].text = 'Uncertainty Factor'
+        header_cells[5].text = 'Junior'
+        header_cells[6].text = 'Mid'
+        header_cells[7].text = 'Senior'
+        header_cells[8].text = 'Lead'
+        header_cells[9].text = 'Base Hrs'
+        header_cells[10].text = 'Total Hrs'
+        header_cells[11].text = 'Notes'
 
         # Make header bold
         for cell in header_cells:
@@ -89,11 +95,25 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         for item in items:
             row_cells = table.add_row().cells
             row_cells[0].text = item.description
-            row_cells[1].text = f"{float(item.hours_junior or 0):.2f}"
-            row_cells[2].text = f"{float(item.hours_mid or 0):.2f}"
-            row_cells[3].text = f"{float(item.hours_senior or 0):.2f}"
-            row_cells[4].text = f"{float(item.hours_lead or 0):.2f}"
-            row_cells[5].text = f"{float(item.get_total_hours()):.2f}"
+            row_cells[1].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
+            row_cells[2].text = item.get_priority_display() if item.priority else 'N/A'
+            row_cells[3].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
+            row_cells[4].text = f"{float(item.uncertainty_padding_factor or 1.0):.2f}x"
+            row_cells[5].text = f"{float(item.hours_junior or 0):.2f}"
+            row_cells[6].text = f"{float(item.hours_mid or 0):.2f}"
+            row_cells[7].text = f"{float(item.hours_senior or 0):.2f}"
+            row_cells[8].text = f"{float(item.hours_lead or 0):.2f}"
+            row_cells[9].text = f"{float(item.get_base_hours()):.2f}"
+            row_cells[10].text = f"{float(item.get_total_hours()):.2f}"
+
+            # Add notes explaining the uncertainty impact
+            base_hours = item.get_base_hours()
+            total_hours = item.get_total_hours()
+            if total_hours > base_hours:
+                padding = total_hours - base_hours
+                row_cells[11].text = f"+{float(padding):.2f} hrs padding"
+            else:
+                row_cells[11].text = ""
 
     else:
         document.add_paragraph('No estimation items added yet.')
