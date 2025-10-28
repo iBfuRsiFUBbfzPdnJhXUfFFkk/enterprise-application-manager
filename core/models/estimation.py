@@ -32,39 +32,81 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     # Contingency padding as a percentage (e.g., 20 for 20%)
     contingency_padding_percent = create_generic_decimal()
 
-    def get_total_hours_junior(self):
-        """Calculate total junior developer hours from all items."""
+    # Base hours (before uncertainty) - kept for reference
+    def get_base_hours_junior(self):
+        """Calculate total base junior developer hours from all items (before uncertainty)."""
         return sum(item.hours_junior or 0 for item in self.items.all())
 
-    def get_total_hours_mid(self):
-        """Calculate total mid-level developer hours from all items."""
+    def get_base_hours_mid(self):
+        """Calculate total base mid-level developer hours from all items (before uncertainty)."""
         return sum(item.hours_mid or 0 for item in self.items.all())
 
-    def get_total_hours_senior(self):
-        """Calculate total senior developer hours from all items."""
+    def get_base_hours_senior(self):
+        """Calculate total base senior developer hours from all items (before uncertainty)."""
         return sum(item.hours_senior or 0 for item in self.items.all())
 
-    def get_total_hours_lead(self):
-        """Calculate total lead developer hours from all items."""
+    def get_base_hours_lead(self):
+        """Calculate total base lead developer hours from all items (before uncertainty)."""
         return sum(item.hours_lead or 0 for item in self.items.all())
 
-    def get_total_hours_all_levels(self):
-        """Calculate total hours across all developer levels."""
-        return (
-            self.get_total_hours_junior() +
-            self.get_total_hours_mid() +
-            self.get_total_hours_senior() +
-            self.get_total_hours_lead()
-        )
+    # Hours with uncertainty applied per level
+    def get_total_hours_junior_with_uncertainty(self):
+        """Calculate total junior developer hours from all items with uncertainty applied."""
+        return sum(item.get_junior_hours_with_uncertainty() for item in self.items.all())
 
-    def get_contingency_hours(self):
-        """Calculate contingency hours based on padding percentage."""
-        total = self.get_total_hours_all_levels()
-        return total * (self.contingency_padding_percent / 100)
+    def get_total_hours_mid_with_uncertainty(self):
+        """Calculate total mid-level developer hours from all items with uncertainty applied."""
+        return sum(item.get_mid_hours_with_uncertainty() for item in self.items.all())
 
-    def get_grand_total_hours(self):
-        """Calculate grand total including contingency padding."""
-        return self.get_total_hours_all_levels() + self.get_contingency_hours()
+    def get_total_hours_senior_with_uncertainty(self):
+        """Calculate total senior developer hours from all items with uncertainty applied."""
+        return sum(item.get_senior_hours_with_uncertainty() for item in self.items.all())
+
+    def get_total_hours_lead_with_uncertainty(self):
+        """Calculate total lead developer hours from all items with uncertainty applied."""
+        return sum(item.get_lead_hours_with_uncertainty() for item in self.items.all())
+
+    # Contingency padding per level
+    def get_contingency_hours_junior(self):
+        """Calculate contingency hours for junior level."""
+        return self.get_total_hours_junior_with_uncertainty() * (self.contingency_padding_percent / 100)
+
+    def get_contingency_hours_mid(self):
+        """Calculate contingency hours for mid level."""
+        return self.get_total_hours_mid_with_uncertainty() * (self.contingency_padding_percent / 100)
+
+    def get_contingency_hours_senior(self):
+        """Calculate contingency hours for senior level."""
+        return self.get_total_hours_senior_with_uncertainty() * (self.contingency_padding_percent / 100)
+
+    def get_contingency_hours_lead(self):
+        """Calculate contingency hours for lead level."""
+        return self.get_total_hours_lead_with_uncertainty() * (self.contingency_padding_percent / 100)
+
+    # Grand totals per level (with uncertainty + contingency)
+    def get_grand_total_hours_junior(self):
+        """Calculate grand total junior hours (with uncertainty and contingency)."""
+        return self.get_total_hours_junior_with_uncertainty() + self.get_contingency_hours_junior()
+
+    def get_grand_total_hours_mid(self):
+        """Calculate grand total mid-level hours (with uncertainty and contingency)."""
+        return self.get_total_hours_mid_with_uncertainty() + self.get_contingency_hours_mid()
+
+    def get_grand_total_hours_senior(self):
+        """Calculate grand total senior hours (with uncertainty and contingency)."""
+        return self.get_total_hours_senior_with_uncertainty() + self.get_contingency_hours_senior()
+
+    def get_grand_total_hours_lead(self):
+        """Calculate grand total lead hours (with uncertainty and contingency)."""
+        return self.get_total_hours_lead_with_uncertainty() + self.get_contingency_hours_lead()
+
+    # Average across levels (optional aggregate view)
+    def get_average_hours_with_uncertainty(self):
+        """
+        Calculate average hours across all developer levels with uncertainty applied.
+        This is an optional aggregate view since hours per level are alternatives, not additive.
+        """
+        return sum(item.get_average_hours_with_uncertainty() for item in self.items.all())
 
     def __str__(self):
         return f"{self.name}"

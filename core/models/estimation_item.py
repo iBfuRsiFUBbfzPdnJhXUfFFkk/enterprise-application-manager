@@ -79,26 +79,48 @@ class EstimationItem(AbstractBaseModel):
         choices=PRIORITY_CHOICES
     )
 
-    def get_base_hours(self):
-        """Calculate base hours for this item across all developer levels (before uncertainty padding)."""
-        return (
-            (self.hours_junior or 0) +
-            (self.hours_mid or 0) +
-            (self.hours_senior or 0) +
-            (self.hours_lead or 0)
-        )
-
     def get_uncertainty_multiplier(self):
         """Get the uncertainty multiplier based on the cone of uncertainty phase."""
         if self.cone_of_uncertainty:
             return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, Decimal('1.0'))
         return Decimal('1.0')
 
-    def get_total_hours(self):
-        """Calculate total hours including uncertainty padding based on cone of uncertainty."""
-        base_hours = self.get_base_hours()
-        multiplier = self.get_uncertainty_multiplier()
-        return base_hours * multiplier
+    # Individual level hours with uncertainty applied
+    def get_junior_hours_with_uncertainty(self):
+        """Calculate junior hours including uncertainty padding."""
+        return (self.hours_junior or 0) * self.get_uncertainty_multiplier()
+
+    def get_mid_hours_with_uncertainty(self):
+        """Calculate mid-level hours including uncertainty padding."""
+        return (self.hours_mid or 0) * self.get_uncertainty_multiplier()
+
+    def get_senior_hours_with_uncertainty(self):
+        """Calculate senior hours including uncertainty padding."""
+        return (self.hours_senior or 0) * self.get_uncertainty_multiplier()
+
+    def get_lead_hours_with_uncertainty(self):
+        """Calculate lead hours including uncertainty padding."""
+        return (self.hours_lead or 0) * self.get_uncertainty_multiplier()
+
+    def get_average_hours_with_uncertainty(self):
+        """
+        Calculate average hours across all developer levels with uncertainty applied.
+        This is an optional aggregate view since hours per level are alternatives, not additive.
+        """
+        total = (
+            self.get_junior_hours_with_uncertainty() +
+            self.get_mid_hours_with_uncertainty() +
+            self.get_senior_hours_with_uncertainty() +
+            self.get_lead_hours_with_uncertainty()
+        )
+        # Count non-zero hours to get accurate average
+        count = sum([
+            1 if self.hours_junior else 0,
+            1 if self.hours_mid else 0,
+            1 if self.hours_senior else 0,
+            1 if self.hours_lead else 0,
+        ])
+        return total / count if count > 0 else Decimal('0')
 
     def __str__(self):
         return f"{self.description[:50]}..." if len(self.description) > 50 else self.description
