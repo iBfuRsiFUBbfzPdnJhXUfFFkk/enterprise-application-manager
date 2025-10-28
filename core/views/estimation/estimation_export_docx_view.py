@@ -21,6 +21,14 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Create a new Document
     document = Document()
 
+    # Set narrow margins (0.5 inches on all sides)
+    sections = document.sections
+    for section in sections:
+        section.top_margin = Inches(0.5)
+        section.bottom_margin = Inches(0.5)
+        section.left_margin = Inches(0.5)
+        section.right_margin = Inches(0.5)
+
     # Add title
     title = document.add_heading(estimation.name, level=1)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -120,12 +128,6 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
                         run.bold = True
-
-    # Add footer
-    document.add_paragraph()
-    footer_para = document.add_paragraph()
-    footer_para.add_run('Generated with Enterprise Application Manager').italic = True
-    footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     # Save document to BytesIO
     buffer = BytesIO()
