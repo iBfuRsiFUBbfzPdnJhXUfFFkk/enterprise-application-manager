@@ -20,6 +20,7 @@ from core.urls.urlpatterns_data_use_exception import urlpatterns_data_use_except
 from core.urls.urlpatterns_database import urlpatterns_database
 from core.urls.urlpatterns_dependency import urlpatterns_dependency
 from core.urls.urlpatterns_document import urlpatterns_document
+from core.urls.urlpatterns_estimation import urlpatterns_estimation
 from core.urls.urlpatterns_external_blocker import urlpatterns_external_blocker
 from core.urls.urlpatterns_formula import urlpatterns_formula
 from core.urls.urlpatterns_hotfix import urlpatterns_hotfix
@@ -87,6 +88,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_database,
     *urlpatterns_dependency,
     *urlpatterns_document,
+    *urlpatterns_estimation,
     *urlpatterns_external_blocker,
     *urlpatterns_formula,
     *urlpatterns_hotfix,
