@@ -28,13 +28,35 @@ print(f"\nTotal fields in model: {len(model_fields)}")
 print("\n2. DATABASE COLUMNS IN core_aiusecase TABLE:")
 print("-" * 80)
 with connection.cursor() as cursor:
-    cursor.execute("""
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_name = 'core_aiusecase'
-        ORDER BY ordinal_position
-    """)
-    db_columns = [row[0] for row in cursor.fetchall()]
+    # Get database engine
+    db_engine = connection.settings_dict['ENGINE']
+    print(f"Database engine: {db_engine}")
+
+    if 'sqlite' in db_engine:
+        # SQLite
+        cursor.execute("PRAGMA table_info(core_aiusecase)")
+        db_columns = [row[1] for row in cursor.fetchall()]
+    elif 'postgresql' in db_engine:
+        # PostgreSQL
+        cursor.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'core_aiusecase'
+            ORDER BY ordinal_position
+        """)
+        db_columns = [row[0] for row in cursor.fetchall()]
+    elif 'mysql' in db_engine:
+        # MySQL
+        cursor.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'core_aiusecase'
+            ORDER BY ordinal_position
+        """)
+        db_columns = [row[0] for row in cursor.fetchall()]
+    else:
+        print(f"⚠️  Unsupported database engine: {db_engine}")
+        db_columns = []
 
 for column in db_columns:
     print(f"  - {column}")
