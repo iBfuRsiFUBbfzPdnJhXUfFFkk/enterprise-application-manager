@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django_generic_model_fields.create_generic_decimal import create_generic_decimal
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_text import create_generic_text
@@ -24,11 +26,11 @@ class EstimationItem(AbstractBaseModel):
 
     # Cone of Uncertainty multipliers
     CONE_OF_UNCERTAINTY_MULTIPLIERS = {
-        'INITIAL_CONCEPT': 4.0,
-        'APPROVED_PRODUCT': 2.0,
-        'REQUIREMENTS_COMPLETE': 1.5,
-        'DESIGN_COMPLETE': 1.25,
-        'IMPLEMENTATION_COMPLETE': 1.1,
+        'INITIAL_CONCEPT': Decimal('4.0'),
+        'APPROVED_PRODUCT': Decimal('2.0'),
+        'REQUIREMENTS_COMPLETE': Decimal('1.5'),
+        'DESIGN_COMPLETE': Decimal('1.25'),
+        'IMPLEMENTATION_COMPLETE': Decimal('1.1'),
     }
 
     # Complexity level choices
@@ -89,8 +91,8 @@ class EstimationItem(AbstractBaseModel):
     def get_uncertainty_multiplier(self):
         """Get the uncertainty multiplier based on the cone of uncertainty phase."""
         if self.cone_of_uncertainty:
-            return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, 1.0)
-        return 1.0
+            return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, Decimal('1.0'))
+        return Decimal('1.0')
 
     def get_total_hours(self):
         """Calculate total hours including uncertainty padding based on cone of uncertainty."""
