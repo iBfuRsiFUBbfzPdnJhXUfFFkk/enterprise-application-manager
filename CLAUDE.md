@@ -48,7 +48,23 @@ Create a `.env` file in the root directory with these variables (see `.documenta
 
 ### Running the Development Server
 
+**Quick Start (Recommended):**
+
+Unix/Linux/Mac:
 ```bash
+./run_dev.sh
+```
+
+Windows:
+```bash
+run_dev.bat
+```
+
+**Manual Method:**
+
+Set environment and run:
+```bash
+export DJANGO_SETTINGS_MODULE="core.settings.local"
 .venv/bin/python manage.py runserver
 ```
 
