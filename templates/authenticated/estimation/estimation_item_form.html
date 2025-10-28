@@ -2,18 +2,65 @@
 {% block content %}
 <div class="min-h-screen bg-gray-50 py-6">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-sm rounded-lg">
-            <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
+        <div class="bg-white shadow-md rounded-lg">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-900">
                     {% if item %}Edit{% else %}Add{% endif %} Estimation Item
                 </h2>
                 <p class="mt-1 text-sm text-gray-500">for {{ estimation.name }}</p>
             </div>
-            <form method="post" class="px-4 py-5 sm:p-6">
+            <form method="post" class="px-6 py-6">
                 {% csrf_token %}
                 <div class="space-y-6">
-                    {{ form.as_p }}
+                    <div>
+                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        {{ form.description }}
+                        <p class="mt-1 text-xs text-gray-500">Describe the task or feature to be estimated</p>
+                        {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Developer Hours Estimates</h3>
+                        <p class="text-sm text-gray-500 mb-4">Enter estimated hours for each developer experience level</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Junior Developer Hours
+                                </label>
+                                {{ form.hours_junior }}
+                                {% if form.hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_junior.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Mid-Level Developer Hours
+                                </label>
+                                {{ form.hours_mid }}
+                                {% if form.hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_mid.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Senior Developer Hours
+                                </label>
+                                {{ form.hours_senior }}
+                                {% if form.hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_senior.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Lead Developer Hours
+                                </label>
+                                {{ form.hours_lead }}
+                                {% if form.hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_lead.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="mt-6 flex justify-end space-x-3">
                     <a href="{% url 'estimation_detail' estimation.id %}"
                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
@@ -28,4 +75,91 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Style Django form fields with Tailwind */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="url"],
+    input[type="date"],
+    input[type="datetime-local"],
+    input[type="password"],
+    textarea,
+    select {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #1f2937;
+        background-color: #ffffff;
+        background-clip: padding-box;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus,
+    input[type="date"]:focus,
+    input[type="datetime-local"]:focus,
+    input[type="password"]:focus,
+    textarea:focus,
+    select:focus {
+        color: #1f2937;
+        background-color: #ffffff;
+        border-color: #3b82f6;
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    input[type="text"]:disabled,
+    input[type="email"]:disabled,
+    input[type="number"]:disabled,
+    input[type="url"]:disabled,
+    input[type="date"]:disabled,
+    input[type="datetime-local"]:disabled,
+    input[type="password"]:disabled,
+    textarea:disabled,
+    select:disabled {
+        background-color: #f3f4f6;
+        opacity: 1;
+    }
+
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        color: #3b82f6;
+        background-color: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 0.25rem;
+        cursor: pointer;
+    }
+
+    input[type="checkbox"]:focus {
+        border-color: #3b82f6;
+        outline: 0;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    input[type="checkbox"]:checked {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    /* Placeholder styling */
+    input::placeholder,
+    textarea::placeholder {
+        color: #9ca3af;
+        opacity: 1;
+    }
+</style>
 {% endblock %}
