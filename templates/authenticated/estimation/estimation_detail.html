@@ -72,7 +72,6 @@
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Complexity</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Cone of Uncertainty</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Uncertainty Factor</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Junior</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Mid</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Senior</th>
@@ -114,7 +113,6 @@
                                         {% elif item.cone_of_uncertainty == 'IMPLEMENTATION_COMPLETE' %}1.1x
                                         {% else %}N/A{% endif %}
                                     </td>
-                                    <td class="px-4 py-4 text-sm text-right text-gray-600">{{ item.uncertainty_padding_factor|default:"1.0"|floatformat:2 }}x</td>
                                     <td class="px-4 py-4 text-sm text-right text-gray-500">{{ item.hours_junior|default:"0"|floatformat:2 }}</td>
                                     <td class="px-4 py-4 text-sm text-right text-gray-500">{{ item.hours_mid|default:"0"|floatformat:2 }}</td>
                                     <td class="px-4 py-4 text-sm text-right text-gray-500">{{ item.hours_senior|default:"0"|floatformat:2 }}</td>

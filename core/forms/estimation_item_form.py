@@ -16,10 +16,6 @@ class EstimationItemForm(BaseModelForm):
                 if field not in self.initial:
                     self.initial[field] = 0.0
 
-            # Default uncertainty padding factor to 1.0 (no additional padding)
-            if 'uncertainty_padding_factor' not in self.initial:
-                self.initial['uncertainty_padding_factor'] = 1.0
-
             # Default cone of uncertainty to requirements complete (middle ground)
             if 'cone_of_uncertainty' not in self.initial:
                 self.initial['cone_of_uncertainty'] = 'REQUIREMENTS_COMPLETE'

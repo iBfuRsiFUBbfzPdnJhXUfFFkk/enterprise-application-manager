@@ -70,17 +70,8 @@
                                     Cone of Uncertainty {% if form.cone_of_uncertainty.field.required %}<span class="text-red-500">*</span>{% endif %}
                                 </label>
                                 {{ form.cone_of_uncertainty }}
-                                <p class="mt-1 text-xs text-gray-500">Project phase - indicates typical estimate accuracy range</p>
+                                <p class="mt-1 text-xs text-gray-500">Project phase - automatically determines padding multiplier</p>
                                 {% if form.cone_of_uncertainty.errors %}<p class="mt-2 text-sm text-red-600">{{ form.cone_of_uncertainty.errors.0 }}</p>{% endif %}
-                            </div>
-
-                            <div>
-                                <label for="{{ form.uncertainty_padding_factor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Uncertainty Padding Factor {% if form.uncertainty_padding_factor.field.required %}<span class="text-red-500">*</span>{% endif %}
-                                </label>
-                                {{ form.uncertainty_padding_factor }}
-                                <p class="mt-1 text-xs text-gray-500">Multiplier for additional padding (1.0 = no padding, 1.5 = 50% padding)</p>
-                                {% if form.uncertainty_padding_factor.errors %}<p class="mt-2 text-sm text-red-600">{{ form.uncertainty_padding_factor.errors.0 }}</p>{% endif %}
                             </div>
 
                             <div>

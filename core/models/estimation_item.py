@@ -9,7 +9,8 @@ from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 class EstimationItem(AbstractBaseModel):
     """
     Individual line item within an estimation with hours for different developer levels.
-    Includes cone of uncertainty, complexity level, priority, and uncertainty padding.
+    Includes cone of uncertainty, complexity level, and priority.
+    The cone of uncertainty automatically determines the uncertainty padding multiplier.
     """
 
     # Cone of Uncertainty choices based on project phase
@@ -20,6 +21,15 @@ class EstimationItem(AbstractBaseModel):
         ('DESIGN_COMPLETE', 'Design Complete (1.25x uncertainty)'),
         ('IMPLEMENTATION_COMPLETE', 'Implementation Complete (1.1x uncertainty)'),
     ]
+
+    # Cone of Uncertainty multipliers
+    CONE_OF_UNCERTAINTY_MULTIPLIERS = {
+        'INITIAL_CONCEPT': 4.0,
+        'APPROVED_PRODUCT': 2.0,
+        'REQUIREMENTS_COMPLETE': 1.5,
+        'DESIGN_COMPLETE': 1.25,
+        'IMPLEMENTATION_COMPLETE': 1.1,
+    }
 
     # Complexity level choices
     COMPLEXITY_CHOICES = [
@@ -57,9 +67,6 @@ class EstimationItem(AbstractBaseModel):
         choices=CONE_OF_UNCERTAINTY_CHOICES
     )
 
-    # Uncertainty padding factor - multiplier for additional padding (1.0 = no padding, 1.5 = 50% padding)
-    uncertainty_padding_factor = create_generic_decimal()
-
     # Complexity level
     complexity_level = create_generic_enum(
         choices=COMPLEXITY_CHOICES
@@ -79,11 +86,17 @@ class EstimationItem(AbstractBaseModel):
             (self.hours_lead or 0)
         )
 
+    def get_uncertainty_multiplier(self):
+        """Get the uncertainty multiplier based on the cone of uncertainty phase."""
+        if self.cone_of_uncertainty:
+            return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, 1.0)
+        return 1.0
+
     def get_total_hours(self):
-        """Calculate total hours including uncertainty padding factor."""
+        """Calculate total hours including uncertainty padding based on cone of uncertainty."""
         base_hours = self.get_base_hours()
-        padding_factor = self.uncertainty_padding_factor or 1.0
-        return base_hours * padding_factor
+        multiplier = self.get_uncertainty_multiplier()
+        return base_hours * multiplier
 
     def __str__(self):
         return f"{self.description[:50]}..." if len(self.description) > 50 else self.description
