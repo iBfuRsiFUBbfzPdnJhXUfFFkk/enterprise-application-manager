@@ -48,7 +48,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Contingency Padding
     row = table.rows[2]
     row.cells[0].text = 'Contingency Padding'
-    row.cells[1].text = f"{estimation.contingency_padding_percent or 0}%"
+    row.cells[1].text = f"{float(estimation.contingency_padding_percent or 0):.2f}%"
 
     document.add_paragraph()
 
@@ -81,11 +81,11 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         for item in items:
             row_cells = table.add_row().cells
             row_cells[0].text = item.description
-            row_cells[1].text = str(item.hours_junior or 0)
-            row_cells[2].text = str(item.hours_mid or 0)
-            row_cells[3].text = str(item.hours_senior or 0)
-            row_cells[4].text = str(item.hours_lead or 0)
-            row_cells[5].text = str(item.get_total_hours())
+            row_cells[1].text = f"{float(item.hours_junior or 0):.2f}"
+            row_cells[2].text = f"{float(item.hours_mid or 0):.2f}"
+            row_cells[3].text = f"{float(item.hours_senior or 0):.2f}"
+            row_cells[4].text = f"{float(item.hours_lead or 0):.2f}"
+            row_cells[5].text = f"{float(item.get_total_hours()):.2f}"
 
     else:
         document.add_paragraph('No estimation items added yet.')
@@ -105,7 +105,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         ('Senior Developer Hours', estimation.get_total_hours_senior()),
         ('Lead Developer Hours', estimation.get_total_hours_lead()),
         ('Subtotal (All Levels)', estimation.get_total_hours_all_levels()),
-        (f'Contingency ({estimation.contingency_padding_percent or 0}%)', estimation.get_contingency_hours()),
+        (f'Contingency ({float(estimation.contingency_padding_percent or 0):.2f}%)', estimation.get_contingency_hours()),
         ('GRAND TOTAL', estimation.get_grand_total_hours()),
     ]
 
