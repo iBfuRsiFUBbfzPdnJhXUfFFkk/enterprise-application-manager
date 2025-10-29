@@ -11,8 +11,10 @@ from core.views.estimation.estimation_item_add_view import estimation_item_add_v
 from core.views.estimation.estimation_item_delete_view import estimation_item_delete_view
 from core.views.estimation.estimation_item_duplicate_view import estimation_item_duplicate_view
 from core.views.estimation.estimation_item_edit_view import estimation_item_edit_view
-from core.views.estimation.estimation_item_move_up_view import estimation_item_move_up_view
 from core.views.estimation.estimation_item_move_down_view import estimation_item_move_down_view
+from core.views.estimation.estimation_item_move_to_bottom_view import estimation_item_move_to_bottom_view
+from core.views.estimation.estimation_item_move_to_top_view import estimation_item_move_to_top_view
+from core.views.estimation.estimation_item_move_up_view import estimation_item_move_up_view
 from core.views.estimation.estimation_view import estimation_view
 
 urlpatterns_estimation: list[URLPattern | URLResolver] = [
@@ -34,4 +36,6 @@ urlpatterns_estimation: list[URLPattern | URLResolver] = [
     path(name="estimation_item_duplicate", route="estimation/item/<int:item_id>/duplicate/", view=estimation_item_duplicate_view),
     path(name="estimation_item_move_up", route="estimation/item/<int:item_id>/move-up/", view=estimation_item_move_up_view),
     path(name="estimation_item_move_down", route="estimation/item/<int:item_id>/move-down/", view=estimation_item_move_down_view),
+    path(name="estimation_item_move_to_top", route="estimation/item/<int:item_id>/move-to-top/", view=estimation_item_move_to_top_view),
+    path(name="estimation_item_move_to_bottom", route="estimation/item/<int:item_id>/move-to-bottom/", view=estimation_item_move_to_bottom_view),
 ]
