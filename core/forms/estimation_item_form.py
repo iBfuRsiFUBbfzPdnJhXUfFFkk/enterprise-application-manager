@@ -30,6 +30,5 @@ class EstimationItemForm(BaseModelForm):
             if 'complexity_level' not in self.initial:
                 self.initial['complexity_level'] = 'MEDIUM'
 
-            # Default priority to medium
-            if 'priority' not in self.initial:
-                self.initial['priority'] = 'MEDIUM'
+            # Priority defaults to N/A (None)
+            # No default set - field remains empty
