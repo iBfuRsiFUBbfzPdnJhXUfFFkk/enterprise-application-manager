@@ -342,20 +342,21 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     if items:
         # Create table for items (hours with uncertainty applied)
-        table = document.add_table(rows=1, cols=9)
+        table = document.add_table(rows=1, cols=10)
         table.style = 'Light Grid Accent 1'
 
         # Header row
         header_cells = table.rows[0].cells
-        header_cells[0].text = 'Title'
-        header_cells[1].text = 'Pts'
-        header_cells[2].text = 'Cmplx'
-        header_cells[3].text = 'Prior'
-        header_cells[4].text = 'CoU'
-        header_cells[5].text = 'Jr'
-        header_cells[6].text = 'Mid'
-        header_cells[7].text = 'Sr'
-        header_cells[8].text = 'Lead'
+        header_cells[0].text = 'ID'
+        header_cells[1].text = 'Title'
+        header_cells[2].text = 'Pts'
+        header_cells[3].text = 'Cmplx'
+        header_cells[4].text = 'Prior'
+        header_cells[5].text = 'CoU'
+        header_cells[6].text = 'Jr'
+        header_cells[7].text = 'Mid'
+        header_cells[8].text = 'Sr'
+        header_cells[9].text = 'Lead'
 
         # Make header bold and smaller font
         for cell in header_cells:
@@ -365,11 +366,13 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     run.font.size = Pt(9)
 
         # Add items (showing hours with uncertainty applied)
-        for item in items:
+        for idx, item in enumerate(items, start=1):
             row_cells = table.add_row().cells
 
-            # Set text content
+            # Set text content with ID as first column
+            item_ref = f"ITEM-{idx:03d}"
             contents = [
+                item_ref,
                 item.title if item.title else '(No title)',
                 f"{float(item.story_points or 0):.1f}",
                 item.get_complexity_level_display() if item.complexity_level else 'N/A',
@@ -381,10 +384,10 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
             ]
 
-            for idx, content in enumerate(contents):
-                row_cells[idx].text = content
+            for col_idx, content in enumerate(contents):
+                row_cells[col_idx].text = content
                 # Set font size for the paragraph
-                for paragraph in row_cells[idx].paragraphs:
+                for paragraph in row_cells[col_idx].paragraphs:
                     for run in paragraph.runs:
                         run.font.size = Pt(9)
 
@@ -461,6 +464,117 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     for paragraph in cell.paragraphs:
                         for run in paragraph.runs:
                             run.font.size = Pt(9)
+
+    # Add page break and detailed items section
+    if items:
+        document.add_page_break()
+        document.add_heading('Detailed Item Descriptions', level=1)
+        detail_para = document.add_paragraph()
+        detail_para.add_run('This section provides detailed information for each estimation item, including full descriptions. ').font.size = Pt(10)
+        detail_para.add_run('Reference the item ID to cross-reference with the summary table above.').font.size = Pt(10)
+        document.add_paragraph()
+
+        # Add detailed entry for each item
+        for idx, item in enumerate(items, start=1):
+            item_ref = f"ITEM-{idx:03d}"
+
+            # Add item reference ID as heading
+            item_heading = document.add_heading(f"{item_ref}: {item.title if item.title else '(No title)'}", level=2)
+
+            # Add metadata table for the item
+            meta_table = document.add_table(rows=6, cols=2)
+            meta_table.style = 'Light Grid Accent 1'
+
+            meta_table.rows[0].cells[0].text = 'Story Points'
+            meta_table.rows[0].cells[1].text = f"{float(item.story_points or 0):.1f}"
+
+            meta_table.rows[1].cells[0].text = 'Complexity'
+            meta_table.rows[1].cells[1].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
+
+            meta_table.rows[2].cells[0].text = 'Priority'
+            meta_table.rows[2].cells[1].text = item.get_priority_display() if item.priority else 'N/A'
+
+            meta_table.rows[3].cells[0].text = 'Cone of Uncertainty'
+            meta_table.rows[3].cells[1].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
+
+            # Add hours breakdown
+            meta_table.rows[4].cells[0].text = 'Hours (Jr/Mid/Sr/Lead)'
+            hours_str = f"{float(item.get_junior_hours_with_uncertainty()):.1f} / {float(item.get_mid_hours_with_uncertainty()):.1f} / {float(item.get_senior_hours_with_uncertainty()):.1f} / {float(item.get_lead_hours_with_uncertainty()):.1f}"
+            meta_table.rows[4].cells[1].text = hours_str
+
+            # Add base hours
+            meta_table.rows[5].cells[0].text = 'Base Hours (Lead)'
+            base_hours = (item.hours_lead or 0) + (item.code_review_hours_lead or 0) + (item.tests_hours_lead or 0)
+            meta_table.rows[5].cells[1].text = f"{float(base_hours):.1f}"
+
+            # Make all text in table smaller
+            for row in meta_table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(9)
+
+            document.add_paragraph()
+
+            # Add description section
+            if item.description:
+                document.add_heading('Description', level=3)
+                # Basic markdown rendering
+                description_lines = item.description.split('\n')
+
+                for line in description_lines:
+                    line = line.strip()
+                    if not line:
+                        document.add_paragraph()
+                        continue
+
+                    # Handle headings
+                    if line.startswith('# '):
+                        document.add_heading(line[2:], level=4)
+                    elif line.startswith('## '):
+                        document.add_heading(line[3:], level=5)
+                    elif line.startswith('### '):
+                        document.add_heading(line[4:], level=6)
+                    # Handle bullet lists
+                    elif line.startswith('- ') or line.startswith('* '):
+                        p = document.add_paragraph(line[2:], style='List Bullet')
+                        for run in p.runs:
+                            run.font.size = Pt(10)
+                    # Handle numbered lists
+                    elif len(line) > 2 and line[0].isdigit() and line[1:3] in ['. ', ') ']:
+                        p = document.add_paragraph(line[3:], style='List Number')
+                        for run in p.runs:
+                            run.font.size = Pt(10)
+                    # Handle code blocks
+                    elif line.startswith('```'):
+                        continue  # Skip code fence markers
+                    # Regular paragraph
+                    else:
+                        p = document.add_paragraph()
+                        # Simple inline markdown: **bold** and *italic*
+                        import re
+                        # Replace **bold**
+                        parts = re.split(r'(\*\*.*?\*\*)', line)
+                        for part in parts:
+                            if part.startswith('**') and part.endswith('**'):
+                                run = p.add_run(part[2:-2])
+                                run.bold = True
+                                run.font.size = Pt(10)
+                            else:
+                                # Replace *italic*
+                                italic_parts = re.split(r'(\*.*?\*)', part)
+                                for italic_part in italic_parts:
+                                    if italic_part.startswith('*') and italic_part.endswith('*') and not italic_part.startswith('**'):
+                                        run = p.add_run(italic_part[1:-1])
+                                        run.italic = True
+                                        run.font.size = Pt(10)
+                                    else:
+                                        run = p.add_run(italic_part)
+                                        run.font.size = Pt(10)
+            else:
+                document.add_paragraph('No description provided.')
+
+            document.add_paragraph()  # Add spacing between items
 
     # Save document to BytesIO
     buffer = BytesIO()
