@@ -29,14 +29,17 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
         'mid_with_uncertainty': estimation.get_total_hours_mid_with_uncertainty(),
         'senior_with_uncertainty': estimation.get_total_hours_senior_with_uncertainty(),
         'lead_with_uncertainty': estimation.get_total_hours_lead_with_uncertainty(),
+        'reviewer_total': estimation.get_total_reviewer_hours(),
         'contingency_junior': estimation.get_contingency_hours_junior(),
         'contingency_mid': estimation.get_contingency_hours_mid(),
         'contingency_senior': estimation.get_contingency_hours_senior(),
         'contingency_lead': estimation.get_contingency_hours_lead(),
+        'contingency_reviewer': estimation.get_contingency_hours_reviewer(),
         'grand_total_junior': estimation.get_grand_total_hours_junior(),
         'grand_total_mid': estimation.get_grand_total_hours_mid(),
         'grand_total_senior': estimation.get_grand_total_hours_senior(),
         'grand_total_lead': estimation.get_grand_total_hours_lead(),
+        'grand_total_reviewer': estimation.get_grand_total_reviewer_hours(),
         'average_with_uncertainty': estimation.get_average_hours_with_uncertainty(),
     }
 

@@ -66,6 +66,10 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """Calculate total lead developer hours from all items with uncertainty applied."""
         return sum(item.get_lead_hours_with_uncertainty() for item in self.items.all())
 
+    def get_total_reviewer_hours(self):
+        """Calculate total reviewer hours from all items (no uncertainty applied)."""
+        return sum(item.get_reviewer_hours() for item in self.items.all())
+
     # Contingency padding per level
     def get_contingency_hours_junior(self):
         """Calculate contingency hours for junior level."""
@@ -83,6 +87,10 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """Calculate contingency hours for lead level."""
         return self.get_total_hours_lead_with_uncertainty() * (self.contingency_padding_percent / 100)
 
+    def get_contingency_hours_reviewer(self):
+        """Calculate contingency hours for reviewer."""
+        return self.get_total_reviewer_hours() * (self.contingency_padding_percent / 100)
+
     # Grand totals per level (with uncertainty + contingency)
     def get_grand_total_hours_junior(self):
         """Calculate grand total junior hours (with uncertainty and contingency)."""
@@ -99,6 +107,10 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     def get_grand_total_hours_lead(self):
         """Calculate grand total lead hours (with uncertainty and contingency)."""
         return self.get_total_hours_lead_with_uncertainty() + self.get_contingency_hours_lead()
+
+    def get_grand_total_reviewer_hours(self):
+        """Calculate grand total reviewer hours (with contingency but no uncertainty)."""
+        return self.get_total_reviewer_hours() + self.get_contingency_hours_reviewer()
 
     # Average across levels (optional aggregate view)
     def get_average_hours_with_uncertainty(self):

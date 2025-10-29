@@ -122,9 +122,13 @@ class EstimationItem(AbstractBaseModel):
         return total * self.get_uncertainty_multiplier()
 
     def get_lead_hours_with_uncertainty(self):
-        """Calculate total lead hours (dev + code review + tests + code reviewer time) including uncertainty padding."""
-        total = (self.hours_lead or 0) + (self.code_review_hours_lead or 0) + (self.tests_hours_lead or 0) + (self.code_reviewer_hours or 0)
+        """Calculate total lead hours (dev + code review + tests) including uncertainty padding."""
+        total = (self.hours_lead or 0) + (self.code_review_hours_lead or 0) + (self.tests_hours_lead or 0)
         return total * self.get_uncertainty_multiplier()
+
+    def get_reviewer_hours(self):
+        """Get code reviewer hours without uncertainty padding (assumes lead dev)."""
+        return self.code_reviewer_hours or Decimal('0')
 
     def get_average_hours_with_uncertainty(self):
         """

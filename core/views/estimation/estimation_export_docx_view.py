@@ -62,13 +62,13 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
-    document.add_paragraph('Hours shown include development, code review, and testing time with cone of uncertainty multipliers applied. Lead developer hours also include code reviewer time (time spent reviewing others\' code).')
+    document.add_paragraph('Hours shown include development, code review, and testing time with cone of uncertainty multipliers applied. Reviewer hours (lead dev reviewing code) are shown separately without uncertainty multipliers.')
 
     items = estimation.items.all().order_by('order', 'id')
 
     if items:
         # Create table for items (hours with uncertainty applied)
-        table = document.add_table(rows=1, cols=8)
+        table = document.add_table(rows=1, cols=9)
         table.style = 'Light Grid Accent 1'
 
         # Header row
@@ -81,6 +81,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         header_cells[5].text = 'Mid Hrs'
         header_cells[6].text = 'Senior Hrs'
         header_cells[7].text = 'Lead Hrs'
+        header_cells[8].text = 'Reviewer Hrs'
 
         # Make header bold
         for cell in header_cells:
@@ -99,6 +100,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
             row_cells[5].text = f"{float(item.get_mid_hours_with_uncertainty()):.2f}"
             row_cells[6].text = f"{float(item.get_senior_hours_with_uncertainty()):.2f}"
             row_cells[7].text = f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
+            row_cells[8].text = f"{float(item.get_reviewer_hours()):.2f}"
 
     else:
         document.add_paragraph('No estimation items added yet.')
@@ -134,6 +136,10 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         ('  With Uncertainty', estimation.get_total_hours_lead_with_uncertainty()),
         (f'  Contingency ({float(estimation.contingency_padding_percent or 0):.2f}%)', estimation.get_contingency_hours_lead()),
         ('  Grand Total', estimation.get_grand_total_hours_lead()),
+        ('CODE REVIEWER (LEAD DEV)', ''),
+        ('  Total Hours', estimation.get_total_reviewer_hours()),
+        (f'  Contingency ({float(estimation.contingency_padding_percent or 0):.2f}%)', estimation.get_contingency_hours_reviewer()),
+        ('  Grand Total', estimation.get_grand_total_reviewer_hours()),
     ]
 
     # Adjust rows to match the number of totals
