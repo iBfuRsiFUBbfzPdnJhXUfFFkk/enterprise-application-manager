@@ -6,6 +6,7 @@ from core.models.estimation_item import EstimationItem
 class EstimationItemForm(BaseModelForm):
     class Meta(BaseModelFormMeta):
         model = EstimationItem
+        exclude = ['enumeration_attack_uuid', 'order', 'estimation']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
