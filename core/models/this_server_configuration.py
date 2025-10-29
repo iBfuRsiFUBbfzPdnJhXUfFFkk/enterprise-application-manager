@@ -26,6 +26,7 @@ class ThisServerConfiguration(
     connection_git_lab_token: Secret | None = create_generic_fk(to=Secret)
     connection_git_lab_top_level_group_id: str | None = create_generic_varchar()
     connection_google_maps_api_key: Secret | None = create_generic_fk(to=Secret, related_name='server_config_google_maps')
+    connection_chatgpt_api_key: Secret | None = create_generic_fk(to=Secret, related_name='server_config_chatgpt')
     kpi_developers_to_exclude = create_generic_m2m(to='Person')
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
@@ -38,6 +39,13 @@ class ThisServerConfiguration(
         """Returns the decrypted Google Maps API key if configured, None otherwise."""
         if self.connection_google_maps_api_key:
             return self.connection_google_maps_api_key.get_encrypted_value()
+        return None
+
+    @property
+    def chatgpt_api_key_decrypted(self) -> str | None:
+        """Returns the decrypted ChatGPT API key if configured, None otherwise."""
+        if self.connection_chatgpt_api_key:
+            return self.connection_chatgpt_api_key.get_encrypted_value()
         return None
 
     @property

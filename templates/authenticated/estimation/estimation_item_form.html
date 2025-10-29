@@ -85,14 +85,23 @@
                             <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
                                 Description (Markdown Supported) {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
-                            <button type="button" id="toggle_preview"
-                                    class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
-                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                                <span id="preview_button_text">Show Preview</span>
-                            </button>
+                            <div class="flex space-x-2">
+                                <button type="button" id="enhance_with_ai"
+                                        class="inline-flex items-center px-3 py-1 border border-purple-300 shadow-sm text-xs font-medium rounded text-purple-700 bg-white hover:bg-purple-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    </svg>
+                                    <span id="enhance_button_text">Enhance with AI</span>
+                                </button>
+                                <button type="button" id="toggle_preview"
+                                        class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <span id="preview_button_text">Show Preview</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="grid grid-cols-1 gap-4" id="description_container">
                             <div id="description_editor">
@@ -470,8 +479,89 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Markdown Preview functionality
+    // Enhance with AI functionality
     const descriptionField = document.getElementById('{{ form.description.id_for_label }}');
+    const enhanceButton = document.getElementById('enhance_with_ai');
+    const enhanceButtonText = document.getElementById('enhance_button_text');
+
+    if (enhanceButton && descriptionField) {
+        enhanceButton.addEventListener('click', function() {
+            const currentDescription = descriptionField.value.trim();
+
+            if (!currentDescription) {
+                alert('Please enter some text in the description field first.');
+                return;
+            }
+
+            if (!confirm('This will replace your current description with an AI-enhanced version. Continue?')) {
+                return;
+            }
+
+            // Disable button and show loading state
+            enhanceButton.disabled = true;
+            enhanceButtonText.textContent = 'Enhancing...';
+
+            // Get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Call the enhance endpoint
+            fetch('{% url "estimation_item_enhance_description" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    description: currentDescription
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Replace the description with the enhanced version
+                    descriptionField.value = data.enhanced_description;
+
+                    // Update preview if it's visible
+                    const previewDiv = document.getElementById('description_preview');
+                    if (previewDiv && !previewDiv.classList.contains('hidden')) {
+                        try {
+                            previewDiv.innerHTML = marked.parse(data.enhanced_description);
+                        } catch (e) {
+                            previewDiv.innerHTML = '<p class="text-red-500">Error rendering markdown</p>';
+                        }
+                    }
+
+                    alert('Description enhanced successfully!');
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to enhance description'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while enhancing the description. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable button and restore text
+                enhanceButton.disabled = false;
+                enhanceButtonText.textContent = 'Enhance with AI';
+            });
+        });
+    }
+
+    // Markdown Preview functionality
     const previewDiv = document.getElementById('description_preview');
     const toggleButton = document.getElementById('toggle_preview');
     const buttonText = document.getElementById('preview_button_text');

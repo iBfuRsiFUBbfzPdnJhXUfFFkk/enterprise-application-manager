@@ -11,6 +11,7 @@ from core.models.this_server_configuration import ThisServerConfiguration
 class ThisServerConfigurationForm(BaseModelForm):
     connection_git_lab_token = generic_choice_field(queryset=Secret.objects.all())
     connection_google_maps_api_key = generic_choice_field(queryset=Secret.objects.all())
+    connection_chatgpt_api_key = generic_choice_field(queryset=Secret.objects.all())
     kpi_developers_to_exclude = generic_multiple_choice_field(queryset=Person.objects.all())
     type_developer_role = generic_choice_field(queryset=Role.objects.all())
 
