@@ -9,6 +9,8 @@ from core.views.estimation.estimation_export_docx_view import estimation_export_
 from core.views.estimation.estimation_item_add_view import estimation_item_add_view
 from core.views.estimation.estimation_item_delete_view import estimation_item_delete_view
 from core.views.estimation.estimation_item_edit_view import estimation_item_edit_view
+from core.views.estimation.estimation_item_move_up_view import estimation_item_move_up_view
+from core.views.estimation.estimation_item_move_down_view import estimation_item_move_down_view
 from core.views.estimation.estimation_view import estimation_view
 
 urlpatterns_estimation: list[URLPattern | URLResolver] = [
@@ -26,4 +28,6 @@ urlpatterns_estimation: list[URLPattern | URLResolver] = [
     path(name="estimation_item_add", route="estimation/<int:estimation_id>/item/add/", view=estimation_item_add_view),
     path(name="estimation_item_edit", route="estimation/item/<int:item_id>/edit/", view=estimation_item_edit_view),
     path(name="estimation_item_delete", route="estimation/item/<int:item_id>/delete/", view=estimation_item_delete_view),
+    path(name="estimation_item_move_up", route="estimation/item/<int:item_id>/move-up/", view=estimation_item_move_up_view),
+    path(name="estimation_item_move_down", route="estimation/item/<int:item_id>/move-down/", view=estimation_item_move_down_view),
 ]

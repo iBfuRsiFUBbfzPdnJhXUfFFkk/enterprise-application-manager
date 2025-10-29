@@ -1,9 +1,11 @@
 from decimal import Decimal
 
+from django.db import models
 from django_generic_model_fields.create_generic_decimal import create_generic_decimal
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_text import create_generic_text
 from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_integer import create_generic_integer
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 
@@ -54,6 +56,9 @@ class EstimationItem(AbstractBaseModel):
         to='Estimation',
         related_name='items'
     )
+
+    # Order within the estimation
+    order = create_generic_integer()
 
     # Item details
     description = create_generic_text()
@@ -141,10 +146,20 @@ class EstimationItem(AbstractBaseModel):
         ])
         return total / count if count > 0 else Decimal('0')
 
+    def save(self, *args, **kwargs):
+        """Auto-assign order for new items."""
+        if not self.pk and self.estimation_id and (self.order is None or self.order == 0):
+            # Get the max order for this estimation
+            max_order = EstimationItem.objects.filter(estimation=self.estimation).aggregate(
+                max_order=models.Max('order')
+            )['max_order']
+            self.order = (max_order or 0) + 1
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.description[:50]}..." if len(self.description) > 50 else self.description
 
     class Meta:
-        ordering = ['id']
+        ordering = ['order', 'id']
         verbose_name = 'Estimation Item'
         verbose_name_plural = 'Estimation Items'

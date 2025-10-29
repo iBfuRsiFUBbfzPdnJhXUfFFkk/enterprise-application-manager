@@ -12,8 +12,8 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     except Estimation.DoesNotExist:
         return generic_500(request=request)
 
-    # Get all items for this estimation
-    items = estimation.items.all().order_by('id')
+    # Get all items for this estimation, ordered by the order field
+    items = estimation.items.all().order_by('order', 'id')
 
     # Get created and updated history records
     created_record = estimation.history.order_by('history_date').first()
