@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from io import BytesIO
 
 from django.http import HttpRequest, HttpResponse
@@ -581,10 +581,10 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     document.save(buffer)
     buffer.seek(0)
 
-    # Generate filename: <name>__<YYYY-MM-DD>__<HH:MM>.docx (lowercase, spaces to underscores)
-    now = datetime.now()
+    # Generate filename: <name>__<YYYY-MM-DD>__<HH:MM:[AM|PM]>.docx (lowercase, spaces to underscores, UTC time, 12-hour format)
+    now = datetime.now(timezone.utc)
     date_str = now.strftime('%Y-%m-%d')
-    time_str = now.strftime('%H:%M')
+    time_str = now.strftime('%I:%M:%p').lower()  # 12-hour format with lowercase am/pm
     name_cleaned = estimation.name.lower().replace(' ', '_')
     filename = f"{name_cleaned}__{date_str}__{time_str}.docx"
 
