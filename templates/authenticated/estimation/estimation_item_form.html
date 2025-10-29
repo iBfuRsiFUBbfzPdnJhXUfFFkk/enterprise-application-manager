@@ -71,7 +71,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Development Hours</h3>
-                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). You can override any value.</p>
+                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). Also auto-fills code review (0.5×) and testing (1×). You can override any value.</p>
                             </div>
                             <button type="button" id="recalculate_dev_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,7 +182,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Testing Hours</h3>
-                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill with same multipliers.</p>
+                                <p class="text-sm text-gray-500 mt-1">Auto-filled at 1× (100%) of development hours for each level. You can override any value.</p>
                             </div>
                             <button type="button" id="recalculate_tests_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,6 +414,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Auto-populate testing hours as 1x of dev hours
+    function autoPopulateTests() {
+        const levels = ['lead', 'senior', 'mid', 'junior'];
+
+        levels.forEach(level => {
+            const devField = document.getElementById(`id_hours_${level}`);
+            const testsField = document.getElementById(`id_tests_hours_${level}`);
+
+            if (!devField || !testsField) return;
+
+            devField.addEventListener('input', function() {
+                const devValue = parseFloat(devField.value) || 0;
+                // Only auto-populate if tests field is empty or zero
+                if (testsField.value === '' || parseFloat(testsField.value) === 0) {
+                    testsField.value = (devValue * 1.0).toFixed(2);
+                }
+            });
+        });
+    }
+
     // Force recalculation function (ignores current values)
     function forceRecalculate(leadFieldId, seniorFieldId, midFieldId, juniorFieldId) {
         const leadField = document.getElementById(leadFieldId);
@@ -444,16 +464,32 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Force recalculate testing hours as 1x dev hours
+    function forceRecalculateTests() {
+        const levels = ['lead', 'senior', 'mid', 'junior'];
+
+        levels.forEach(level => {
+            const devField = document.getElementById(`id_hours_${level}`);
+            const testsField = document.getElementById(`id_tests_hours_${level}`);
+
+            if (devField && testsField) {
+                const devValue = parseFloat(devField.value) || 0;
+                testsField.value = (devValue * 1.0).toFixed(2);
+            }
+        });
+    }
+
     // Apply auto-population to all three categories
     autoPopulate('id_hours_lead', 'id_hours_senior', 'id_hours_mid', 'id_hours_junior');
-    autoPopulateCodeReview(); // New: auto-populate code review as 0.5x dev hours
-    autoPopulate('id_tests_hours_lead', 'id_tests_hours_senior', 'id_tests_hours_mid', 'id_tests_hours_junior');
+    autoPopulateCodeReview(); // Auto-populate code review as 0.5x dev hours
+    autoPopulateTests(); // Auto-populate testing as 1x dev hours
 
     // Attach recalculate button handlers
     document.getElementById('recalculate_dev_hours')?.addEventListener('click', function() {
         forceRecalculate('id_hours_lead', 'id_hours_senior', 'id_hours_mid', 'id_hours_junior');
-        // Also update code review hours when dev hours are recalculated
+        // Also update code review and testing hours when dev hours are recalculated
         forceRecalculateCodeReview();
+        forceRecalculateTests();
     });
 
     document.getElementById('recalculate_code_review_hours')?.addEventListener('click', function() {
@@ -461,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('recalculate_tests_hours')?.addEventListener('click', function() {
-        forceRecalculate('id_tests_hours_lead', 'id_tests_hours_senior', 'id_tests_hours_mid', 'id_tests_hours_junior');
+        forceRecalculateTests();
     });
 });
 </script>
