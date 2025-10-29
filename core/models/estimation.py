@@ -32,22 +32,42 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     # Contingency padding as a percentage (e.g., 20 for 20%)
     contingency_padding_percent = create_generic_decimal()
 
-    # Base hours (before uncertainty) - kept for reference
+    # Base hours (before uncertainty) - includes dev + code review + testing
     def get_base_hours_junior(self):
-        """Calculate total base junior developer hours from all items (before uncertainty)."""
-        return sum(item.hours_junior or 0 for item in self.items.all())
+        """Calculate total base junior developer hours from all items (dev + code review + testing, before uncertainty)."""
+        return sum(
+            (item.hours_junior or 0) +
+            (item.code_review_hours_junior or 0) +
+            (item.tests_hours_junior or 0)
+            for item in self.items.all()
+        )
 
     def get_base_hours_mid(self):
-        """Calculate total base mid-level developer hours from all items (before uncertainty)."""
-        return sum(item.hours_mid or 0 for item in self.items.all())
+        """Calculate total base mid-level developer hours from all items (dev + code review + testing, before uncertainty)."""
+        return sum(
+            (item.hours_mid or 0) +
+            (item.code_review_hours_mid or 0) +
+            (item.tests_hours_mid or 0)
+            for item in self.items.all()
+        )
 
     def get_base_hours_senior(self):
-        """Calculate total base senior developer hours from all items (before uncertainty)."""
-        return sum(item.hours_senior or 0 for item in self.items.all())
+        """Calculate total base senior developer hours from all items (dev + code review + testing, before uncertainty)."""
+        return sum(
+            (item.hours_senior or 0) +
+            (item.code_review_hours_senior or 0) +
+            (item.tests_hours_senior or 0)
+            for item in self.items.all()
+        )
 
     def get_base_hours_lead(self):
-        """Calculate total base lead developer hours from all items (before uncertainty)."""
-        return sum(item.hours_lead or 0 for item in self.items.all())
+        """Calculate total base lead developer hours from all items (dev + code review + testing, before uncertainty)."""
+        return sum(
+            (item.hours_lead or 0) +
+            (item.code_review_hours_lead or 0) +
+            (item.tests_hours_lead or 0)
+            for item in self.items.all()
+        )
 
     # Hours with uncertainty applied per level
     def get_total_hours_junior_with_uncertainty(self):
