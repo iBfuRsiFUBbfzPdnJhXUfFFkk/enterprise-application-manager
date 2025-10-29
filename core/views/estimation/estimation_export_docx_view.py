@@ -62,7 +62,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
-    document.add_paragraph('Hours include development, code review, and testing with cone of uncertainty multipliers applied. Reviewer hours shown separately without uncertainty.')
+    document.add_paragraph('Hours include development, code review, and testing with level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Reviewer hours shown separately without uncertainty.')
 
     items = estimation.items.all().order_by('order', 'id')
 
@@ -123,7 +123,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add summary section
     document.add_heading('Estimation Summary', level=2)
-    document.add_paragraph('Hours include cone of uncertainty multipliers. Each level represents alternative estimates, not additive totals.')
+    document.add_paragraph('Hours include level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Each level represents alternative estimates, not additive totals.')
 
     summary_table = document.add_table(rows=17, cols=2)
     summary_table.style = 'Light Grid Accent 1'

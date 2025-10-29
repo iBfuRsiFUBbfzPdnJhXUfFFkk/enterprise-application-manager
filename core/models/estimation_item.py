@@ -102,32 +102,45 @@ class EstimationItem(AbstractBaseModel):
         choices=PRIORITY_CHOICES
     )
 
+    # Developer level-based uncertainty multipliers
+    # Junior developers (least experienced) get highest multiplier
+    # Senior/Lead developers (most experienced) get lowest multiplier
+    LEVEL_UNCERTAINTY_MULTIPLIERS = {
+        'JUNIOR': Decimal('6.0'),
+        'MID': Decimal('3.0'),
+        'SENIOR': Decimal('1.5'),
+        'LEAD': Decimal('1.0'),
+    }
+
     def get_uncertainty_multiplier(self):
-        """Get the uncertainty multiplier based on the cone of uncertainty phase."""
+        """
+        DEPRECATED: Cone of uncertainty is now for display only.
+        Use level-specific multipliers instead.
+        """
         if self.cone_of_uncertainty:
             return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, Decimal('1.0'))
         return Decimal('1.0')
 
-    # Individual level total hours (dev + code review + tests) with uncertainty applied
+    # Individual level total hours (dev + code review + tests) with level-based uncertainty applied
     def get_junior_hours_with_uncertainty(self):
-        """Calculate total junior hours (dev + code review + tests) including uncertainty padding."""
+        """Calculate total junior hours (dev + code review + tests) with 6x uncertainty multiplier."""
         total = (self.hours_junior or 0) + (self.code_review_hours_junior or 0) + (self.tests_hours_junior or 0)
-        return total * self.get_uncertainty_multiplier()
+        return total * self.LEVEL_UNCERTAINTY_MULTIPLIERS['JUNIOR']
 
     def get_mid_hours_with_uncertainty(self):
-        """Calculate total mid-level hours (dev + code review + tests) including uncertainty padding."""
+        """Calculate total mid-level hours (dev + code review + tests) with 3x uncertainty multiplier."""
         total = (self.hours_mid or 0) + (self.code_review_hours_mid or 0) + (self.tests_hours_mid or 0)
-        return total * self.get_uncertainty_multiplier()
+        return total * self.LEVEL_UNCERTAINTY_MULTIPLIERS['MID']
 
     def get_senior_hours_with_uncertainty(self):
-        """Calculate total senior hours (dev + code review + tests) including uncertainty padding."""
+        """Calculate total senior hours (dev + code review + tests) with 1.5x uncertainty multiplier."""
         total = (self.hours_senior or 0) + (self.code_review_hours_senior or 0) + (self.tests_hours_senior or 0)
-        return total * self.get_uncertainty_multiplier()
+        return total * self.LEVEL_UNCERTAINTY_MULTIPLIERS['SENIOR']
 
     def get_lead_hours_with_uncertainty(self):
-        """Calculate total lead hours (dev + code review + tests) including uncertainty padding."""
+        """Calculate total lead hours (dev + code review + tests) with 1x uncertainty multiplier (no padding)."""
         total = (self.hours_lead or 0) + (self.code_review_hours_lead or 0) + (self.tests_hours_lead or 0)
-        return total * self.get_uncertainty_multiplier()
+        return total * self.LEVEL_UNCERTAINTY_MULTIPLIERS['LEAD']
 
     def get_reviewer_hours(self):
         """Get code reviewer hours without uncertainty padding (assumes lead dev)."""

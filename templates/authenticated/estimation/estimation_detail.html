@@ -85,11 +85,11 @@
                                 <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 90px;">Cmplx</th>
                                 <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 80px;">Prior</th>
                                 <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 70px;">CoU</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;">Jr</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;">Mid</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;">Sr</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;">Lead</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;">Rev</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Junior Developer (6x multiplier)">Jr</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Mid-Level Developer (3x multiplier)">Mid</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Senior Developer (1.5x multiplier)">Sr</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Lead Developer (1x multiplier)">Lead</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Code Reviewer (no multiplier)">Rev</th>
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap" style="width: 140px;">Actions</th>
                             </tr>
                         </thead>
@@ -168,10 +168,10 @@
                                         {% elif item.cone_of_uncertainty == 'IMPLEMENTATION_COMPLETE' %}1.1x
                                         {% else %}N/A{% endif %}
                                     </td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:2 }}">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:2 }}">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:2 }}">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }}">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:2 }} | Multiplier: 6x">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:2 }} | Multiplier: 3x">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:2 }} | Multiplier: 1.5x">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }} | Multiplier: 1x">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
                                     <td class="px-2 py-3 text-sm text-right text-gray-500">{{ item.get_reviewer_hours|floatformat:2 }}</td>
                                     <td class="px-2 py-3 text-xs text-right whitespace-nowrap">
                                         <a href="{% url 'estimation_item_edit' item.id %}" class="text-blue-600 hover:text-blue-900 inline-block">Edit</a>
@@ -198,13 +198,13 @@
         <div class="bg-white shadow-sm rounded-lg">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">Estimation Summary</h2>
-                <p class="mt-1 text-sm text-gray-500">Hours shown include cone of uncertainty multipliers. Each level represents alternative estimates, not additive totals.</p>
+                <p class="mt-1 text-sm text-gray-500">Hours shown include developer level-based uncertainty multipliers (Junior: 6x, Mid: 3x, Senior: 1.5x, Lead: 1x). Each level represents alternative estimates, not additive totals.</p>
             </div>
             <div class="px-6 py-4">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <!-- Junior Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Junior Developer</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Junior Developer <span class="text-xs text-gray-500">(6x multiplier)</span></h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
@@ -227,7 +227,7 @@
 
                     <!-- Mid-Level Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Mid-Level Developer</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Mid-Level Developer <span class="text-xs text-gray-500">(3x multiplier)</span></h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
@@ -250,7 +250,7 @@
 
                     <!-- Senior Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Senior Developer</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Senior Developer <span class="text-xs text-gray-500">(1.5x multiplier)</span></h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
@@ -273,7 +273,7 @@
 
                     <!-- Lead Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Lead Developer</h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Lead Developer <span class="text-xs text-gray-500">(1x multiplier)</span></h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
