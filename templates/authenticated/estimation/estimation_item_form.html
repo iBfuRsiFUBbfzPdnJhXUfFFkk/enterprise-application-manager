@@ -71,7 +71,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Development Hours</h3>
-                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). Also auto-fills code review (0.5×), code reviewer (1× lead review), and testing (1×). You can override any value.</p>
+                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). Also auto-fills code review (0.5×), testing (1×), and review iteration time (1× lead review). You can override any value.</p>
                             </div>
                             <button type="button" id="recalculate_dev_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@
                                 <div class="max-w-xs">
                                     {{ form.code_reviewer_hours }}
                                 </div>
-                                <p class="mt-2 text-xs text-gray-600">Auto-filled at 1× (100%) of Lead Code Review hours. Time spent by lead developer reviewing others' code. This is added to lead dev total only.</p>
+                                <p class="mt-2 text-xs text-gray-600">Auto-filled at 1× (100%) of Lead Code Review hours. Time spent in back-and-forth code review process: addressing feedback, resolving issues, and iterating on changes based on review comments.</p>
                                 {% if form.code_reviewer_hours.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_reviewer_hours.errors.0 }}</p>{% endif %}
                             </div>
                         </div>

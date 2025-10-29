@@ -76,9 +76,9 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     components_list = [
         ('Development Hours:', 'Core implementation time for writing features, fixing bugs, or building functionality.'),
-        ('Code Review Hours:', 'Time for reviewing others\' code (typically 0.5x development time). Critical for maintaining code quality and catching issues early.'),
+        ('Code Review Hours:', 'Time spent reviewing others\' code (typically 0.5x development time). Critical for maintaining code quality and catching issues early.'),
         ('Testing Hours:', 'Time for writing unit tests, integration tests, and manual QA (typically 1x development time). Essential for long-term maintainability.'),
-        ('Code Reviewer Hours:', 'Dedicated time for lead developers to review all team code (no uncertainty multiplier). Shown separately as it represents additional team capacity needs.'),
+        ('Code Reviewer Hours:', 'Time spent in the back-and-forth code review process - addressing feedback, resolving issues, and iterating on changes based on review comments.'),
     ]
 
     for label, description in components_list:
@@ -147,7 +147,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         'Junior developers require more calendar time but may be more cost-effective',
         'Lead developers complete work faster but represent higher labor costs',
         'Mixed teams should use weighted averages based on actual team composition',
-        'Code reviewer hours are additive to developer hours and represent dedicated review capacity',
+        'Review iteration hours represent time spent addressing feedback and resolving issues from code reviews',
     ]
 
     for item in interpret_list:

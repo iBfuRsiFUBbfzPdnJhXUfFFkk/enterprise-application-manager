@@ -89,8 +89,8 @@
                     </a>
                     <a href="{% url 'estimation_recalculate_all_items' model.id %}"
                        class="inline-flex items-center px-3 py-2 border border-purple-300 shadow-sm text-sm font-medium rounded-md text-purple-700 bg-white hover:bg-purple-50"
-                       onclick="return confirm('Recalculate all hours for all items? This will overwrite code review, testing, and code reviewer hours based on current dev hours.')"
-                       title="Auto-calculate all hours using lead dev hours as base (code review: 0.5x, testing: 1x, code reviewer: 1x of lead review)">
+                       onclick="return confirm('Recalculate all hours for all items? This will overwrite code review, testing, and review iteration hours based on current dev hours.')"
+                       title="Auto-calculate all hours using lead dev hours as base (code review: 0.5x, testing: 1x, review iteration: 1x of lead review)">
                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
@@ -121,7 +121,7 @@
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Mid-Level Developer (3x multiplier)">Mid</th>
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Senior Developer (1.5x multiplier)">Sr</th>
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Lead Developer (1x multiplier)">Lead</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Code Reviewer (no multiplier)">Rev</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Review Iteration Time - Back-and-forth resolving review feedback (no multiplier)">Rev Iter</th>
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap" style="width: 140px;">Actions</th>
                             </tr>
                         </thead>
