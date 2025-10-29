@@ -20,6 +20,7 @@ def estimation_item_duplicate_view(request: HttpRequest, item_id: int) -> HttpRe
             estimation=original_item.estimation,
             title=new_title,
             description=original_item.description,
+            group=original_item.group,
             story_points=original_item.story_points,
             hours_junior=original_item.hours_junior,
             hours_mid=original_item.hours_mid,
