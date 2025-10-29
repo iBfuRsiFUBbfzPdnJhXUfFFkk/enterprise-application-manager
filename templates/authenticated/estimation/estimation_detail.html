@@ -365,9 +365,10 @@ document.addEventListener('DOMContentLoaded', function() {
             onEnd: function(evt) {
                 // Get the new order of item IDs
                 const rows = tableBody.querySelectorAll('tr');
-                const itemIds = Array.from(rows).map(row => row.dataset.itemId);
+                const itemIds = Array.from(rows).map(row => parseInt(row.dataset.itemId)).filter(id => !isNaN(id));
 
                 // Send AJAX request to update order
+                console.log('Sending reorder request with item IDs:', itemIds);
                 fetch('{% url "estimation_item_reorder" %}', {
                     method: 'POST',
                     headers: {
@@ -376,16 +377,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     body: JSON.stringify({ item_ids: itemIds })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Response data:', data);
                     if (!data.success) {
                         console.error('Failed to reorder items:', data.error);
-                        alert('Failed to save new order. Please refresh the page.');
+                        alert('Failed to save new order: ' + (data.error || 'Unknown error'));
+                    } else {
+                        console.log('Successfully reordered items');
                     }
                 })
                 .catch(error => {
                     console.error('Error reordering items:', error);
-                    alert('Failed to save new order. Please refresh the page.');
+                    alert('Failed to save new order: ' + error.message);
                 });
             }
         });
