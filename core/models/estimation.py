@@ -1,6 +1,9 @@
+from decimal import Decimal
+
 from django.db import models
 from django_generic_model_fields.create_generic_decimal import create_generic_decimal
 from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_integer import create_generic_integer
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.application import Application
@@ -31,6 +34,13 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
 
     # Contingency padding as a percentage (e.g., 20 for 20%)
     contingency_padding_percent = create_generic_decimal()
+
+    # Developer counts for duration estimation
+    junior_developer_count = create_generic_integer()
+    mid_developer_count = create_generic_integer()
+    senior_developer_count = create_generic_integer()
+    lead_developer_count = create_generic_integer()
+    reviewer_count = create_generic_integer()
 
     # Base hours (before uncertainty) - includes dev + code review + testing
     def get_base_hours_junior(self):
@@ -139,6 +149,82 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         This is an optional aggregate view since hours per level are alternatives, not additive.
         """
         return sum(item.get_average_hours_with_uncertainty() for item in self.items.all())
+
+    # Duration estimation methods (based on 40-hour work week)
+    def get_duration_weeks_junior(self):
+        """Calculate duration in weeks for junior developers (grand total / count / 40)."""
+        count = self.junior_developer_count or 0
+        if count == 0:
+            return None
+        hours_per_dev = self.get_grand_total_hours_junior() / Decimal(str(count))
+        return hours_per_dev / Decimal('40.0')
+
+    def get_duration_months_junior(self):
+        """Calculate duration in months for junior developers (weeks / 4.33)."""
+        weeks = self.get_duration_weeks_junior()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')  # 52 weeks / 12 months ≈ 4.33
+
+    def get_duration_weeks_mid(self):
+        """Calculate duration in weeks for mid-level developers (grand total / count / 40)."""
+        count = self.mid_developer_count or 0
+        if count == 0:
+            return None
+        hours_per_dev = self.get_grand_total_hours_mid() / Decimal(str(count))
+        return hours_per_dev / Decimal('40.0')
+
+    def get_duration_months_mid(self):
+        """Calculate duration in months for mid-level developers (weeks / 4.33)."""
+        weeks = self.get_duration_weeks_mid()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
+
+    def get_duration_weeks_senior(self):
+        """Calculate duration in weeks for senior developers (grand total / count / 40)."""
+        count = self.senior_developer_count or 0
+        if count == 0:
+            return None
+        hours_per_dev = self.get_grand_total_hours_senior() / Decimal(str(count))
+        return hours_per_dev / Decimal('40.0')
+
+    def get_duration_months_senior(self):
+        """Calculate duration in months for senior developers (weeks / 4.33)."""
+        weeks = self.get_duration_weeks_senior()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
+
+    def get_duration_weeks_lead(self):
+        """Calculate duration in weeks for lead developers (grand total / count / 40)."""
+        count = self.lead_developer_count or 0
+        if count == 0:
+            return None
+        hours_per_dev = self.get_grand_total_hours_lead() / Decimal(str(count))
+        return hours_per_dev / Decimal('40.0')
+
+    def get_duration_months_lead(self):
+        """Calculate duration in months for lead developers (weeks / 4.33)."""
+        weeks = self.get_duration_weeks_lead()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
+
+    def get_duration_weeks_reviewer(self):
+        """Calculate duration in weeks for code reviewers (grand total / count / 40)."""
+        count = self.reviewer_count or 0
+        if count == 0:
+            return None
+        hours_per_dev = self.get_grand_total_reviewer_hours() / Decimal(str(count))
+        return hours_per_dev / Decimal('40.0')
+
+    def get_duration_months_reviewer(self):
+        """Calculate duration in months for code reviewers (weeks / 4.33)."""
+        weeks = self.get_duration_weeks_reviewer()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
 
     def __str__(self):
         return f"{self.name}"

@@ -38,6 +38,125 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         document.add_paragraph(estimation.description)
         document.add_paragraph()
 
+    # Add methodology explanation section
+    document.add_heading('Estimation Methodology', level=2)
+
+    # Overview paragraph
+    overview = document.add_paragraph()
+    overview.add_run('This estimation uses a sophisticated multi-factor approach to provide realistic project timelines. ').font.size = Pt(10)
+    overview.add_run('The methodology accounts for developer experience levels, task uncertainty, and project-specific contingencies.').font.size = Pt(10)
+    document.add_paragraph()
+
+    # Developer level multipliers
+    document.add_heading('Developer Level Multipliers', level=3)
+    multipliers_para = document.add_paragraph()
+    multipliers_para.add_run('Each developer level has a different uncertainty multiplier based on experience:').font.size = Pt(10)
+
+    multipliers_list = [
+        ('Junior Developer (6x):', 'Junior developers require significantly more time due to learning curves, troubleshooting, and the need for guidance. The 6x multiplier accounts for these factors.'),
+        ('Mid-Level Developer (3x):', 'Mid-level developers have foundational skills but still encounter unforeseen challenges. The 3x multiplier provides reasonable padding for problem-solving.'),
+        ('Senior Developer (1.5x):', 'Senior developers work efficiently with fewer blockers. The 1.5x multiplier accounts for architectural decisions and edge cases.'),
+        ('Lead Developer (1x):', 'Lead developers provide the baseline estimate with no additional multiplier, representing expert-level execution.'),
+    ]
+
+    for label, description in multipliers_list:
+        p = document.add_paragraph(style='List Bullet')
+        run = p.add_run(f'{label} ')
+        run.bold = True
+        run.font.size = Pt(10)
+        run2 = p.add_run(description)
+        run2.font.size = Pt(10)
+
+    document.add_paragraph()
+
+    # Separated hours components
+    document.add_heading('Hour Components', level=3)
+    components_para = document.add_paragraph()
+    components_para.add_run('Each estimation item separates work into distinct components, each with level-specific multipliers applied:').font.size = Pt(10)
+
+    components_list = [
+        ('Development Hours:', 'Core implementation time for writing features, fixing bugs, or building functionality.'),
+        ('Code Review Hours:', 'Time for reviewing others\' code (typically 0.5x development time). Critical for maintaining code quality and catching issues early.'),
+        ('Testing Hours:', 'Time for writing unit tests, integration tests, and manual QA (typically 1x development time). Essential for long-term maintainability.'),
+        ('Code Reviewer Hours:', 'Dedicated time for lead developers to review all team code (no uncertainty multiplier). Shown separately as it represents additional team capacity needs.'),
+    ]
+
+    for label, description in components_list:
+        p = document.add_paragraph(style='List Bullet')
+        run = p.add_run(f'{label} ')
+        run.bold = True
+        run.font.size = Pt(10)
+        run2 = p.add_run(description)
+        run2.font.size = Pt(10)
+
+    document.add_paragraph()
+
+    # Contingency padding
+    document.add_heading('Contingency Padding', level=3)
+    contingency_para = document.add_paragraph()
+    contingency_value = float(estimation.contingency_padding_percent or 0)
+    contingency_para.add_run(f'This estimation includes a {contingency_value:.1f}% contingency buffer applied to all final totals. ').font.size = Pt(10)
+    contingency_para.add_run('Contingency padding accounts for:').font.size = Pt(10)
+
+    contingency_list = [
+        'Scope creep and requirement changes',
+        'Integration challenges with existing systems',
+        'Unforeseen technical debt or refactoring needs',
+        'Team coordination overhead and communication time',
+        'Deployment, documentation, and release activities',
+    ]
+
+    for item in contingency_list:
+        p = document.add_paragraph(style='List Bullet')
+        run = p.add_run(item)
+        run.font.size = Pt(10)
+
+    document.add_paragraph()
+
+    # Cone of Uncertainty
+    document.add_heading('Cone of Uncertainty', level=3)
+    cou_para = document.add_paragraph()
+    cou_para.add_run('The "Cone of Uncertainty" field tracks project phase for reference purposes. ').font.size = Pt(10)
+    cou_para.add_run('While displayed on items, it is informational only—actual uncertainty is handled through developer level multipliers:').font.size = Pt(10)
+
+    cou_list = [
+        ('Initial Concept (4x):', 'Early exploration phase with high uncertainty'),
+        ('Approved Product (2x):', 'Product definition complete, requirements being refined'),
+        ('Requirements Complete (1.5x):', 'Requirements documented, design in progress'),
+        ('Design Complete (1.25x):', 'Technical design finished, implementation starting'),
+        ('Implementation Complete (1.1x):', 'Code complete, final testing and refinement'),
+    ]
+
+    for label, description in cou_list:
+        p = document.add_paragraph(style='List Bullet')
+        run = p.add_run(f'{label} ')
+        run.bold = True
+        run.font.size = Pt(10)
+        run2 = p.add_run(description)
+        run2.font.size = Pt(10)
+
+    document.add_paragraph()
+
+    # How to use estimates
+    document.add_heading('Interpreting the Estimates', level=3)
+    interpret_para = document.add_paragraph()
+    interpret_para.add_run('Each developer level represents an alternative staffing scenario, not additive totals. ').font.size = Pt(10)
+    interpret_para.add_run('Choose the level that matches your team composition:').font.size = Pt(10)
+
+    interpret_list = [
+        'Junior developers require more calendar time but may be more cost-effective',
+        'Lead developers complete work faster but represent higher labor costs',
+        'Mixed teams should use weighted averages based on actual team composition',
+        'Code reviewer hours are additive to developer hours and represent dedicated review capacity',
+    ]
+
+    for item in interpret_list:
+        p = document.add_paragraph(style='List Bullet')
+        run = p.add_run(item)
+        run.font.size = Pt(10)
+
+    document.add_paragraph()
+
     # Add metadata section
     document.add_heading('Project Information', level=2)
     table = document.add_table(rows=3, cols=2)
