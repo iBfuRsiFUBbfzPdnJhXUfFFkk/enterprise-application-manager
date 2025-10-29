@@ -140,6 +140,11 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """
         return sum(item.get_average_hours_with_uncertainty() for item in self.items.all())
 
+    # Story points total
+    def get_total_story_points(self):
+        """Calculate total story points across all items."""
+        return sum(item.story_points or 0 for item in self.items.all())
+
     # Duration estimation methods (based on 40-hour work week)
     def get_duration_weeks_junior(self):
         """Calculate duration in weeks for junior developers (grand total / count / 40)."""

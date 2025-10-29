@@ -38,6 +38,7 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
         'grand_total_senior': estimation.get_grand_total_hours_senior(),
         'grand_total_lead': estimation.get_grand_total_hours_lead(),
         'average_with_uncertainty': estimation.get_average_hours_with_uncertainty(),
+        'total_story_points': estimation.get_total_story_points(),
     }
 
     context: Mapping[str, Any] = {

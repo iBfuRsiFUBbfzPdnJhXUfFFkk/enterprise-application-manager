@@ -169,6 +169,24 @@ class EstimationItem(AbstractBaseModel):
         ])
         return total / count if count > 0 else Decimal('0')
 
+    def calculate_story_points(self):
+        """
+        Calculate suggested story points based on lead developer base hours.
+        Uses conventional agile wisdom: 1 story point ≈ 4 hours of ideal work time.
+        Rounds to nearest 0.5 for practical use.
+        """
+        base_hours = self.get_base_hours_lead()
+        if base_hours == 0:
+            return Decimal('0')
+
+        # 1 story point = 4 hours of ideal work time (conventional agile wisdom)
+        raw_points = base_hours / Decimal('4.0')
+
+        # Round to nearest 0.5
+        rounded_points = round(float(raw_points) * 2) / 2
+
+        return Decimal(str(rounded_points))
+
     def save(self, *args, **kwargs):
         """Auto-assign order for new items."""
         if not self.pk and self.estimation_id and (self.order is None or self.order == 0):

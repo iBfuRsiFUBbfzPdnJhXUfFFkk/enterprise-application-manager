@@ -11,9 +11,10 @@ from core.views.generic.generic_500 import generic_500
 
 def estimation_recalculate_all_items_view(request: HttpRequest, model_id: int) -> HttpResponse:
     """
-    Recalculate all hours for all items in the estimation using auto-calculation logic.
+    Recalculate all hours and story points for all items in the estimation using auto-calculation logic.
     Uses lead dev hours as the base and applies reverse multipliers, then calculates
-    code review (0.5x), testing (1x), and code reviewer (1x of lead code review) hours.
+    code review (0.5x), testing (1x), code reviewer (1x of lead code review) hours, and story points.
+    Story points calculated as: base_hours / 4 (1 story point ≈ 4 hours), rounded to nearest 0.5.
     """
     try:
         estimation = Estimation.objects.get(id=model_id)
@@ -77,6 +78,9 @@ def estimation_recalculate_all_items_view(request: HttpRequest, model_id: int) -
                     # Calculate code reviewer hours (1x of lead code review hours)
                     item.code_reviewer_hours = item.code_review_hours_lead
 
+                    # Calculate story points based on lead dev base hours
+                    item.story_points = item.calculate_story_points()
+
                 # Save the item with updated fields
                 item.save(update_fields=[
                     'hours_senior', 'hours_mid', 'hours_junior',
@@ -84,7 +88,7 @@ def estimation_recalculate_all_items_view(request: HttpRequest, model_id: int) -
                     'code_review_hours_mid', 'code_review_hours_junior',
                     'tests_hours_lead', 'tests_hours_senior',
                     'tests_hours_mid', 'tests_hours_junior',
-                    'code_reviewer_hours'
+                    'code_reviewer_hours', 'story_points'
                 ])
 
     except Estimation.DoesNotExist:

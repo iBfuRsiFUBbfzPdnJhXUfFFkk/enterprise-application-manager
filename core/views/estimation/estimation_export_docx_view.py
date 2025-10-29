@@ -175,7 +175,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add metadata section
     document.add_heading('Project Information', level=2)
-    table = document.add_table(rows=5, cols=2)
+    table = document.add_table(rows=6, cols=2)
     table.style = 'Light Grid Accent 1'
 
     # Application
@@ -193,8 +193,14 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     row.cells[0].text = 'Contingency Padding'
     row.cells[1].text = f"{float(estimation.contingency_padding_percent or 0):.2f}%"
 
-    # Sprint Count
+    # Total Story Points
     row = table.rows[3]
+    row.cells[0].text = 'Total Story Points'
+    total_points = estimation.get_total_story_points()
+    row.cells[1].text = f"{float(total_points):.1f} points"
+
+    # Sprint Count
+    row = table.rows[4]
     row.cells[0].text = 'Sprint Count'
     if estimation.sprint_duration_weeks and estimation.get_total_team_size() > 0:
         sprint_count = estimation.get_sprint_count()
@@ -210,7 +216,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
             row.cells[1].text = 'N/A (team composition required)'
 
     # Average Hours
-    row = table.rows[4]
+    row = table.rows[5]
     row.cells[0].text = 'Average Hours (All Levels)'
     avg_hours = estimation.get_average_hours_with_uncertainty()
     row.cells[1].text = f"{float(avg_hours):.2f} hours with uncertainty"
@@ -390,7 +396,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     document.add_heading('Estimation Summary', level=2)
     document.add_paragraph('Hours include cone of uncertainty multipliers based on project phase. Contingency is applied to base hours only. Each level represents alternative estimates, not additive totals. Code review time is included in each developer\'s hours.')
 
-    summary_table = document.add_table(rows=17, cols=2)
+    summary_table = document.add_table(rows=19, cols=2)
     summary_table.style = 'Light Grid Accent 1'
 
     # Calculate totals per level
@@ -415,6 +421,8 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         ('  With Uncertainty', estimation.get_total_hours_lead_with_uncertainty()),
         (f'  Contingency ({float(estimation.contingency_padding_percent or 0):.2f}%)', estimation.get_contingency_hours_lead()),
         ('  Grand Total', estimation.get_grand_total_hours_lead()),
+        ('', ''),  # Empty row for spacing
+        ('TOTAL STORY POINTS', estimation.get_total_story_points()),
     ]
 
     # Adjust rows to match the number of totals
@@ -425,7 +433,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         row = summary_table.rows[idx]
         row.cells[0].text = label
         if value == '':
-            # Section headers
+            # Section headers or empty rows
             row.cells[1].text = ''
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
@@ -433,10 +441,14 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                         run.bold = True
                         run.font.size = Pt(9)
         else:
-            row.cells[1].text = f"{float(value):.2f} hours"
+            # Format based on whether it's story points or hours
+            if 'STORY POINTS' in label:
+                row.cells[1].text = f"{float(value):.1f} points"
+            else:
+                row.cells[1].text = f"{float(value):.2f} hours"
 
-            # Make grand total rows bold
-            if 'Grand Total' in label:
+            # Make grand total and story points rows bold
+            if 'Grand Total' in label or 'STORY POINTS' in label:
                 for cell in row.cells:
                     for paragraph in cell.paragraphs:
                         for run in paragraph.runs:

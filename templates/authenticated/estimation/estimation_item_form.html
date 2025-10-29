@@ -51,10 +51,20 @@
                         <label for="{{ form.story_points.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                             Story Points {% if form.story_points.field.required %}<span class="text-red-500">*</span>{% endif %}
                         </label>
-                        <div class="max-w-xs">
-                            {{ form.story_points }}
+                        <div class="flex items-center space-x-2 max-w-md">
+                            <div class="flex-shrink-0" style="width: 120px;">
+                                {{ form.story_points }}
+                            </div>
+                            <button type="button" id="calculate_story_points"
+                                    class="inline-flex items-center px-2 py-1 border border-blue-300 shadow-sm text-xs font-medium rounded text-blue-700 bg-blue-50 hover:bg-blue-100"
+                                    title="Calculate story points based on lead dev base hours (1 point ≈ 4 hours)">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                                Auto-Calculate
+                            </button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Estimate complexity using story points (Fibonacci: 1, 2, 3, 5, 8, 13...)</p>
+                        <p class="mt-1 text-xs text-gray-500">Conventional agile wisdom: 1 story point ≈ 4 hours of ideal work time. Click Auto-Calculate based on lead dev hours.</p>
                         {% if form.story_points.errors %}<p class="mt-2 text-sm text-red-600">{{ form.story_points.errors.0 }}</p>{% endif %}
                     </div>
 
@@ -565,6 +575,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     addStepWithoutValidation();
+
+    // Story point calculation handler
+    document.getElementById('calculate_story_points')?.addEventListener('click', function() {
+        // Get lead dev base hours (dev + code review + testing)
+        const leadDev = parseFloat(document.getElementById('id_hours_lead')?.value) || 0;
+        const leadCodeReview = parseFloat(document.getElementById('id_code_review_hours_lead')?.value) || 0;
+        const leadTests = parseFloat(document.getElementById('id_tests_hours_lead')?.value) || 0;
+
+        const baseHours = leadDev + leadCodeReview + leadTests;
+
+        if (baseHours === 0) {
+            alert('Please enter lead developer hours first (dev, code review, and/or testing).');
+            return;
+        }
+
+        // Calculate story points: 1 point ≈ 4 hours, rounded to nearest 0.5
+        const rawPoints = baseHours / 4.0;
+        const roundedPoints = Math.round(rawPoints * 2) / 2;
+
+        // Set the story points field
+        const storyPointsField = document.getElementById('id_story_points');
+        if (storyPointsField) {
+            storyPointsField.value = roundedPoints.toFixed(1);
+        }
+    });
 });
 </script>
 {% endblock %}
