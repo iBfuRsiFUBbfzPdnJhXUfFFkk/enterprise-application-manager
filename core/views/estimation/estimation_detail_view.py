@@ -69,6 +69,9 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
         'grand_total_lead': estimation.get_grand_total_hours_lead(),
         'average_with_uncertainty': estimation.get_average_hours_with_uncertainty(),
         'total_story_points': estimation.get_total_story_points(),
+        'required_team_velocity_per_sprint': estimation.get_required_team_velocity_per_sprint(),
+        'required_velocity_per_developer_per_sprint': estimation.get_required_velocity_per_developer_per_sprint(),
+        'required_velocity_per_week': estimation.get_required_velocity_per_week(),
     }
 
     context: Mapping[str, Any] = {

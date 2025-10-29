@@ -302,6 +302,42 @@
                             </div>
                         {% endif %}
 
+                        {% if totals.required_team_velocity_per_sprint %}
+                            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-green-500">
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Required Team Velocity</dt>
+                                <dd class="text-4xl font-bold text-green-600">
+                                    {{ totals.required_team_velocity_per_sprint|floatformat:1 }} <span class="text-2xl">pts/sprint</span>
+                                </dd>
+                                <dd class="text-sm text-gray-600 mt-2">
+                                    Story points per sprint needed
+                                </dd>
+                            </div>
+                        {% endif %}
+
+                        {% if totals.required_velocity_per_developer_per_sprint %}
+                            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-teal-500">
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Per Developer Velocity</dt>
+                                <dd class="text-4xl font-bold text-teal-600">
+                                    {{ totals.required_velocity_per_developer_per_sprint|floatformat:2 }} <span class="text-2xl">pts/sprint</span>
+                                </dd>
+                                <dd class="text-sm text-gray-600 mt-2">
+                                    Per person ({{ model.get_total_team_size }} developer{{ model.get_total_team_size|pluralize }})
+                                </dd>
+                            </div>
+                        {% endif %}
+
+                        {% if totals.required_velocity_per_week %}
+                            <div class="bg-white p-6 rounded-lg shadow border-l-4 border-indigo-500">
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Weekly Velocity</dt>
+                                <dd class="text-4xl font-bold text-indigo-600">
+                                    {{ totals.required_velocity_per_week|floatformat:1 }} <span class="text-2xl">pts/week</span>
+                                </dd>
+                                <dd class="text-sm text-gray-600 mt-2">
+                                    Alternative weekly view
+                                </dd>
+                            </div>
+                        {% endif %}
+
                         {% if model.get_bottleneck_level %}
                             <div class="bg-white p-6 rounded-lg shadow">
                                 <dt class="text-sm font-medium text-gray-500 mb-2">Bottleneck Level</dt>
@@ -324,6 +360,13 @@
                             The project completes when the slowest level finishes (the bottleneck). This estimate assumes each level has dedicated work
                             and developers work simultaneously at 40 hours per week.
                         </p>
+                        {% if totals.required_team_velocity_per_sprint %}
+                        <p class="text-sm text-gray-700 mt-3">
+                            <strong class="text-green-900">Required Velocity:</strong> To complete this estimation on schedule, your team needs to maintain
+                            a velocity of <strong>{{ totals.required_team_velocity_per_sprint|floatformat:1 }} story points per sprint</strong>.
+                            Compare this to your team's historical velocity to assess if the timeline is realistic.
+                        </p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

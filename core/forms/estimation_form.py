@@ -35,6 +35,17 @@ class EstimationForm(BaseModelForm):
         if not self.instance.pk and 'contingency_padding_percent' not in self.initial:
             self.initial['contingency_padding_percent'] = 20.0
 
+        # Configure story points modifier field to allow any decimal
+        if 'story_points_modifier' in self.fields:
+            self.fields['story_points_modifier'].widget.attrs.update({
+                'step': 'any',
+                'min': '0.01'
+            })
+
+        # Set default story points modifier if creating new estimation
+        if not self.instance.pk and 'story_points_modifier' not in self.initial:
+            self.initial['story_points_modifier'] = 1.0
+
         # Set default sprint duration if creating new estimation
         if not self.instance.pk and 'sprint_duration_weeks' not in self.initial:
             self.initial['sprint_duration_weeks'] = 3

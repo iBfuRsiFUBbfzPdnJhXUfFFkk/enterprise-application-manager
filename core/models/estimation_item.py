@@ -188,6 +188,7 @@ class EstimationItem(AbstractBaseModel):
         """
         Calculate suggested story points based on lead developer base hours.
         Uses conventional agile wisdom: 1 story point ≈ 4 hours of ideal work time.
+        Applies the estimation's story_points_modifier to calibrate for team velocity.
         Rounds to nearest 0.5 for practical use.
         """
         base_hours = self.get_base_hours_lead()
@@ -196,6 +197,10 @@ class EstimationItem(AbstractBaseModel):
 
         # 1 story point = 4 hours of ideal work time (conventional agile wisdom)
         raw_points = base_hours / Decimal('4.0')
+
+        # Apply the estimation's story points modifier if available
+        if self.estimation and self.estimation.story_points_modifier:
+            raw_points = raw_points * self.estimation.story_points_modifier
 
         # Round to nearest 0.5
         rounded_points = round(float(raw_points) * 2) / 2

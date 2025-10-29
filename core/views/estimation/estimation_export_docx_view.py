@@ -178,7 +178,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add metadata section
     document.add_heading('Project Information', level=2)
-    table = document.add_table(rows=6, cols=2)
+    table = document.add_table(rows=9, cols=2)
     table.style = 'Light Grid Accent 1'
 
     # Application
@@ -218,8 +218,35 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         else:
             row.cells[1].text = 'N/A (team composition required)'
 
-    # Average Hours
+    # Required Team Velocity
     row = table.rows[5]
+    row.cells[0].text = 'Required Team Velocity'
+    team_velocity = estimation.get_required_team_velocity_per_sprint()
+    if team_velocity:
+        row.cells[1].text = f"{float(team_velocity):.1f} story points per sprint"
+    else:
+        row.cells[1].text = 'N/A (requires sprint count)'
+
+    # Required Per-Developer Velocity
+    row = table.rows[6]
+    row.cells[0].text = 'Required Per-Developer Velocity'
+    dev_velocity = estimation.get_required_velocity_per_developer_per_sprint()
+    if dev_velocity:
+        row.cells[1].text = f"{float(dev_velocity):.2f} story points per sprint per developer"
+    else:
+        row.cells[1].text = 'N/A (requires sprint count and team size)'
+
+    # Required Weekly Velocity
+    row = table.rows[7]
+    row.cells[0].text = 'Required Weekly Velocity'
+    weekly_velocity = estimation.get_required_velocity_per_week()
+    if weekly_velocity:
+        row.cells[1].text = f"{float(weekly_velocity):.1f} story points per week"
+    else:
+        row.cells[1].text = 'N/A (requires project duration)'
+
+    # Average Hours
+    row = table.rows[8]
     row.cells[0].text = 'Average Hours (All Levels)'
     avg_hours = estimation.get_average_hours_with_uncertainty()
     row.cells[1].text = f"{float(avg_hours):.2f} hours with uncertainty"
@@ -241,8 +268,8 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         combined_para.add_run('Based on your team composition, this is the realistic project timeline assuming all developer levels work in parallel on their assigned tasks. Code review time is included in each developer\'s hours.').font.size = Pt(10)
         document.add_paragraph()
 
-        # Determine number of rows needed (6 rows total)
-        num_rows = 6
+        # Determine number of rows needed (9 rows total)
+        num_rows = 9
 
         # Create table for combined estimate
         combined_table = document.add_table(rows=num_rows, cols=2)
@@ -283,6 +310,36 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 row.cells[1].text = 'N/A'
         else:
             row.cells[1].text = 'N/A (sprint duration not configured)'
+        row_idx += 1
+
+        # Required Team Velocity
+        row = combined_table.rows[row_idx]
+        row.cells[0].text = 'Required Team Velocity'
+        team_velocity = estimation.get_required_team_velocity_per_sprint()
+        if team_velocity:
+            row.cells[1].text = f"{float(team_velocity):.1f} story points per sprint"
+        else:
+            row.cells[1].text = 'N/A (requires sprint count)'
+        row_idx += 1
+
+        # Required Per-Developer Velocity
+        row = combined_table.rows[row_idx]
+        row.cells[0].text = 'Required Per-Developer Velocity'
+        dev_velocity = estimation.get_required_velocity_per_developer_per_sprint()
+        if dev_velocity:
+            row.cells[1].text = f"{float(dev_velocity):.2f} story points per sprint per developer"
+        else:
+            row.cells[1].text = 'N/A (requires sprint count and team size)'
+        row_idx += 1
+
+        # Required Weekly Velocity
+        row = combined_table.rows[row_idx]
+        row.cells[0].text = 'Required Weekly Velocity'
+        weekly_velocity = estimation.get_required_velocity_per_week()
+        if weekly_velocity:
+            row.cells[1].text = f"{float(weekly_velocity):.1f} story points per week"
+        else:
+            row.cells[1].text = 'N/A (requires project duration)'
         row_idx += 1
 
         # Bottleneck level

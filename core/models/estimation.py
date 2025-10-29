@@ -35,6 +35,16 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     # Contingency padding as a percentage (e.g., 20 for 20%)
     contingency_padding_percent = create_generic_decimal()
 
+    # Story points modifier for team calibration (multiplier applied to auto-calculated story points)
+    # Default 1.0 = standard calculation (1 point ≈ 4 hours)
+    # > 1.0 = increases story points, < 1.0 = decreases story points
+    story_points_modifier = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=1.0,
+        help_text="Multiplier for auto-calculated story points to calibrate to your team's velocity (default: 1.0)"
+    )
+
     # Sprint duration in weeks (for sprint calculation)
     sprint_duration_weeks = create_generic_integer()
 
@@ -293,6 +303,48 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         # Calculate sprints and round up (can't have partial sprints)
         import math
         return math.ceil(float(duration_weeks) / float(self.sprint_duration_weeks))
+
+    def get_required_team_velocity_per_sprint(self):
+        """
+        Calculate the required team velocity (story points per sprint) to complete the estimation on time.
+        This is the total story points divided by the number of sprints.
+        Returns None if sprint count cannot be calculated.
+        """
+        sprint_count = self.get_sprint_count()
+        if sprint_count is None or sprint_count == 0:
+            return None
+
+        total_story_points = self.get_total_story_points()
+        return Decimal(str(total_story_points)) / Decimal(str(sprint_count))
+
+    def get_required_velocity_per_developer_per_sprint(self):
+        """
+        Calculate the required velocity per developer per sprint.
+        This is the total story points divided by (sprint count * team size).
+        Helps assess if the individual workload is reasonable.
+        Returns None if team size is 0 or sprint count cannot be calculated.
+        """
+        sprint_count = self.get_sprint_count()
+        team_size = self.get_total_team_size()
+
+        if sprint_count is None or sprint_count == 0 or team_size == 0:
+            return None
+
+        total_story_points = self.get_total_story_points()
+        return Decimal(str(total_story_points)) / (Decimal(str(sprint_count)) * Decimal(str(team_size)))
+
+    def get_required_velocity_per_week(self):
+        """
+        Calculate the required velocity per week (story points per week).
+        Alternative view for teams that think in weekly rather than sprint cadences.
+        Returns None if project duration cannot be calculated.
+        """
+        duration_weeks = self.get_combined_project_duration_weeks()
+        if duration_weeks is None or duration_weeks == 0:
+            return None
+
+        total_story_points = self.get_total_story_points()
+        return Decimal(str(total_story_points)) / duration_weeks
 
     def __str__(self):
         return f"{self.name}"

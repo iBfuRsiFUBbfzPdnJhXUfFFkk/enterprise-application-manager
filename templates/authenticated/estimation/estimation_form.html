@@ -56,6 +56,15 @@
                     </div>
 
                     <div>
+                        <label for="{{ form.story_points_modifier.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Story Points Modifier
+                        </label>
+                        {{ form.story_points_modifier }}
+                        <p class="mt-1 text-xs text-gray-500">Multiplier for auto-calculated story points to calibrate to your team's velocity (default: 1.0, >1.0 increases points, &lt;1.0 decreases points)</p>
+                        {% if form.story_points_modifier.errors %}<p class="mt-2 text-sm text-red-600">{{ form.story_points_modifier.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
                         <label for="{{ form.sprint_duration_weeks.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                             Sprint Duration (Weeks)
                         </label>
