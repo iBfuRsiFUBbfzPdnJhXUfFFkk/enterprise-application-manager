@@ -62,49 +62,59 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
-    document.add_paragraph('Hours shown include development, code review, and testing time with cone of uncertainty multipliers applied. Reviewer hours (lead dev reviewing code) are shown separately without uncertainty multipliers.')
+    document.add_paragraph('Hours include development, code review, and testing with cone of uncertainty multipliers applied. Reviewer hours shown separately without uncertainty.')
 
     items = estimation.items.all().order_by('order', 'id')
 
     if items:
         # Create table for items (hours with uncertainty applied)
-        table = document.add_table(rows=1, cols=11)
+        table = document.add_table(rows=1, cols=10)
         table.style = 'Light Grid Accent 1'
 
         # Header row
         header_cells = table.rows[0].cells
         header_cells[0].text = 'Title'
-        header_cells[1].text = 'Story Points'
-        header_cells[2].text = 'Description'
-        header_cells[3].text = 'Complexity'
-        header_cells[4].text = 'Priority'
-        header_cells[5].text = 'Cone of Uncertainty'
-        header_cells[6].text = 'Junior Hrs'
-        header_cells[7].text = 'Mid Hrs'
-        header_cells[8].text = 'Senior Hrs'
-        header_cells[9].text = 'Lead Hrs'
-        header_cells[10].text = 'Reviewer Hrs'
+        header_cells[1].text = 'Pts'
+        header_cells[2].text = 'Cmplx'
+        header_cells[3].text = 'Prior'
+        header_cells[4].text = 'CoU'
+        header_cells[5].text = 'Jr'
+        header_cells[6].text = 'Mid'
+        header_cells[7].text = 'Sr'
+        header_cells[8].text = 'Lead'
+        header_cells[9].text = 'Rev'
 
-        # Make header bold
+        # Make header bold and smaller font
         for cell in header_cells:
             for paragraph in cell.paragraphs:
                 for run in paragraph.runs:
                     run.bold = True
+                    run.font.size = Pt(9)
 
         # Add items (showing hours with uncertainty applied)
         for item in items:
             row_cells = table.add_row().cells
-            row_cells[0].text = item.title if item.title else '(No title)'
-            row_cells[1].text = f"{float(item.story_points or 0):.1f}"
-            row_cells[2].text = item.description if item.description else ''
-            row_cells[3].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
-            row_cells[4].text = item.get_priority_display() if item.priority else 'N/A'
-            row_cells[5].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
-            row_cells[6].text = f"{float(item.get_junior_hours_with_uncertainty()):.2f}"
-            row_cells[7].text = f"{float(item.get_mid_hours_with_uncertainty()):.2f}"
-            row_cells[8].text = f"{float(item.get_senior_hours_with_uncertainty()):.2f}"
-            row_cells[9].text = f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
-            row_cells[10].text = f"{float(item.get_reviewer_hours()):.2f}"
+
+            # Set text content
+            contents = [
+                item.title if item.title else '(No title)',
+                f"{float(item.story_points or 0):.1f}",
+                item.get_complexity_level_display() if item.complexity_level else 'N/A',
+                item.get_priority_display() if item.priority else 'N/A',
+                item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A',
+                f"{float(item.get_junior_hours_with_uncertainty()):.2f}",
+                f"{float(item.get_mid_hours_with_uncertainty()):.2f}",
+                f"{float(item.get_senior_hours_with_uncertainty()):.2f}",
+                f"{float(item.get_lead_hours_with_uncertainty()):.2f}",
+                f"{float(item.get_reviewer_hours()):.2f}"
+            ]
+
+            for idx, content in enumerate(contents):
+                row_cells[idx].text = content
+                # Set font size for the paragraph
+                for paragraph in row_cells[idx].paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(9)
 
     else:
         document.add_paragraph('No estimation items added yet.')
@@ -113,7 +123,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add summary section
     document.add_heading('Estimation Summary', level=2)
-    document.add_paragraph('Hours shown include cone of uncertainty multipliers. Each level represents alternative estimates, not additive totals.')
+    document.add_paragraph('Hours include cone of uncertainty multipliers. Each level represents alternative estimates, not additive totals.')
 
     summary_table = document.add_table(rows=17, cols=2)
     summary_table.style = 'Light Grid Accent 1'
@@ -160,6 +170,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
                         run.bold = True
+                        run.font.size = Pt(9)
         else:
             row.cells[1].text = f"{float(value):.2f} hours"
 
@@ -169,6 +180,13 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     for paragraph in cell.paragraphs:
                         for run in paragraph.runs:
                             run.bold = True
+                            run.font.size = Pt(9)
+            else:
+                # Regular rows - make smaller
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(9)
 
     # Save document to BytesIO
     buffer = BytesIO()
