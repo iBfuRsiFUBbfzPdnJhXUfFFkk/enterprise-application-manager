@@ -120,7 +120,7 @@
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Code Review Hours</h3>
-                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill with same multipliers.</p>
+                                <p class="text-sm text-gray-500 mt-1">Auto-filled at 0.5× (50%) of development hours for each level. You can override any value.</p>
                             </div>
                             <button type="button" id="recalculate_code_review_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,6 +394,26 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Auto-populate code review hours as 0.5x of dev hours
+    function autoPopulateCodeReview() {
+        const levels = ['lead', 'senior', 'mid', 'junior'];
+
+        levels.forEach(level => {
+            const devField = document.getElementById(`id_hours_${level}`);
+            const codeReviewField = document.getElementById(`id_code_review_hours_${level}`);
+
+            if (!devField || !codeReviewField) return;
+
+            devField.addEventListener('input', function() {
+                const devValue = parseFloat(devField.value) || 0;
+                // Only auto-populate if code review field is empty or zero
+                if (codeReviewField.value === '' || parseFloat(codeReviewField.value) === 0) {
+                    codeReviewField.value = (devValue * 0.5).toFixed(2);
+                }
+            });
+        });
+    }
+
     // Force recalculation function (ignores current values)
     function forceRecalculate(leadFieldId, seniorFieldId, midFieldId, juniorFieldId) {
         const leadField = document.getElementById(leadFieldId);
@@ -409,18 +429,35 @@ document.addEventListener('DOMContentLoaded', function() {
         if (juniorField) juniorField.value = (leadValue * 3).toFixed(2);
     }
 
+    // Force recalculate code review hours as 0.5x dev hours
+    function forceRecalculateCodeReview() {
+        const levels = ['lead', 'senior', 'mid', 'junior'];
+
+        levels.forEach(level => {
+            const devField = document.getElementById(`id_hours_${level}`);
+            const codeReviewField = document.getElementById(`id_code_review_hours_${level}`);
+
+            if (devField && codeReviewField) {
+                const devValue = parseFloat(devField.value) || 0;
+                codeReviewField.value = (devValue * 0.5).toFixed(2);
+            }
+        });
+    }
+
     // Apply auto-population to all three categories
     autoPopulate('id_hours_lead', 'id_hours_senior', 'id_hours_mid', 'id_hours_junior');
-    autoPopulate('id_code_review_hours_lead', 'id_code_review_hours_senior', 'id_code_review_hours_mid', 'id_code_review_hours_junior');
+    autoPopulateCodeReview(); // New: auto-populate code review as 0.5x dev hours
     autoPopulate('id_tests_hours_lead', 'id_tests_hours_senior', 'id_tests_hours_mid', 'id_tests_hours_junior');
 
     // Attach recalculate button handlers
     document.getElementById('recalculate_dev_hours')?.addEventListener('click', function() {
         forceRecalculate('id_hours_lead', 'id_hours_senior', 'id_hours_mid', 'id_hours_junior');
+        // Also update code review hours when dev hours are recalculated
+        forceRecalculateCodeReview();
     });
 
     document.getElementById('recalculate_code_review_hours')?.addEventListener('click', function() {
-        forceRecalculate('id_code_review_hours_lead', 'id_code_review_hours_senior', 'id_code_review_hours_mid', 'id_code_review_hours_junior');
+        forceRecalculateCodeReview();
     });
 
     document.getElementById('recalculate_tests_hours')?.addEventListener('click', function() {
