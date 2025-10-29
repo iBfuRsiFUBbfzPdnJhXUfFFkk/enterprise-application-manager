@@ -61,6 +61,14 @@ class EstimationItem(AbstractBaseModel):
     # Order within the estimation
     order = create_generic_integer()
 
+    # Optional group/category for logical organization
+    group = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text="Optional category/group name for organizing related items (e.g., 'Frontend', 'Backend', 'Database')"
+    )
+
     # Item details
     title = create_generic_varchar()
     description = create_generic_text()
@@ -110,6 +118,13 @@ class EstimationItem(AbstractBaseModel):
         if self.cone_of_uncertainty:
             return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, Decimal('1.0'))
         return Decimal('1.0')
+
+    def get_group_display(self):
+        """
+        Get the display name for the group.
+        Returns the group name if set, otherwise returns 'Ungrouped'.
+        """
+        return self.group if self.group else 'Ungrouped'
 
     # Base hours (without uncertainty) for each developer level
     def get_base_hours_junior(self):

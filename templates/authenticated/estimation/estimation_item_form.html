@@ -48,6 +48,18 @@
                     </div>
 
                     <div>
+                        <label for="{{ form.group.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Group {% if form.group.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        {{ form.group }}
+                        <datalist id="group-datalist">
+                            {# Dynamically populated via JavaScript from existing groups #}
+                        </datalist>
+                        <p class="mt-1 text-xs text-gray-500">Optional category to logically group related items (e.g., Frontend, Backend, Database). Leave blank if not needed.</p>
+                        {% if form.group.errors %}<p class="mt-2 text-sm text-red-600">{{ form.group.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
                         <label for="{{ form.story_points.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                             Story Points {% if form.story_points.field.required %}<span class="text-red-500">*</span>{% endif %}
                         </label>
@@ -443,6 +455,21 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Populate group datalist with existing groups from the estimation
+    const groupField = document.getElementById('{{ form.group.id_for_label }}');
+    if (groupField) {
+        const existingGroups = groupField.getAttribute('data-existing-groups');
+        if (existingGroups) {
+            const datalist = document.getElementById('group-datalist');
+            const groups = existingGroups.split('|').filter(g => g.trim() !== '');
+            groups.forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                datalist.appendChild(option);
+            });
+        }
+    }
+
     // Markdown Preview functionality
     const descriptionField = document.getElementById('{{ form.description.id_for_label }}');
     const previewDiv = document.getElementById('description_preview');

@@ -1,9 +1,11 @@
 from datetime import datetime, timezone
 from io import BytesIO
+from collections import OrderedDict
+from decimal import Decimal
 
 from django.http import HttpRequest, HttpResponse
 from docx import Document
-from docx.shared import Inches, Pt
+from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from core.models.estimation import Estimation
@@ -340,6 +342,33 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     items = estimation.items.all().order_by('order', 'id')
 
+    # Group items by their group field with subtotals
+    grouped_items = OrderedDict()
+    grouped_items['Ungrouped'] = {'items': [], 'subtotals': {}}
+
+    for item in items:
+        group_name = item.group if item.group else 'Ungrouped'
+        if group_name not in grouped_items:
+            grouped_items[group_name] = {'items': [], 'subtotals': {}}
+        grouped_items[group_name]['items'].append(item)
+
+    # Remove Ungrouped if it's empty
+    if not grouped_items['Ungrouped']['items']:
+        del grouped_items['Ungrouped']
+
+    # Calculate subtotals for each group
+    for group_name, group_data in grouped_items.items():
+        group_items_list = group_data['items']
+        subtotals = {
+            'story_points': sum(item.story_points or Decimal('0') for item in group_items_list),
+            'junior_with_uncertainty': sum(item.get_junior_hours_with_uncertainty() for item in group_items_list),
+            'mid_with_uncertainty': sum(item.get_mid_hours_with_uncertainty() for item in group_items_list),
+            'senior_with_uncertainty': sum(item.get_senior_hours_with_uncertainty() for item in group_items_list),
+            'lead_with_uncertainty': sum(item.get_lead_hours_with_uncertainty() for item in group_items_list),
+            'reviewer_hours': sum(item.get_reviewer_hours() for item in group_items_list),
+        }
+        group_data['subtotals'] = subtotals
+
     if items:
         # Create table for items (hours with uncertainty applied)
         table = document.add_table(rows=1, cols=10)
@@ -365,30 +394,67 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     run.bold = True
                     run.font.size = Pt(9)
 
-        # Add items (showing hours with uncertainty applied)
-        for idx, item in enumerate(items, start=1):
-            row_cells = table.add_row().cells
+        # Add items grouped with headers and subtotals
+        item_counter = 1
+        for group_name, group_data in grouped_items.items():
+            # Add group header row
+            group_row_cells = table.add_row().cells
+            # Merge all cells for group header
+            group_row_cells[0].text = f"📁 {group_name}"
+            group_row_cells[0].merge(group_row_cells[9])
 
-            # Set text content with ID as first column
-            item_ref = f"ITEM-{idx:03d}"
-            contents = [
-                item_ref,
-                item.title if item.title else '(No title)',
-                f"{float(item.story_points or 0):.1f}",
-                item.get_complexity_level_display() if item.complexity_level else 'N/A',
-                item.get_priority_display() if item.priority else 'N/A',
-                item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A',
-                f"{float(item.get_junior_hours_with_uncertainty()):.2f}",
-                f"{float(item.get_mid_hours_with_uncertainty()):.2f}",
-                f"{float(item.get_senior_hours_with_uncertainty()):.2f}",
-                f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
-            ]
+            # Make group header bold and slightly larger
+            for paragraph in group_row_cells[0].paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+                    run.font.size = Pt(10)
 
-            for col_idx, content in enumerate(contents):
-                row_cells[col_idx].text = content
-                # Set font size for the paragraph
-                for paragraph in row_cells[col_idx].paragraphs:
+            # Add items in this group
+            for item in group_data['items']:
+                row_cells = table.add_row().cells
+
+                # Set text content with ID as first column
+                item_ref = f"ITEM-{item_counter:03d}"
+                contents = [
+                    item_ref,
+                    item.title if item.title else '(No title)',
+                    f"{float(item.story_points or 0):.1f}",
+                    item.get_complexity_level_display() if item.complexity_level else 'N/A',
+                    item.get_priority_display() if item.priority else 'N/A',
+                    item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A',
+                    f"{float(item.get_junior_hours_with_uncertainty()):.2f}",
+                    f"{float(item.get_mid_hours_with_uncertainty()):.2f}",
+                    f"{float(item.get_senior_hours_with_uncertainty()):.2f}",
+                    f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
+                ]
+
+                for col_idx, content in enumerate(contents):
+                    row_cells[col_idx].text = content
+                    # Set font size for the paragraph
+                    for paragraph in row_cells[col_idx].paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(9)
+
+                item_counter += 1
+
+            # Add subtotal row for this group
+            subtotal_row_cells = table.add_row().cells
+            subtotal_row_cells[0].text = f"{group_name} Subtotal"
+            subtotal_row_cells[1].text = ""
+            subtotal_row_cells[2].text = f"{float(group_data['subtotals']['story_points']):.1f}"
+            subtotal_row_cells[3].text = ""
+            subtotal_row_cells[4].text = ""
+            subtotal_row_cells[5].text = ""
+            subtotal_row_cells[6].text = f"{float(group_data['subtotals']['junior_with_uncertainty']):.2f}"
+            subtotal_row_cells[7].text = f"{float(group_data['subtotals']['mid_with_uncertainty']):.2f}"
+            subtotal_row_cells[8].text = f"{float(group_data['subtotals']['senior_with_uncertainty']):.2f}"
+            subtotal_row_cells[9].text = f"{float(group_data['subtotals']['lead_with_uncertainty']):.2f}"
+
+            # Make subtotal row bold
+            for cell in subtotal_row_cells:
+                for paragraph in cell.paragraphs:
                     for run in paragraph.runs:
+                        run.bold = True
                         run.font.size = Pt(9)
 
     else:
@@ -471,110 +537,118 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         document.add_heading('Detailed Item Descriptions', level=1)
         detail_para = document.add_paragraph()
         detail_para.add_run('This section provides detailed information for each estimation item, including full descriptions. ').font.size = Pt(10)
-        detail_para.add_run('Reference the item ID to cross-reference with the summary table above.').font.size = Pt(10)
+        detail_para.add_run('Items are organized by group. Reference the item ID to cross-reference with the summary table above.').font.size = Pt(10)
         document.add_paragraph()
 
-        # Add detailed entry for each item
-        for idx, item in enumerate(items, start=1):
-            item_ref = f"ITEM-{idx:03d}"
-
-            # Add item reference ID as heading
-            item_heading = document.add_heading(f"{item_ref}: {item.title if item.title else '(No title)'}", level=2)
-
-            # Add metadata table for the item
-            meta_table = document.add_table(rows=6, cols=2)
-            meta_table.style = 'Light Grid Accent 1'
-
-            meta_table.rows[0].cells[0].text = 'Story Points'
-            meta_table.rows[0].cells[1].text = f"{float(item.story_points or 0):.1f}"
-
-            meta_table.rows[1].cells[0].text = 'Complexity'
-            meta_table.rows[1].cells[1].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
-
-            meta_table.rows[2].cells[0].text = 'Priority'
-            meta_table.rows[2].cells[1].text = item.get_priority_display() if item.priority else 'N/A'
-
-            meta_table.rows[3].cells[0].text = 'Cone of Uncertainty'
-            meta_table.rows[3].cells[1].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
-
-            # Add hours breakdown
-            meta_table.rows[4].cells[0].text = 'Hours (Jr/Mid/Sr/Lead)'
-            hours_str = f"{float(item.get_junior_hours_with_uncertainty()):.1f} / {float(item.get_mid_hours_with_uncertainty()):.1f} / {float(item.get_senior_hours_with_uncertainty()):.1f} / {float(item.get_lead_hours_with_uncertainty()):.1f}"
-            meta_table.rows[4].cells[1].text = hours_str
-
-            # Add base hours
-            meta_table.rows[5].cells[0].text = 'Base Hours (Lead)'
-            base_hours = (item.hours_lead or 0) + (item.code_review_hours_lead or 0) + (item.tests_hours_lead or 0)
-            meta_table.rows[5].cells[1].text = f"{float(base_hours):.1f}"
-
-            # Make all text in table smaller
-            for row in meta_table.rows:
-                for cell in row.cells:
-                    for paragraph in cell.paragraphs:
-                        for run in paragraph.runs:
-                            run.font.size = Pt(9)
-
+        # Add detailed entry for each item grouped by category
+        item_counter = 1
+        for group_name, group_data in grouped_items.items():
+            # Add group header
+            group_heading = document.add_heading(f"📁 {group_name}", level=2)
             document.add_paragraph()
 
-            # Add description section
-            if item.description:
-                document.add_heading('Description', level=3)
-                # Basic markdown rendering
-                description_lines = item.description.split('\n')
+            # Add items in this group
+            for item in group_data['items']:
+                item_ref = f"ITEM-{item_counter:03d}"
 
-                for line in description_lines:
-                    line = line.strip()
-                    if not line:
-                        document.add_paragraph()
-                        continue
+                # Add item reference ID as heading
+                item_heading = document.add_heading(f"{item_ref}: {item.title if item.title else '(No title)'}", level=3)
 
-                    # Handle headings
-                    if line.startswith('# '):
-                        document.add_heading(line[2:], level=4)
-                    elif line.startswith('## '):
-                        document.add_heading(line[3:], level=5)
-                    elif line.startswith('### '):
-                        document.add_heading(line[4:], level=6)
-                    # Handle bullet lists
-                    elif line.startswith('- ') or line.startswith('* '):
-                        p = document.add_paragraph(line[2:], style='List Bullet')
-                        for run in p.runs:
-                            run.font.size = Pt(10)
-                    # Handle numbered lists
-                    elif len(line) > 2 and line[0].isdigit() and line[1:3] in ['. ', ') ']:
-                        p = document.add_paragraph(line[3:], style='List Number')
-                        for run in p.runs:
-                            run.font.size = Pt(10)
-                    # Handle code blocks
-                    elif line.startswith('```'):
-                        continue  # Skip code fence markers
-                    # Regular paragraph
-                    else:
-                        p = document.add_paragraph()
-                        # Simple inline markdown: **bold** and *italic*
-                        import re
-                        # Replace **bold**
-                        parts = re.split(r'(\*\*.*?\*\*)', line)
-                        for part in parts:
-                            if part.startswith('**') and part.endswith('**'):
-                                run = p.add_run(part[2:-2])
-                                run.bold = True
+                # Add metadata table for the item
+                meta_table = document.add_table(rows=6, cols=2)
+                meta_table.style = 'Light Grid Accent 1'
+
+                meta_table.rows[0].cells[0].text = 'Story Points'
+                meta_table.rows[0].cells[1].text = f"{float(item.story_points or 0):.1f}"
+
+                meta_table.rows[1].cells[0].text = 'Complexity'
+                meta_table.rows[1].cells[1].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
+
+                meta_table.rows[2].cells[0].text = 'Priority'
+                meta_table.rows[2].cells[1].text = item.get_priority_display() if item.priority else 'N/A'
+
+                meta_table.rows[3].cells[0].text = 'Cone of Uncertainty'
+                meta_table.rows[3].cells[1].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
+
+                # Add hours breakdown
+                meta_table.rows[4].cells[0].text = 'Hours (Jr/Mid/Sr/Lead)'
+                hours_str = f"{float(item.get_junior_hours_with_uncertainty()):.1f} / {float(item.get_mid_hours_with_uncertainty()):.1f} / {float(item.get_senior_hours_with_uncertainty()):.1f} / {float(item.get_lead_hours_with_uncertainty()):.1f}"
+                meta_table.rows[4].cells[1].text = hours_str
+
+                # Add base hours
+                meta_table.rows[5].cells[0].text = 'Base Hours (Lead)'
+                base_hours = (item.hours_lead or 0) + (item.code_review_hours_lead or 0) + (item.tests_hours_lead or 0)
+                meta_table.rows[5].cells[1].text = f"{float(base_hours):.1f}"
+
+                # Make all text in table smaller
+                for row in meta_table.rows:
+                    for cell in row.cells:
+                        for paragraph in cell.paragraphs:
+                            for run in paragraph.runs:
+                                run.font.size = Pt(9)
+
+                document.add_paragraph()
+
+                # Add description section
+                if item.description:
+                    document.add_heading('Description', level=4)
+                    # Basic markdown rendering
+                    description_lines = item.description.split('\n')
+
+                    for line in description_lines:
+                        line = line.strip()
+                        if not line:
+                            document.add_paragraph()
+                            continue
+
+                        # Handle headings
+                        if line.startswith('# '):
+                            document.add_heading(line[2:], level=5)
+                        elif line.startswith('## '):
+                            document.add_heading(line[3:], level=6)
+                        elif line.startswith('### '):
+                            document.add_heading(line[4:], level=6)
+                        # Handle bullet lists
+                        elif line.startswith('- ') or line.startswith('* '):
+                            p = document.add_paragraph(line[2:], style='List Bullet')
+                            for run in p.runs:
                                 run.font.size = Pt(10)
-                            else:
-                                # Replace *italic*
-                                italic_parts = re.split(r'(\*.*?\*)', part)
-                                for italic_part in italic_parts:
-                                    if italic_part.startswith('*') and italic_part.endswith('*') and not italic_part.startswith('**'):
-                                        run = p.add_run(italic_part[1:-1])
-                                        run.italic = True
-                                        run.font.size = Pt(10)
-                                    else:
-                                        run = p.add_run(italic_part)
-                                        run.font.size = Pt(10)
-            else:
-                document.add_paragraph('No description provided.')
+                        # Handle numbered lists
+                        elif len(line) > 2 and line[0].isdigit() and line[1:3] in ['. ', ') ']:
+                            p = document.add_paragraph(line[3:], style='List Number')
+                            for run in p.runs:
+                                run.font.size = Pt(10)
+                        # Handle code blocks
+                        elif line.startswith('```'):
+                            continue  # Skip code fence markers
+                        # Regular paragraph
+                        else:
+                            p = document.add_paragraph()
+                            # Simple inline markdown: **bold** and *italic*
+                            import re
+                            # Replace **bold**
+                            parts = re.split(r'(\*\*.*?\*\*)', line)
+                            for part in parts:
+                                if part.startswith('**') and part.endswith('**'):
+                                    run = p.add_run(part[2:-2])
+                                    run.bold = True
+                                    run.font.size = Pt(10)
+                                else:
+                                    # Replace *italic*
+                                    italic_parts = re.split(r'(\*.*?\*)', part)
+                                    for italic_part in italic_parts:
+                                        if italic_part.startswith('*') and italic_part.endswith('*') and not italic_part.startswith('**'):
+                                            run = p.add_run(italic_part[1:-1])
+                                            run.italic = True
+                                            run.font.size = Pt(10)
+                                        else:
+                                            run = p.add_run(italic_part)
+                                            run.font.size = Pt(10)
+                else:
+                    document.add_paragraph('No description provided.')
 
-            document.add_paragraph()  # Add spacing between items
+                document.add_paragraph()  # Add spacing between items
+                item_counter += 1
 
     # Save document to BytesIO
     buffer = BytesIO()

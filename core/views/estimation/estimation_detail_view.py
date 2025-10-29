@@ -1,4 +1,6 @@
 from typing import Mapping, Any
+from collections import OrderedDict
+from decimal import Decimal
 from django.http import HttpRequest, HttpResponse
 
 from core.models.estimation import Estimation
@@ -14,6 +16,34 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
 
     # Get all items for this estimation, ordered by the order field
     items = estimation.items.all().order_by('order', 'id')
+
+    # Group items by their group field with subtotals
+    grouped_items = OrderedDict()
+    # Put ungrouped items first (None or empty string)
+    grouped_items['Ungrouped'] = {'items': [], 'subtotals': {}}
+
+    for item in items:
+        group_name = item.group if item.group else 'Ungrouped'
+        if group_name not in grouped_items:
+            grouped_items[group_name] = {'items': [], 'subtotals': {}}
+        grouped_items[group_name]['items'].append(item)
+
+    # Remove Ungrouped if it's empty
+    if not grouped_items['Ungrouped']['items']:
+        del grouped_items['Ungrouped']
+
+    # Calculate subtotals for each group
+    for group_name, group_data in grouped_items.items():
+        group_items_list = group_data['items']
+        subtotals = {
+            'story_points': sum(item.story_points or Decimal('0') for item in group_items_list),
+            'junior_with_uncertainty': sum(item.get_junior_hours_with_uncertainty() for item in group_items_list),
+            'mid_with_uncertainty': sum(item.get_mid_hours_with_uncertainty() for item in group_items_list),
+            'senior_with_uncertainty': sum(item.get_senior_hours_with_uncertainty() for item in group_items_list),
+            'lead_with_uncertainty': sum(item.get_lead_hours_with_uncertainty() for item in group_items_list),
+            'reviewer_hours': sum(item.get_reviewer_hours() for item in group_items_list),
+        }
+        group_data['subtotals'] = subtotals
 
     # Get created and updated history records
     created_record = estimation.history.order_by('history_date').first()
@@ -44,6 +74,7 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     context: Mapping[str, Any] = {
         'model': estimation,
         'items': items,
+        'grouped_items': grouped_items,
         'totals': totals,
         'created_record': created_record,
         'updated_record': updated_record,

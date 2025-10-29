@@ -1,3 +1,4 @@
+from django import forms
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
 from core.models.estimation_item import EstimationItem
@@ -7,9 +8,36 @@ class EstimationItemForm(BaseModelForm):
     class Meta(BaseModelFormMeta):
         model = EstimationItem
         exclude = ['enumeration_attack_uuid', 'order', 'estimation']
+        widgets = {
+            'group': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Frontend, Backend, Database (optional)',
+                'list': 'group-datalist'
+            })
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Get existing group names from the estimation for autocomplete
+        estimation = None
+        if self.instance and self.instance.pk:
+            estimation = self.instance.estimation
+        elif 'initial' in kwargs and 'estimation' in kwargs['initial']:
+            estimation = kwargs['initial']['estimation']
+
+        if estimation:
+            # Get distinct group names from all items in this estimation
+            existing_groups = EstimationItem.objects.filter(
+                estimation=estimation
+            ).exclude(
+                group__isnull=True
+            ).exclude(
+                group=''
+            ).values_list('group', flat=True).distinct().order_by('group')
+
+            # Store existing groups for use in template via widget attrs
+            self.fields['group'].widget.attrs['data-existing-groups'] = '|'.join(existing_groups)
 
         # Note: Step attribute removed to allow any decimal value while maintaining data entry flexibility
         hour_fields = [

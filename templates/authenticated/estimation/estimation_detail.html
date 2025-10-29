@@ -125,8 +125,19 @@
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap" style="width: 140px;">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="estimation-items-tbody" class="bg-white divide-y divide-gray-200">
-                            {% for item in items %}
+                        <tbody id="estimation-items-tbody" class="bg-white">
+                            {% for group_name, group_data in grouped_items.items %}
+                                {# Group Header Row #}
+                                <tr class="bg-gray-100 border-t-2 border-gray-300" data-group-name="{{ group_name }}">
+                                    <td colspan="12" class="px-3 py-2">
+                                        <div class="font-semibold text-gray-800 text-sm">
+                                            📁 {{ group_name }}
+                                            <span class="text-xs text-gray-600 font-normal ml-2">({{ group_data.items|length }} item{{ group_data.items|length|pluralize }})</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {# Items in this group #}
+                                {% for item in group_data.items %}
                                 <tr class="hover:bg-gray-50" data-item-id="{{ item.id }}">
                                     <td class="px-2 py-3 text-sm text-center">
                                         <div class="flex justify-center items-center">
@@ -214,6 +225,33 @@
                                            onclick="return confirm('Delete this item?')"
                                            class="text-red-600 hover:text-red-900 inline-block">Del</a>
                                     </td>
+                                </tr>
+                                {% endfor %}
+                                {# Group Subtotal Row #}
+                                <tr class="bg-blue-50 border-t border-blue-200">
+                                    <td colspan="2" class="px-3 py-2 text-sm font-semibold text-blue-900">
+                                        {{ group_name }} Subtotal
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-center font-semibold text-blue-900">
+                                        {{ group_data.subtotals.story_points|floatformat:1 }}
+                                    </td>
+                                    <td colspan="3"></td>
+                                    <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
+                                        {{ group_data.subtotals.junior_with_uncertainty|floatformat:2 }}
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
+                                        {{ group_data.subtotals.mid_with_uncertainty|floatformat:2 }}
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
+                                        {{ group_data.subtotals.senior_with_uncertainty|floatformat:2 }}
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
+                                        {{ group_data.subtotals.lead_with_uncertainty|floatformat:2 }}
+                                    </td>
+                                    <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
+                                        {{ group_data.subtotals.reviewer_hours|floatformat:2 }}
+                                    </td>
+                                    <td></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -483,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Drag and drop functionality
+    // Drag and drop functionality with group support
     const tableBody = document.querySelector('#estimation-items-tbody');
     if (tableBody) {
         const sortable = new Sortable(tableBody, {
@@ -491,20 +529,47 @@ document.addEventListener('DOMContentLoaded', function() {
             handle: '.drag-handle',
             ghostClass: 'bg-blue-100',
             dragClass: 'opacity-50',
+            filter: '.bg-gray-100, .bg-blue-50', // Exclude group headers and subtotal rows
             onEnd: function(evt) {
-                // Get the new order of item IDs
-                const rows = tableBody.querySelectorAll('tr');
+                // Get the dragged item's row
+                const draggedRow = evt.item;
+                const itemId = parseInt(draggedRow.dataset.itemId);
+
+                if (isNaN(itemId)) {
+                    console.log('Skipping non-item row');
+                    return;
+                }
+
+                // Find which group this item is now in by looking for the previous group header row
+                let currentRow = draggedRow.previousElementSibling;
+                let newGroup = null;
+
+                // Walk backwards to find the group header
+                while (currentRow) {
+                    if (currentRow.dataset.groupName) {
+                        newGroup = currentRow.dataset.groupName;
+                        break;
+                    }
+                    currentRow = currentRow.previousElementSibling;
+                }
+
+                // Get the new order of item IDs (excluding headers and subtotals)
+                const rows = tableBody.querySelectorAll('tr[data-item-id]');
                 const itemIds = Array.from(rows).map(row => parseInt(row.dataset.itemId)).filter(id => !isNaN(id));
 
-                // Send AJAX request to update order
-                console.log('Sending reorder request with item IDs:', itemIds);
+                // Send AJAX request to update order and group
+                console.log('Sending reorder request:', { item_id: itemId, new_group: newGroup, item_ids: itemIds });
                 fetch('{% url "estimation_item_reorder" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({ item_ids: itemIds })
+                    body: JSON.stringify({
+                        item_id: itemId,
+                        new_group: newGroup === 'Ungrouped' ? null : newGroup,
+                        item_ids: itemIds
+                    })
                 })
                 .then(response => {
                     console.log('Response status:', response.status);
@@ -515,13 +580,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!data.success) {
                         console.error('Failed to reorder items:', data.error);
                         alert('Failed to save new order: ' + (data.error || 'Unknown error'));
+                        // Reload page to restore original state
+                        location.reload();
                     } else {
                         console.log('Successfully reordered items');
+                        // Reload page to update group subtotals
+                        location.reload();
                     }
                 })
                 .catch(error => {
                     console.error('Error reordering items:', error);
                     alert('Failed to save new order: ' + error.message);
+                    // Reload page to restore original state
+                    location.reload();
                 });
             }
         });
