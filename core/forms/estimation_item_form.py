@@ -11,26 +11,13 @@ class EstimationItemForm(BaseModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Configure hour fields to only allow 0.25 increments and no negative values
+        # Note: Step attribute removed to allow any decimal value while maintaining data entry flexibility
         hour_fields = [
             'hours_junior', 'hours_mid', 'hours_senior', 'hours_lead',
             'code_review_hours_junior', 'code_review_hours_mid', 'code_review_hours_senior', 'code_review_hours_lead',
             'code_reviewer_hours',
             'tests_hours_junior', 'tests_hours_mid', 'tests_hours_senior', 'tests_hours_lead'
         ]
-        for field in hour_fields:
-            if field in self.fields:
-                self.fields[field].widget.attrs.update({
-                    'step': '0.25',
-                    'min': '0'
-                })
-
-        # Also apply to story_points
-        if 'story_points' in self.fields:
-            self.fields['story_points'].widget.attrs.update({
-                'step': '0.25',
-                'min': '0'
-            })
 
         # Set default values if creating new item
         if not self.instance.pk:

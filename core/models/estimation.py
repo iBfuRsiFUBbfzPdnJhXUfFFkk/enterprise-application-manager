@@ -35,6 +35,9 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     # Contingency padding as a percentage (e.g., 20 for 20%)
     contingency_padding_percent = create_generic_decimal()
 
+    # Sprint duration in weeks (for sprint calculation)
+    sprint_duration_weeks = create_generic_integer()
+
     # Developer counts for duration estimation
     junior_developer_count = create_generic_integer()
     mid_developer_count = create_generic_integer()
@@ -95,22 +98,22 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """Calculate total lead developer hours from all items with uncertainty applied."""
         return sum(item.get_lead_hours_with_uncertainty() for item in self.items.all())
 
-    # Contingency padding per level
+    # Contingency padding per level (applied to base hours only)
     def get_contingency_hours_junior(self):
-        """Calculate contingency hours for junior level."""
-        return self.get_total_hours_junior_with_uncertainty() * (self.contingency_padding_percent / 100)
+        """Calculate contingency hours for junior level (applied to base hours only)."""
+        return self.get_base_hours_junior() * (self.contingency_padding_percent / 100)
 
     def get_contingency_hours_mid(self):
-        """Calculate contingency hours for mid level."""
-        return self.get_total_hours_mid_with_uncertainty() * (self.contingency_padding_percent / 100)
+        """Calculate contingency hours for mid level (applied to base hours only)."""
+        return self.get_base_hours_mid() * (self.contingency_padding_percent / 100)
 
     def get_contingency_hours_senior(self):
-        """Calculate contingency hours for senior level."""
-        return self.get_total_hours_senior_with_uncertainty() * (self.contingency_padding_percent / 100)
+        """Calculate contingency hours for senior level (applied to base hours only)."""
+        return self.get_base_hours_senior() * (self.contingency_padding_percent / 100)
 
     def get_contingency_hours_lead(self):
-        """Calculate contingency hours for lead level."""
-        return self.get_total_hours_lead_with_uncertainty() * (self.contingency_padding_percent / 100)
+        """Calculate contingency hours for lead level (applied to base hours only)."""
+        return self.get_base_hours_lead() * (self.contingency_padding_percent / 100)
 
     # Grand totals per level (with uncertainty + contingency)
     def get_grand_total_hours_junior(self):
@@ -268,6 +271,23 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
             (self.senior_developer_count or 0) +
             (self.lead_developer_count or 0)
         )
+
+    def get_sprint_count(self):
+        """
+        Calculate the number of sprints needed to complete the project.
+        Based on combined project duration divided by sprint duration.
+        Returns None if sprint duration or project duration cannot be calculated.
+        """
+        if not self.sprint_duration_weeks or self.sprint_duration_weeks <= 0:
+            return None
+
+        duration_weeks = self.get_combined_project_duration_weeks()
+        if duration_weeks is None:
+            return None
+
+        # Calculate sprints and round up (can't have partial sprints)
+        import math
+        return math.ceil(float(duration_weeks) / float(self.sprint_duration_weeks))
 
     def __str__(self):
         return f"{self.name}"

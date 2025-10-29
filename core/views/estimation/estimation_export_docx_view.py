@@ -43,23 +43,25 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Overview paragraph
     overview = document.add_paragraph()
-    overview.add_run('This estimation uses a sophisticated multi-factor approach to provide realistic project timelines. ').font.size = Pt(10)
-    overview.add_run('The methodology accounts for developer experience levels, task uncertainty, and project-specific contingencies.').font.size = Pt(10)
+    overview.add_run('This estimation uses a sophisticated approach based on the Cone of Uncertainty principle to provide realistic project timelines. ').font.size = Pt(10)
+    overview.add_run('The methodology applies uncertainty multipliers based on project phase and adds contingency padding for unforeseen challenges.').font.size = Pt(10)
     document.add_paragraph()
 
-    # Developer level multipliers
-    document.add_heading('Developer Level Multipliers', level=3)
-    multipliers_para = document.add_paragraph()
-    multipliers_para.add_run('Each developer level has a different uncertainty multiplier based on experience:').font.size = Pt(10)
+    # Cone of Uncertainty explanation
+    document.add_heading('Cone of Uncertainty', level=3)
+    cou_para = document.add_paragraph()
+    cou_para.add_run('The Cone of Uncertainty recognizes that estimates become more accurate as a project progresses through its lifecycle. ').font.size = Pt(10)
+    cou_para.add_run('Each task is assigned an uncertainty multiplier based on its current phase:').font.size = Pt(10)
 
-    multipliers_list = [
-        ('Junior Developer (6x):', 'Junior developers require significantly more time due to learning curves, troubleshooting, and the need for guidance. The 6x multiplier accounts for these factors.'),
-        ('Mid-Level Developer (3x):', 'Mid-level developers have foundational skills but still encounter unforeseen challenges. The 3x multiplier provides reasonable padding for problem-solving.'),
-        ('Senior Developer (1.5x):', 'Senior developers work efficiently with fewer blockers. The 1.5x multiplier accounts for architectural decisions and edge cases.'),
-        ('Lead Developer (1x):', 'Lead developers provide the baseline estimate with no additional multiplier, representing expert-level execution.'),
+    cou_list = [
+        ('Initial Concept (4x):', 'Early exploration phase with highest uncertainty. Requirements are vague and architecture is undefined.'),
+        ('Approved Product (2x):', 'Product definition complete, but detailed requirements are still being refined and technical approach is being validated.'),
+        ('Requirements Complete (1.5x):', 'Requirements are documented and approved, design work is in progress, but implementation details may vary.'),
+        ('Design Complete (1.25x):', 'Technical design is finished and implementation is starting. Most unknowns have been resolved.'),
+        ('Implementation Complete (1.1x):', 'Code is complete and being tested. Only minor refinements and bug fixes remain.'),
     ]
 
-    for label, description in multipliers_list:
+    for label, description in cou_list:
         p = document.add_paragraph(style='List Bullet')
         run = p.add_run(f'{label} ')
         run.bold = True
@@ -72,7 +74,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Separated hours components
     document.add_heading('Hour Components', level=3)
     components_para = document.add_paragraph()
-    components_para.add_run('Each estimation item separates work into distinct components, each with level-specific multipliers applied:').font.size = Pt(10)
+    components_para.add_run('Each estimation item separates work into distinct components:').font.size = Pt(10)
 
     components_list = [
         ('Development Hours:', 'Core implementation time for writing features, fixing bugs, or building functionality.'),
@@ -95,8 +97,8 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     document.add_heading('Contingency Padding', level=3)
     contingency_para = document.add_paragraph()
     contingency_value = float(estimation.contingency_padding_percent or 0)
-    contingency_para.add_run(f'This estimation includes a {contingency_value:.1f}% contingency buffer applied to all final totals. ').font.size = Pt(10)
-    contingency_para.add_run('Contingency padding accounts for:').font.size = Pt(10)
+    contingency_para.add_run(f'This estimation includes a {contingency_value:.1f}% contingency buffer applied to base hours (before uncertainty multipliers). ').font.size = Pt(10)
+    contingency_para.add_run('This padding accounts for:').font.size = Pt(10)
 
     contingency_list = [
         'Scope creep and requirement changes',
@@ -113,41 +115,55 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     document.add_paragraph()
 
-    # Cone of Uncertainty
-    document.add_heading('Cone of Uncertainty', level=3)
-    cou_para = document.add_paragraph()
-    cou_para.add_run('The "Cone of Uncertainty" field tracks project phase for reference purposes. ').font.size = Pt(10)
-    cou_para.add_run('While displayed on items, it is informational only—actual uncertainty is handled through developer level multipliers:').font.size = Pt(10)
+    # Calculation formula
+    document.add_heading('Calculation Formula', level=3)
+    formula_para = document.add_paragraph()
+    formula_para.add_run('The total hours for each task are calculated as follows:').font.size = Pt(10)
+    document.add_paragraph()
 
-    cou_list = [
-        ('Initial Concept (4x):', 'Early exploration phase with high uncertainty'),
-        ('Approved Product (2x):', 'Product definition complete, requirements being refined'),
-        ('Requirements Complete (1.5x):', 'Requirements documented, design in progress'),
-        ('Design Complete (1.25x):', 'Technical design finished, implementation starting'),
-        ('Implementation Complete (1.1x):', 'Code complete, final testing and refinement'),
+    formula_steps = [
+        '1. Base Hours = Development + Code Review + Testing',
+        '2. Hours with Uncertainty = Base Hours × Cone of Uncertainty Multiplier',
+        '3. Contingency Hours = Base Hours × Contingency Percentage',
+        '4. Total Hours = Hours with Uncertainty + Contingency Hours',
     ]
 
-    for label, description in cou_list:
-        p = document.add_paragraph(style='List Bullet')
-        run = p.add_run(f'{label} ')
-        run.bold = True
+    for step in formula_steps:
+        p = document.add_paragraph()
+        run = p.add_run(step)
         run.font.size = Pt(10)
-        run2 = p.add_run(description)
-        run2.font.size = Pt(10)
+        run.bold = True
+
+    document.add_paragraph()
+    example_para = document.add_paragraph()
+    example_para.add_run('Example: A mid-level task with 2 dev hours, 1 code review hour, 2 test hours (5 base hours total), Design Complete phase (1.25x), and 20% contingency:').font.size = Pt(10)
+
+    example_steps = [
+        '• Base Hours = 5',
+        '• With Uncertainty = 5 × 1.25 = 6.25 hours',
+        '• Contingency = 5 × 0.20 = 1.0 hour',
+        '• Total = 6.25 + 1.0 = 7.25 hours',
+    ]
+
+    for step in example_steps:
+        p = document.add_paragraph()
+        run = p.add_run(step)
+        run.font.size = Pt(10)
 
     document.add_paragraph()
 
     # How to use estimates
     document.add_heading('Interpreting the Estimates', level=3)
     interpret_para = document.add_paragraph()
-    interpret_para.add_run('Each developer level represents an alternative staffing scenario, not additive totals. ').font.size = Pt(10)
-    interpret_para.add_run('Choose the level that matches your team composition:').font.size = Pt(10)
+    interpret_para.add_run('Each developer level provides hours estimates for that specific experience level. ').font.size = Pt(10)
+    interpret_para.add_run('Choose the level that matches your team composition and consider these factors:').font.size = Pt(10)
 
     interpret_list = [
-        'Junior developers require more calendar time but may be more cost-effective',
-        'Lead developers complete work faster but represent higher labor costs',
-        'Mixed teams should use weighted averages based on actual team composition',
+        'All developer levels use the same cone of uncertainty multipliers—the difference is in base productivity',
+        'Junior developers typically require more base hours for the same task compared to senior developers',
+        'Contingency padding is applied to base hours to account for unforeseen challenges',
         'Review iteration hours represent time spent addressing feedback and resolving issues from code reviews',
+        'Mixed teams should estimate tasks using the appropriate level for who will actually perform the work',
     ]
 
     for item in interpret_list:
@@ -159,7 +175,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add metadata section
     document.add_heading('Project Information', level=2)
-    table = document.add_table(rows=3, cols=2)
+    table = document.add_table(rows=5, cols=2)
     table.style = 'Light Grid Accent 1'
 
     # Application
@@ -177,6 +193,35 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     row.cells[0].text = 'Contingency Padding'
     row.cells[1].text = f"{float(estimation.contingency_padding_percent or 0):.2f}%"
 
+    # Sprint Count
+    row = table.rows[3]
+    row.cells[0].text = 'Sprint Count'
+    if estimation.sprint_duration_weeks and estimation.get_total_team_size() > 0:
+        sprint_count = estimation.get_sprint_count()
+        if sprint_count:
+            sprint_text = f"{sprint_count} sprint{'s' if sprint_count != 1 else ''} ({estimation.sprint_duration_weeks} week{'s' if estimation.sprint_duration_weeks != 1 else ''} each)"
+            row.cells[1].text = sprint_text
+        else:
+            row.cells[1].text = 'N/A'
+    else:
+        if not estimation.sprint_duration_weeks:
+            row.cells[1].text = 'N/A (sprint duration not configured)'
+        else:
+            row.cells[1].text = 'N/A (team composition required)'
+
+    # Average Hours
+    row = table.rows[4]
+    row.cells[0].text = 'Average Hours (All Levels)'
+    avg_hours = estimation.get_average_hours_with_uncertainty()
+    row.cells[1].text = f"{float(avg_hours):.2f} hours with uncertainty"
+
+    # Make all text in table smaller
+    for row in table.rows:
+        for cell in row.cells:
+            for paragraph in cell.paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)
+
     document.add_paragraph()
 
     # Add combined project estimate (if team composition is set)
@@ -187,36 +232,65 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         combined_para.add_run('Based on your team composition, this is the realistic project timeline assuming all developer levels work in parallel on their assigned tasks. Code review time is included in each developer\'s hours.').font.size = Pt(10)
         document.add_paragraph()
 
+        # Determine number of rows needed (6 rows total)
+        num_rows = 6
+
         # Create table for combined estimate
-        combined_table = document.add_table(rows=4, cols=2)
+        combined_table = document.add_table(rows=num_rows, cols=2)
         combined_table.style = 'Light Grid Accent 1'
 
+        row_idx = 0
+
         # Team size
-        row = combined_table.rows[0]
+        row = combined_table.rows[row_idx]
         row.cells[0].text = 'Total Team Size'
         team_text = f"{estimation.get_total_team_size()} developer{'s' if estimation.get_total_team_size() != 1 else ''}"
         row.cells[1].text = team_text
+        row_idx += 1
 
         # Project duration in weeks
-        row = combined_table.rows[1]
+        row = combined_table.rows[row_idx]
         row.cells[0].text = 'Project Duration (Weeks)'
         weeks = estimation.get_combined_project_duration_weeks()
         row.cells[1].text = f"{float(weeks):.1f} weeks" if weeks else 'N/A'
+        row_idx += 1
 
         # Project duration in months
-        row = combined_table.rows[2]
+        row = combined_table.rows[row_idx]
         row.cells[0].text = 'Project Duration (Months)'
         months = estimation.get_combined_project_duration_months()
         row.cells[1].text = f"{float(months):.1f} months" if months else 'N/A'
+        row_idx += 1
+
+        # Sprint count
+        row = combined_table.rows[row_idx]
+        row.cells[0].text = 'Sprint Count'
+        if estimation.sprint_duration_weeks:
+            sprint_count = estimation.get_sprint_count()
+            if sprint_count:
+                sprint_text = f"{sprint_count} sprint{'s' if sprint_count != 1 else ''} ({estimation.sprint_duration_weeks} week{'s' if estimation.sprint_duration_weeks != 1 else ''} each)"
+                row.cells[1].text = sprint_text
+            else:
+                row.cells[1].text = 'N/A'
+        else:
+            row.cells[1].text = 'N/A (sprint duration not configured)'
+        row_idx += 1
 
         # Bottleneck level
-        row = combined_table.rows[3]
+        row = combined_table.rows[row_idx]
         row.cells[0].text = 'Bottleneck Level'
         bottleneck = estimation.get_bottleneck_level()
         if bottleneck:
             row.cells[1].text = f"{bottleneck[0]} ({float(bottleneck[1]):.1f} weeks - determines project duration)"
         else:
             row.cells[1].text = 'N/A'
+        row_idx += 1
+
+        # Average hours across all levels
+        row = combined_table.rows[row_idx]
+        row.cells[0].text = 'Average Hours (All Levels)'
+        avg_hours = estimation.get_average_hours_with_uncertainty()
+        row.cells[1].text = f"{float(avg_hours):.2f} hours with uncertainty"
 
         # Make all text in table smaller
         for row in combined_table.rows:
@@ -255,7 +329,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
-    document.add_paragraph('Hours include development, code review, and testing with level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Code review is performed by the same developers, not a separate reviewer position.')
+    document.add_paragraph('Hours shown include cone of uncertainty multipliers based on project phase. Each item\'s base hours (dev + code review + testing) are multiplied by its cone of uncertainty factor. Code review is performed by the same developers, not a separate reviewer position.')
 
     items = estimation.items.all().order_by('order', 'id')
 
@@ -314,7 +388,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add summary section
     document.add_heading('Estimation Summary', level=2)
-    document.add_paragraph('Hours include level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Each level represents alternative estimates, not additive totals. Code review time is included in each developer\'s hours.')
+    document.add_paragraph('Hours include cone of uncertainty multipliers based on project phase. Contingency is applied to base hours only. Each level represents alternative estimates, not additive totals. Code review time is included in each developer\'s hours.')
 
     summary_table = document.add_table(rows=17, cols=2)
     summary_table.style = 'Light Grid Accent 1'

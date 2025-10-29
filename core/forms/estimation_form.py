@@ -24,6 +24,17 @@ class EstimationForm(BaseModelForm):
                     'step': '1'
                 })
 
+        # Configure sprint duration field
+        if 'sprint_duration_weeks' in self.fields:
+            self.fields['sprint_duration_weeks'].widget.attrs.update({
+                'min': '1',
+                'step': '1'
+            })
+
         # Set default contingency padding if creating new estimation
         if not self.instance.pk and 'contingency_padding_percent' not in self.initial:
             self.initial['contingency_padding_percent'] = 20.0
+
+        # Set default sprint duration if creating new estimation
+        if not self.instance.pk and 'sprint_duration_weeks' not in self.initial:
+            self.initial['sprint_duration_weeks'] = 3

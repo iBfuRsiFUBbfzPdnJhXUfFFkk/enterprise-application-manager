@@ -117,10 +117,10 @@
                                 <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 90px;">Cmplx</th>
                                 <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 80px;">Prior</th>
                                 <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 70px;">CoU</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Junior Developer (6x multiplier)">Jr</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Mid-Level Developer (3x multiplier)">Mid</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Senior Developer (1.5x multiplier)">Sr</th>
-                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Lead Developer (1x multiplier)">Lead</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Junior Developer Hours (with cone of uncertainty)">Jr</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Mid-Level Developer Hours (with cone of uncertainty)">Mid</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Senior Developer Hours (with cone of uncertainty)">Sr</th>
+                                <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Lead Developer Hours (with cone of uncertainty)">Lead</th>
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 65px;" title="Review Iteration Time - Back-and-forth resolving review feedback (no multiplier)">Rev Iter</th>
                                 <th class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap" style="width: 140px;">Actions</th>
                             </tr>
@@ -200,10 +200,10 @@
                                         {% elif item.cone_of_uncertainty == 'IMPLEMENTATION_COMPLETE' %}1.1x
                                         {% else %}N/A{% endif %}
                                     </td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:2 }} | Multiplier: 6x">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:2 }} | Multiplier: 3x">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:2 }} | Multiplier: 1.5x">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }} | Multiplier: 1x">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
                                     <td class="px-2 py-3 text-sm text-right text-gray-500">{{ item.get_reviewer_hours|floatformat:2 }}</td>
                                     <td class="px-2 py-3 text-xs text-right whitespace-nowrap">
                                         <a href="{% url 'estimation_item_edit' item.id %}" class="text-blue-600 hover:text-blue-900 inline-block">Edit</a>
@@ -234,7 +234,7 @@
                     <p class="mt-1 text-sm text-blue-700">Realistic timeline for your mixed team working in parallel</p>
                 </div>
                 <div class="px-6 py-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div class="bg-white p-6 rounded-lg shadow">
                             <dt class="text-sm font-medium text-gray-500 mb-2">Project Duration</dt>
                             <dd class="text-4xl font-bold text-blue-600">
@@ -251,6 +251,18 @@
                                 {{ model.get_total_team_size }} <span class="text-2xl">dev{{ model.get_total_team_size|pluralize }}</span>
                             </dd>
                         </div>
+
+                        {% if model.sprint_duration_weeks %}
+                            <div class="bg-white p-6 rounded-lg shadow">
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Sprint Count</dt>
+                                <dd class="text-4xl font-bold text-purple-600">
+                                    {{ model.get_sprint_count }} <span class="text-2xl">sprint{{ model.get_sprint_count|pluralize }}</span>
+                                </dd>
+                                <dd class="text-sm text-gray-600 mt-2">
+                                    ({{ model.sprint_duration_weeks }} week{{ model.sprint_duration_weeks|pluralize }} each)
+                                </dd>
+                            </div>
+                        {% endif %}
 
                         {% if model.get_bottleneck_level %}
                             <div class="bg-white p-6 rounded-lg shadow">
@@ -283,14 +295,14 @@
         <div class="bg-white shadow-sm rounded-lg">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">Estimation Summary</h2>
-                <p class="mt-1 text-sm text-gray-500">Hours shown include developer level-based uncertainty multipliers (Junior: 6x, Mid: 3x, Senior: 1.5x, Lead: 1x). Each level represents alternative estimates, not additive totals.</p>
+                <p class="mt-1 text-sm text-gray-500">Hours shown include cone of uncertainty multipliers based on project phase. Each level represents alternative estimates, not additive totals. Contingency is applied to base hours only.</p>
             </div>
             <div class="px-6 py-4">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     <p class="col-span-full text-xs text-gray-600 mb-2">Note: Code review time is included in each developer's hours and performed by the same developers, not a separate reviewer position.</p>
                     <!-- Junior Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Junior Developer <span class="text-xs text-gray-500">(6x multiplier)</span></h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Junior Developer</h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
@@ -323,7 +335,7 @@
 
                     <!-- Mid-Level Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Mid-Level Developer <span class="text-xs text-gray-500">(3x multiplier)</span></h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Mid-Level Developer</h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
@@ -356,7 +368,7 @@
 
                     <!-- Senior Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Senior Developer <span class="text-xs text-gray-500">(1.5x multiplier)</span></h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Senior Developer</h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
@@ -389,7 +401,7 @@
 
                     <!-- Lead Developer -->
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Lead Developer <span class="text-xs text-gray-500">(1x multiplier)</span></h3>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Lead Developer</h3>
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
