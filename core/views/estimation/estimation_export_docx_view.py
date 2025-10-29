@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import BytesIO
 
 from django.http import HttpRequest, HttpResponse
@@ -466,11 +467,18 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     document.save(buffer)
     buffer.seek(0)
 
+    # Generate filename: <name>__<YYYY-MM-DD>__<HH:MM>.docx (lowercase, spaces to underscores)
+    now = datetime.now()
+    date_str = now.strftime('%Y-%m-%d')
+    time_str = now.strftime('%H:%M')
+    name_cleaned = estimation.name.lower().replace(' ', '_')
+    filename = f"{name_cleaned}__{date_str}__{time_str}.docx"
+
     # Create HTTP response
     response = HttpResponse(
         buffer.getvalue(),
         content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     )
-    response['Content-Disposition'] = f'attachment; filename="estimation_{estimation.id}_{estimation.name.replace(" ", "_")}.docx"'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     return response
