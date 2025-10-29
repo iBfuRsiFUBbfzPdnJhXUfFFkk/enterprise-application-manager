@@ -39,13 +39,21 @@ class EstimationItemForm(BaseModelForm):
             # Store existing groups for use in template via widget attrs
             self.fields['group'].widget.attrs['data-existing-groups'] = '|'.join(existing_groups)
 
-        # Note: Step attribute removed to allow any decimal value while maintaining data entry flexibility
+        # Remove step validation to allow any decimal value (e.g., 0.63 hours is acceptable)
         hour_fields = [
             'hours_junior', 'hours_mid', 'hours_senior', 'hours_lead',
             'code_review_hours_junior', 'code_review_hours_mid', 'code_review_hours_senior', 'code_review_hours_lead',
             'code_reviewer_hours',
             'tests_hours_junior', 'tests_hours_mid', 'tests_hours_senior', 'tests_hours_lead'
         ]
+
+        # Set step="any" on hour fields and story_points to allow any decimal value
+        for field in hour_fields:
+            if field in self.fields:
+                self.fields[field].widget.attrs['step'] = 'any'
+
+        if 'story_points' in self.fields:
+            self.fields['story_points'].widget.attrs['step'] = 'any'
 
         # Set default values if creating new item
         if not self.instance.pk:
