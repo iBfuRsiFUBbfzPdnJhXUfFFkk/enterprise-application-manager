@@ -6,6 +6,7 @@ from core.views.estimation.estimation_delete_view import estimation_delete_view
 from core.views.estimation.estimation_detail_view import estimation_detail_view
 from core.views.estimation.estimation_edit_view import estimation_edit_view
 from core.views.estimation.estimation_export_docx_view import estimation_export_docx_view
+from core.views.estimation.estimation_fix_item_order_view import estimation_fix_item_order_view
 from core.views.estimation.estimation_item_add_view import estimation_item_add_view
 from core.views.estimation.estimation_item_delete_view import estimation_item_delete_view
 from core.views.estimation.estimation_item_duplicate_view import estimation_item_duplicate_view
@@ -24,6 +25,7 @@ urlpatterns_estimation: list[URLPattern | URLResolver] = [
     path(name="estimation_detail", route="estimation/<int:model_id>/", view=estimation_detail_view),
     path(name="estimation_delete", route="estimation/delete/<int:model_id>/", view=estimation_delete_view),
     path(name="estimation_export_docx", route="estimation/<int:model_id>/export/", view=estimation_export_docx_view),
+    path(name="estimation_fix_item_order", route="estimation/<int:model_id>/fix-order/", view=estimation_fix_item_order_view),
 
     # Estimation item URLs
     path(name="estimation_item_add", route="estimation/<int:estimation_id>/item/add/", view=estimation_item_add_view),
