@@ -15,6 +15,7 @@ from core.views.estimation.estimation_item_move_down_view import estimation_item
 from core.views.estimation.estimation_item_move_to_bottom_view import estimation_item_move_to_bottom_view
 from core.views.estimation.estimation_item_move_to_top_view import estimation_item_move_to_top_view
 from core.views.estimation.estimation_item_move_up_view import estimation_item_move_up_view
+from core.views.estimation.estimation_item_reorder_view import estimation_item_reorder_view
 from core.views.estimation.estimation_view import estimation_view
 
 urlpatterns_estimation: list[URLPattern | URLResolver] = [
@@ -38,4 +39,5 @@ urlpatterns_estimation: list[URLPattern | URLResolver] = [
     path(name="estimation_item_move_down", route="estimation/item/<int:item_id>/move-down/", view=estimation_item_move_down_view),
     path(name="estimation_item_move_to_top", route="estimation/item/<int:item_id>/move-to-top/", view=estimation_item_move_to_top_view),
     path(name="estimation_item_move_to_bottom", route="estimation/item/<int:item_id>/move-to-bottom/", view=estimation_item_move_to_bottom_view),
+    path(name="estimation_item_reorder", route="estimation/item/reorder/", view=estimation_item_reorder_view),
 ]

@@ -39,11 +39,31 @@
 
                 <div class="space-y-6">
                     <div>
+                        <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Title {% if form.title.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        {{ form.title }}
+                        <p class="mt-1 text-xs text-gray-500">Short, descriptive title for this item</p>
+                        {% if form.title.errors %}<p class="mt-2 text-sm text-red-600">{{ form.title.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.story_points.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Story Points {% if form.story_points.field.required %}<span class="text-red-500">*</span>{% endif %}
+                        </label>
+                        <div class="max-w-xs">
+                            {{ form.story_points }}
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Estimate complexity using story points (Fibonacci: 1, 2, 3, 5, 8, 13...)</p>
+                        {% if form.story_points.errors %}<p class="mt-2 text-sm text-red-600">{{ form.story_points.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div>
                         <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                            Description {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            Description (Markdown Supported) {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
                         </label>
                         {{ form.description }}
-                        <p class="mt-1 text-xs text-gray-500">Describe the task or feature to be estimated</p>
+                        <p class="mt-1 text-xs text-gray-500">Detailed description with markdown support (use **bold**, *italic*, `code`, etc.)</p>
                         {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
                     </div>
 

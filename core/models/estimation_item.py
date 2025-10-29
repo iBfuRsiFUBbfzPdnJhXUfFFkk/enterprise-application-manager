@@ -6,6 +6,7 @@ from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_text import create_generic_text
 from django_generic_model_fields.create_generic_enum import create_generic_enum
 from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 
@@ -61,7 +62,9 @@ class EstimationItem(AbstractBaseModel):
     order = create_generic_integer()
 
     # Item details
+    title = create_generic_varchar()
     description = create_generic_text()
+    story_points = create_generic_decimal()
 
     # Development hours by developer level
     hours_junior = create_generic_decimal()
@@ -161,7 +164,12 @@ class EstimationItem(AbstractBaseModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.description[:50]}..." if len(self.description) > 50 else self.description
+        if self.title:
+            return self.title
+        elif self.description:
+            return f"{self.description[:50]}..." if len(self.description) > 50 else self.description
+        else:
+            return f"Item {self.id}"
 
     class Meta:
         ordering = ['order', 'id']

@@ -22,6 +22,10 @@ class EstimationItemForm(BaseModelForm):
                 if field not in self.initial:
                     self.initial[field] = 0.0
 
+            # Default story points to 0
+            if 'story_points' not in self.initial:
+                self.initial['story_points'] = 0.0
+
             # Default cone of uncertainty to requirements complete (middle ground)
             if 'cone_of_uncertainty' not in self.initial:
                 self.initial['cone_of_uncertainty'] = 'REQUIREMENTS_COMPLETE'

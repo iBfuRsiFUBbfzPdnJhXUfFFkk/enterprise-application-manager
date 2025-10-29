@@ -13,9 +13,14 @@ def estimation_item_duplicate_view(request: HttpRequest, item_id: int) -> HttpRe
 
         # Create a new item with all the same values
         # We don't set pk, so Django will create a new record
+        # Append " (Copy)" to title if it exists
+        new_title = f"{original_item.title} (Copy)" if original_item.title else None
+
         new_item = EstimationItem(
             estimation=original_item.estimation,
-            description=f"{original_item.description} (Copy)",
+            title=new_title,
+            description=original_item.description,
+            story_points=original_item.story_points,
             hours_junior=original_item.hours_junior,
             hours_mid=original_item.hours_mid,
             hours_senior=original_item.hours_senior,

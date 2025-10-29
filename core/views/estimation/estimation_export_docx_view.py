@@ -68,20 +68,22 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     if items:
         # Create table for items (hours with uncertainty applied)
-        table = document.add_table(rows=1, cols=9)
+        table = document.add_table(rows=1, cols=11)
         table.style = 'Light Grid Accent 1'
 
         # Header row
         header_cells = table.rows[0].cells
-        header_cells[0].text = 'Description'
-        header_cells[1].text = 'Complexity'
-        header_cells[2].text = 'Priority'
-        header_cells[3].text = 'Cone of Uncertainty'
-        header_cells[4].text = 'Junior Hrs'
-        header_cells[5].text = 'Mid Hrs'
-        header_cells[6].text = 'Senior Hrs'
-        header_cells[7].text = 'Lead Hrs'
-        header_cells[8].text = 'Reviewer Hrs'
+        header_cells[0].text = 'Title'
+        header_cells[1].text = 'Story Points'
+        header_cells[2].text = 'Description'
+        header_cells[3].text = 'Complexity'
+        header_cells[4].text = 'Priority'
+        header_cells[5].text = 'Cone of Uncertainty'
+        header_cells[6].text = 'Junior Hrs'
+        header_cells[7].text = 'Mid Hrs'
+        header_cells[8].text = 'Senior Hrs'
+        header_cells[9].text = 'Lead Hrs'
+        header_cells[10].text = 'Reviewer Hrs'
 
         # Make header bold
         for cell in header_cells:
@@ -92,15 +94,17 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         # Add items (showing hours with uncertainty applied)
         for item in items:
             row_cells = table.add_row().cells
-            row_cells[0].text = item.description
-            row_cells[1].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
-            row_cells[2].text = item.get_priority_display() if item.priority else 'N/A'
-            row_cells[3].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
-            row_cells[4].text = f"{float(item.get_junior_hours_with_uncertainty()):.2f}"
-            row_cells[5].text = f"{float(item.get_mid_hours_with_uncertainty()):.2f}"
-            row_cells[6].text = f"{float(item.get_senior_hours_with_uncertainty()):.2f}"
-            row_cells[7].text = f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
-            row_cells[8].text = f"{float(item.get_reviewer_hours()):.2f}"
+            row_cells[0].text = item.title if item.title else '(No title)'
+            row_cells[1].text = f"{float(item.story_points or 0):.1f}"
+            row_cells[2].text = item.description if item.description else ''
+            row_cells[3].text = item.get_complexity_level_display() if item.complexity_level else 'N/A'
+            row_cells[4].text = item.get_priority_display() if item.priority else 'N/A'
+            row_cells[5].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
+            row_cells[6].text = f"{float(item.get_junior_hours_with_uncertainty()):.2f}"
+            row_cells[7].text = f"{float(item.get_mid_hours_with_uncertainty()):.2f}"
+            row_cells[8].text = f"{float(item.get_senior_hours_with_uncertainty()):.2f}"
+            row_cells[9].text = f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
+            row_cells[10].text = f"{float(item.get_reviewer_hours()):.2f}"
 
     else:
         document.add_paragraph('No estimation items added yet.')
