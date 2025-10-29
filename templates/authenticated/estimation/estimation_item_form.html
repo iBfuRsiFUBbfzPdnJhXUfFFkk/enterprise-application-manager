@@ -69,11 +69,28 @@
                     </div>
 
                     <div>
-                        <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                            Description (Markdown Supported) {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
-                        </label>
-                        {{ form.description }}
-                        <p class="mt-1 text-xs text-gray-500">Detailed description with markdown support (use **bold**, *italic*, `code`, etc.)</p>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Description (Markdown Supported) {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            <button type="button" id="toggle_preview"
+                                    class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                <span id="preview_button_text">Show Preview</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4" id="description_container">
+                            <div id="description_editor">
+                                {{ form.description }}
+                            </div>
+                            <div id="description_preview" class="hidden border border-gray-300 rounded-md p-4 bg-gray-50 prose prose-sm max-w-none">
+                                <p class="text-gray-500 italic">Preview will appear here...</p>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Detailed description with markdown support (use **bold**, *italic*, `code`, # headings, - lists, etc.)</p>
                         {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
                     </div>
 
@@ -372,10 +389,108 @@
         color: #9ca3af;
         opacity: 1;
     }
+
+    /* Markdown preview styling */
+    #description_preview {
+        min-height: 200px;
+    }
+    #description_preview h1,
+    #description_preview h2,
+    #description_preview h3,
+    #description_preview h4,
+    #description_preview h5,
+    #description_preview h6 {
+        font-weight: 600;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+    }
+    #description_preview h1 { font-size: 1.5em; }
+    #description_preview h2 { font-size: 1.3em; }
+    #description_preview h3 { font-size: 1.1em; }
+    #description_preview ul,
+    #description_preview ol {
+        margin-left: 1.5em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    #description_preview code {
+        background-color: #f3f4f6;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-family: monospace;
+    }
+    #description_preview pre {
+        background-color: #f3f4f6;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        overflow-x: auto;
+        margin: 0.5em 0;
+    }
+    #description_preview pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    #description_preview blockquote {
+        border-left: 4px solid #e5e7eb;
+        padding-left: 1rem;
+        margin: 0.5em 0;
+        color: #6b7280;
+    }
 </style>
+
+<!-- Marked.js for markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Markdown Preview functionality
+    const descriptionField = document.getElementById('{{ form.description.id_for_label }}');
+    const previewDiv = document.getElementById('description_preview');
+    const toggleButton = document.getElementById('toggle_preview');
+    const buttonText = document.getElementById('preview_button_text');
+    const descriptionContainer = document.getElementById('description_container');
+    let previewVisible = false;
+
+    if (toggleButton && descriptionField && previewDiv) {
+        toggleButton.addEventListener('click', function() {
+            previewVisible = !previewVisible;
+
+            if (previewVisible) {
+                // Show preview
+                previewDiv.classList.remove('hidden');
+                descriptionContainer.classList.remove('grid-cols-1');
+                descriptionContainer.classList.add('grid-cols-2');
+                buttonText.textContent = 'Hide Preview';
+                updatePreview();
+            } else {
+                // Hide preview
+                previewDiv.classList.add('hidden');
+                descriptionContainer.classList.remove('grid-cols-2');
+                descriptionContainer.classList.add('grid-cols-1');
+                buttonText.textContent = 'Show Preview';
+            }
+        });
+
+        // Update preview on input
+        descriptionField.addEventListener('input', function() {
+            if (previewVisible) {
+                updatePreview();
+            }
+        });
+
+        function updatePreview() {
+            const markdownText = descriptionField.value;
+            if (markdownText.trim() === '') {
+                previewDiv.innerHTML = '<p class="text-gray-500 italic">Preview will appear here...</p>';
+            } else {
+                try {
+                    previewDiv.innerHTML = marked.parse(markdownText);
+                } catch (e) {
+                    previewDiv.innerHTML = '<p class="text-red-500">Error rendering markdown</p>';
+                }
+            }
+        }
+    }
     // Auto-populate hours based on lead dev values
     // Multipliers: Senior = 1.25x, Mid = 2x, Junior = 3x
 
