@@ -179,6 +179,85 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     document.add_paragraph()
 
+    # Add combined project estimate (if team composition is set)
+    if estimation.get_total_team_size() > 0 or estimation.reviewer_count:
+        document.add_heading('Combined Project Estimate', level=2)
+
+        combined_para = document.add_paragraph()
+        combined_para.add_run('Based on your team composition, this is the realistic project timeline assuming all developer levels work in parallel on their assigned tasks.').font.size = Pt(10)
+        document.add_paragraph()
+
+        # Create table for combined estimate
+        combined_table = document.add_table(rows=4, cols=2)
+        combined_table.style = 'Light Grid Accent 1'
+
+        # Team size
+        row = combined_table.rows[0]
+        row.cells[0].text = 'Total Team Size'
+        team_text = f"{estimation.get_total_team_size()} developer{'s' if estimation.get_total_team_size() != 1 else ''}"
+        if estimation.reviewer_count:
+            team_text += f" + {estimation.reviewer_count} reviewer{'s' if estimation.reviewer_count != 1 else ''}"
+        row.cells[1].text = team_text
+
+        # Project duration in weeks
+        row = combined_table.rows[1]
+        row.cells[0].text = 'Project Duration (Weeks)'
+        weeks = estimation.get_combined_project_duration_weeks()
+        row.cells[1].text = f"{float(weeks):.1f} weeks" if weeks else 'N/A'
+
+        # Project duration in months
+        row = combined_table.rows[2]
+        row.cells[0].text = 'Project Duration (Months)'
+        months = estimation.get_combined_project_duration_months()
+        row.cells[1].text = f"{float(months):.1f} months" if months else 'N/A'
+
+        # Bottleneck level
+        row = combined_table.rows[3]
+        row.cells[0].text = 'Bottleneck Level'
+        bottleneck = estimation.get_bottleneck_level()
+        if bottleneck:
+            row.cells[1].text = f"{bottleneck[0]} ({float(bottleneck[1]):.1f} weeks - determines project duration)"
+        else:
+            row.cells[1].text = 'N/A'
+
+        # Make all text in table smaller
+        for row in combined_table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(10)
+
+        document.add_paragraph()
+
+        # Team composition breakdown
+        document.add_heading('Team Composition', level=3)
+        comp_table = document.add_table(rows=5, cols=2)
+        comp_table.style = 'Light Grid Accent 1'
+
+        comp_table.rows[0].cells[0].text = 'Junior Developers'
+        comp_table.rows[0].cells[1].text = str(estimation.junior_developer_count or 0)
+
+        comp_table.rows[1].cells[0].text = 'Mid-Level Developers'
+        comp_table.rows[1].cells[1].text = str(estimation.mid_developer_count or 0)
+
+        comp_table.rows[2].cells[0].text = 'Senior Developers'
+        comp_table.rows[2].cells[1].text = str(estimation.senior_developer_count or 0)
+
+        comp_table.rows[3].cells[0].text = 'Lead Developers'
+        comp_table.rows[3].cells[1].text = str(estimation.lead_developer_count or 0)
+
+        comp_table.rows[4].cells[0].text = 'Code Reviewers'
+        comp_table.rows[4].cells[1].text = str(estimation.reviewer_count or 0)
+
+        # Make all text in table smaller
+        for row in comp_table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(10)
+
+        document.add_paragraph()
+
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
     document.add_paragraph('Hours include development, code review, and testing with level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Reviewer hours shown separately without uncertainty.')

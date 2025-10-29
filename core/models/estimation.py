@@ -226,6 +226,84 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
             return None
         return weeks / Decimal('4.33')
 
+    # Combined project duration (for mixed teams working in parallel)
+    def get_combined_project_duration_weeks(self):
+        """
+        Calculate overall project duration in weeks for a mixed team.
+        Each level works on their portion in parallel; project completes when slowest level finishes.
+        Returns None if no developer counts are set.
+        """
+        durations = []
+
+        if self.junior_developer_count and self.junior_developer_count > 0:
+            durations.append(self.get_duration_weeks_junior())
+
+        if self.mid_developer_count and self.mid_developer_count > 0:
+            durations.append(self.get_duration_weeks_mid())
+
+        if self.senior_developer_count and self.senior_developer_count > 0:
+            durations.append(self.get_duration_weeks_senior())
+
+        if self.lead_developer_count and self.lead_developer_count > 0:
+            durations.append(self.get_duration_weeks_lead())
+
+        # Reviewer time runs in parallel with dev work, so we include it
+        if self.reviewer_count and self.reviewer_count > 0:
+            durations.append(self.get_duration_weeks_reviewer())
+
+        # Filter out None values and return max (bottleneck)
+        valid_durations = [d for d in durations if d is not None]
+        if not valid_durations:
+            return None
+
+        return max(valid_durations)
+
+    def get_combined_project_duration_months(self):
+        """Calculate overall project duration in months for a mixed team."""
+        weeks = self.get_combined_project_duration_weeks()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
+
+    def get_bottleneck_level(self):
+        """
+        Identify which developer level is the bottleneck (takes longest).
+        Returns tuple of (level_name, duration_weeks) or None if no counts set.
+        """
+        durations_by_level = []
+
+        if self.junior_developer_count and self.junior_developer_count > 0:
+            durations_by_level.append(('Junior', self.get_duration_weeks_junior()))
+
+        if self.mid_developer_count and self.mid_developer_count > 0:
+            durations_by_level.append(('Mid', self.get_duration_weeks_mid()))
+
+        if self.senior_developer_count and self.senior_developer_count > 0:
+            durations_by_level.append(('Senior', self.get_duration_weeks_senior()))
+
+        if self.lead_developer_count and self.lead_developer_count > 0:
+            durations_by_level.append(('Lead', self.get_duration_weeks_lead()))
+
+        if self.reviewer_count and self.reviewer_count > 0:
+            durations_by_level.append(('Reviewer', self.get_duration_weeks_reviewer()))
+
+        # Filter out None values
+        valid_durations = [(name, dur) for name, dur in durations_by_level if dur is not None]
+        if not valid_durations:
+            return None
+
+        # Return the level with maximum duration
+        return max(valid_durations, key=lambda x: x[1])
+
+    def get_total_team_size(self):
+        """Calculate total number of developers across all levels (excluding reviewers)."""
+        return (
+            (self.junior_developer_count or 0) +
+            (self.mid_developer_count or 0) +
+            (self.senior_developer_count or 0) +
+            (self.lead_developer_count or 0)
+        )
+
     def __str__(self):
         return f"{self.name}"
 

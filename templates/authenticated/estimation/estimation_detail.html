@@ -230,6 +230,64 @@
             {% endif %}
         </div>
 
+        <!-- Combined Project Estimate -->
+        {% if model.get_total_team_size > 0 or model.reviewer_count %}
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 shadow-lg rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-blue-200 bg-blue-100">
+                    <h2 class="text-2xl font-bold text-blue-900">Combined Project Estimate</h2>
+                    <p class="mt-1 text-sm text-blue-700">Realistic timeline for your mixed team working in parallel</p>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Project Duration</dt>
+                            <dd class="text-4xl font-bold text-blue-600">
+                                {{ model.get_combined_project_duration_weeks|floatformat:1 }} <span class="text-2xl">weeks</span>
+                            </dd>
+                            <dd class="text-lg text-gray-600 mt-2">
+                                ({{ model.get_combined_project_duration_months|floatformat:1 }} months)
+                            </dd>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Team Size</dt>
+                            <dd class="text-4xl font-bold text-indigo-600">
+                                {{ model.get_total_team_size }} <span class="text-2xl">dev{{ model.get_total_team_size|pluralize }}</span>
+                            </dd>
+                            {% if model.reviewer_count %}
+                                <dd class="text-lg text-gray-600 mt-2">
+                                    + {{ model.reviewer_count }} reviewer{{ model.reviewer_count|pluralize }}
+                                </dd>
+                            {% endif %}
+                        </div>
+
+                        {% if model.get_bottleneck_level %}
+                            <div class="bg-white p-6 rounded-lg shadow">
+                                <dt class="text-sm font-medium text-gray-500 mb-2">Bottleneck Level</dt>
+                                <dd class="text-3xl font-bold text-amber-600">
+                                    {{ model.get_bottleneck_level.0 }}
+                                </dd>
+                                <dd class="text-sm text-gray-600 mt-2">
+                                    Takes {{ model.get_bottleneck_level.1|floatformat:1 }} weeks
+                                </dd>
+                                <dd class="text-xs text-gray-500 mt-1">
+                                    This level determines project duration
+                                </dd>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p class="text-sm text-gray-700">
+                            <strong class="text-blue-900">How this works:</strong> Each developer level works on their assigned tasks in parallel.
+                            The project completes when the slowest level finishes (the bottleneck). This estimate assumes each level has dedicated work
+                            and developers work simultaneously at 40 hours per week.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
         <!-- Totals Summary -->
         <div class="bg-white shadow-sm rounded-lg">
             <div class="px-6 py-4 border-b border-gray-200">
