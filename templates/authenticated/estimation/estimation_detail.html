@@ -136,6 +136,7 @@
                                     <td class="px-4 py-4 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Code Reviewer: {{ item.code_reviewer_hours|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }}">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
                                     <td class="px-4 py-4 text-sm text-right space-x-2 whitespace-nowrap">
                                         <a href="{% url 'estimation_item_edit' item.id %}" class="text-blue-600 hover:text-blue-900">Edit</a>
+                                        <a href="{% url 'estimation_item_duplicate' item.id %}" class="text-green-600 hover:text-green-900">Duplicate</a>
                                         <a href="{% url 'estimation_item_delete' item.id %}"
                                            onclick="return confirm('Delete this item?')"
                                            class="text-red-600 hover:text-red-900">Delete</a>
