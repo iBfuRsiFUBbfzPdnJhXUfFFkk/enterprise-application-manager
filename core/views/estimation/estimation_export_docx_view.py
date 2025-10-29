@@ -180,11 +180,11 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     document.add_paragraph()
 
     # Add combined project estimate (if team composition is set)
-    if estimation.get_total_team_size() > 0 or estimation.reviewer_count:
+    if estimation.get_total_team_size() > 0:
         document.add_heading('Combined Project Estimate', level=2)
 
         combined_para = document.add_paragraph()
-        combined_para.add_run('Based on your team composition, this is the realistic project timeline assuming all developer levels work in parallel on their assigned tasks.').font.size = Pt(10)
+        combined_para.add_run('Based on your team composition, this is the realistic project timeline assuming all developer levels work in parallel on their assigned tasks. Code review time is included in each developer\'s hours.').font.size = Pt(10)
         document.add_paragraph()
 
         # Create table for combined estimate
@@ -195,8 +195,6 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         row = combined_table.rows[0]
         row.cells[0].text = 'Total Team Size'
         team_text = f"{estimation.get_total_team_size()} developer{'s' if estimation.get_total_team_size() != 1 else ''}"
-        if estimation.reviewer_count:
-            team_text += f" + {estimation.reviewer_count} reviewer{'s' if estimation.reviewer_count != 1 else ''}"
         row.cells[1].text = team_text
 
         # Project duration in weeks
@@ -231,7 +229,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
         # Team composition breakdown
         document.add_heading('Team Composition', level=3)
-        comp_table = document.add_table(rows=5, cols=2)
+        comp_table = document.add_table(rows=4, cols=2)
         comp_table.style = 'Light Grid Accent 1'
 
         comp_table.rows[0].cells[0].text = 'Junior Developers'
@@ -246,9 +244,6 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         comp_table.rows[3].cells[0].text = 'Lead Developers'
         comp_table.rows[3].cells[1].text = str(estimation.lead_developer_count or 0)
 
-        comp_table.rows[4].cells[0].text = 'Code Reviewers'
-        comp_table.rows[4].cells[1].text = str(estimation.reviewer_count or 0)
-
         # Make all text in table smaller
         for row in comp_table.rows:
             for cell in row.cells:
@@ -260,13 +255,13 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
-    document.add_paragraph('Hours include development, code review, and testing with level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Reviewer hours shown separately without uncertainty.')
+    document.add_paragraph('Hours include development, code review, and testing with level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Code review is performed by the same developers, not a separate reviewer position.')
 
     items = estimation.items.all().order_by('order', 'id')
 
     if items:
         # Create table for items (hours with uncertainty applied)
-        table = document.add_table(rows=1, cols=10)
+        table = document.add_table(rows=1, cols=9)
         table.style = 'Light Grid Accent 1'
 
         # Header row
@@ -280,7 +275,6 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         header_cells[6].text = 'Mid'
         header_cells[7].text = 'Sr'
         header_cells[8].text = 'Lead'
-        header_cells[9].text = 'Rev'
 
         # Make header bold and smaller font
         for cell in header_cells:
@@ -303,8 +297,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 f"{float(item.get_junior_hours_with_uncertainty()):.2f}",
                 f"{float(item.get_mid_hours_with_uncertainty()):.2f}",
                 f"{float(item.get_senior_hours_with_uncertainty()):.2f}",
-                f"{float(item.get_lead_hours_with_uncertainty()):.2f}",
-                f"{float(item.get_reviewer_hours()):.2f}"
+                f"{float(item.get_lead_hours_with_uncertainty()):.2f}"
             ]
 
             for idx, content in enumerate(contents):
@@ -321,7 +314,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add summary section
     document.add_heading('Estimation Summary', level=2)
-    document.add_paragraph('Hours include level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Each level represents alternative estimates, not additive totals.')
+    document.add_paragraph('Hours include level-based uncertainty multipliers (Jr: 6x, Mid: 3x, Sr: 1.5x, Lead: 1x). Each level represents alternative estimates, not additive totals. Code review time is included in each developer\'s hours.')
 
     summary_table = document.add_table(rows=17, cols=2)
     summary_table.style = 'Light Grid Accent 1'
@@ -348,10 +341,6 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         ('  With Uncertainty', estimation.get_total_hours_lead_with_uncertainty()),
         (f'  Contingency ({float(estimation.contingency_padding_percent or 0):.2f}%)', estimation.get_contingency_hours_lead()),
         ('  Grand Total', estimation.get_grand_total_hours_lead()),
-        ('CODE REVIEWER (LEAD DEV)', ''),
-        ('  Total Hours', estimation.get_total_reviewer_hours()),
-        (f'  Contingency ({float(estimation.contingency_padding_percent or 0):.2f}%)', estimation.get_contingency_hours_reviewer()),
-        ('  Grand Total', estimation.get_grand_total_reviewer_hours()),
     ]
 
     # Adjust rows to match the number of totals

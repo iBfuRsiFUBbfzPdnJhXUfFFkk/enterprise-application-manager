@@ -58,9 +58,9 @@
                     <!-- Team Composition Section -->
                     <div class="border-t border-gray-200 pt-6">
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Team Composition</h3>
-                        <p class="text-sm text-gray-600 mb-4">Specify the number of developers at each level to calculate project duration estimates based on a 40-hour work week.</p>
+                        <p class="text-sm text-gray-600 mb-4">Specify the number of developers at each level to calculate project duration estimates based on a 40-hour work week. Code review time is already included in each developer's hours.</p>
 
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div>
                                 <label for="{{ form.junior_developer_count.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Junior Devs
@@ -91,14 +91,6 @@
                                 </label>
                                 {{ form.lead_developer_count }}
                                 {% if form.lead_developer_count.errors %}<p class="mt-2 text-sm text-red-600">{{ form.lead_developer_count.errors.0 }}</p>{% endif %}
-                            </div>
-
-                            <div>
-                                <label for="{{ form.reviewer_count.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Reviewers
-                                </label>
-                                {{ form.reviewer_count }}
-                                {% if form.reviewer_count.errors %}<p class="mt-2 text-sm text-red-600">{{ form.reviewer_count.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
                     </div>

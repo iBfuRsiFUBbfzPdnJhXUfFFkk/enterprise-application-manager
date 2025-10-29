@@ -15,8 +15,7 @@ class EstimationForm(BaseModelForm):
             'junior_developer_count',
             'mid_developer_count',
             'senior_developer_count',
-            'lead_developer_count',
-            'reviewer_count'
+            'lead_developer_count'
         ]
         for field in count_fields:
             if field in self.fields:

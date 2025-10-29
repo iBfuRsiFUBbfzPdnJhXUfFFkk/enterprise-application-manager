@@ -40,7 +40,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     mid_developer_count = create_generic_integer()
     senior_developer_count = create_generic_integer()
     lead_developer_count = create_generic_integer()
-    reviewer_count = create_generic_integer()
 
     # Base hours (before uncertainty) - includes dev + code review + testing
     def get_base_hours_junior(self):
@@ -96,10 +95,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """Calculate total lead developer hours from all items with uncertainty applied."""
         return sum(item.get_lead_hours_with_uncertainty() for item in self.items.all())
 
-    def get_total_reviewer_hours(self):
-        """Calculate total reviewer hours from all items (no uncertainty applied)."""
-        return sum(item.get_reviewer_hours() for item in self.items.all())
-
     # Contingency padding per level
     def get_contingency_hours_junior(self):
         """Calculate contingency hours for junior level."""
@@ -117,10 +112,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """Calculate contingency hours for lead level."""
         return self.get_total_hours_lead_with_uncertainty() * (self.contingency_padding_percent / 100)
 
-    def get_contingency_hours_reviewer(self):
-        """Calculate contingency hours for reviewer."""
-        return self.get_total_reviewer_hours() * (self.contingency_padding_percent / 100)
-
     # Grand totals per level (with uncertainty + contingency)
     def get_grand_total_hours_junior(self):
         """Calculate grand total junior hours (with uncertainty and contingency)."""
@@ -137,10 +128,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     def get_grand_total_hours_lead(self):
         """Calculate grand total lead hours (with uncertainty and contingency)."""
         return self.get_total_hours_lead_with_uncertainty() + self.get_contingency_hours_lead()
-
-    def get_grand_total_reviewer_hours(self):
-        """Calculate grand total reviewer hours (with contingency but no uncertainty)."""
-        return self.get_total_reviewer_hours() + self.get_contingency_hours_reviewer()
 
     # Average across levels (optional aggregate view)
     def get_average_hours_with_uncertainty(self):
@@ -211,21 +198,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
             return None
         return weeks / Decimal('4.33')
 
-    def get_duration_weeks_reviewer(self):
-        """Calculate duration in weeks for code reviewers (grand total / count / 40)."""
-        count = self.reviewer_count or 0
-        if count == 0:
-            return None
-        hours_per_dev = self.get_grand_total_reviewer_hours() / Decimal(str(count))
-        return hours_per_dev / Decimal('40.0')
-
-    def get_duration_months_reviewer(self):
-        """Calculate duration in months for code reviewers (weeks / 4.33)."""
-        weeks = self.get_duration_weeks_reviewer()
-        if weeks is None:
-            return None
-        return weeks / Decimal('4.33')
-
     # Combined project duration (for mixed teams working in parallel)
     def get_combined_project_duration_weeks(self):
         """
@@ -246,10 +218,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
 
         if self.lead_developer_count and self.lead_developer_count > 0:
             durations.append(self.get_duration_weeks_lead())
-
-        # Reviewer time runs in parallel with dev work, so we include it
-        if self.reviewer_count and self.reviewer_count > 0:
-            durations.append(self.get_duration_weeks_reviewer())
 
         # Filter out None values and return max (bottleneck)
         valid_durations = [d for d in durations if d is not None]
@@ -283,9 +251,6 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
 
         if self.lead_developer_count and self.lead_developer_count > 0:
             durations_by_level.append(('Lead', self.get_duration_weeks_lead()))
-
-        if self.reviewer_count and self.reviewer_count > 0:
-            durations_by_level.append(('Reviewer', self.get_duration_weeks_reviewer()))
 
         # Filter out None values
         valid_durations = [(name, dur) for name, dur in durations_by_level if dur is not None]
