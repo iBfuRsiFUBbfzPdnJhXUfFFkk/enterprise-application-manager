@@ -111,10 +111,10 @@
                                         {% elif item.cone_of_uncertainty == 'IMPLEMENTATION_COMPLETE' %}1.1x
                                         {% else %}N/A{% endif %}
                                     </td>
-                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Base: {{ item.hours_junior|default:"0"|floatformat:2 }}">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Base: {{ item.hours_mid|default:"0"|floatformat:2 }}">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Base: {{ item.hours_senior|default:"0"|floatformat:2 }}">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Base: {{ item.hours_lead|default:"0"|floatformat:2 }}">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:2 }}">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:2 }}">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:2 }}">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
+                                    <td class="px-4 py-4 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Code Reviewer: {{ item.code_reviewer_hours|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }}">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
                                     <td class="px-4 py-4 text-sm text-right space-x-2 whitespace-nowrap">
                                         <a href="{% url 'estimation_item_edit' item.id %}" class="text-blue-600 hover:text-blue-900">Edit</a>
                                         <a href="{% url 'estimation_item_delete' item.id %}"

@@ -11,6 +11,32 @@
             </div>
             <form method="post" class="px-6 py-6">
                 {% csrf_token %}
+
+                {# Hidden field to preserve the estimation FK relationship #}
+                <input type="hidden" name="estimation" value="{{ estimation.id }}">
+
+                {% if form.non_field_errors %}
+                    <div class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Form Errors</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <ul class="list-disc list-inside space-y-1">
+                                        {% for error in form.non_field_errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
                 <div class="space-y-6">
                     <div>
                         <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
@@ -22,24 +48,26 @@
                     </div>
 
                     <div class="border-t border-gray-200 pt-6">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Developer Hours Estimates</h3>
-                        <p class="text-sm text-gray-500 mb-4">Enter estimated hours for each developer experience level</p>
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Development Hours</h3>
+                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). You can override any value.</p>
+                            </div>
+                            <button type="button" id="recalculate_dev_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Recalculate
+                            </button>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="{{ form.hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Junior Developer Hours
+                                <label for="{{ form.hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Lead Developer Hours
                                 </label>
-                                {{ form.hours_junior }}
-                                {% if form.hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_junior.errors.0 }}</p>{% endif %}
-                            </div>
-
-                            <div>
-                                <label for="{{ form.hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Mid-Level Developer Hours
-                                </label>
-                                {{ form.hours_mid }}
-                                {% if form.hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_mid.errors.0 }}</p>{% endif %}
+                                {{ form.hours_lead }}
+                                {% if form.hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_lead.errors.0 }}</p>{% endif %}
                             </div>
 
                             <div>
@@ -51,11 +79,130 @@
                             </div>
 
                             <div>
-                                <label for="{{ form.hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="{{ form.hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Mid-Level Developer Hours
+                                </label>
+                                {{ form.hours_mid }}
+                                {% if form.hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_mid.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Junior Developer Hours
+                                </label>
+                                {{ form.hours_junior }}
+                                {% if form.hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_junior.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Code Review Hours</h3>
+                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill with same multipliers.</p>
+                            </div>
+                            <button type="button" id="recalculate_code_review_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Recalculate
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.code_review_hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Lead Developer Hours
                                 </label>
-                                {{ form.hours_lead }}
-                                {% if form.hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_lead.errors.0 }}</p>{% endif %}
+                                {{ form.code_review_hours_lead }}
+                                {% if form.code_review_hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_lead.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.code_review_hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Senior Developer Hours
+                                </label>
+                                {{ form.code_review_hours_senior }}
+                                {% if form.code_review_hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_senior.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.code_review_hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Mid-Level Developer Hours
+                                </label>
+                                {{ form.code_review_hours_mid }}
+                                {% if form.code_review_hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_mid.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.code_review_hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Junior Developer Hours
+                                </label>
+                                {{ form.code_review_hours_junior }}
+                                {% if form.code_review_hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_junior.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-6 border-t border-gray-100 pt-6">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <label for="{{ form.code_reviewer_hours.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
+                                    Code Reviewer Time (Lead Developer)
+                                </label>
+                                <div class="max-w-xs">
+                                    {{ form.code_reviewer_hours }}
+                                </div>
+                                <p class="mt-2 text-xs text-gray-600">Time spent by lead developer reviewing others' code. This is added to lead dev total only.</p>
+                                {% if form.code_reviewer_hours.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_reviewer_hours.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Testing Hours</h3>
+                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill with same multipliers.</p>
+                            </div>
+                            <button type="button" id="recalculate_tests_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Recalculate
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.tests_hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Lead Developer Hours
+                                </label>
+                                {{ form.tests_hours_lead }}
+                                {% if form.tests_hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_lead.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.tests_hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Senior Developer Hours
+                                </label>
+                                {{ form.tests_hours_senior }}
+                                {% if form.tests_hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_senior.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.tests_hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Mid-Level Developer Hours
+                                </label>
+                                {{ form.tests_hours_mid }}
+                                {% if form.tests_hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_mid.errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <div>
+                                <label for="{{ form.tests_hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Junior Developer Hours
+                                </label>
+                                {{ form.tests_hours_junior }}
+                                {% if form.tests_hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_junior.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
                     </div>
@@ -196,4 +343,69 @@
         opacity: 1;
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-populate hours based on lead dev values
+    // Multipliers: Senior = 1.25x, Mid = 2x, Junior = 3x
+
+    function autoPopulate(leadFieldId, seniorFieldId, midFieldId, juniorFieldId) {
+        const leadField = document.getElementById(leadFieldId);
+        if (!leadField) return;
+
+        const seniorField = document.getElementById(seniorFieldId);
+        const midField = document.getElementById(midFieldId);
+        const juniorField = document.getElementById(juniorFieldId);
+
+        leadField.addEventListener('input', function() {
+            const leadValue = parseFloat(leadField.value) || 0;
+
+            // Only auto-populate if the dependent field hasn't been manually modified
+            // We check if the current value matches what it would be from auto-population
+            if (seniorField && (seniorField.value === '' || parseFloat(seniorField.value) === 0)) {
+                seniorField.value = (leadValue * 1.25).toFixed(2);
+            }
+            if (midField && (midField.value === '' || parseFloat(midField.value) === 0)) {
+                midField.value = (leadValue * 2).toFixed(2);
+            }
+            if (juniorField && (juniorField.value === '' || parseFloat(juniorField.value) === 0)) {
+                juniorField.value = (leadValue * 3).toFixed(2);
+            }
+        });
+    }
+
+    // Force recalculation function (ignores current values)
+    function forceRecalculate(leadFieldId, seniorFieldId, midFieldId, juniorFieldId) {
+        const leadField = document.getElementById(leadFieldId);
+        if (!leadField) return;
+
+        const leadValue = parseFloat(leadField.value) || 0;
+        const seniorField = document.getElementById(seniorFieldId);
+        const midField = document.getElementById(midFieldId);
+        const juniorField = document.getElementById(juniorFieldId);
+
+        if (seniorField) seniorField.value = (leadValue * 1.25).toFixed(2);
+        if (midField) midField.value = (leadValue * 2).toFixed(2);
+        if (juniorField) juniorField.value = (leadValue * 3).toFixed(2);
+    }
+
+    // Apply auto-population to all three categories
+    autoPopulate('id_hours_lead', 'id_hours_senior', 'id_hours_mid', 'id_hours_junior');
+    autoPopulate('id_code_review_hours_lead', 'id_code_review_hours_senior', 'id_code_review_hours_mid', 'id_code_review_hours_junior');
+    autoPopulate('id_tests_hours_lead', 'id_tests_hours_senior', 'id_tests_hours_mid', 'id_tests_hours_junior');
+
+    // Attach recalculate button handlers
+    document.getElementById('recalculate_dev_hours')?.addEventListener('click', function() {
+        forceRecalculate('id_hours_lead', 'id_hours_senior', 'id_hours_mid', 'id_hours_junior');
+    });
+
+    document.getElementById('recalculate_code_review_hours')?.addEventListener('click', function() {
+        forceRecalculate('id_code_review_hours_lead', 'id_code_review_hours_senior', 'id_code_review_hours_mid', 'id_code_review_hours_junior');
+    });
+
+    document.getElementById('recalculate_tests_hours')?.addEventListener('click', function() {
+        forceRecalculate('id_tests_hours_lead', 'id_tests_hours_senior', 'id_tests_hours_mid', 'id_tests_hours_junior');
+    });
+});
+</script>
 {% endblock %}

@@ -58,11 +58,26 @@ class EstimationItem(AbstractBaseModel):
     # Item details
     description = create_generic_text()
 
-    # Hours by developer level
+    # Development hours by developer level
     hours_junior = create_generic_decimal()
     hours_mid = create_generic_decimal()
     hours_senior = create_generic_decimal()
     hours_lead = create_generic_decimal()
+
+    # Code review hours by developer level
+    code_review_hours_junior = create_generic_decimal()
+    code_review_hours_mid = create_generic_decimal()
+    code_review_hours_senior = create_generic_decimal()
+    code_review_hours_lead = create_generic_decimal()
+
+    # Code reviewer time (lead dev reviewing others' code - added to lead total only)
+    code_reviewer_hours = create_generic_decimal()
+
+    # Testing hours by developer level
+    tests_hours_junior = create_generic_decimal()
+    tests_hours_mid = create_generic_decimal()
+    tests_hours_senior = create_generic_decimal()
+    tests_hours_lead = create_generic_decimal()
 
     # Cone of Uncertainty - project phase indicator
     cone_of_uncertainty = create_generic_enum(
@@ -85,22 +100,26 @@ class EstimationItem(AbstractBaseModel):
             return self.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(self.cone_of_uncertainty, Decimal('1.0'))
         return Decimal('1.0')
 
-    # Individual level hours with uncertainty applied
+    # Individual level total hours (dev + code review + tests) with uncertainty applied
     def get_junior_hours_with_uncertainty(self):
-        """Calculate junior hours including uncertainty padding."""
-        return (self.hours_junior or 0) * self.get_uncertainty_multiplier()
+        """Calculate total junior hours (dev + code review + tests) including uncertainty padding."""
+        total = (self.hours_junior or 0) + (self.code_review_hours_junior or 0) + (self.tests_hours_junior or 0)
+        return total * self.get_uncertainty_multiplier()
 
     def get_mid_hours_with_uncertainty(self):
-        """Calculate mid-level hours including uncertainty padding."""
-        return (self.hours_mid or 0) * self.get_uncertainty_multiplier()
+        """Calculate total mid-level hours (dev + code review + tests) including uncertainty padding."""
+        total = (self.hours_mid or 0) + (self.code_review_hours_mid or 0) + (self.tests_hours_mid or 0)
+        return total * self.get_uncertainty_multiplier()
 
     def get_senior_hours_with_uncertainty(self):
-        """Calculate senior hours including uncertainty padding."""
-        return (self.hours_senior or 0) * self.get_uncertainty_multiplier()
+        """Calculate total senior hours (dev + code review + tests) including uncertainty padding."""
+        total = (self.hours_senior or 0) + (self.code_review_hours_senior or 0) + (self.tests_hours_senior or 0)
+        return total * self.get_uncertainty_multiplier()
 
     def get_lead_hours_with_uncertainty(self):
-        """Calculate lead hours including uncertainty padding."""
-        return (self.hours_lead or 0) * self.get_uncertainty_multiplier()
+        """Calculate total lead hours (dev + code review + tests + code reviewer time) including uncertainty padding."""
+        total = (self.hours_lead or 0) + (self.code_review_hours_lead or 0) + (self.tests_hours_lead or 0) + (self.code_reviewer_hours or 0)
+        return total * self.get_uncertainty_multiplier()
 
     def get_average_hours_with_uncertainty(self):
         """

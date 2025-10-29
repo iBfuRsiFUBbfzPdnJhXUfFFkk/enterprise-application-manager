@@ -62,6 +62,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
+    document.add_paragraph('Hours shown include development, code review, and testing time with cone of uncertainty multipliers applied. Lead developer hours also include code reviewer time (time spent reviewing others\' code).')
 
     items = estimation.items.all().order_by('id')
 
