@@ -85,6 +85,11 @@
 
                     <!-- Metadata -->
                     <div class="mb-4 flex flex-wrap gap-2">
+                        {% if model.project_manager %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            PM: {{ model.project_manager.name }}
+                        </span>
+                        {% endif %}
                         {% if model.applications.count > 0 %}
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                             {{ model.applications.count }} app{{ model.applications.count|pluralize }}
@@ -140,6 +145,7 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code Billing</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Manager</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stakeholders</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
@@ -156,6 +162,13 @@
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="text-sm text-gray-500 font-mono">{{ model.code_billing|default:"—" }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                {% if model.project_manager %}
+                                    <div class="text-sm text-gray-900">{{ model.project_manager.name }}</div>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">—</span>
+                                {% endif %}
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 {% if model.applications.count > 0 %}

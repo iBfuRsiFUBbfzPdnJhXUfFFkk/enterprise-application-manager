@@ -60,6 +60,17 @@
                             <dd class="text-lg font-mono text-gray-900">{{ project.code_billing }}</dd>
                         </div>
                         {% endif %}
+                        {% if project.project_manager %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Project Manager</dt>
+                            <dd class="text-lg text-gray-900">
+                                <a href="{% url 'person_detail' model_id=project.project_manager.id %}"
+                                   class="text-purple-600 hover:text-purple-800 hover:underline">
+                                    {{ project.project_manager.name }}
+                                </a>
+                            </dd>
+                        </div>
+                        {% endif %}
                     </dl>
                 </div>
             </div>
