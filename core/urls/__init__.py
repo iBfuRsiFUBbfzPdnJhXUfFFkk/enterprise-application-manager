@@ -59,6 +59,7 @@ from core.urls.urlpatterns_vulnerability import urlpatterns_vulnerability
 from core.urls.urlpatterns_settings import urlpatterns_settings
 from core.urls.urlpatterns_this_api import urlpatterns_this_api
 from core.views import home_view
+from core.views.link.link_short_redirect_view import link_short_redirect_view
 from kpi.urls import urlpatterns_kpi
 
 urlpatterns_authenticated: list[URLPattern | URLResolver] = [
@@ -132,5 +133,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
 urlpatterns: list[URLPattern | URLResolver] = [
     path(name="index", route="", view=login_required(function=home_view)),
     *urlpatterns_login,
+    # Public short URL redirect (no authentication required)
+    path(name="link_short_redirect", route='-/<str:short_code>/', view=link_short_redirect_view),
     path(name="authenticated", route='authenticated/', view=include(arg=urlpatterns_authenticated)),
 ]

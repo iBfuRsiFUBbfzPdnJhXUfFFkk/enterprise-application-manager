@@ -137,6 +137,7 @@
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Short URL</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -159,6 +160,26 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                                     </svg>
                                 </a>
+                                {% else %}
+                                <span class="text-sm text-gray-400">—</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                {% if link.short_code %}
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded" title="{{ request.scheme }}://{{ request.get_host }}{{ link.get_short_url }}">
+                                        {{ link.get_short_url }}
+                                    </span>
+                                    <button onclick="copyShortUrlInline(event, '{{ request.scheme }}://{{ request.get_host }}{{ link.get_short_url }}')"
+                                            class="text-gray-400 hover:text-gray-600" title="Copy short URL">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                    </button>
+                                    <span class="text-xs text-gray-500" title="{{ link.click_count }} clicks">
+                                        {{ link.click_count }}
+                                    </span>
+                                </div>
                                 {% else %}
                                 <span class="text-sm text-gray-400">—</span>
                                 {% endif %}
@@ -359,6 +380,29 @@ document.addEventListener('keydown', function(event) {
         closeDeleteModal();
     }
 });
+
+// Copy short URL function for inline buttons
+function copyShortUrlInline(event, shortUrl) {
+    event.stopPropagation(); // Prevent row double-click
+
+    navigator.clipboard.writeText(shortUrl).then(function() {
+        // Visual feedback
+        const button = event.currentTarget;
+        const originalColor = button.classList.contains('text-gray-400');
+
+        button.classList.remove('text-gray-400');
+        button.classList.add('text-green-600');
+
+        // Reset after 1 second
+        setTimeout(function() {
+            button.classList.remove('text-green-600');
+            button.classList.add('text-gray-400');
+        }, 1000);
+    }).catch(function(err) {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy URL. Please copy manually.');
+    });
+}
 </script>
 
 <style>

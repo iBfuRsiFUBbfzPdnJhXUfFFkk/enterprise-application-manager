@@ -3,6 +3,7 @@ from decimal import Decimal
 from django.db import models
 from django_generic_model_fields.create_generic_decimal import create_generic_decimal
 from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_text import create_generic_text
 from django_generic_model_fields.create_generic_enum import create_generic_enum
 from django_generic_model_fields.create_generic_integer import create_generic_integer
@@ -108,6 +109,12 @@ class EstimationItem(AbstractBaseModel):
     # Priority
     priority = create_generic_enum(
         choices=PRIORITY_CHOICES
+    )
+
+    # Related links (many-to-many)
+    links = create_generic_m2m(
+        to='Link',
+        related_name='estimation_items'
     )
 
     def get_uncertainty_multiplier(self):

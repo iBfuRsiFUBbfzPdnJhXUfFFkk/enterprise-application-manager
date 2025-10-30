@@ -13,6 +13,11 @@ class EstimationItemForm(BaseModelForm):
                 'class': 'form-control',
                 'placeholder': 'e.g., Frontend, Backend, Database (optional)',
                 'list': 'group-datalist'
+            }),
+            'links': forms.SelectMultiple(attrs={
+                'class': 'form-control',
+                'id': 'id_links',
+                'size': '1'  # Will be enhanced with JavaScript
             })
         }
 

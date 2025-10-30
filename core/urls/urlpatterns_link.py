@@ -3,6 +3,7 @@ from django.urls import URLPattern, URLResolver, path
 from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.link import (
     link_add_view,
+    link_create_ajax_view,
     link_delete_view,
     link_detail_view,
     link_edit_view,
@@ -24,4 +25,9 @@ urlpatterns_link.append(
 # Add delete view
 urlpatterns_link.append(
     path(name='link_delete', route='link/delete/<int:model_id>/', view=link_delete_view)
+)
+
+# Add AJAX create view
+urlpatterns_link.append(
+    path(name='link_create_ajax', route='link/create/ajax/', view=link_create_ajax_view)
 )

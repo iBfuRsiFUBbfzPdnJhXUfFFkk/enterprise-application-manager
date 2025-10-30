@@ -59,6 +59,62 @@
                     </div>
                 </div>
 
+                <!-- Short URL Settings -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Short URL Settings</h2>
+                        <p class="mt-1 text-sm text-gray-500">Configure short URL for easier sharing and tracking</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="{{ form.short_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Short Code {% if form.short_code.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.short_code }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Optional: Customize the short URL path. Leave blank to auto-generate a unique 10-character code.
+                                <br>Example: "my-link" becomes <span class="font-mono">/-/my-link/</span>
+                            </p>
+                            {% if form.short_code.errors %}<p class="mt-2 text-sm text-red-600">{{ form.short_code.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                {{ form.is_short_url_active }}
+                                <label for="{{ form.is_short_url_active.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-700 cursor-pointer">
+                                    Short URL is Active
+                                </label>
+                            </div>
+                            <p class="mt-1 ml-6 text-xs text-gray-500">
+                                When unchecked, the short URL will not redirect (returns 404). Use this to temporarily disable a link without deleting it.
+                            </p>
+                            {% if form.is_short_url_active.errors %}<p class="mt-2 ml-6 text-sm text-red-600">{{ form.is_short_url_active.errors.0 }}</p>{% endif %}
+                        </div>
+                        {% if form.instance.pk and form.instance.short_code %}
+                        <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                            <div class="flex items-start">
+                                <svg class="h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="ml-3 flex-1">
+                                    <h3 class="text-sm font-medium text-blue-800">Current Short URL</h3>
+                                    <div class="mt-2 text-sm text-blue-700">
+                                        <p class="font-mono bg-white px-2 py-1 rounded border border-blue-200">
+                                            {{ request.scheme }}://{{ request.get_host }}{{ form.instance.get_short_url }}
+                                        </p>
+                                        <p class="mt-2 text-xs">
+                                            <strong>Clicks:</strong> {{ form.instance.click_count }}
+                                            {% if form.instance.last_accessed_at %}
+                                            | <strong>Last accessed:</strong> {{ form.instance.last_accessed_at|timesince }} ago
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">

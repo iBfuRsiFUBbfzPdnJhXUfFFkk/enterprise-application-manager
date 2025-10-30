@@ -181,6 +181,25 @@
                                         {% if item.description %}
                                             <div class="text-xs text-gray-500 mt-1" title="{{ item.description }}">{{ item.description|truncatewords:8 }}</div>
                                         {% endif %}
+                                        {% if item.links.exists %}
+                                            <div class="flex flex-wrap gap-1 mt-2">
+                                                {% for link in item.links.all %}
+                                                    <a href="{{ link.url }}"
+                                                       target="_blank"
+                                                       rel="noopener noreferrer"
+                                                       class="inline-flex items-center px-2 py-1 text-xs font-medium rounded bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-colors duration-150"
+                                                       title="{{ link.comment|default:link.url }}">
+                                                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                                        </svg>
+                                                        {{ link.name|truncatewords:3 }}
+                                                        <svg class="h-3 w-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                                        </svg>
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
                                     </td>
                                     <td class="px-2 py-3 text-sm text-center text-gray-900">{{ item.story_points|default:"0"|floatformat:1 }}</td>
                                     <td class="px-2 py-3 text-sm text-center">
@@ -656,6 +675,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return cookieValue;
     }
+
+    // Double-click handler to navigate to item detail page
+    const itemRows = document.querySelectorAll('tr[data-item-id]');
+    itemRows.forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('dblclick', function() {
+            const itemId = this.dataset.itemId;
+            if (itemId) {
+                window.location.href = `{% url 'estimation_item_detail' 0 %}`.replace('0', itemId);
+            }
+        });
+    });
 });
 </script>
 {% endblock %}

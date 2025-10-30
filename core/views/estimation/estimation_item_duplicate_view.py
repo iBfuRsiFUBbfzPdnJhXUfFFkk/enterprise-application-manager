@@ -42,6 +42,9 @@ def estimation_item_duplicate_view(request: HttpRequest, item_id: int) -> HttpRe
         # The save() method will auto-assign the order
         new_item.save()
 
+        # Copy many-to-many relationships (must be done after save)
+        new_item.links.set(original_item.links.all())
+
     except EstimationItem.DoesNotExist:
         return generic_500(request=request)
 
