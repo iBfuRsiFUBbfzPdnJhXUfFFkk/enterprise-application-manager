@@ -764,20 +764,58 @@ function toggleGroup(groupName) {
         item.classList.toggle('hidden');
     });
 
-    // Rotate chevron
-    if (chevron.style.transform === 'rotate(-90deg)') {
-        chevron.style.transform = '';
-    } else {
+    // Rotate chevron and save state
+    const isExpanded = chevron.style.transform !== 'rotate(-90deg)';
+    if (isExpanded) {
         chevron.style.transform = 'rotate(-90deg)';
+        removeExpandedGroup(groupName);
+    } else {
+        chevron.style.transform = '';
+        saveExpandedGroup(groupName);
     }
 }
 
+// Save expanded group state to localStorage
+function saveExpandedGroup(groupName) {
+    const storageKey = 'estimation_expanded_groups_{{ model.id }}';
+    let expandedGroups = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (!expandedGroups.includes(groupName)) {
+        expandedGroups.push(groupName);
+        localStorage.setItem(storageKey, JSON.stringify(expandedGroups));
+    }
+}
+
+// Remove expanded group state from localStorage
+function removeExpandedGroup(groupName) {
+    const storageKey = 'estimation_expanded_groups_{{ model.id }}';
+    let expandedGroups = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    expandedGroups = expandedGroups.filter(name => name !== groupName);
+    localStorage.setItem(storageKey, JSON.stringify(expandedGroups));
+}
+
+// Get expanded groups from localStorage
+function getExpandedGroups() {
+    const storageKey = 'estimation_expanded_groups_{{ model.id }}';
+    return JSON.parse(localStorage.getItem(storageKey) || '[]');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all groups as collapsed
+    // Get previously expanded groups
+    const expandedGroups = getExpandedGroups();
+
+    // Initialize groups - collapse by default, expand if in localStorage
     const groupHeaders = document.querySelectorAll('.group-header');
     groupHeaders.forEach(header => {
+        const groupName = header.dataset.groupName;
         const chevron = header.querySelector('.group-chevron');
-        if (chevron) {
+        const groupItems = document.querySelectorAll(`tr.group-item[data-group="${groupName}"], tr.group-subtotal[data-group="${groupName}"]`);
+
+        if (expandedGroups.includes(groupName)) {
+            // Expand this group
+            chevron.style.transform = '';
+            groupItems.forEach(item => item.classList.remove('hidden'));
+        } else {
+            // Keep collapsed (default state)
             chevron.style.transform = 'rotate(-90deg)';
         }
     });
@@ -903,6 +941,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = `{% url 'estimation_item_detail' 0 %}`.replace('0', itemId);
             }
         });
+    });
+
+    // Add click handlers to item ordering buttons to save group state
+    document.querySelectorAll('tr[data-item-id]').forEach(row => {
+        const groupName = row.dataset.group;
+        if (groupName) {
+            // Find all ordering links in this row
+            const orderingLinks = row.querySelectorAll('a[href*="move-up"], a[href*="move-down"], a[href*="move-to-top"], a[href*="move-to-bottom"]');
+            orderingLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Save the group as expanded before navigating
+                    saveExpandedGroup(groupName);
+                });
+            });
+        }
     });
 });
 
