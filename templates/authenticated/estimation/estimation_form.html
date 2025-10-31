@@ -363,6 +363,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Configure marked to enable all markdown features
+    if (typeof marked !== 'undefined' && marked.setOptions) {
+        marked.setOptions({
+            gfm: true,  // GitHub Flavored Markdown
+            breaks: false,  // Don't convert \n to <br>
+            headerIds: true,
+            mangle: false,
+            sanitize: false
+        });
+    }
+
     // Markdown Preview functionality for comments (ON by default)
     const commentField = document.getElementById('{{ form.comment.id_for_label }}');
     const commentPreviewDiv = document.getElementById('comment_preview');

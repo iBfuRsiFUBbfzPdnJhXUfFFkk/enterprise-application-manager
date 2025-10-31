@@ -771,6 +771,17 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Configure marked to enable all markdown features
+    if (typeof marked !== 'undefined' && marked.setOptions) {
+        marked.setOptions({
+            gfm: true,  // GitHub Flavored Markdown
+            breaks: false,  // Don't convert \n to <br>
+            headerIds: true,
+            mangle: false,
+            sanitize: false
+        });
+    }
+
     // Populate group datalist and quick-select cards with existing groups from the estimation
     const groupField = document.getElementById('{{ form.group.id_for_label }}');
     if (groupField) {

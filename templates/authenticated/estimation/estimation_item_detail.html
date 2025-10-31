@@ -373,6 +373,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (markdownText.trim()) {
             // Check if marked is available
             if (typeof marked !== 'undefined' && marked.parse) {
+                // Configure marked to enable all markdown features
+                marked.setOptions({
+                    gfm: true,  // GitHub Flavored Markdown
+                    breaks: false,  // Don't convert \n to <br>
+                    headerIds: true,
+                    mangle: false,
+                    sanitize: false
+                });
+
                 const renderedHtml = marked.parse(markdownText);
                 contentDiv.innerHTML = renderedHtml;
             } else {

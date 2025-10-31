@@ -800,6 +800,17 @@ function getExpandedGroups() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Configure marked to enable all markdown features
+    if (typeof marked !== 'undefined' && marked.setOptions) {
+        marked.setOptions({
+            gfm: true,  // GitHub Flavored Markdown
+            breaks: false,  // Don't convert \n to <br>
+            headerIds: true,
+            mangle: false,
+            sanitize: false
+        });
+    }
+
     // Get previously expanded groups
     const expandedGroups = getExpandedGroups();
 
