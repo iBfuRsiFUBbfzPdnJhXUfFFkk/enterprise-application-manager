@@ -805,6 +805,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+    // Helper function to format hours - rounds to 2 decimals but removes trailing zeros
+    function formatHours(value) {
+        return parseFloat(value.toFixed(2)).toString();
+    }
+
     // Auto-populate hours based on lead dev values
     // Multipliers: Senior = 1.25x, Mid = 2x, Junior = 3x
 
@@ -822,13 +827,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Only auto-populate if the dependent field hasn't been manually modified
             // We check if the current value matches what it would be from auto-population
             if (seniorField && (seniorField.value === '' || parseFloat(seniorField.value) === 0)) {
-                seniorField.value = (leadValue * 1.25).toFixed(2);
+                seniorField.value = formatHours(leadValue * 1.25);
             }
             if (midField && (midField.value === '' || parseFloat(midField.value) === 0)) {
-                midField.value = (leadValue * 2).toFixed(2);
+                midField.value = formatHours(leadValue * 2);
             }
             if (juniorField && (juniorField.value === '' || parseFloat(juniorField.value) === 0)) {
-                juniorField.value = (leadValue * 3).toFixed(2);
+                juniorField.value = formatHours(leadValue * 3);
             }
         });
     }
@@ -847,7 +852,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const devValue = parseFloat(devField.value) || 0;
                 // Only auto-populate if code review field is empty or zero
                 if (codeReviewField.value === '' || parseFloat(codeReviewField.value) === 0) {
-                    codeReviewField.value = (devValue * 0.5).toFixed(2);
+                    codeReviewField.value = formatHours(devValue * 0.5);
                 }
             });
         });
@@ -867,7 +872,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const devValue = parseFloat(devField.value) || 0;
                 // Only auto-populate if tests field is empty or zero
                 if (testsField.value === '' || parseFloat(testsField.value) === 0) {
-                    testsField.value = (devValue * 1.0).toFixed(2);
+                    testsField.value = formatHours(devValue * 1.0);
                 }
             });
         });
@@ -884,7 +889,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const leadCodeReviewValue = parseFloat(leadCodeReviewField.value) || 0;
             // Only auto-populate if code reviewer field is empty or zero
             if (codeReviewerField.value === '' || parseFloat(codeReviewerField.value) === 0) {
-                codeReviewerField.value = (leadCodeReviewValue * 1.0).toFixed(2);
+                codeReviewerField.value = formatHours(leadCodeReviewValue * 1.0);
             }
         });
     }
@@ -899,9 +904,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const midField = document.getElementById(midFieldId);
         const juniorField = document.getElementById(juniorFieldId);
 
-        if (seniorField) seniorField.value = (leadValue * 1.25).toFixed(2);
-        if (midField) midField.value = (leadValue * 2).toFixed(2);
-        if (juniorField) juniorField.value = (leadValue * 3).toFixed(2);
+        if (seniorField) seniorField.value = formatHours(leadValue * 1.25);
+        if (midField) midField.value = formatHours(leadValue * 2);
+        if (juniorField) juniorField.value = formatHours(leadValue * 3);
     }
 
     // Force recalculate code review hours as 0.5x dev hours
@@ -914,7 +919,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (devField && codeReviewField) {
                 const devValue = parseFloat(devField.value) || 0;
-                codeReviewField.value = (devValue * 0.5).toFixed(2);
+                codeReviewField.value = formatHours(devValue * 0.5);
             }
         });
     }
@@ -929,7 +934,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (devField && testsField) {
                 const devValue = parseFloat(devField.value) || 0;
-                testsField.value = (devValue * 1.0).toFixed(2);
+                testsField.value = formatHours(devValue * 1.0);
             }
         });
     }
@@ -941,7 +946,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (leadCodeReviewField && codeReviewerField) {
             const leadCodeReviewValue = parseFloat(leadCodeReviewField.value) || 0;
-            codeReviewerField.value = (leadCodeReviewValue * 1.0).toFixed(2);
+            codeReviewerField.value = formatHours(leadCodeReviewValue * 1.0);
         }
     }
 
