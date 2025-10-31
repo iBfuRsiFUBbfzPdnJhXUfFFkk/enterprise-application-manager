@@ -1117,6 +1117,20 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('DOMContentLoaded', function() {
         initializeLinksSystem();
     });
+
+    // Keyboard shortcut: Ctrl+S or Cmd+S to save form
+    document.addEventListener('keydown', function(e) {
+        // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault(); // Prevent browser's default save dialog
+
+            // Submit the form
+            const form = document.getElementById('estimation-item-form');
+            if (form) {
+                form.submit();
+            }
+        }
+    });
 });
 </script>
 
