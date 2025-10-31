@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 from collections import OrderedDict
 from decimal import Decimal
+import re
 
 from django.http import HttpRequest, HttpResponse
 from docx import Document
@@ -10,6 +11,40 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from core.models.estimation import Estimation
 from core.views.generic.generic_500 import generic_500
+
+
+def add_formatted_text(paragraph, text, font_size=10):
+    """
+    Add text with inline markdown formatting (bold and italic) to a paragraph.
+    Supports **bold** and *italic* markdown syntax.
+    """
+    # Process bold first, then italic within non-bold sections
+    # Use a more specific pattern to avoid conflicts
+    bold_pattern = r'(\*\*[^*]+?\*\*)'
+    parts = re.split(bold_pattern, text)
+
+    for part in parts:
+        if part.startswith('**') and part.endswith('**') and len(part) > 4:
+            # This is bold text
+            run = paragraph.add_run(part[2:-2])
+            run.bold = True
+            run.font.size = Pt(font_size)
+        else:
+            # Process italic in non-bold parts
+            italic_pattern = r'(\*[^*]+?\*)'
+            italic_parts = re.split(italic_pattern, part)
+
+            for italic_part in italic_parts:
+                if italic_part.startswith('*') and italic_part.endswith('*') and len(italic_part) > 2 and not italic_part.startswith('**'):
+                    # This is italic text
+                    run = paragraph.add_run(italic_part[1:-1])
+                    run.italic = True
+                    run.font.size = Pt(font_size)
+                else:
+                    # Regular text
+                    if italic_part:  # Only add non-empty strings
+                        run = paragraph.add_run(italic_part)
+                        run.font.size = Pt(font_size)
 
 
 def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResponse:
@@ -828,47 +863,29 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
                         # Handle headings
                         if line.startswith('# '):
-                            document.add_heading(line[2:], level=5)
+                            h = document.add_heading(level=5)
+                            add_formatted_text(h, line[2:], font_size=10)
                         elif line.startswith('## '):
-                            document.add_heading(line[3:], level=6)
+                            h = document.add_heading(level=6)
+                            add_formatted_text(h, line[3:], font_size=10)
                         elif line.startswith('### '):
-                            document.add_heading(line[4:], level=6)
+                            h = document.add_heading(level=6)
+                            add_formatted_text(h, line[4:], font_size=10)
                         # Handle bullet lists
                         elif line.startswith('- ') or line.startswith('* '):
-                            p = document.add_paragraph(line[2:], style='List Bullet')
-                            for run in p.runs:
-                                run.font.size = Pt(10)
+                            p = document.add_paragraph(style='List Bullet')
+                            add_formatted_text(p, line[2:], font_size=10)
                         # Handle numbered lists
                         elif len(line) > 2 and line[0].isdigit() and line[1:3] in ['. ', ') ']:
-                            p = document.add_paragraph(line[3:], style='List Number')
-                            for run in p.runs:
-                                run.font.size = Pt(10)
+                            p = document.add_paragraph(style='List Number')
+                            add_formatted_text(p, line[3:], font_size=10)
                         # Handle code blocks
                         elif line.startswith('```'):
                             continue  # Skip code fence markers
                         # Regular paragraph
                         else:
                             p = document.add_paragraph()
-                            # Simple inline markdown: **bold** and *italic*
-                            import re
-                            # Replace **bold**
-                            parts = re.split(r'(\*\*.*?\*\*)', line)
-                            for part in parts:
-                                if part.startswith('**') and part.endswith('**'):
-                                    run = p.add_run(part[2:-2])
-                                    run.bold = True
-                                    run.font.size = Pt(10)
-                                else:
-                                    # Replace *italic*
-                                    italic_parts = re.split(r'(\*.*?\*)', part)
-                                    for italic_part in italic_parts:
-                                        if italic_part.startswith('*') and italic_part.endswith('*') and not italic_part.startswith('**'):
-                                            run = p.add_run(italic_part[1:-1])
-                                            run.italic = True
-                                            run.font.size = Pt(10)
-                                        else:
-                                            run = p.add_run(italic_part)
-                                            run.font.size = Pt(10)
+                            add_formatted_text(p, line, font_size=10)
                 else:
                     document.add_paragraph('No description provided.')
 
