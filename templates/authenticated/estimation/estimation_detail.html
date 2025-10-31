@@ -207,7 +207,7 @@
                                 {% for item in group_data.items %}
                                 <tr class="hover:bg-gray-50 group-item hidden" data-item-id="{{ item.id }}" data-group="{{ group_name }}">
                                     <td class="px-2 py-3 text-sm text-center">
-                                        <div class="flex justify-center items-center">
+                                        <div class="flex justify-center items-center" onclick="event.stopPropagation()">
                                             <div class="drag-handle cursor-move text-gray-400 hover:text-gray-600 p-0.5" title="Drag to reorder">
                                                 <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"/>
