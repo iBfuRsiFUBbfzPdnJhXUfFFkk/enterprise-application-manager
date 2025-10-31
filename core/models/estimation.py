@@ -4,6 +4,7 @@ from django.db import models
 from django_generic_model_fields.create_generic_decimal import create_generic_decimal
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.application import Application
@@ -31,6 +32,12 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
 
     # Estimation details
     description = create_generic_varchar()
+
+    # Related links
+    links = create_generic_m2m(
+        to='Link',
+        related_name='estimations'
+    )
 
     # Contingency padding as a percentage (e.g., 20 for 20%)
     contingency_padding_percent = create_generic_decimal()
