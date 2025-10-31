@@ -180,9 +180,10 @@
                         <h2 class="text-lg font-semibold text-gray-900">Description</h2>
                     </div>
                     <div class="px-6 py-4">
-                        <div id="description-content" class="prose max-w-none text-gray-700" data-markdown="{{ item.description|escapejs }}">
+                        <div id="description-content" class="prose max-w-none text-gray-700">
                             <!-- Markdown will be rendered here by JavaScript -->
                         </div>
+                        <script type="text/markdown" id="description-markdown">{{ item.description|safe }}</script>
                     </div>
                 </div>
                 {% endif %}
@@ -363,10 +364,11 @@
 <script>
 // Render markdown in description
 document.addEventListener('DOMContentLoaded', function() {
+    const markdownScript = document.getElementById('description-markdown');
     const contentDiv = document.getElementById('description-content');
 
-    if (contentDiv) {
-        const markdownText = contentDiv.getAttribute('data-markdown');
+    if (markdownScript && contentDiv) {
+        const markdownText = markdownScript.textContent;
 
         if (markdownText && markdownText.trim()) {
             // Check if marked is available
