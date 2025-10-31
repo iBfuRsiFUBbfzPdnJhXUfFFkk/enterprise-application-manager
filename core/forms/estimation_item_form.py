@@ -76,14 +76,46 @@ class EstimationItemForm(BaseModelForm):
 
         # Set default values if creating new item
         if not self.instance.pk:
-            # Default all hour fields to 0.00 (formatted)
-            for field in hour_fields:
-                if field not in self.initial:
-                    self.initial[field] = "0.00"
+            # Default lead dev hours to 1.00
+            if 'hours_lead' not in self.initial:
+                self.initial['hours_lead'] = "1.00"
 
-            # Default story points to 0.00 (formatted)
+            # Calculate other development hours based on lead dev hours (1.00)
+            # Senior = 1.25x, Mid = 2x, Junior = 3x
+            if 'hours_senior' not in self.initial:
+                self.initial['hours_senior'] = "1.25"
+            if 'hours_mid' not in self.initial:
+                self.initial['hours_mid'] = "2.00"
+            if 'hours_junior' not in self.initial:
+                self.initial['hours_junior'] = "3.00"
+
+            # Calculate code review hours (0.5x of dev hours)
+            if 'code_review_hours_lead' not in self.initial:
+                self.initial['code_review_hours_lead'] = "0.50"
+            if 'code_review_hours_senior' not in self.initial:
+                self.initial['code_review_hours_senior'] = "0.62"  # 1.25 * 0.5
+            if 'code_review_hours_mid' not in self.initial:
+                self.initial['code_review_hours_mid'] = "1.00"  # 2.00 * 0.5
+            if 'code_review_hours_junior' not in self.initial:
+                self.initial['code_review_hours_junior'] = "1.50"  # 3.00 * 0.5
+
+            # Calculate code reviewer hours (1x of lead code review)
+            if 'code_reviewer_hours' not in self.initial:
+                self.initial['code_reviewer_hours'] = "0.50"  # 1x of 0.50
+
+            # Calculate testing hours (1x of dev hours)
+            if 'tests_hours_lead' not in self.initial:
+                self.initial['tests_hours_lead'] = "1.00"
+            if 'tests_hours_senior' not in self.initial:
+                self.initial['tests_hours_senior'] = "1.25"
+            if 'tests_hours_mid' not in self.initial:
+                self.initial['tests_hours_mid'] = "2.00"
+            if 'tests_hours_junior' not in self.initial:
+                self.initial['tests_hours_junior'] = "3.00"
+
+            # Default story points to 1
             if 'story_points' not in self.initial:
-                self.initial['story_points'] = "0.00"
+                self.initial['story_points'] = "1"
 
             # Default cone of uncertainty to requirements complete (middle ground)
             if 'cone_of_uncertainty' not in self.initial:
