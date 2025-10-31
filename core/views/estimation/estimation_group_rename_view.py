@@ -59,7 +59,7 @@ def estimation_group_rename_view(request: HttpRequest, estimation_id: int) -> Js
                 'error': f'Group name "{new_group_name}" already exists in this estimation'
             }, status=400)
 
-        # Update all items with the old group name
+        # Update all items with the old group name and update group_order
         with transaction.atomic():
             items = EstimationItem.objects.filter(
                 estimation=estimation,
@@ -67,6 +67,16 @@ def estimation_group_rename_view(request: HttpRequest, estimation_id: int) -> Js
             )
 
             updated_count = items.update(group=new_group_name)
+
+            # Update the group_order to replace old name with new name
+            if estimation.group_order:
+                group_order = estimation.group_order
+                # Replace the old group name with the new one, preserving order
+                if old_group_name in group_order:
+                    index = group_order.index(old_group_name)
+                    group_order[index] = new_group_name
+                    estimation.group_order = group_order
+                    estimation.save(update_fields=['group_order'])
 
         return JsonResponse({
             'success': True,

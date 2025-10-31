@@ -993,6 +993,14 @@ function renameGroup(oldGroupName, estimationId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Update localStorage to rename the group in expanded groups list
+            const storageKey = 'estimation_expanded_groups_{{ model.id }}';
+            let expandedGroups = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            if (expandedGroups.includes(oldGroupName)) {
+                expandedGroups = expandedGroups.map(name => name === oldGroupName ? newGroupName : name);
+                localStorage.setItem(storageKey, JSON.stringify(expandedGroups));
+            }
+
             // Reload the page to show the updated group name
             location.reload();
         } else {
