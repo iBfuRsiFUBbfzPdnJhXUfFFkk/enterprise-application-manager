@@ -245,38 +245,38 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <tr>
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900">Development</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_junior|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_mid|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_senior|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_lead|default:"0"|floatformat:2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_junior|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_mid|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_senior|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.hours_lead|default:"0"|floatformat:-2 }}</td>
                                     </tr>
                                     <tr class="bg-gray-50">
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900">Code Review</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_junior|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_mid|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_senior|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_lead|default:"0"|floatformat:2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_junior|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_mid|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_senior|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.code_review_hours_lead|default:"0"|floatformat:-2 }}</td>
                                     </tr>
                                     <tr>
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900">Testing</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_junior|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_mid|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_senior|default:"0"|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_lead|default:"0"|floatformat:2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_junior|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_mid|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_senior|default:"0"|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-gray-600">{{ item.tests_hours_lead|default:"0"|floatformat:-2 }}</td>
                                     </tr>
                                     <tr class="bg-blue-50 font-semibold">
                                         <td class="px-4 py-3 text-sm text-gray-900">With Uncertainty ({{ item.get_uncertainty_multiplier }}x)</td>
-                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
-                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_junior_hours_with_uncertainty|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_mid_hours_with_uncertainty|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_senior_hours_with_uncertainty|floatformat:-2 }}</td>
+                                        <td class="px-4 py-3 text-sm text-right text-blue-900">{{ item.get_lead_hours_with_uncertainty|floatformat:-2 }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <div class="mt-4 p-3 bg-gray-50 rounded-lg">
                             <p class="text-sm text-gray-700">
-                                <strong>Code Reviewer Hours:</strong> {{ item.code_reviewer_hours|default:"0"|floatformat:2 }}
+                                <strong>Code Reviewer Hours:</strong> {{ item.code_reviewer_hours|default:"0"|floatformat:-2 }}
                             </p>
                         </div>
                     </div>
