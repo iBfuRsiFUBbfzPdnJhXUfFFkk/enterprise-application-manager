@@ -60,16 +60,29 @@ class EstimationItemForm(BaseModelForm):
         if 'story_points' in self.fields:
             self.fields['story_points'].widget.attrs['step'] = 'any'
 
+        # Format existing hour values to 2 decimal places for display in input fields
+        if self.instance.pk:
+            for field in hour_fields:
+                if field in self.fields:
+                    value = getattr(self.instance, field, None)
+                    if value is not None:
+                        # Format to 2 decimal places
+                        self.initial[field] = f"{float(value):.2f}"
+
+            # Also format story_points
+            if 'story_points' in self.fields and self.instance.story_points is not None:
+                self.initial['story_points'] = f"{float(self.instance.story_points):.2f}"
+
         # Set default values if creating new item
         if not self.instance.pk:
-            # Default all hour fields to 0
+            # Default all hour fields to 0.00 (formatted)
             for field in hour_fields:
                 if field not in self.initial:
-                    self.initial[field] = 0.0
+                    self.initial[field] = "0.00"
 
-            # Default story points to 0
+            # Default story points to 0.00 (formatted)
             if 'story_points' not in self.initial:
-                self.initial['story_points'] = 0.0
+                self.initial['story_points'] = "0.00"
 
             # Default cone of uncertainty to requirements complete (middle ground)
             if 'cone_of_uncertainty' not in self.initial:
