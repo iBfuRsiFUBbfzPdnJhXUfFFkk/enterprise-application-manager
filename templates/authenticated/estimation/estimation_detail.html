@@ -294,11 +294,11 @@
                                         {% elif item.cone_of_uncertainty == 'IMPLEMENTATION_COMPLETE' %}1.1x
                                         {% else %}N/A{% endif %}
                                     </td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_junior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_mid_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_senior_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_lead_hours_with_uncertainty|floatformat:2 }}</td>
-                                    <td class="px-2 py-3 text-sm text-right text-gray-500">{{ item.get_reviewer_hours|floatformat:2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_junior|default:"0"|floatformat:-2 }} | Code Review: {{ item.code_review_hours_junior|default:"0"|floatformat:-2 }} | Tests: {{ item.tests_hours_junior|default:"0"|floatformat:-2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_junior_hours_with_uncertainty|floatformat:-2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_mid|default:"0"|floatformat:-2 }} | Code Review: {{ item.code_review_hours_mid|default:"0"|floatformat:-2 }} | Tests: {{ item.tests_hours_mid|default:"0"|floatformat:-2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_mid_hours_with_uncertainty|floatformat:-2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_senior|default:"0"|floatformat:-2 }} | Code Review: {{ item.code_review_hours_senior|default:"0"|floatformat:-2 }} | Tests: {{ item.tests_hours_senior|default:"0"|floatformat:-2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_senior_hours_with_uncertainty|floatformat:-2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500" title="Dev: {{ item.hours_lead|default:"0"|floatformat:-2 }} | Code Review: {{ item.code_review_hours_lead|default:"0"|floatformat:-2 }} | Tests: {{ item.tests_hours_lead|default:"0"|floatformat:-2 }} | CoU: {{ item.get_cone_of_uncertainty_display }}">{{ item.get_lead_hours_with_uncertainty|floatformat:-2 }}</td>
+                                    <td class="px-2 py-3 text-sm text-right text-gray-500">{{ item.get_reviewer_hours|floatformat:-2 }}</td>
                                     <td class="px-2 py-3 text-xs text-right whitespace-nowrap">
                                         <a href="{% url 'estimation_item_edit' item.id %}" class="text-blue-600 hover:text-blue-900 inline-block">Edit</a>
                                         <span class="text-gray-300 mx-1">|</span>
@@ -320,19 +320,19 @@
                                     </td>
                                     <td colspan="3"></td>
                                     <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
-                                        {{ group_data.subtotals.junior_with_uncertainty|floatformat:2 }}
+                                        {{ group_data.subtotals.junior_with_uncertainty|floatformat:-2 }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
-                                        {{ group_data.subtotals.mid_with_uncertainty|floatformat:2 }}
+                                        {{ group_data.subtotals.mid_with_uncertainty|floatformat:-2 }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
-                                        {{ group_data.subtotals.senior_with_uncertainty|floatformat:2 }}
+                                        {{ group_data.subtotals.senior_with_uncertainty|floatformat:-2 }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
-                                        {{ group_data.subtotals.lead_with_uncertainty|floatformat:2 }}
+                                        {{ group_data.subtotals.lead_with_uncertainty|floatformat:-2 }}
                                     </td>
                                     <td class="px-2 py-2 text-sm text-right font-semibold text-blue-900">
-                                        {{ group_data.subtotals.reviewer_hours|floatformat:2 }}
+                                        {{ group_data.subtotals.reviewer_hours|floatformat:-2 }}
                                     </td>
                                     <td></td>
                                 </tr>
@@ -566,19 +566,19 @@
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_junior|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_junior|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">With Uncertainty</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.junior_with_uncertainty|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.junior_with_uncertainty|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">Contingency ({{ model.contingency_padding_percent|default:"0"|floatformat:2 }}%)</dt>
-                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_junior|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_junior|floatformat:-2 }}</dd>
                             </div>
                             <div class="border-t border-gray-300 pt-2">
                                 <dt class="text-xs text-gray-700 font-medium">Grand Total</dt>
-                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_junior|floatformat:2 }}</dd>
+                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_junior|floatformat:-2 }}</dd>
                             </div>
                             {% if model.junior_developer_count %}
                                 <div class="border-t border-gray-300 pt-2 mt-2 bg-green-50 -mx-4 px-4 py-2 rounded">
@@ -599,19 +599,19 @@
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_mid|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_mid|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">With Uncertainty</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.mid_with_uncertainty|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.mid_with_uncertainty|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">Contingency ({{ model.contingency_padding_percent|default:"0"|floatformat:2 }}%)</dt>
-                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_mid|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_mid|floatformat:-2 }}</dd>
                             </div>
                             <div class="border-t border-gray-300 pt-2">
                                 <dt class="text-xs text-gray-700 font-medium">Grand Total</dt>
-                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_mid|floatformat:2 }}</dd>
+                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_mid|floatformat:-2 }}</dd>
                             </div>
                             {% if model.mid_developer_count %}
                                 <div class="border-t border-gray-300 pt-2 mt-2 bg-green-50 -mx-4 px-4 py-2 rounded">
@@ -632,19 +632,19 @@
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_senior|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_senior|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">With Uncertainty</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.senior_with_uncertainty|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.senior_with_uncertainty|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">Contingency ({{ model.contingency_padding_percent|default:"0"|floatformat:2 }}%)</dt>
-                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_senior|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_senior|floatformat:-2 }}</dd>
                             </div>
                             <div class="border-t border-gray-300 pt-2">
                                 <dt class="text-xs text-gray-700 font-medium">Grand Total</dt>
-                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_senior|floatformat:2 }}</dd>
+                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_senior|floatformat:-2 }}</dd>
                             </div>
                             {% if model.senior_developer_count %}
                                 <div class="border-t border-gray-300 pt-2 mt-2 bg-green-50 -mx-4 px-4 py-2 rounded">
@@ -665,19 +665,19 @@
                         <dl class="space-y-2">
                             <div>
                                 <dt class="text-xs text-gray-500">Base Hours</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_lead|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.base_lead|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">With Uncertainty</dt>
-                                <dd class="text-lg font-semibold text-gray-900">{{ totals.lead_with_uncertainty|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-gray-900">{{ totals.lead_with_uncertainty|floatformat:-2 }}</dd>
                             </div>
                             <div>
                                 <dt class="text-xs text-gray-500">Contingency ({{ model.contingency_padding_percent|default:"0"|floatformat:2 }}%)</dt>
-                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_lead|floatformat:2 }}</dd>
+                                <dd class="text-lg font-semibold text-blue-600">{{ totals.contingency_lead|floatformat:-2 }}</dd>
                             </div>
                             <div class="border-t border-gray-300 pt-2">
                                 <dt class="text-xs text-gray-700 font-medium">Grand Total</dt>
-                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_lead|floatformat:2 }}</dd>
+                                <dd class="text-xl font-bold text-blue-700">{{ totals.grand_total_lead|floatformat:-2 }}</dd>
                             </div>
                             {% if model.lead_developer_count %}
                                 <div class="border-t border-gray-300 pt-2 mt-2 bg-green-50 -mx-4 px-4 py-2 rounded">
@@ -698,7 +698,7 @@
                     <div class="bg-yellow-50 p-4 rounded-lg">
                         <h3 class="text-sm font-medium text-gray-700 mb-2">Average Estimate (Optional Aggregate View)</h3>
                         <p class="text-xs text-gray-600 mb-3">This is an average across all developer levels with uncertainty applied. Use with caution as levels are alternatives, not additive.</p>
-                        <dd class="text-2xl font-bold text-gray-900">{{ totals.average_with_uncertainty|floatformat:2 }} hours</dd>
+                        <dd class="text-2xl font-bold text-gray-900">{{ totals.average_with_uncertainty|floatformat:-2 }} hours</dd>
                     </div>
                 </div>
 
