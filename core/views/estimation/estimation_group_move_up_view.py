@@ -1,21 +1,15 @@
-from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 
 from core.models.estimation import Estimation
 from core.views.generic.generic_500 import generic_500
 
 
-@csrf_exempt
-@login_required
-@require_http_methods(["POST"])
 def estimation_group_move_up_view(request: HttpRequest, estimation_id: int) -> HttpResponse:
     """Move a group up one position in the order."""
     try:
         estimation = Estimation.objects.get(id=estimation_id)
-        group_name = request.POST.get('group_name')
+        group_name = request.GET.get('group_name')
 
         if not group_name:
             return redirect(to='estimation_detail', model_id=estimation_id)
