@@ -121,9 +121,8 @@ class EstimationItemForm(BaseModelForm):
             if 'cone_of_uncertainty' not in self.initial:
                 self.initial['cone_of_uncertainty'] = 'REQUIREMENTS_COMPLETE'
 
-            # Default complexity to medium
-            if 'complexity_level' not in self.initial:
-                self.initial['complexity_level'] = 'MEDIUM'
+            # Complexity defaults to None - user must select
+            # No default set - field remains empty
 
-            # Priority defaults to N/A (None)
+            # Priority defaults to None - user must select
             # No default set - field remains empty
