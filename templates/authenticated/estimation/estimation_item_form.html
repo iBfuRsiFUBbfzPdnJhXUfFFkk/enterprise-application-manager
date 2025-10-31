@@ -566,6 +566,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 const groupCardsContainer = document.getElementById('group-cards-container');
                 const groupCards = document.getElementById('group-cards');
 
+                // Add "Ungrouped" card first
+                const ungroupedCard = document.createElement('button');
+                ungroupedCard.type = 'button';
+                ungroupedCard.className = 'inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-red-500 hover:bg-red-50 hover:text-red-700 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2';
+                ungroupedCard.innerHTML = `
+                    <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    Ungrouped
+                `;
+                ungroupedCard.setAttribute('data-group-name', '');
+
+                // Add click handler to clear the group field
+                ungroupedCard.addEventListener('click', function() {
+                    groupField.value = '';
+
+                    // Visual feedback - highlight the selected card
+                    document.querySelectorAll('#group-cards button').forEach(btn => {
+                        btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                        btn.classList.remove('border-red-500', 'bg-red-50', 'text-red-700', 'ring-red-500');
+                        if (btn.getAttribute('data-group-name') === '') {
+                            btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+                        } else {
+                            btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+                        }
+                    });
+                    this.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                    this.classList.add('border-red-500', 'bg-red-50', 'text-red-700', 'ring-2', 'ring-red-500');
+                });
+
+                groupCards.appendChild(ungroupedCard);
+
+                // Add group cards
                 groups.forEach(group => {
                     const card = document.createElement('button');
                     card.type = 'button';
@@ -585,6 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Visual feedback - highlight the selected card
                         document.querySelectorAll('#group-cards button').forEach(btn => {
                             btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                            btn.classList.remove('border-red-500', 'bg-red-50', 'text-red-700', 'ring-red-500');
                             btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
                         });
                         this.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
@@ -598,8 +632,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 groupCardsContainer.classList.remove('hidden');
 
                 // If the field already has a value, highlight the corresponding card
-                if (groupField.value) {
-                    const currentValue = groupField.value.trim();
+                const currentValue = groupField.value.trim();
+                if (currentValue === '') {
+                    // Highlight ungrouped card
+                    const ungroupedCardElem = document.querySelector('#group-cards button[data-group-name=""]');
+                    if (ungroupedCardElem) {
+                        ungroupedCardElem.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                        ungroupedCardElem.classList.add('border-red-500', 'bg-red-50', 'text-red-700', 'ring-2', 'ring-red-500');
+                    }
+                } else {
                     const matchingCard = document.querySelector(`#group-cards button[data-group-name="${currentValue}"]`);
                     if (matchingCard) {
                         matchingCard.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
@@ -612,12 +653,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     const currentValue = this.value.trim();
                     document.querySelectorAll('#group-cards button').forEach(btn => {
                         const groupName = btn.getAttribute('data-group-name');
+
+                        // Reset all cards
+                        btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                        btn.classList.remove('border-red-500', 'bg-red-50', 'text-red-700', 'ring-red-500');
+                        btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+
+                        // Highlight matching card
                         if (groupName === currentValue) {
                             btn.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
-                            btn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
-                        } else {
-                            btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
-                            btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+                            if (groupName === '') {
+                                // Ungrouped card - red highlight
+                                btn.classList.add('border-red-500', 'bg-red-50', 'text-red-700', 'ring-2', 'ring-red-500');
+                            } else {
+                                // Group card - blue highlight
+                                btn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                            }
                         }
                     });
                 });
