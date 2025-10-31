@@ -937,6 +937,15 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 # Add description section
                 if item.description:
                     document.add_heading('Description', level=4)
+
+                    # Add an invisible paragraph with zero spacing to break numbered list continuation
+                    # This ensures numbered lists restart at 1 for each item
+                    break_para = document.add_paragraph()
+                    break_para_format = break_para.paragraph_format
+                    break_para_format.space_before = Pt(0)
+                    break_para_format.space_after = Pt(0)
+                    break_para_format.line_spacing = Pt(0)
+
                     # Basic markdown rendering
                     description_lines = item.description.split('\n')
 
