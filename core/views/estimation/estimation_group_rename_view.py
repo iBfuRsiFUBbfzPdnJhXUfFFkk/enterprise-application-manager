@@ -1,11 +1,15 @@
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import HttpRequest, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from core.models.estimation import Estimation
 from core.models.estimation_item import EstimationItem
 
 
+@csrf_exempt
+@login_required
 @require_http_methods(["POST"])
 def estimation_group_rename_view(request: HttpRequest, estimation_id: int) -> JsonResponse:
     """
