@@ -155,6 +155,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     # Overview paragraph
     overview = document.add_paragraph()
+    overview.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     overview.add_run('This estimation uses a sophisticated approach based on the Cone of Uncertainty principle to provide realistic project timelines. ').font.size = Pt(10)
     overview.add_run('The methodology applies uncertainty multipliers based on project phase and adds contingency padding for unforeseen challenges.').font.size = Pt(10)
     document.add_paragraph()
@@ -162,6 +163,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Cone of Uncertainty explanation
     document.add_heading('Cone of Uncertainty', level=3)
     cou_para = document.add_paragraph()
+    cou_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     cou_para.add_run('The Cone of Uncertainty recognizes that estimates become more accurate as a project progresses through its lifecycle. ').font.size = Pt(10)
     cou_para.add_run('Each task is assigned an uncertainty multiplier based on its current phase:').font.size = Pt(10)
 
@@ -186,6 +188,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Separated hours components
     document.add_heading('Hour Components', level=3)
     components_para = document.add_paragraph()
+    components_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     components_para.add_run('Each estimation item separates work into distinct components:').font.size = Pt(10)
 
     components_list = [
@@ -208,6 +211,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Contingency padding
     document.add_heading('Contingency Padding', level=3)
     contingency_para = document.add_paragraph()
+    contingency_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     contingency_value = float(estimation.contingency_padding_percent or 0)
     contingency_para.add_run(f'This estimation includes a {contingency_value:.1f}% contingency buffer applied to base hours (before uncertainty multipliers). ').font.size = Pt(10)
     contingency_para.add_run('This padding accounts for:').font.size = Pt(10)
@@ -230,6 +234,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # Calculation formula
     document.add_heading('Calculation Formula', level=3)
     formula_para = document.add_paragraph()
+    formula_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     formula_para.add_run('The total hours for each task are calculated as follows:').font.size = Pt(10)
     document.add_paragraph()
 
@@ -248,6 +253,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     document.add_paragraph()
     example_para = document.add_paragraph()
+    example_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     example_para.add_run('Example: A mid-level task with 2 dev hours, 1 code review hour, 2 test hours (5 base hours total), Design Complete phase (1.25x), and 20% contingency:').font.size = Pt(10)
 
     example_steps = [
@@ -267,6 +273,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     # How to use estimates
     document.add_heading('Interpreting the Estimates', level=3)
     interpret_para = document.add_paragraph()
+    interpret_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     interpret_para.add_run('Each developer level provides hours estimates for that specific experience level. ').font.size = Pt(10)
     interpret_para.add_run('Choose the level that matches your team composition and consider these factors:').font.size = Pt(10)
 
@@ -381,6 +388,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         document.add_heading('Combined Project Estimate', level=2)
 
         combined_para = document.add_paragraph()
+        combined_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         combined_para.add_run('Based on your team composition, this is the realistic project timeline assuming all developer levels work in parallel on their assigned tasks. Code review time is included in each developer\'s hours.').font.size = Pt(10)
         document.add_paragraph()
 
@@ -513,6 +521,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         document.add_heading('Best Case Scenario', level=2)
 
         best_case_para = document.add_paragraph()
+        best_case_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         best_case_para.add_run('This optimistic timeline assumes all estimation items are at the "Implementation Complete" phase with minimal uncertainty (1.1x multiplier). ').font.size = Pt(10)
         best_case_para.add_run('This represents the most favorable scenario where requirements, design, and implementation details are fully known.').font.size = Pt(10)
         document.add_paragraph()
@@ -562,6 +571,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         document.add_heading('Worst Case Scenario', level=2)
 
         worst_case_para = document.add_paragraph()
+        worst_case_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         worst_case_para.add_run('This conservative timeline assumes all estimation items are at the "Initial Concept" stage with maximum uncertainty (4.0x multiplier). ').font.size = Pt(10)
         worst_case_para.add_run('This represents the most conservative scenario where requirements are unclear and significant changes are expected during the project.').font.size = Pt(10)
         document.add_paragraph()
@@ -810,6 +820,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
         document.add_page_break()
         document.add_heading('Detailed Item Descriptions', level=1)
         detail_para = document.add_paragraph()
+        detail_para.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         detail_para.add_run('This section provides detailed information for each estimation item, including full descriptions. ').font.size = Pt(10)
         detail_para.add_run('Items are organized by group. Reference the item ID to cross-reference with the summary table above.').font.size = Pt(10)
         document.add_paragraph()
@@ -899,6 +910,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                         # Regular paragraph
                         else:
                             p = document.add_paragraph()
+                            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
                             add_formatted_text(p, line, font_size=10)
                 else:
                     document.add_paragraph('No description provided.')
