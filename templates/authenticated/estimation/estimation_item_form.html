@@ -843,9 +843,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    // Helper function to format hours - rounds to 2 decimals but removes trailing zeros
+    // Helper function to format hours - rounds to nearest 0.25 (quarter hour)
     function formatHours(value) {
-        return parseFloat(value.toFixed(2)).toString();
+        // Round to nearest 0.25 (quarter hour)
+        return (Math.round(value * 4) / 4).toFixed(2);
     }
 
     // Auto-populate hours based on lead dev values
