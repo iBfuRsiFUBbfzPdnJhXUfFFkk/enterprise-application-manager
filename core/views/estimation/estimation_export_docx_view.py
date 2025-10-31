@@ -10,7 +10,21 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from core.models.estimation import Estimation
+from core.models.estimation_item import EstimationItem
 from core.views.generic.generic_500 import generic_500
+
+
+def get_cou_multiplier_display(cone_of_uncertainty_value):
+    """
+    Get just the multiplier text for Cone of Uncertainty (e.g., '4x', '2x', '1.5x').
+    """
+    if not cone_of_uncertainty_value:
+        return 'N/A'
+
+    multiplier = EstimationItem.CONE_OF_UNCERTAINTY_MULTIPLIERS.get(cone_of_uncertainty_value)
+    if multiplier:
+        return f"{float(multiplier)}x"
+    return 'N/A'
 
 
 def add_formatted_text(paragraph, text, font_size=10):
@@ -681,7 +695,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     f"{float(item.story_points or 0):.1f}",
                     item.get_complexity_level_display() if item.complexity_level else 'N/A',
                     item.get_priority_display() if item.priority else 'N/A',
-                    item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A',
+                    get_cou_multiplier_display(item.cone_of_uncertainty),
                     f"{float(item.get_junior_hours_with_uncertainty()):.2f}",
                     f"{float(item.get_mid_hours_with_uncertainty()):.2f}",
                     f"{float(item.get_senior_hours_with_uncertainty()):.2f}",
@@ -828,7 +842,7 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 meta_table.rows[2].cells[1].text = item.get_priority_display() if item.priority else 'N/A'
 
                 meta_table.rows[3].cells[0].text = 'Cone of Uncertainty'
-                meta_table.rows[3].cells[1].text = item.get_cone_of_uncertainty_display() if item.cone_of_uncertainty else 'N/A'
+                meta_table.rows[3].cells[1].text = get_cou_multiplier_display(item.cone_of_uncertainty)
 
                 # Add hours breakdown
                 meta_table.rows[4].cells[0].text = 'Hours (Jr/Mid/Sr/Lead)'
