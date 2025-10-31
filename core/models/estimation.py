@@ -61,6 +61,13 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     senior_developer_count = create_generic_integer()
     lead_developer_count = create_generic_integer()
 
+    # Group ordering - stores the order of groups as a list of group names
+    group_order = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Order of groups for display (list of group names)"
+    )
+
     # Base hours (before uncertainty) - includes dev + code review + testing
     def get_base_hours_junior(self):
         """Calculate total base junior developer hours from all items (dev + code review + testing, before uncertainty)."""

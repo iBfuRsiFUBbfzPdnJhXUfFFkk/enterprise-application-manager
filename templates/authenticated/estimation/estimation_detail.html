@@ -147,28 +147,65 @@
                         <tbody id="estimation-items-tbody" class="bg-white">
                             {% for group_name, group_data in grouped_items.items %}
                                 {# Group Header Row #}
-                                <tr class="bg-gray-100 border-t-2 border-gray-300" data-group-name="{{ group_name }}">
+                                <tr class="bg-gray-100 border-t-2 border-gray-300 group-header cursor-pointer hover:bg-gray-200" data-group-name="{{ group_name }}" onclick="toggleGroup('{{ group_name|escapejs }}')">
                                     <td colspan="12" class="px-3 py-2">
                                         <div class="flex items-center justify-between">
-                                            <div class="font-semibold text-gray-800 text-sm">
-                                                📁 {{ group_name }}
-                                                <span class="text-xs text-gray-600 font-normal ml-2">({{ group_data.items|length }} item{{ group_data.items|length|pluralize }})</span>
-                                            </div>
-                                            <button type="button"
-                                                    onclick="renameGroup('{{ group_name|escapejs }}', {{ model.id }})"
-                                                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors duration-150"
-                                                    title="Rename this group">
-                                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            <div class="flex items-center">
+                                                <svg class="h-4 w-4 mr-2 group-chevron transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                                 </svg>
-                                                Rename
-                                            </button>
+                                                <div class="font-semibold text-gray-800 text-sm">
+                                                    📁 {{ group_name }}
+                                                    <span class="text-xs text-gray-600 font-normal ml-2">({{ group_data.items|length }} item{{ group_data.items|length|pluralize }})</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center space-x-2" onclick="event.stopPropagation()">
+                                                <div class="flex items-center">
+                                                    <a href="{% url 'estimation_group_move_to_top' model.id group_name %}"
+                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                       title="Move group to top">
+                                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7 7 7M5 19l7-7 7 7"/>
+                                                        </svg>
+                                                    </a>
+                                                    <a href="{% url 'estimation_group_move_up' model.id group_name %}"
+                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                       title="Move group up">
+                                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                                        </svg>
+                                                    </a>
+                                                    <a href="{% url 'estimation_group_move_down' model.id group_name %}"
+                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                       title="Move group down">
+                                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                        </svg>
+                                                    </a>
+                                                    <a href="{% url 'estimation_group_move_to_bottom' model.id group_name %}"
+                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                       title="Move group to bottom">
+                                                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7M19 5l-7 7-7-7"/>
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                                <button type="button"
+                                                        onclick="renameGroup('{{ group_name|escapejs }}', {{ model.id }})"
+                                                        class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors duration-150"
+                                                        title="Rename this group">
+                                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Rename
+                                                </button>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
                                 {# Items in this group #}
                                 {% for item in group_data.items %}
-                                <tr class="hover:bg-gray-50" data-item-id="{{ item.id }}">
+                                <tr class="hover:bg-gray-50 group-item hidden" data-item-id="{{ item.id }}" data-group="{{ group_name }}">
                                     <td class="px-2 py-3 text-sm text-center">
                                         <div class="flex justify-center items-center">
                                             <div class="drag-handle cursor-move text-gray-400 hover:text-gray-600 p-0.5" title="Drag to reorder">
@@ -274,7 +311,7 @@
                                 </tr>
                                 {% endfor %}
                                 {# Group Subtotal Row #}
-                                <tr class="bg-blue-50 border-t border-blue-200">
+                                <tr class="bg-blue-50 border-t border-blue-200 group-subtotal hidden" data-group="{{ group_name }}">
                                     <td colspan="2" class="px-3 py-2 text-sm font-semibold text-blue-900">
                                         {{ group_name }} Subtotal
                                     </td>
@@ -701,7 +738,34 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
+// Toggle group visibility
+function toggleGroup(groupName) {
+    const groupItems = document.querySelectorAll(`tr.group-item[data-group="${groupName}"], tr.group-subtotal[data-group="${groupName}"]`);
+    const groupHeader = document.querySelector(`tr.group-header[data-group-name="${groupName}"]`);
+    const chevron = groupHeader.querySelector('.group-chevron');
+
+    groupItems.forEach(item => {
+        item.classList.toggle('hidden');
+    });
+
+    // Rotate chevron
+    if (chevron.style.transform === 'rotate(-90deg)') {
+        chevron.style.transform = '';
+    } else {
+        chevron.style.transform = 'rotate(-90deg)';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all groups as collapsed
+    const groupHeaders = document.querySelectorAll('.group-header');
+    groupHeaders.forEach(header => {
+        const chevron = header.querySelector('.group-chevron');
+        if (chevron) {
+            chevron.style.transform = 'rotate(-90deg)';
+        }
+    });
+
     // Render markdown comments
     const commentsContent = document.getElementById('comments-content');
     if (commentsContent) {

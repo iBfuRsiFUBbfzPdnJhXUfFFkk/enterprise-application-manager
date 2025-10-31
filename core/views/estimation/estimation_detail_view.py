@@ -17,20 +17,37 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     # Get all items for this estimation, ordered by the order field
     items = estimation.items.all().order_by('order', 'id')
 
-    # Group items by their group field with subtotals
-    grouped_items = OrderedDict()
-    # Put ungrouped items first (None or empty string)
-    grouped_items['Ungrouped'] = {'items': [], 'subtotals': {}}
+    # Group items by their group field
+    temp_grouped_items = {}
+    ungrouped_items = []
 
     for item in items:
-        group_name = item.group if item.group else 'Ungrouped'
-        if group_name not in grouped_items:
-            grouped_items[group_name] = {'items': [], 'subtotals': {}}
-        grouped_items[group_name]['items'].append(item)
+        if item.group:
+            if item.group not in temp_grouped_items:
+                temp_grouped_items[item.group] = []
+            temp_grouped_items[item.group].append(item)
+        else:
+            ungrouped_items.append(item)
 
-    # Remove Ungrouped if it's empty
-    if not grouped_items['Ungrouped']['items']:
-        del grouped_items['Ungrouped']
+    # Get the group_order from the estimation
+    group_order = estimation.group_order if estimation.group_order else []
+
+    # Create ordered dict with groups sorted by group_order
+    grouped_items = OrderedDict()
+
+    # Add ungrouped items first if they exist
+    if ungrouped_items:
+        grouped_items['Ungrouped'] = {'items': ungrouped_items, 'subtotals': {}}
+
+    # Add groups in the order specified by group_order
+    for group_name in group_order:
+        if group_name in temp_grouped_items:
+            grouped_items[group_name] = {'items': temp_grouped_items[group_name], 'subtotals': {}}
+
+    # Add any groups that aren't in group_order (new groups)
+    for group_name, group_items in temp_grouped_items.items():
+        if group_name not in grouped_items:
+            grouped_items[group_name] = {'items': group_items, 'subtotals': {}}
 
     # Calculate subtotals for each group
     for group_name, group_data in grouped_items.items():
