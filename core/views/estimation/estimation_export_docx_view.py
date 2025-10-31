@@ -687,18 +687,33 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     items = estimation.items.all().order_by('order', 'id')
 
     # Group items by their group field with subtotals
-    grouped_items = OrderedDict()
-    grouped_items['Ungrouped'] = {'items': [], 'subtotals': {}}
+    # First, collect items into groups
+    groups_dict = {}
+    groups_dict['Ungrouped'] = {'items': [], 'subtotals': {}}
 
     for item in items:
         group_name = item.group if item.group else 'Ungrouped'
-        if group_name not in grouped_items:
-            grouped_items[group_name] = {'items': [], 'subtotals': {}}
-        grouped_items[group_name]['items'].append(item)
+        if group_name not in groups_dict:
+            groups_dict[group_name] = {'items': [], 'subtotals': {}}
+        groups_dict[group_name]['items'].append(item)
 
     # Remove Ungrouped if it's empty
-    if not grouped_items['Ungrouped']['items']:
-        del grouped_items['Ungrouped']
+    if not groups_dict['Ungrouped']['items']:
+        del groups_dict['Ungrouped']
+
+    # Now order the groups according to estimation.group_order
+    grouped_items = OrderedDict()
+
+    # Add groups in the order specified by estimation.group_order
+    if estimation.group_order:
+        for group_name in estimation.group_order:
+            if group_name in groups_dict:
+                grouped_items[group_name] = groups_dict[group_name]
+
+    # Add any remaining groups not in group_order (including Ungrouped if present)
+    for group_name in groups_dict:
+        if group_name not in grouped_items:
+            grouped_items[group_name] = groups_dict[group_name]
 
     # Calculate subtotals for each group
     for group_name, group_data in grouped_items.items():
@@ -973,6 +988,20 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                             p = document.add_paragraph(style='List Bullet')
                             add_formatted_text(p, line[2:], font_size=10)
                             # Reset numbering tracker after bullet list
+                            first_numbered_item = True
+                        # Handle blockquotes
+                        elif line.startswith('> '):
+                            p = document.add_paragraph()
+                            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                            # Add left indent for blockquote appearance
+                            p.paragraph_format.left_indent = Inches(0.5)
+                            p.paragraph_format.right_indent = Inches(0.5)
+                            add_formatted_text(p, line[2:], font_size=10)
+                            # Add subtle styling
+                            for run in p.runs:
+                                if not run.font.color.rgb:  # Only if color not already set
+                                    run.font.color.rgb = RGBColor(80, 80, 80)
+                            # Reset numbering tracker after blockquote
                             first_numbered_item = True
                         # Handle numbered lists
                         elif len(line) > 2 and line[0].isdigit() and line[1:3] in ['. ', ') ']:
