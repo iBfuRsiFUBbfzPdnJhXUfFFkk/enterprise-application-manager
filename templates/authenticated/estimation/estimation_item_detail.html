@@ -180,10 +180,9 @@
                         <h2 class="text-lg font-semibold text-gray-900">Description</h2>
                     </div>
                     <div class="px-6 py-4">
-                        <div id="description-content" class="prose max-w-none text-gray-700">
+                        <div id="description-content" class="prose max-w-none text-gray-700" data-markdown="{{ item.description|escapejs }}">
                             <!-- Markdown will be rendered here by JavaScript -->
                         </div>
-                        <script type="text/markdown" id="description-markdown">{{ item.description }}</script>
                     </div>
                 </div>
                 {% endif %}
@@ -364,22 +363,25 @@
 <script>
 // Render markdown in description
 document.addEventListener('DOMContentLoaded', function() {
-    const markdownScript = document.getElementById('description-markdown');
     const contentDiv = document.getElementById('description-content');
 
-    if (markdownScript && contentDiv) {
-        const markdownText = markdownScript.textContent;
-        if (markdownText.trim()) {
+    if (contentDiv) {
+        const markdownText = contentDiv.getAttribute('data-markdown');
+
+        if (markdownText && markdownText.trim()) {
             // Check if marked is available
-            if (typeof marked !== 'undefined' && marked.parse) {
+            if (typeof marked !== 'undefined') {
                 try {
-                    // Parse markdown with options
-                    const renderedHtml = marked.parse(markdownText, {
-                        gfm: true,  // GitHub Flavored Markdown
-                        breaks: false,  // Don't convert \n to <br>
+                    // Set global options first
+                    marked.use({
+                        gfm: true,
+                        breaks: false,
                         headerIds: true,
                         mangle: false
                     });
+
+                    // Parse markdown
+                    const renderedHtml = marked.parse(markdownText);
                     contentDiv.innerHTML = renderedHtml;
                 } catch (e) {
                     console.error('Error parsing markdown:', e);
