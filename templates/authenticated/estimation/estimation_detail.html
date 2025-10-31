@@ -675,16 +675,46 @@
                 </div>
             </div>
         </div>
+
+        <!-- Comments Section -->
+        {% if model.comment %}
+            <div class="bg-white shadow-sm rounded-lg mt-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-900">Comments</h2>
+                </div>
+                <div class="px-6 py-4">
+                    <div id="comments-content" class="prose prose-sm max-w-none">
+                        <!-- Markdown will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<!-- Marked.js for markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+
 <!-- SortableJS for drag-and-drop -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Render markdown comments
+    const commentsContent = document.getElementById('comments-content');
+    if (commentsContent) {
+        const markdownText = "{{ model.comment|escapejs }}";
+        if (markdownText && markdownText.trim() !== '') {
+            try {
+                commentsContent.innerHTML = marked.parse(markdownText);
+            } catch (e) {
+                commentsContent.innerHTML = '<p class="text-red-500">Error rendering markdown</p>';
+            }
+        }
+    }
+
     // Scroll position persistence
     const SCROLL_STORAGE_KEY = 'estimation_detail_scroll_{{ model.id }}';
 

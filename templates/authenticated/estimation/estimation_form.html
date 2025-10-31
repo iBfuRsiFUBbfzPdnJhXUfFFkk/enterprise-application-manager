@@ -9,7 +9,7 @@
                 </h2>
                 <p class="mt-1 text-sm text-gray-500">{% if model %}Update estimation details{% else %}Create a new project/task estimation{% endif %}</p>
             </div>
-            <form method="post" class="px-6 py-6">
+            <form method="post" id="estimation-form" class="px-6 py-6">
                 {% csrf_token %}
                 <div class="space-y-6">
                     <div>
@@ -175,26 +175,51 @@
                     </div>
 
                     <div>
-                        <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                            Comment
-                        </label>
-                        {{ form.comment }}
-                        <p class="mt-1 text-xs text-gray-500">Additional notes or comments</p>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Comment (Markdown Supported)
+                            </label>
+                            <button type="button" id="toggle_comment_preview"
+                                    class="inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                <span id="comment_preview_button_text">Hide Preview</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4" id="comment_container">
+                            <div id="comment_editor">
+                                {{ form.comment }}
+                            </div>
+                            <div id="comment_preview" class="border border-gray-300 rounded-md p-4 bg-gray-50 prose prose-sm max-w-none">
+                                <p class="text-gray-500 italic">Preview will appear here...</p>
+                            </div>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Additional notes or comments with markdown support (use **bold**, *italic*, `code`, # headings, - lists, etc.)</p>
                         {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end space-x-3">
-                    <a href="{% if model %}{% url 'estimation_detail' model.id %}{% else %}{% url 'estimation' %}{% endif %}"
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        Cancel
-                    </a>
-                    <button type="submit"
-                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                        Save
-                    </button>
-                </div>
+                <!-- Spacer to prevent content from being hidden behind sticky buttons -->
+                <div class="h-20"></div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Save/Cancel Buttons -->
+<div class="fixed left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40" style="bottom: 28px;">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex justify-end space-x-3">
+            <a href="{% if model %}{% url 'estimation_detail' model.id %}{% else %}{% url 'estimation' %}{% endif %}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Cancel
+            </a>
+            <button type="submit" form="estimation-form"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                Save
+            </button>
         </div>
     </div>
 </div>
@@ -284,10 +309,112 @@
         color: #9ca3af;
         opacity: 1;
     }
+
+    /* Markdown preview styling */
+    #comment_preview {
+        min-height: 150px;
+    }
+    #comment_preview h1,
+    #comment_preview h2,
+    #comment_preview h3,
+    #comment_preview h4,
+    #comment_preview h5,
+    #comment_preview h6 {
+        font-weight: 600;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+    }
+    #comment_preview h1 { font-size: 1.5em; }
+    #comment_preview h2 { font-size: 1.3em; }
+    #comment_preview h3 { font-size: 1.1em; }
+    #comment_preview ul,
+    #comment_preview ol {
+        margin-left: 1.5em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    #comment_preview code {
+        background-color: #f3f4f6;
+        padding: 0.125rem 0.25rem;
+        border-radius: 0.25rem;
+        font-family: monospace;
+    }
+    #comment_preview pre {
+        background-color: #f3f4f6;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        overflow-x: auto;
+        margin: 0.5em 0;
+    }
+    #comment_preview pre code {
+        background-color: transparent;
+        padding: 0;
+    }
+    #comment_preview blockquote {
+        border-left: 4px solid #e5e7eb;
+        padding-left: 1rem;
+        margin: 0.5em 0;
+        color: #6b7280;
+    }
 </style>
+
+<!-- Marked.js for markdown parsing -->
+<script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Markdown Preview functionality for comments (ON by default)
+    const commentField = document.getElementById('{{ form.comment.id_for_label }}');
+    const commentPreviewDiv = document.getElementById('comment_preview');
+    const commentToggleButton = document.getElementById('toggle_comment_preview');
+    const commentButtonText = document.getElementById('comment_preview_button_text');
+    const commentContainer = document.getElementById('comment_container');
+    let commentPreviewVisible = true; // ON by default
+
+    if (commentToggleButton && commentField && commentPreviewDiv) {
+        // Initialize preview on page load
+        updateCommentPreview();
+
+        commentToggleButton.addEventListener('click', function() {
+            commentPreviewVisible = !commentPreviewVisible;
+
+            if (commentPreviewVisible) {
+                // Show preview (side-by-side)
+                commentPreviewDiv.classList.remove('hidden');
+                commentContainer.classList.remove('grid-cols-1');
+                commentContainer.classList.add('grid-cols-2');
+                commentButtonText.textContent = 'Hide Preview';
+                updateCommentPreview();
+            } else {
+                // Hide preview (full width editor)
+                commentPreviewDiv.classList.add('hidden');
+                commentContainer.classList.remove('grid-cols-2');
+                commentContainer.classList.add('grid-cols-1');
+                commentButtonText.textContent = 'Show Preview';
+            }
+        });
+
+        // Update preview on input
+        commentField.addEventListener('input', function() {
+            if (commentPreviewVisible) {
+                updateCommentPreview();
+            }
+        });
+
+        function updateCommentPreview() {
+            const markdownText = commentField.value;
+            if (markdownText.trim() === '') {
+                commentPreviewDiv.innerHTML = '<p class="text-gray-500 italic">Preview will appear here...</p>';
+            } else {
+                try {
+                    commentPreviewDiv.innerHTML = marked.parse(markdownText);
+                } catch (e) {
+                    commentPreviewDiv.innerHTML = '<p class="text-red-500">Error rendering markdown</p>';
+                }
+            }
+        }
+    }
+
     // Links Management System
     let allLinks = []; // Will store all available links
     let selectedLinkIds = new Set(); // Track selected link IDs
@@ -493,6 +620,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize on page load
     initializeLinksSystem();
+
+    // Keyboard shortcut: Ctrl+S or Cmd+S to save form
+    document.addEventListener('keydown', function(e) {
+        // Check for Ctrl+S (Windows/Linux) or Cmd+S (Mac)
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault(); // Prevent browser's default save dialog
+
+            // Submit the form
+            const form = document.getElementById('estimation-form');
+            if (form) {
+                form.submit();
+            }
+        }
+    });
 });
 </script>
 
