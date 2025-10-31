@@ -9,6 +9,7 @@ from core.utilities.generate_short_code import validate_short_code
 class LinkForm(BaseModelForm):
     class Meta(BaseModelFormMeta):
         model = Link
+        fields = ['name', 'url', 'comment', 'short_code', 'is_short_url_active']
         widgets = {
             'short_code': forms.TextInput(attrs={
                 'class': 'form-control',
