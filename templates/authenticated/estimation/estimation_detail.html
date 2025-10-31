@@ -418,6 +418,102 @@
             </div>
         {% endif %}
 
+        <!-- Best Case Scenario -->
+        {% if model.get_total_team_size > 0 %}
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 shadow-lg rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-green-200 bg-green-100">
+                    <h2 class="text-2xl font-bold text-green-900">Best Case Scenario</h2>
+                    <p class="mt-1 text-sm text-green-700">Optimistic timeline assuming all tasks at Implementation Complete phase (1.1x uncertainty)</p>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Project Duration</dt>
+                            <dd class="text-4xl font-bold text-green-600">
+                                {{ model.get_combined_project_duration_weeks_best_case|floatformat:1 }} <span class="text-2xl">weeks</span>
+                            </dd>
+                            <dd class="text-lg text-gray-600 mt-2">
+                                ({{ model.get_combined_project_duration_months_best_case|floatformat:1 }} months)
+                            </dd>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Team Size</dt>
+                            <dd class="text-4xl font-bold text-emerald-600">
+                                {{ model.get_total_team_size }} <span class="text-2xl">dev{{ model.get_total_team_size|pluralize }}</span>
+                            </dd>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Uncertainty Multiplier</dt>
+                            <dd class="text-4xl font-bold text-green-600">
+                                1.1x
+                            </dd>
+                            <dd class="text-sm text-gray-600 mt-2">
+                                Implementation Complete
+                            </dd>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p class="text-sm text-gray-700">
+                            <strong class="text-green-900">Best Case:</strong> This timeline assumes all estimation items are at the "Implementation Complete" stage
+                            with minimal uncertainty (1.1x multiplier). This represents the most optimistic scenario where requirements, design, and implementation
+                            details are fully known.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Worst Case Scenario -->
+        {% if model.get_total_team_size > 0 %}
+            <div class="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 shadow-lg rounded-lg mb-6">
+                <div class="px-6 py-4 border-b border-red-200 bg-red-100">
+                    <h2 class="text-2xl font-bold text-red-900">Worst Case Scenario</h2>
+                    <p class="mt-1 text-sm text-red-700">Conservative timeline assuming all tasks at Initial Concept phase (4.0x uncertainty)</p>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Project Duration</dt>
+                            <dd class="text-4xl font-bold text-red-600">
+                                {{ model.get_combined_project_duration_weeks_worst_case|floatformat:1 }} <span class="text-2xl">weeks</span>
+                            </dd>
+                            <dd class="text-lg text-gray-600 mt-2">
+                                ({{ model.get_combined_project_duration_months_worst_case|floatformat:1 }} months)
+                            </dd>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Team Size</dt>
+                            <dd class="text-4xl font-bold text-orange-600">
+                                {{ model.get_total_team_size }} <span class="text-2xl">dev{{ model.get_total_team_size|pluralize }}</span>
+                            </dd>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <dt class="text-sm font-medium text-gray-500 mb-2">Uncertainty Multiplier</dt>
+                            <dd class="text-4xl font-bold text-red-600">
+                                4.0x
+                            </dd>
+                            <dd class="text-sm text-gray-600 mt-2">
+                                Initial Concept
+                            </dd>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                        <p class="text-sm text-gray-700">
+                            <strong class="text-red-900">Worst Case:</strong> This timeline assumes all estimation items are at the "Initial Concept" stage
+                            with maximum uncertainty (4.0x multiplier). This represents the most conservative scenario where requirements are unclear and significant
+                            changes are expected during the project.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
         <!-- Totals Summary -->
         <div class="bg-white shadow-sm rounded-lg">
             <div class="px-6 py-4 border-b border-gray-200">

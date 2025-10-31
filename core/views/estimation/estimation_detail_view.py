@@ -72,6 +72,24 @@ def estimation_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
         'required_team_velocity_per_sprint': estimation.get_required_team_velocity_per_sprint(),
         'required_velocity_per_developer_per_sprint': estimation.get_required_velocity_per_developer_per_sprint(),
         'required_velocity_per_week': estimation.get_required_velocity_per_week(),
+        # Best case scenario (1.1x uncertainty)
+        'junior_best_case': estimation.get_total_hours_junior_best_case(),
+        'mid_best_case': estimation.get_total_hours_mid_best_case(),
+        'senior_best_case': estimation.get_total_hours_senior_best_case(),
+        'lead_best_case': estimation.get_total_hours_lead_best_case(),
+        'grand_total_junior_best_case': estimation.get_grand_total_hours_junior_best_case(),
+        'grand_total_mid_best_case': estimation.get_grand_total_hours_mid_best_case(),
+        'grand_total_senior_best_case': estimation.get_grand_total_hours_senior_best_case(),
+        'grand_total_lead_best_case': estimation.get_grand_total_hours_lead_best_case(),
+        # Worst case scenario (4.0x uncertainty)
+        'junior_worst_case': estimation.get_total_hours_junior_worst_case(),
+        'mid_worst_case': estimation.get_total_hours_mid_worst_case(),
+        'senior_worst_case': estimation.get_total_hours_senior_worst_case(),
+        'lead_worst_case': estimation.get_total_hours_lead_worst_case(),
+        'grand_total_junior_worst_case': estimation.get_grand_total_hours_junior_worst_case(),
+        'grand_total_mid_worst_case': estimation.get_grand_total_hours_mid_worst_case(),
+        'grand_total_senior_worst_case': estimation.get_grand_total_hours_senior_worst_case(),
+        'grand_total_lead_worst_case': estimation.get_grand_total_hours_lead_worst_case(),
     }
 
     context: Mapping[str, Any] = {

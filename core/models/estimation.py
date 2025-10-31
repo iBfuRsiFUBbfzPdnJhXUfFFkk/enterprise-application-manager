@@ -115,6 +115,40 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
         """Calculate total lead developer hours from all items with uncertainty applied."""
         return sum(item.get_lead_hours_with_uncertainty() for item in self.items.all())
 
+    # Best case hours (minimum uncertainty - 1.1x multiplier)
+    def get_total_hours_junior_best_case(self):
+        """Calculate total junior developer hours with best case uncertainty (1.1x)."""
+        return sum(item.get_base_hours_junior() * Decimal('1.1') for item in self.items.all())
+
+    def get_total_hours_mid_best_case(self):
+        """Calculate total mid-level developer hours with best case uncertainty (1.1x)."""
+        return sum(item.get_base_hours_mid() * Decimal('1.1') for item in self.items.all())
+
+    def get_total_hours_senior_best_case(self):
+        """Calculate total senior developer hours with best case uncertainty (1.1x)."""
+        return sum(item.get_base_hours_senior() * Decimal('1.1') for item in self.items.all())
+
+    def get_total_hours_lead_best_case(self):
+        """Calculate total lead developer hours with best case uncertainty (1.1x)."""
+        return sum(item.get_base_hours_lead() * Decimal('1.1') for item in self.items.all())
+
+    # Worst case hours (maximum uncertainty - 4.0x multiplier)
+    def get_total_hours_junior_worst_case(self):
+        """Calculate total junior developer hours with worst case uncertainty (4.0x)."""
+        return sum(item.get_base_hours_junior() * Decimal('4.0') for item in self.items.all())
+
+    def get_total_hours_mid_worst_case(self):
+        """Calculate total mid-level developer hours with worst case uncertainty (4.0x)."""
+        return sum(item.get_base_hours_mid() * Decimal('4.0') for item in self.items.all())
+
+    def get_total_hours_senior_worst_case(self):
+        """Calculate total senior developer hours with worst case uncertainty (4.0x)."""
+        return sum(item.get_base_hours_senior() * Decimal('4.0') for item in self.items.all())
+
+    def get_total_hours_lead_worst_case(self):
+        """Calculate total lead developer hours with worst case uncertainty (4.0x)."""
+        return sum(item.get_base_hours_lead() * Decimal('4.0') for item in self.items.all())
+
     # Contingency padding per level (applied to base hours only)
     def get_contingency_hours_junior(self):
         """Calculate contingency hours for junior level (applied to base hours only)."""
@@ -148,6 +182,40 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     def get_grand_total_hours_lead(self):
         """Calculate grand total lead hours (with uncertainty and contingency)."""
         return self.get_total_hours_lead_with_uncertainty() + self.get_contingency_hours_lead()
+
+    # Grand totals for best case (with best case hours + contingency)
+    def get_grand_total_hours_junior_best_case(self):
+        """Calculate grand total junior hours for best case scenario (1.1x uncertainty + contingency)."""
+        return self.get_total_hours_junior_best_case() + self.get_contingency_hours_junior()
+
+    def get_grand_total_hours_mid_best_case(self):
+        """Calculate grand total mid-level hours for best case scenario (1.1x uncertainty + contingency)."""
+        return self.get_total_hours_mid_best_case() + self.get_contingency_hours_mid()
+
+    def get_grand_total_hours_senior_best_case(self):
+        """Calculate grand total senior hours for best case scenario (1.1x uncertainty + contingency)."""
+        return self.get_total_hours_senior_best_case() + self.get_contingency_hours_senior()
+
+    def get_grand_total_hours_lead_best_case(self):
+        """Calculate grand total lead hours for best case scenario (1.1x uncertainty + contingency)."""
+        return self.get_total_hours_lead_best_case() + self.get_contingency_hours_lead()
+
+    # Grand totals for worst case (with worst case hours + contingency)
+    def get_grand_total_hours_junior_worst_case(self):
+        """Calculate grand total junior hours for worst case scenario (4.0x uncertainty + contingency)."""
+        return self.get_total_hours_junior_worst_case() + self.get_contingency_hours_junior()
+
+    def get_grand_total_hours_mid_worst_case(self):
+        """Calculate grand total mid-level hours for worst case scenario (4.0x uncertainty + contingency)."""
+        return self.get_total_hours_mid_worst_case() + self.get_contingency_hours_mid()
+
+    def get_grand_total_hours_senior_worst_case(self):
+        """Calculate grand total senior hours for worst case scenario (4.0x uncertainty + contingency)."""
+        return self.get_total_hours_senior_worst_case() + self.get_contingency_hours_senior()
+
+    def get_grand_total_hours_lead_worst_case(self):
+        """Calculate grand total lead hours for worst case scenario (4.0x uncertainty + contingency)."""
+        return self.get_total_hours_lead_worst_case() + self.get_contingency_hours_lead()
 
     # Average across levels (optional aggregate view)
     def get_average_hours_with_uncertainty(self):
@@ -254,6 +322,80 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     def get_combined_project_duration_months(self):
         """Calculate overall project duration in months for a mixed team."""
         weeks = self.get_combined_project_duration_weeks()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
+
+    # Best case combined project duration
+    def get_combined_project_duration_weeks_best_case(self):
+        """
+        Calculate best case project duration in weeks for a mixed team.
+        Uses best case hours (1.1x uncertainty) for all items.
+        """
+        durations = []
+
+        if self.junior_developer_count and self.junior_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_junior_best_case() / Decimal(str(self.junior_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        if self.mid_developer_count and self.mid_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_mid_best_case() / Decimal(str(self.mid_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        if self.senior_developer_count and self.senior_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_senior_best_case() / Decimal(str(self.senior_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        if self.lead_developer_count and self.lead_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_lead_best_case() / Decimal(str(self.lead_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        valid_durations = [d for d in durations if d is not None]
+        if not valid_durations:
+            return None
+
+        return max(valid_durations)
+
+    def get_combined_project_duration_months_best_case(self):
+        """Calculate best case project duration in months for a mixed team."""
+        weeks = self.get_combined_project_duration_weeks_best_case()
+        if weeks is None:
+            return None
+        return weeks / Decimal('4.33')
+
+    # Worst case combined project duration
+    def get_combined_project_duration_weeks_worst_case(self):
+        """
+        Calculate worst case project duration in weeks for a mixed team.
+        Uses worst case hours (4.0x uncertainty) for all items.
+        """
+        durations = []
+
+        if self.junior_developer_count and self.junior_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_junior_worst_case() / Decimal(str(self.junior_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        if self.mid_developer_count and self.mid_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_mid_worst_case() / Decimal(str(self.mid_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        if self.senior_developer_count and self.senior_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_senior_worst_case() / Decimal(str(self.senior_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        if self.lead_developer_count and self.lead_developer_count > 0:
+            hours_per_dev = self.get_grand_total_hours_lead_worst_case() / Decimal(str(self.lead_developer_count))
+            durations.append(hours_per_dev / Decimal('40.0'))
+
+        valid_durations = [d for d in durations if d is not None]
+        if not valid_durations:
+            return None
+
+        return max(valid_durations)
+
+    def get_combined_project_duration_months_worst_case(self):
+        """Calculate worst case project duration in months for a mixed team."""
+        weeks = self.get_combined_project_duration_weeks_worst_case()
         if weeks is None:
             return None
         return weeks / Decimal('4.33')

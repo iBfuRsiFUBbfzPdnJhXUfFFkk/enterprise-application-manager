@@ -393,6 +393,104 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
         document.add_paragraph()
 
+        # Add Best Case Scenario
+        document.add_heading('Best Case Scenario', level=2)
+
+        best_case_para = document.add_paragraph()
+        best_case_para.add_run('This optimistic timeline assumes all estimation items are at the "Implementation Complete" phase with minimal uncertainty (1.1x multiplier). ').font.size = Pt(10)
+        best_case_para.add_run('This represents the most favorable scenario where requirements, design, and implementation details are fully known.').font.size = Pt(10)
+        document.add_paragraph()
+
+        # Create table for best case
+        best_case_table = document.add_table(rows=4, cols=2)
+        best_case_table.style = 'Light Grid Accent 1'
+
+        row_idx = 0
+
+        # Team size
+        row = best_case_table.rows[row_idx]
+        row.cells[0].text = 'Total Team Size'
+        team_text = f"{estimation.get_total_team_size()} developer{'s' if estimation.get_total_team_size() != 1 else ''}"
+        row.cells[1].text = team_text
+        row_idx += 1
+
+        # Best case duration in weeks
+        row = best_case_table.rows[row_idx]
+        row.cells[0].text = 'Project Duration (Weeks)'
+        weeks_best = estimation.get_combined_project_duration_weeks_best_case()
+        row.cells[1].text = f"{float(weeks_best):.1f} weeks" if weeks_best else 'N/A'
+        row_idx += 1
+
+        # Best case duration in months
+        row = best_case_table.rows[row_idx]
+        row.cells[0].text = 'Project Duration (Months)'
+        months_best = estimation.get_combined_project_duration_months_best_case()
+        row.cells[1].text = f"{float(months_best):.1f} months" if months_best else 'N/A'
+        row_idx += 1
+
+        # Uncertainty multiplier
+        row = best_case_table.rows[row_idx]
+        row.cells[0].text = 'Uncertainty Multiplier'
+        row.cells[1].text = '1.1x (Implementation Complete)'
+
+        # Make all text in table smaller
+        for row in best_case_table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(10)
+
+        document.add_paragraph()
+
+        # Add Worst Case Scenario
+        document.add_heading('Worst Case Scenario', level=2)
+
+        worst_case_para = document.add_paragraph()
+        worst_case_para.add_run('This conservative timeline assumes all estimation items are at the "Initial Concept" stage with maximum uncertainty (4.0x multiplier). ').font.size = Pt(10)
+        worst_case_para.add_run('This represents the most conservative scenario where requirements are unclear and significant changes are expected during the project.').font.size = Pt(10)
+        document.add_paragraph()
+
+        # Create table for worst case
+        worst_case_table = document.add_table(rows=4, cols=2)
+        worst_case_table.style = 'Light Grid Accent 1'
+
+        row_idx = 0
+
+        # Team size
+        row = worst_case_table.rows[row_idx]
+        row.cells[0].text = 'Total Team Size'
+        team_text = f"{estimation.get_total_team_size()} developer{'s' if estimation.get_total_team_size() != 1 else ''}"
+        row.cells[1].text = team_text
+        row_idx += 1
+
+        # Worst case duration in weeks
+        row = worst_case_table.rows[row_idx]
+        row.cells[0].text = 'Project Duration (Weeks)'
+        weeks_worst = estimation.get_combined_project_duration_weeks_worst_case()
+        row.cells[1].text = f"{float(weeks_worst):.1f} weeks" if weeks_worst else 'N/A'
+        row_idx += 1
+
+        # Worst case duration in months
+        row = worst_case_table.rows[row_idx]
+        row.cells[0].text = 'Project Duration (Months)'
+        months_worst = estimation.get_combined_project_duration_months_worst_case()
+        row.cells[1].text = f"{float(months_worst):.1f} months" if months_worst else 'N/A'
+        row_idx += 1
+
+        # Uncertainty multiplier
+        row = worst_case_table.rows[row_idx]
+        row.cells[0].text = 'Uncertainty Multiplier'
+        row.cells[1].text = '4.0x (Initial Concept)'
+
+        # Make all text in table smaller
+        for row in worst_case_table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(10)
+
+        document.add_paragraph()
+
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
     document.add_paragraph('Hours shown include cone of uncertainty multipliers based on project phase. Each item\'s base hours (dev + code review + testing) are multiplied by its cone of uncertainty factor. Code review is performed by the same developers, not a separate reviewer position.')
