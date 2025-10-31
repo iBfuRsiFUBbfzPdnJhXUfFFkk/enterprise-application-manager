@@ -70,8 +70,7 @@
         font-weight: 500;
         font-style: italic;
         color: #111827;
-        border-left-width: 0.25rem;
-        border-left-color: #e5e7eb;
+        border-left: 0.25rem solid #e5e7eb;
         quotes: "\201C""\201D""\2018""\2019";
         margin-top: 1.6em;
         margin-bottom: 1.6em;
@@ -373,17 +372,20 @@ document.addEventListener('DOMContentLoaded', function() {
         if (markdownText.trim()) {
             // Check if marked is available
             if (typeof marked !== 'undefined' && marked.parse) {
-                // Configure marked to enable all markdown features
-                marked.setOptions({
-                    gfm: true,  // GitHub Flavored Markdown
-                    breaks: false,  // Don't convert \n to <br>
-                    headerIds: true,
-                    mangle: false,
-                    sanitize: false
-                });
-
-                const renderedHtml = marked.parse(markdownText);
-                contentDiv.innerHTML = renderedHtml;
+                try {
+                    // Parse markdown with options
+                    const renderedHtml = marked.parse(markdownText, {
+                        gfm: true,  // GitHub Flavored Markdown
+                        breaks: false,  // Don't convert \n to <br>
+                        headerIds: true,
+                        mangle: false
+                    });
+                    contentDiv.innerHTML = renderedHtml;
+                } catch (e) {
+                    console.error('Error parsing markdown:', e);
+                    // Fallback to plain text
+                    contentDiv.textContent = markdownText;
+                }
             } else {
                 console.error('Marked.js library not loaded');
                 contentDiv.textContent = markdownText; // Fallback to plain text
