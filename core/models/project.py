@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django_generic_model_fields.create_generic_enum import create_generic_enum
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
@@ -11,10 +12,21 @@ from core.models.person import Person
 
 
 class Project(AbstractBaseModel, AbstractComment, AbstractName):
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('proposal_approved', 'Proposal Approved'),
+        ('beta_launch', 'Beta Launch'),
+        ('soft_launch', 'Soft Launch'),
+        ('launched', 'Launched'),
+        ('on_hold', 'On Hold'),
+        ('denied', 'Denied'),
+    ]
+
     applications = create_generic_m2m(to=Application)
     billing_codes = create_generic_m2m(to='BillingCode', related_name='projects')
     person_stake_holders = create_generic_m2m(to=Person)
     project_manager = create_generic_fk(to=Person, related_name='projects_managed')
+    status = create_generic_enum(choices=STATUS_CHOICES)
 
     def clean(self):
         """

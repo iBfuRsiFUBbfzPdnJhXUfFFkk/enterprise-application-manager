@@ -58,6 +58,24 @@
                             <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
                             <dd class="text-lg text-gray-900">{{ project.name|default:"-" }}</dd>
                         </div>
+                        {% if project.status %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Status</dt>
+                            <dd class="text-lg">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                    {% if project.status == 'launched' %}bg-green-100 text-green-800
+                                    {% elif project.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                    {% elif project.status == 'proposal_approved' %}bg-indigo-100 text-indigo-800
+                                    {% elif project.status == 'beta_launch' %}bg-yellow-100 text-yellow-800
+                                    {% elif project.status == 'soft_launch' %}bg-teal-100 text-teal-800
+                                    {% elif project.status == 'on_hold' %}bg-orange-100 text-orange-800
+                                    {% elif project.status == 'denied' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ project.get_status_display }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
                         {% if project.project_manager %}
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">Project Manager</dt>
