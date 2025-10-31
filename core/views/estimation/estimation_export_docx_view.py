@@ -938,41 +938,71 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                 if item.description:
                     document.add_heading('Description', level=4)
 
-                    # Add an invisible paragraph with zero spacing to break numbered list continuation
-                    # This ensures numbered lists restart at 1 for each item
-                    break_para = document.add_paragraph()
-                    break_para_format = break_para.paragraph_format
-                    break_para_format.space_before = Pt(0)
-                    break_para_format.space_after = Pt(0)
-                    break_para_format.line_spacing = Pt(0)
-
                     # Basic markdown rendering
                     description_lines = item.description.split('\n')
+
+                    # Track if we need to restart numbering (for first numbered item in this description)
+                    first_numbered_item = True
 
                     for line in description_lines:
                         line = line.strip()
                         if not line:
                             document.add_paragraph()
+                            # Reset numbering tracker after empty line
+                            first_numbered_item = True
                             continue
 
                         # Handle headings
                         if line.startswith('# '):
                             h = document.add_heading(level=5)
                             add_formatted_text(h, line[2:], font_size=10)
+                            # Reset numbering tracker after heading
+                            first_numbered_item = True
                         elif line.startswith('## '):
                             h = document.add_heading(level=6)
                             add_formatted_text(h, line[3:], font_size=10)
+                            # Reset numbering tracker after heading
+                            first_numbered_item = True
                         elif line.startswith('### '):
                             h = document.add_heading(level=6)
                             add_formatted_text(h, line[4:], font_size=10)
+                            # Reset numbering tracker after heading
+                            first_numbered_item = True
                         # Handle bullet lists
                         elif line.startswith('- ') or line.startswith('* '):
                             p = document.add_paragraph(style='List Bullet')
                             add_formatted_text(p, line[2:], font_size=10)
+                            # Reset numbering tracker after bullet list
+                            first_numbered_item = True
                         # Handle numbered lists
                         elif len(line) > 2 and line[0].isdigit() and line[1:3] in ['. ', ') ']:
                             p = document.add_paragraph(style='List Number')
                             add_formatted_text(p, line[3:], font_size=10)
+
+                            # Set numbering value to 1 for first numbered item (like Word's "Set Numbering Value")
+                            if first_numbered_item:
+                                from docx.oxml import OxmlElement
+                                from docx.oxml.ns import qn
+
+                                # Get paragraph properties
+                                pPr = p._element.get_or_add_pPr()
+
+                                # Get or create numbering properties
+                                numPr = pPr.find(qn('w:numPr'))
+                                if numPr is None:
+                                    numPr = OxmlElement('w:numPr')
+                                    pPr.append(numPr)
+
+                                # Remove any existing start override
+                                for start_elem in numPr.findall(qn('w:start')):
+                                    numPr.remove(start_elem)
+
+                                # Add start override to force restart at 1
+                                start = OxmlElement('w:start')
+                                start.set(qn('w:val'), '1')
+                                numPr.append(start)
+
+                                first_numbered_item = False
                         # Handle code blocks
                         elif line.startswith('```'):
                             continue  # Skip code fence markers
@@ -981,6 +1011,8 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                             p = document.add_paragraph()
                             p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
                             add_formatted_text(p, line, font_size=10)
+                            # Reset numbering tracker after regular paragraph
+                            first_numbered_item = True
                 else:
                     document.add_paragraph('No description provided.')
 
