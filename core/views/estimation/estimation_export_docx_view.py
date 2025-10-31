@@ -28,9 +28,69 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
     sections = document.sections
     for section in sections:
         section.top_margin = Inches(0.5)
-        section.bottom_margin = Inches(0.5)
+        section.bottom_margin = Inches(0.75)  # Slightly more space for footer
         section.left_margin = Inches(0.5)
         section.right_margin = Inches(0.5)
+
+    # Add header
+    section = document.sections[0]
+    header = section.header
+    header_para = header.paragraphs[0]
+    header_para.text = estimation.name
+    header_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    for run in header_para.runs:
+        run.font.size = Pt(10)
+        run.font.color.rgb = RGBColor(100, 100, 100)
+
+    # Add footer with page number
+    footer = section.footer
+    footer_para = footer.paragraphs[0]
+    footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    # Add left-aligned text "Project Estimation"
+    left_run = footer_para.add_run("Project Estimation")
+    left_run.font.size = Pt(9)
+    left_run.font.color.rgb = RGBColor(100, 100, 100)
+
+    # Add tab to center
+    footer_para.add_run("\t")
+
+    # Add page number in center
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    def create_element(name):
+        return OxmlElement(name)
+
+    def create_attribute(element, name, value):
+        element.set(qn(name), value)
+
+    fldChar1 = create_element('w:fldChar')
+    create_attribute(fldChar1, 'w:fldCharType', 'begin')
+
+    instrText = create_element('w:instrText')
+    create_attribute(instrText, 'xml:space', 'preserve')
+    instrText.text = "PAGE"
+
+    fldChar2 = create_element('w:fldChar')
+    create_attribute(fldChar2, 'w:fldCharType', 'end')
+
+    page_run = footer_para.add_run()
+    page_run.font.size = Pt(9)
+    page_run.font.color.rgb = RGBColor(100, 100, 100)
+    page_run._r.append(fldChar1)
+    page_run._r.append(instrText)
+    page_run._r.append(fldChar2)
+
+    # Add tab to right
+    footer_para.add_run("\t")
+
+    # Add date on the right
+    now = datetime.now(timezone.utc)
+    date_str = now.strftime('%Y-%m-%d')
+    right_run = footer_para.add_run(date_str)
+    right_run.font.size = Pt(9)
+    right_run.font.color.rgb = RGBColor(100, 100, 100)
 
     # Add title
     title = document.add_heading(estimation.name, level=1)
@@ -176,6 +236,9 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
 
     document.add_paragraph()
 
+    # Add page break before Project Information section
+    document.add_page_break()
+
     # Add metadata section
     document.add_heading('Project Information', level=2)
     table = document.add_table(rows=9, cols=2)
@@ -259,6 +322,10 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     run.font.size = Pt(10)
 
     document.add_paragraph()
+
+    # Add page break before Combined Project Estimate section
+    if estimation.get_total_team_size() > 0:
+        document.add_page_break()
 
     # Add combined project estimate (if team composition is set)
     if estimation.get_total_team_size() > 0:
@@ -490,6 +557,9 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                         run.font.size = Pt(10)
 
         document.add_paragraph()
+
+    # Add page break before Estimation Items section
+    document.add_page_break()
 
     # Add estimation items section
     document.add_heading('Estimation Items', level=2)
@@ -803,6 +873,11 @@ def estimation_export_docx_view(request: HttpRequest, model_id: int) -> HttpResp
                     document.add_paragraph('No description provided.')
 
                 document.add_paragraph()  # Add spacing between items
+
+                # Add page break after each item (except the last one)
+                if item_counter < len(items):
+                    document.add_page_break()
+
                 item_counter += 1
 
     # Save document to BytesIO
