@@ -178,9 +178,6 @@
                                     </td>
                                     <td class="px-3 py-3 text-sm text-gray-900">
                                         <div class="font-medium">{{ item.title|default:"(No title)" }}</div>
-                                        {% if item.description %}
-                                            <div class="text-xs text-gray-500 mt-1" title="{{ item.description }}">{{ item.description|truncatewords:8 }}</div>
-                                        {% endif %}
                                         {% if item.links.exists %}
                                             <div class="flex flex-wrap gap-1 mt-2">
                                                 {% for link in item.links.all %}
