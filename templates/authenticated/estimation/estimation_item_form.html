@@ -246,7 +246,21 @@
                                 <label for="{{ form.hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Lead Developer Hours
                                 </label>
-                                {{ form.hours_lead }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_lead">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.hours_lead }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_lead">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_lead.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -254,7 +268,21 @@
                                 <label for="{{ form.hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Senior Developer Hours
                                 </label>
-                                {{ form.hours_senior }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_senior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.hours_senior }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_senior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_senior.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -262,7 +290,21 @@
                                 <label for="{{ form.hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Mid-Level Developer Hours
                                 </label>
-                                {{ form.hours_mid }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_mid">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.hours_mid }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_mid">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_mid.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -270,7 +312,21 @@
                                 <label for="{{ form.hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Junior Developer Hours
                                 </label>
-                                {{ form.hours_junior }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_junior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.hours_junior }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_hours_junior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_junior.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
@@ -295,7 +351,21 @@
                                 <label for="{{ form.code_review_hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Lead Developer Hours
                                 </label>
-                                {{ form.code_review_hours_lead }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_lead">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.code_review_hours_lead }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_lead">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.code_review_hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_lead.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -303,7 +373,21 @@
                                 <label for="{{ form.code_review_hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Senior Developer Hours
                                 </label>
-                                {{ form.code_review_hours_senior }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_senior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.code_review_hours_senior }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_senior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.code_review_hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_senior.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -311,7 +395,21 @@
                                 <label for="{{ form.code_review_hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Mid-Level Developer Hours
                                 </label>
-                                {{ form.code_review_hours_mid }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_mid">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.code_review_hours_mid }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_mid">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.code_review_hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_mid.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -319,7 +417,21 @@
                                 <label for="{{ form.code_review_hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Junior Developer Hours
                                 </label>
-                                {{ form.code_review_hours_junior }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_junior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.code_review_hours_junior }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_review_hours_junior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.code_review_hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_review_hours_junior.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
@@ -329,8 +441,20 @@
                                 <label for="{{ form.code_reviewer_hours.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-2">
                                     Code Reviewer Time (Lead Developer)
                                 </label>
-                                <div class="max-w-xs">
-                                    {{ form.code_reviewer_hours }}
+                                <div class="flex items-center max-w-xs">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_reviewer_hours">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.code_reviewer_hours }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_code_reviewer_hours">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
                                 </div>
                                 <p class="mt-2 text-xs text-gray-600">Auto-filled at 1× (100%) of Lead Code Review hours. Time spent in back-and-forth code review process: addressing feedback, resolving issues, and iterating on changes based on review comments.</p>
                                 {% if form.code_reviewer_hours.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_reviewer_hours.errors.0 }}</p>{% endif %}
@@ -357,7 +481,21 @@
                                 <label for="{{ form.tests_hours_lead.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Lead Developer Hours
                                 </label>
-                                {{ form.tests_hours_lead }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_lead">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.tests_hours_lead }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_lead">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.tests_hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_lead.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -365,7 +503,21 @@
                                 <label for="{{ form.tests_hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Senior Developer Hours
                                 </label>
-                                {{ form.tests_hours_senior }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_senior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.tests_hours_senior }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_senior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.tests_hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_senior.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -373,7 +525,21 @@
                                 <label for="{{ form.tests_hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Mid-Level Developer Hours
                                 </label>
-                                {{ form.tests_hours_mid }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_mid">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.tests_hours_mid }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_mid">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.tests_hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_mid.errors.0 }}</p>{% endif %}
                             </div>
 
@@ -381,7 +547,21 @@
                                 <label for="{{ form.tests_hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Junior Developer Hours
                                 </label>
-                                {{ form.tests_hours_junior }}
+                                <div class="flex items-center">
+                                    <button type="button" class="hour-decrement px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_junior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <div class="flex-1">
+                                        {{ form.tests_hours_junior }}
+                                    </div>
+                                    <button type="button" class="hour-increment px-3 py-2 border border-gray-300 rounded-r-md bg-gray-50 hover:bg-gray-100 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-target="id_tests_hours_junior">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                    </button>
+                                </div>
                                 {% if form.tests_hours_junior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tests_hours_junior.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
@@ -534,6 +714,13 @@
     /* Markdown preview styling */
     #description_preview {
         min-height: 200px;
+    }
+
+    /* Hour input group styling - remove borders where inputs touch buttons */
+    .flex input[type="number"] {
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
     }
     #description_preview h1,
     #description_preview h2,
@@ -1387,6 +1574,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize view mode on page load
     updateViewMode();
+
+    // Hour increment/decrement buttons - adjust by 0.25 (quarter hour)
+    document.querySelectorAll('.hour-increment').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                const currentValue = parseFloat(input.value) || 0;
+                const newValue = currentValue + 0.25;
+                input.value = newValue.toFixed(2);
+                // Trigger input event to update auto-calculations if in simplified view
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    });
+
+    document.querySelectorAll('.hour-decrement').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (input) {
+                const currentValue = parseFloat(input.value) || 0;
+                const newValue = Math.max(0, currentValue - 0.25); // Don't go below 0
+                input.value = newValue.toFixed(2);
+                // Trigger input event to update auto-calculations if in simplified view
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    });
 });
 </script>
 
