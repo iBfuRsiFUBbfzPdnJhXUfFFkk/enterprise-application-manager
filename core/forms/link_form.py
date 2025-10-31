@@ -21,6 +21,32 @@ class LinkForm(BaseModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make is_short_url_active not required so modal can omit it
+        # It will use the model default (True) when not provided
+        self.fields['is_short_url_active'].required = False
+        # Set initial value to True for new instances
+        if not self.instance.pk:
+            self.fields['is_short_url_active'].initial = True
+
+    def clean_is_short_url_active(self):
+        """
+        Default to True if not provided (e.g., from modal).
+        When the modal doesn't send this field, it defaults to False,
+        but we want new links to be active by default.
+        """
+        is_active = self.cleaned_data.get('is_short_url_active')
+
+        # For new instances, default to True if not explicitly set
+        if not self.instance.pk:
+            # Check if the field was actually in the original data
+            # If 'is_short_url_active' key doesn't exist in data, default to True
+            if 'is_short_url_active' not in self.data:
+                return True
+
+        return is_active
+
     def clean_short_code(self):
         """Validate the short code if provided by user."""
         short_code = self.cleaned_data.get('short_code')
