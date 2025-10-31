@@ -969,42 +969,6 @@ document.addEventListener('DOMContentLoaded', function() {
         forceRecalculateTests();
     });
 
-    // Add 0.25 step to all hour input fields for increment behavior (without validation)
-    function addStepWithoutValidation() {
-        const hourFieldIds = [
-            'id_hours_junior', 'id_hours_mid', 'id_hours_senior', 'id_hours_lead',
-            'id_code_review_hours_junior', 'id_code_review_hours_mid',
-            'id_code_review_hours_senior', 'id_code_review_hours_lead',
-            'id_code_reviewer_hours',
-            'id_tests_hours_junior', 'id_tests_hours_mid',
-            'id_tests_hours_senior', 'id_tests_hours_lead',
-            'id_story_points'
-        ];
-
-        hourFieldIds.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.setAttribute('step', '0.25');
-            }
-        });
-
-        // Remove step validation on form submission
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                hourFieldIds.forEach(fieldId => {
-                    const field = document.getElementById(fieldId);
-                    if (field) {
-                        // Temporarily remove step attribute to bypass validation
-                        field.removeAttribute('step');
-                    }
-                });
-            });
-        }
-    }
-
-    addStepWithoutValidation();
-
     // Story point calculation handler
     document.getElementById('calculate_story_points')?.addEventListener('click', function() {
         // Get lead dev base hours (dev + code review + testing)
