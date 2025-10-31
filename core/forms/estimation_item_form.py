@@ -44,7 +44,7 @@ class EstimationItemForm(BaseModelForm):
             # Store existing groups for use in template via widget attrs
             self.fields['group'].widget.attrs['data-existing-groups'] = '|'.join(existing_groups)
 
-        # Remove step validation to allow any decimal value (e.g., 0.63 hours is acceptable)
+        # Configure hour fields with min=0 and step=0.25 for quarter-hour increments
         hour_fields = [
             'hours_junior', 'hours_mid', 'hours_senior', 'hours_lead',
             'code_review_hours_junior', 'code_review_hours_mid', 'code_review_hours_senior', 'code_review_hours_lead',
@@ -52,10 +52,11 @@ class EstimationItemForm(BaseModelForm):
             'tests_hours_junior', 'tests_hours_mid', 'tests_hours_senior', 'tests_hours_lead'
         ]
 
-        # Set step="any" on hour fields and story_points to allow any decimal value
+        # Set min=0 and step=0.25 on hour fields for quarter-hour precision
         for field in hour_fields:
             if field in self.fields:
-                self.fields[field].widget.attrs['step'] = 'any'
+                self.fields[field].widget.attrs['min'] = '0'
+                self.fields[field].widget.attrs['step'] = '0.25'
 
         if 'story_points' in self.fields:
             self.fields['story_points'].widget.attrs['step'] = 'any'
