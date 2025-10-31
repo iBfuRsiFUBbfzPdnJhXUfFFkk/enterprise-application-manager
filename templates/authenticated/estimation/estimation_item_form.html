@@ -139,10 +139,25 @@
                         <div class="flex items-center space-x-2 max-w-md">
                             <div class="flex-shrink-0" style="width: 120px;">
                                 {{ form.story_points }}
+                                <datalist id="fibonacci-values">
+                                    <option value="0">
+                                    <option value="1">
+                                    <option value="2">
+                                    <option value="3">
+                                    <option value="5">
+                                    <option value="8">
+                                    <option value="13">
+                                    <option value="21">
+                                    <option value="34">
+                                    <option value="55">
+                                    <option value="89">
+                                    <option value="144">
+                                    <option value="233">
+                                </datalist>
                             </div>
                             <button type="button" id="calculate_story_points"
                                     class="inline-flex items-center px-2 py-1 border border-blue-300 shadow-sm text-xs font-medium rounded text-blue-700 bg-blue-50 hover:bg-blue-100"
-                                    title="Calculate story points based on lead dev base hours (1 point ≈ 4 hours)"
+                                    title="Calculate story points based on lead dev base hours (1 point ≈ 4 hours), rounded to Fibonacci"
                                     data-modifier="{{ estimation.story_points_modifier|default:1.0 }}">
                                 <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -150,7 +165,20 @@
                                 Auto-Calculate
                             </button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Conventional agile wisdom: 1 story point ≈ 4 hours of ideal work time. Click Auto-Calculate based on lead dev hours.</p>
+                        <p class="mt-1 text-xs text-gray-500">Use Fibonacci sequence (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89...). Conventional agile: 1 point ≈ 4 hours. Auto-Calculate rounds to nearest Fibonacci.</p>
+                        <div id="story-points-quick-select" class="mt-2 flex flex-wrap gap-1">
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="0">0</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="1">1</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="2">2</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="3">3</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="5">5</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="8">8</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="13">13</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="21">21</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="34">34</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="55">55</button>
+                            <button type="button" class="fib-btn px-2 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-blue-50 hover:border-blue-300" data-value="89">89</button>
+                        </div>
                         {% if form.story_points.errors %}<p class="mt-2 text-sm text-red-600">{{ form.story_points.errors.0 }}</p>{% endif %}
                     </div>
 
@@ -191,16 +219,26 @@
 
                     <div class="border-t border-gray-200 pt-6">
                         <div class="flex justify-between items-center mb-4">
-                            <div>
+                            <div class="flex-grow">
                                 <h3 class="text-lg font-medium text-gray-900">Development Hours</h3>
-                                <p class="text-sm text-gray-500 mt-1">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). Also auto-fills code review (0.5×), testing (1×), and review iteration time (1× lead review). You can override any value.</p>
+                                <p id="hours-description-simplified" class="text-sm text-gray-500 mt-1">Enter Lead development hours. All other values will be calculated automatically in the background.</p>
+                                <p id="hours-description-detailed" class="text-sm text-gray-500 mt-1 hidden">Enter Lead hours first. Other levels auto-fill (Senior=1.25×, Mid=2×, Junior=3×). Also auto-fills code review (0.5×), testing (1×), and review iteration time (1× lead review). You can override any value.</p>
                             </div>
-                            <button type="button" id="recalculate_dev_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Recalculate
-                            </button>
+                            <div class="flex space-x-2">
+                                <button type="button" id="toggle_view_mode" class="inline-flex items-center px-3 py-2 border border-blue-300 shadow-sm text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    <span id="view_mode_button_text">Show Detailed View</span>
+                                </button>
+                                <button type="button" id="recalculate_dev_hours" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Recalculate
+                                </button>
+                            </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -212,7 +250,7 @@
                                 {% if form.hours_lead.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_lead.errors.0 }}</p>{% endif %}
                             </div>
 
-                            <div>
+                            <div class="detailed-view-only">
                                 <label for="{{ form.hours_senior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Senior Developer Hours
                                 </label>
@@ -220,7 +258,7 @@
                                 {% if form.hours_senior.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_senior.errors.0 }}</p>{% endif %}
                             </div>
 
-                            <div>
+                            <div class="detailed-view-only">
                                 <label for="{{ form.hours_mid.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Mid-Level Developer Hours
                                 </label>
@@ -228,7 +266,7 @@
                                 {% if form.hours_mid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.hours_mid.errors.0 }}</p>{% endif %}
                             </div>
 
-                            <div>
+                            <div class="detailed-view-only">
                                 <label for="{{ form.hours_junior.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                     Junior Developer Hours
                                 </label>
@@ -238,7 +276,7 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-gray-200 pt-6">
+                    <div class="border-t border-gray-200 pt-6 detailed-view-only">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Code Review Hours</h3>
@@ -300,7 +338,7 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-gray-200 pt-6">
+                    <div class="border-t border-gray-200 pt-6 detailed-view-only">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Testing Hours</h3>
@@ -974,6 +1012,44 @@ document.addEventListener('DOMContentLoaded', function() {
         forceRecalculateTests();
     });
 
+    // Helper function to round to nearest Fibonacci number
+    function roundToNearestFibonacci(value) {
+        // Common Fibonacci sequence used in agile story points
+        const fibSequence = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610];
+
+        if (value <= 0) return 0;
+
+        // Find the closest Fibonacci number
+        let closest = fibSequence[0];
+        let minDiff = Math.abs(value - closest);
+
+        for (let i = 1; i < fibSequence.length; i++) {
+            const diff = Math.abs(value - fibSequence[i]);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closest = fibSequence[i];
+            }
+        }
+
+        return closest;
+    }
+
+    // Add datalist to story points field for autocomplete
+    const storyPointsField = document.getElementById('id_story_points');
+    if (storyPointsField) {
+        storyPointsField.setAttribute('list', 'fibonacci-values');
+    }
+
+    // Quick-select Fibonacci buttons
+    document.querySelectorAll('.fib-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            if (storyPointsField) {
+                storyPointsField.value = value;
+            }
+        });
+    });
+
     // Story point calculation handler
     document.getElementById('calculate_story_points')?.addEventListener('click', function() {
         // Get lead dev base hours (dev + code review + testing)
@@ -991,14 +1067,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get the story points modifier from the estimation (default to 1.0 if not available)
         const modifier = parseFloat(this.getAttribute('data-modifier')) || 1.0;
 
-        // Calculate story points: 1 point ≈ 4 hours, apply modifier, round to nearest 0.5
+        // Calculate story points: 1 point ≈ 4 hours, apply modifier, round to nearest Fibonacci
         const rawPoints = (baseHours / 4.0) * modifier;
-        const roundedPoints = Math.round(rawPoints * 2) / 2;
+        const fibPoints = roundToNearestFibonacci(rawPoints);
 
         // Set the story points field
         const storyPointsField = document.getElementById('id_story_points');
         if (storyPointsField) {
-            storyPointsField.value = roundedPoints.toFixed(1);
+            storyPointsField.value = fibPoints;
         }
     });
 
@@ -1223,6 +1299,94 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // View Mode Toggle (Simplified vs Detailed)
+    let isDetailedView = {% if has_overridden_values %}true{% else %}false{% endif %};
+
+    function updateViewMode() {
+        const detailedElements = document.querySelectorAll('.detailed-view-only');
+        const toggleButton = document.getElementById('view_mode_button_text');
+        const simplifiedDesc = document.getElementById('hours-description-simplified');
+        const detailedDesc = document.getElementById('hours-description-detailed');
+
+        if (isDetailedView) {
+            // Show detailed view
+            detailedElements.forEach(el => el.classList.remove('hidden'));
+            if (toggleButton) toggleButton.textContent = 'Show Simplified View';
+            if (simplifiedDesc) simplifiedDesc.classList.add('hidden');
+            if (detailedDesc) detailedDesc.classList.remove('hidden');
+        } else {
+            // Show simplified view
+            detailedElements.forEach(el => el.classList.add('hidden'));
+            if (toggleButton) toggleButton.textContent = 'Show Detailed View';
+            if (simplifiedDesc) simplifiedDesc.classList.remove('hidden');
+            if (detailedDesc) detailedDesc.classList.add('hidden');
+
+            // In simplified view, ensure all calculations are up to date
+            calculateAllFromLeadDev();
+        }
+    }
+
+    function calculateAllFromLeadDev() {
+        // Get lead dev hours
+        const leadField = document.getElementById('id_hours_lead');
+        if (!leadField) return;
+
+        const leadValue = parseFloat(leadField.value) || 0;
+
+        // Calculate and set all other development hours
+        const seniorField = document.getElementById('id_hours_senior');
+        const midField = document.getElementById('id_hours_mid');
+        const juniorField = document.getElementById('id_hours_junior');
+
+        if (seniorField) seniorField.value = formatHours(leadValue * 1.25);
+        if (midField) midField.value = formatHours(leadValue * 2);
+        if (juniorField) juniorField.value = formatHours(leadValue * 3);
+
+        // Calculate and set code review hours (0.5x of dev hours)
+        const leadCodeReviewField = document.getElementById('id_code_review_hours_lead');
+        const seniorCodeReviewField = document.getElementById('id_code_review_hours_senior');
+        const midCodeReviewField = document.getElementById('id_code_review_hours_mid');
+        const juniorCodeReviewField = document.getElementById('id_code_review_hours_junior');
+
+        if (leadCodeReviewField) leadCodeReviewField.value = formatHours(leadValue * 0.5);
+        if (seniorCodeReviewField) seniorCodeReviewField.value = formatHours(leadValue * 1.25 * 0.5);
+        if (midCodeReviewField) midCodeReviewField.value = formatHours(leadValue * 2 * 0.5);
+        if (juniorCodeReviewField) juniorCodeReviewField.value = formatHours(leadValue * 3 * 0.5);
+
+        // Calculate and set testing hours (1x of dev hours)
+        const leadTestsField = document.getElementById('id_tests_hours_lead');
+        const seniorTestsField = document.getElementById('id_tests_hours_senior');
+        const midTestsField = document.getElementById('id_tests_hours_mid');
+        const juniorTestsField = document.getElementById('id_tests_hours_junior');
+
+        if (leadTestsField) leadTestsField.value = formatHours(leadValue * 1.0);
+        if (seniorTestsField) seniorTestsField.value = formatHours(leadValue * 1.25 * 1.0);
+        if (midTestsField) midTestsField.value = formatHours(leadValue * 2 * 1.0);
+        if (juniorTestsField) juniorTestsField.value = formatHours(leadValue * 3 * 1.0);
+
+        // Calculate and set code reviewer hours (1x of lead code review)
+        const codeReviewerField = document.getElementById('id_code_reviewer_hours');
+        if (codeReviewerField && leadCodeReviewField) {
+            codeReviewerField.value = formatHours(leadValue * 0.5 * 1.0);
+        }
+    }
+
+    // Attach toggle button handler
+    document.getElementById('toggle_view_mode')?.addEventListener('click', function() {
+        isDetailedView = !isDetailedView;
+        updateViewMode();
+    });
+
+    // In simplified mode, auto-calculate on lead dev input
+    document.getElementById('id_hours_lead')?.addEventListener('input', function() {
+        if (!isDetailedView) {
+            calculateAllFromLeadDev();
+        }
+    });
+
+    // Initialize view mode on page load
+    updateViewMode();
 });
 </script>
 

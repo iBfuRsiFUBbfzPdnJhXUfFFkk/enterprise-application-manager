@@ -28,7 +28,8 @@ def estimation_item_edit_view(request: HttpRequest, item_id: int) -> HttpRespons
     context: Mapping[str, Any] = {
         'form': form,
         'estimation': estimation,
-        'item': item
+        'item': item,
+        'has_overridden_values': item.has_overridden_values()
     }
     return base_render(
         context=context,

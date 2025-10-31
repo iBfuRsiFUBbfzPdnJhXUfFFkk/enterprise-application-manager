@@ -27,7 +27,8 @@ def estimation_item_add_view(request: HttpRequest, estimation_id: int) -> HttpRe
 
     context: Mapping[str, Any] = {
         'form': form,
-        'estimation': estimation
+        'estimation': estimation,
+        'has_overridden_values': False  # New items always start in simplified view
     }
     return base_render(
         context=context,

@@ -196,7 +196,7 @@ class EstimationItem(AbstractBaseModel):
         Calculate suggested story points based on lead developer base hours.
         Uses conventional agile wisdom: 1 story point ≈ 4 hours of ideal work time.
         Applies the estimation's story_points_modifier to calibrate for team velocity.
-        Rounds to nearest 0.5 for practical use.
+        Rounds to nearest Fibonacci number for practical agile use.
         """
         base_hours = self.get_base_hours_lead()
         if base_hours == 0:
@@ -209,10 +209,87 @@ class EstimationItem(AbstractBaseModel):
         if self.estimation and self.estimation.story_points_modifier:
             raw_points = raw_points * self.estimation.story_points_modifier
 
-        # Round to nearest 0.5
-        rounded_points = round(float(raw_points) * 2) / 2
+        # Round to nearest Fibonacci number
+        fibonacci_points = self._round_to_nearest_fibonacci(float(raw_points))
 
-        return Decimal(str(rounded_points))
+        return Decimal(str(fibonacci_points))
+
+    @staticmethod
+    def _round_to_nearest_fibonacci(value):
+        """
+        Round a value to the nearest Fibonacci number.
+        Uses common Fibonacci sequence for story points: 0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, etc.
+        """
+        # Common Fibonacci sequence used in agile story points
+        fib_sequence = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610]
+
+        if value <= 0:
+            return 0
+
+        # Find the closest Fibonacci number
+        closest = min(fib_sequence, key=lambda x: abs(x - value))
+        return closest
+
+    def has_overridden_values(self):
+        """
+        Check if any hour values have been manually overridden from their calculated defaults.
+        Returns True if values don't match what would be auto-calculated from lead dev hours.
+        This is used to determine whether to show simplified or detailed view on page load.
+        """
+        # Get lead dev hours as base
+        lead_dev_hours = self.hours_lead or Decimal('0')
+
+        # If lead hours is zero, consider it not overridden (new form)
+        if lead_dev_hours == 0:
+            return False
+
+        # Calculate expected values based on lead dev hours
+        # Development hours multipliers: Senior=1.25x, Mid=2x, Junior=3x
+        expected_senior = lead_dev_hours * Decimal('1.25')
+        expected_mid = lead_dev_hours * Decimal('2.0')
+        expected_junior = lead_dev_hours * Decimal('3.0')
+
+        # Code review multiplier: 0.5x of dev hours
+        expected_code_review_lead = lead_dev_hours * Decimal('0.5')
+        expected_code_review_senior = expected_senior * Decimal('0.5')
+        expected_code_review_mid = expected_mid * Decimal('0.5')
+        expected_code_review_junior = expected_junior * Decimal('0.5')
+
+        # Testing multiplier: 1x of dev hours
+        expected_tests_lead = lead_dev_hours * Decimal('1.0')
+        expected_tests_senior = expected_senior * Decimal('1.0')
+        expected_tests_mid = expected_mid * Decimal('1.0')
+        expected_tests_junior = expected_junior * Decimal('1.0')
+
+        # Code reviewer hours: 1x of lead code review
+        expected_code_reviewer = expected_code_review_lead * Decimal('1.0')
+
+        # Helper function to compare with tolerance for floating point rounding
+        def is_close(actual, expected, tolerance=Decimal('0.01')):
+            """Check if actual value is within tolerance of expected value."""
+            actual = actual or Decimal('0')
+            diff = abs(actual - expected)
+            return diff <= tolerance
+
+        # Check if any value has been overridden (doesn't match calculated value)
+        # Only check non-lead fields since lead is the input
+        checks = [
+            is_close(self.hours_senior, expected_senior),
+            is_close(self.hours_mid, expected_mid),
+            is_close(self.hours_junior, expected_junior),
+            is_close(self.code_review_hours_lead, expected_code_review_lead),
+            is_close(self.code_review_hours_senior, expected_code_review_senior),
+            is_close(self.code_review_hours_mid, expected_code_review_mid),
+            is_close(self.code_review_hours_junior, expected_code_review_junior),
+            is_close(self.tests_hours_lead, expected_tests_lead),
+            is_close(self.tests_hours_senior, expected_tests_senior),
+            is_close(self.tests_hours_mid, expected_tests_mid),
+            is_close(self.tests_hours_junior, expected_tests_junior),
+            is_close(self.code_reviewer_hours, expected_code_reviewer),
+        ]
+
+        # If any value doesn't match, it's been overridden
+        return not all(checks)
 
     def save(self, *args, **kwargs):
         """Auto-assign order for new items."""
