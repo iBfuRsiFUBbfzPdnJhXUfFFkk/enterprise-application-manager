@@ -1,5 +1,6 @@
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
+from core.models.billing_code import BillingCode
 from core.models.person import Person
 from core.models.project import Project
 from core.models.role import Role
@@ -23,3 +24,8 @@ class ProjectForm(BaseModelForm):
             except Role.DoesNotExist:
                 # If the role doesn't exist, show all people but add a note
                 self.fields['project_manager'].help_text = 'Warning: Project Manager role not found.'
+
+        # Customize billing_codes field display
+        if 'billing_codes' in self.fields:
+            self.fields['billing_codes'].queryset = BillingCode.objects.all().order_by('billing_code', 'name')
+            self.fields['billing_codes'].label_from_instance = lambda obj: f"{obj.billing_code} - {obj.name}"

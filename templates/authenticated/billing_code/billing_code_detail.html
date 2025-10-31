@@ -82,18 +82,32 @@
                                 {% endif %}
                             </dd>
                         </div>
-                        <div>
-                            <dt class="text-xs font-medium text-gray-500 uppercase tracking-wider">Project</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                {% if billing_code.project %}
-                                {{ billing_code.project.name }}
-                                {% else %}
-                                <span class="text-gray-400">Not assigned</span>
-                                {% endif %}
-                            </dd>
+                    </div>
+                </div>
+
+                <!-- Projects -->
+                {% if billing_code.projects.count > 0 %}
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Projects ({{ billing_code.projects.count }})</h2>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {% for project in billing_code.projects.all %}
+                            <a href="{% url 'project_detail' model_id=project.id %}"
+                               class="flex items-center p-3 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors duration-150">
+                                <svg class="h-5 w-5 text-purple-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ project.name }}</p>
+                                </div>
+                            </a>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Comment -->
                 {% if billing_code.comment %}

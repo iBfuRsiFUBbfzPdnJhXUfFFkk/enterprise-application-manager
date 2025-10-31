@@ -40,11 +40,12 @@
                             {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="md:col-span-2">
-                            <label for="{{ form.code_billing.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Billing code for the project">
-                                Code Billing {% if form.code_billing.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            <label for="{{ form.billing_codes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Billing codes associated with this project">
+                                Billing Codes {% if form.billing_codes.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
-                            {{ form.code_billing }}
-                            {% if form.code_billing.errors %}<p class="mt-2 text-sm text-red-600">{{ form.code_billing.errors.0 }}</p>{% endif %}
+                            {{ form.billing_codes }}
+                            <p class="mt-1 text-xs text-gray-500">Select multiple billing codes by holding Ctrl (Cmd on Mac)</p>
+                            {% if form.billing_codes.errors %}<p class="mt-2 text-sm text-red-600">{{ form.billing_codes.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Additional notes, description, or comments about this project">

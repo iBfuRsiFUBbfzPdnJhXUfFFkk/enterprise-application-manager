@@ -77,8 +77,12 @@
                                 </svg>
                                 <h3 class="text-lg font-semibold text-gray-900 line-clamp-1" title="{{ model.name }}">{{ model.name|default:"—" }}</h3>
                             </div>
-                            {% if model.code_billing %}
-                            <p class="mt-1 text-sm text-gray-600 font-mono">{{ model.code_billing }}</p>
+                            {% if model.billing_codes.count > 0 %}
+                            <div class="mt-1 flex flex-wrap gap-1">
+                                {% for billing_code in model.billing_codes.all %}
+                                <span class="text-xs text-gray-600 font-mono bg-gray-100 px-2 py-0.5 rounded">{{ billing_code.billing_code }}</span>
+                                {% endfor %}
+                            </div>
                             {% endif %}
                         </div>
                     </div>
@@ -144,7 +148,7 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code Billing</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Billing Codes</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Manager</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applications</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stakeholders</th>
@@ -160,8 +164,16 @@
                             <td class="px-4 py-3">
                                 <div class="text-sm font-medium text-gray-900">{{ model.name|default:"—" }}</div>
                             </td>
-                            <td class="px-4 py-3 whitespace-nowrap">
-                                <div class="text-sm text-gray-500 font-mono">{{ model.code_billing|default:"—" }}</div>
+                            <td class="px-4 py-3">
+                                {% if model.billing_codes.count > 0 %}
+                                    <div class="flex flex-wrap gap-1">
+                                        {% for billing_code in model.billing_codes.all %}
+                                        <span class="text-xs text-gray-600 font-mono bg-gray-100 px-2 py-0.5 rounded">{{ billing_code.billing_code }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <span class="text-sm text-gray-400">—</span>
+                                {% endif %}
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 {% if model.project_manager %}

@@ -12,7 +12,7 @@ from core.models.person import Person
 
 class Project(AbstractBaseModel, AbstractComment, AbstractName):
     applications = create_generic_m2m(to=Application)
-    code_billing = create_generic_varchar()
+    billing_codes = create_generic_m2m(to='BillingCode', related_name='projects')
     person_stake_holders = create_generic_m2m(to=Person)
     project_manager = create_generic_fk(to=Person, related_name='projects_managed')
 
