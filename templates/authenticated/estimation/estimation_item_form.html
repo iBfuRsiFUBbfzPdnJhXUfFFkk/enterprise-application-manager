@@ -13,7 +13,7 @@
                 </h2>
                 <p class="mt-1 text-sm text-gray-500">for {{ estimation.name }}</p>
             </div>
-            <form method="post" class="px-6 py-6">
+            <form method="post" id="estimation-item-form" class="px-6 py-6">
                 {% csrf_token %}
 
                 {# Hidden field to preserve the estimation FK relationship #}
@@ -376,17 +376,25 @@
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end space-x-3">
-                    <a href="{% url 'estimation_detail' estimation.id %}"
-                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        Cancel
-                    </a>
-                    <button type="submit"
-                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                        Save
-                    </button>
-                </div>
+                <!-- Spacer to prevent content from being hidden behind sticky buttons -->
+                <div class="h-20"></div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Save/Cancel Buttons -->
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex justify-end space-x-3">
+            <a href="{% url 'estimation_detail' estimation.id %}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Cancel
+            </a>
+            <button type="submit" form="estimation-item-form"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                Save
+            </button>
         </div>
     </div>
 </div>
