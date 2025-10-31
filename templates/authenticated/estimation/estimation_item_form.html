@@ -61,6 +61,14 @@
                         </datalist>
                         <p class="mt-1 text-xs text-gray-500">Optional category to logically group related items (e.g., Frontend, Backend, Database). Leave blank if not needed.</p>
                         {% if form.group.errors %}<p class="mt-2 text-sm text-red-600">{{ form.group.errors.0 }}</p>{% endif %}
+
+                        <!-- Quick Select Group Cards -->
+                        <div id="group-cards-container" class="mt-3 hidden">
+                            <p class="text-xs font-medium text-gray-600 mb-2">Quick select from existing groups:</p>
+                            <div id="group-cards" class="flex flex-wrap gap-2">
+                                <!-- Cards will be populated dynamically -->
+                            </div>
+                        </div>
                     </div>
 
                     <div>
@@ -538,18 +546,82 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Populate group datalist with existing groups from the estimation
+    // Populate group datalist and quick-select cards with existing groups from the estimation
     const groupField = document.getElementById('{{ form.group.id_for_label }}');
     if (groupField) {
         const existingGroups = groupField.getAttribute('data-existing-groups');
         if (existingGroups) {
             const datalist = document.getElementById('group-datalist');
             const groups = existingGroups.split('|').filter(g => g.trim() !== '');
+
+            // Populate datalist
             groups.forEach(group => {
                 const option = document.createElement('option');
                 option.value = group;
                 datalist.appendChild(option);
             });
+
+            // Populate quick-select group cards
+            if (groups.length > 0) {
+                const groupCardsContainer = document.getElementById('group-cards-container');
+                const groupCards = document.getElementById('group-cards');
+
+                groups.forEach(group => {
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.className = 'inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+                    card.innerHTML = `
+                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                        </svg>
+                        ${group}
+                    `;
+                    card.setAttribute('data-group-name', group);
+
+                    // Add click handler to populate the group field
+                    card.addEventListener('click', function() {
+                        groupField.value = group;
+
+                        // Visual feedback - highlight the selected card
+                        document.querySelectorAll('#group-cards button').forEach(btn => {
+                            btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                            btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+                        });
+                        this.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                        this.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                    });
+
+                    groupCards.appendChild(card);
+                });
+
+                // Show the cards container
+                groupCardsContainer.classList.remove('hidden');
+
+                // If the field already has a value, highlight the corresponding card
+                if (groupField.value) {
+                    const currentValue = groupField.value.trim();
+                    const matchingCard = document.querySelector(`#group-cards button[data-group-name="${currentValue}"]`);
+                    if (matchingCard) {
+                        matchingCard.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                        matchingCard.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                    }
+                }
+
+                // Update card highlighting when typing in the field
+                groupField.addEventListener('input', function() {
+                    const currentValue = this.value.trim();
+                    document.querySelectorAll('#group-cards button').forEach(btn => {
+                        const groupName = btn.getAttribute('data-group-name');
+                        if (groupName === currentValue) {
+                            btn.classList.remove('border-gray-300', 'bg-white', 'text-gray-700');
+                            btn.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                        } else {
+                            btn.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'ring-2', 'ring-blue-500');
+                            btn.classList.add('border-gray-300', 'bg-white', 'text-gray-700');
+                        }
+                    });
+                });
+            }
         }
     }
 
