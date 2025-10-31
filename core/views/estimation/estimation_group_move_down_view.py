@@ -5,10 +5,17 @@ from core.models.estimation import Estimation
 from core.views.generic.generic_500 import generic_500
 
 
-def estimation_group_move_down_view(request: HttpRequest, estimation_id: int, group_name: str) -> HttpResponse:
+def estimation_group_move_down_view(request: HttpRequest, estimation_id: int) -> HttpResponse:
     """Move a group down one position in the order."""
+    if request.method != 'POST':
+        return redirect(to='estimation_detail', model_id=estimation_id)
+
     try:
         estimation = Estimation.objects.get(id=estimation_id)
+        group_name = request.POST.get('group_name')
+
+        if not group_name:
+            return redirect(to='estimation_detail', model_id=estimation_id)
 
         # Get current group order or initialize if empty
         group_order = estimation.group_order if estimation.group_order else []

@@ -161,34 +161,38 @@
                                             </div>
                                             <div class="flex items-center space-x-2" onclick="event.stopPropagation()">
                                                 <div class="flex items-center">
-                                                    <a href="{% url 'estimation_group_move_to_top' model.id group_name %}"
-                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
-                                                       title="Move group to top">
+                                                    <button type="button"
+                                                            onclick="moveGroup('{{ group_name|escapejs }}', 'to_top', {{ model.id }})"
+                                                            class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                            title="Move group to top">
                                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7 7 7M5 19l7-7 7 7"/>
                                                         </svg>
-                                                    </a>
-                                                    <a href="{% url 'estimation_group_move_up' model.id group_name %}"
-                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
-                                                       title="Move group up">
+                                                    </button>
+                                                    <button type="button"
+                                                            onclick="moveGroup('{{ group_name|escapejs }}', 'up', {{ model.id }})"
+                                                            class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                            title="Move group up">
                                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
                                                         </svg>
-                                                    </a>
-                                                    <a href="{% url 'estimation_group_move_down' model.id group_name %}"
-                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
-                                                       title="Move group down">
+                                                    </button>
+                                                    <button type="button"
+                                                            onclick="moveGroup('{{ group_name|escapejs }}', 'down', {{ model.id }})"
+                                                            class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                            title="Move group down">
                                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                                         </svg>
-                                                    </a>
-                                                    <a href="{% url 'estimation_group_move_to_bottom' model.id group_name %}"
-                                                       class="text-gray-600 hover:text-blue-600 p-0.5"
-                                                       title="Move group to bottom">
+                                                    </button>
+                                                    <button type="button"
+                                                            onclick="moveGroup('{{ group_name|escapejs }}', 'to_bottom', {{ model.id }})"
+                                                            class="text-gray-600 hover:text-blue-600 p-0.5"
+                                                            title="Move group to bottom">
                                                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7-7-7M19 5l-7 7-7-7"/>
                                                         </svg>
-                                                    </a>
+                                                    </button>
                                                 </div>
                                                 <button type="button"
                                                         onclick="renameGroup('{{ group_name|escapejs }}', {{ model.id }})"
@@ -738,6 +742,35 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
+// Move group function
+function moveGroup(groupName, direction, estimationId) {
+    const urlMap = {
+        'to_top': '{% url "estimation_group_move_to_top" model.id %}',
+        'up': '{% url "estimation_group_move_up" model.id %}',
+        'down': '{% url "estimation_group_move_down" model.id %}',
+        'to_bottom': '{% url "estimation_group_move_to_bottom" model.id %}'
+    };
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = urlMap[direction];
+
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = getCookie('csrftoken');
+    form.appendChild(csrfInput);
+
+    const groupNameInput = document.createElement('input');
+    groupNameInput.type = 'hidden';
+    groupNameInput.name = 'group_name';
+    groupNameInput.value = groupName;
+    form.appendChild(groupNameInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
 // Toggle group visibility
 function toggleGroup(groupName) {
     const groupItems = document.querySelectorAll(`tr.group-item[data-group="${groupName}"], tr.group-subtotal[data-group="${groupName}"]`);

@@ -39,10 +39,10 @@ urlpatterns_estimation: list[URLPattern | URLResolver] = [
     path(name="estimation_fix_item_order", route="estimation/<int:model_id>/fix-order/", view=estimation_fix_item_order_view),
     path(name="estimation_recalculate_all_items", route="estimation/<int:model_id>/recalculate-all/", view=estimation_recalculate_all_items_view),
     path(name="estimation_group_rename", route="estimation/<int:estimation_id>/group/rename/", view=estimation_group_rename_view),
-    path(name="estimation_group_move_up", route="estimation/<int:estimation_id>/group/<str:group_name>/move-up/", view=estimation_group_move_up_view),
-    path(name="estimation_group_move_down", route="estimation/<int:estimation_id>/group/<str:group_name>/move-down/", view=estimation_group_move_down_view),
-    path(name="estimation_group_move_to_top", route="estimation/<int:estimation_id>/group/<str:group_name>/move-to-top/", view=estimation_group_move_to_top_view),
-    path(name="estimation_group_move_to_bottom", route="estimation/<int:estimation_id>/group/<str:group_name>/move-to-bottom/", view=estimation_group_move_to_bottom_view),
+    path(name="estimation_group_move_up", route="estimation/<int:estimation_id>/group/move-up/", view=estimation_group_move_up_view),
+    path(name="estimation_group_move_down", route="estimation/<int:estimation_id>/group/move-down/", view=estimation_group_move_down_view),
+    path(name="estimation_group_move_to_top", route="estimation/<int:estimation_id>/group/move-to-top/", view=estimation_group_move_to_top_view),
+    path(name="estimation_group_move_to_bottom", route="estimation/<int:estimation_id>/group/move-to-bottom/", view=estimation_group_move_to_bottom_view),
 
     # Estimation item URLs
     path(name="estimation_item_add", route="estimation/<int:estimation_id>/item/add/", view=estimation_item_add_view),
