@@ -21,7 +21,7 @@ def link_short_redirect_view(request: HttpRequest, short_code: str) -> HttpRespo
         HttpResponseRedirect to the full URL
 
     Raises:
-        Http404: If short_code doesn't exist or link is inactive
+        Http404: If short_code doesn't exist, link is inactive, or link has no URL
     """
     # Get the link by short_code (case-insensitive) where short URL is active
     link = get_object_or_404(
@@ -29,6 +29,10 @@ def link_short_redirect_view(request: HttpRequest, short_code: str) -> HttpRespo
         short_code__iexact=short_code,
         is_short_url_active=True
     )
+
+    # Validate that the link has a destination URL
+    if not link.url:
+        raise Http404("Link does not have a destination URL configured")
 
     # Update analytics atomically
     now = timezone.now()
