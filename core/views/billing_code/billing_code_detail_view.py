@@ -15,9 +15,13 @@ def billing_code_detail_view(request: HttpRequest, model_id: int) -> HttpRespons
     # Get historical records
     historical_records = billing_code.history.all()
 
+    # Get billing codes that replace this one
+    replaced_by_codes = billing_code.replaced_by_codes.all()
+
     context: Mapping[str, Any] = {
         'billing_code': billing_code,
         'historical_records': historical_records,
+        'replaced_by_codes': replaced_by_codes,
     }
     return base_render(
         context=context,

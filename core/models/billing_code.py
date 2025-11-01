@@ -1,3 +1,4 @@
+from django_generic_model_fields.create_generic_boolean import create_generic_boolean
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
@@ -12,6 +13,8 @@ class BillingCode(AbstractBaseModel, AbstractComment, AbstractName):
     application = create_generic_fk(to=Application)
     application_group = create_generic_fk(to=ApplicationGroup)
     billing_code = create_generic_varchar()
+    is_active = create_generic_boolean(default=True)
+    replaces = create_generic_fk(to='self', related_name='replaced_by_codes')
 
     def __str__(self):
         return f"{self.name} - {self.billing_code}"
