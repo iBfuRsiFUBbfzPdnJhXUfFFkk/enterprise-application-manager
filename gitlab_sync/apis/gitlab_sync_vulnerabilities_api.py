@@ -67,7 +67,7 @@ def _sync_vulnerabilities_background(
         vulnerabilities, error = handle_gitlab_api_errors(
             func=lambda: [
                 v.asdict()
-                for v in git_lab_client.projects.get(id=project.id, lazy=True)
+                for v in git_lab_client.projects.get(id=project.id, lazy=False)
                 .vulnerabilities.list(get_all=True)
             ],
             entity_name=f"Vulnerabilities for project {project.path_with_namespace}",

@@ -1,0 +1,143 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ branch.name }} - GitLab Branch{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900 font-mono">{{ branch.name }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_branches' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Branches
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if branch.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' branch.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ branch.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Branch Status Badges -->
+    <div class="flex space-x-2 mb-6">
+        {% if branch.default %}
+        <span class="px-3 py-1 text-sm font-semibold bg-blue-100 text-blue-800 rounded-full">
+            Default Branch
+        </span>
+        {% endif %}
+        {% if branch.protected %}
+        <span class="px-3 py-1 text-sm font-semibold bg-yellow-100 text-yellow-800 rounded-full">
+            Protected
+        </span>
+        {% endif %}
+        {% if branch.merged %}
+        <span class="px-3 py-1 text-sm font-semibold bg-purple-100 text-purple-800 rounded-full">
+            Merged
+        </span>
+        {% endif %}
+        {% if branch.can_push %}
+        <span class="px-3 py-1 text-sm font-semibold bg-green-100 text-green-800 rounded-full">
+            Can Push
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Branch Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Branch Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Branch Name</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ branch.name }}</dd>
+                </div>
+                {% if branch.repository %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Repository</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ branch.repository.name }}</dd>
+                </div>
+                {% endif %}
+                {% if branch.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1">
+                        <a href="{{ branch.web_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            View on GitLab
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Latest Commit</h2>
+            <dl class="space-y-3">
+                {% if branch.commit_sha %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Commit SHA</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1 break-all">{{ branch.commit_sha }}</dd>
+                </div>
+                {% endif %}
+                {% if branch.commit_short_id %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Short ID</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ branch.commit_short_id }}</dd>
+                </div>
+                {% endif %}
+                {% if branch.commit_title %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Title</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ branch.commit_title }}</dd>
+                </div>
+                {% endif %}
+                {% if branch.commit_message %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Message</dt>
+                    <dd class="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{{ branch.commit_message }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Permissions -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Permissions & Protection</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Protected</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branch.protected|yesno:"Yes,No,Unknown" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Default Branch</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branch.default|yesno:"Yes,No,Unknown" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Merged</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branch.merged|yesno:"Yes,No,Unknown" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Can Push</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branch.can_push|yesno:"Yes,No,Unknown" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Developers Can Push</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branch.developers_can_push|yesno:"Yes,No,Unknown" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Developers Can Merge</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branch.developers_can_merge|yesno:"Yes,No,Unknown" }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+{% endblock %}

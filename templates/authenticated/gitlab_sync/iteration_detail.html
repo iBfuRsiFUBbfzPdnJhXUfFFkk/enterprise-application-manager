@@ -1,0 +1,87 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ iteration.title }} - GitLab Iteration{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">{{ iteration.title }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_iterations' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Back to Iterations</a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">Dashboard</a>
+            </div>
+        </div>
+        {% if iteration.group %}
+        <p class="text-sm text-gray-600">
+            Group: <a href="{% url 'gitlab_sync_group_detail' iteration.group.id %}" class="text-blue-600 hover:text-blue-800">{{ iteration.group.path }}</a>
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Iteration Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">State</dt>
+                    <dd class="mt-1">
+                        {% if iteration.state == "started" %}
+                        <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Started</span>
+                        {% elif iteration.state == "upcoming" %}
+                        <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Upcoming</span>
+                        {% else %}
+                        <span class="px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">Closed</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                {% if iteration.sequence %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Sequence</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ iteration.sequence }}</dd>
+                </div>
+                {% endif %}
+                {% if iteration.start_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Start Date</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ iteration.start_date|date:"M d, Y" }}</dd>
+                </div>
+                {% endif %}
+                {% if iteration.due_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Due Date</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ iteration.due_date|date:"M d, Y" }}</dd>
+                </div>
+                {% endif %}
+                {% if iteration.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1"><a href="{{ iteration.web_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">View on GitLab</a></dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Issues</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issues_count }} issue{{ issues_count|pluralize }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Merge Requests</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_requests_count }} merge request{{ merge_requests_count|pluralize }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    {% if iteration.description %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+        <div class="text-sm text-gray-900 whitespace-pre-wrap">{{ iteration.description }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

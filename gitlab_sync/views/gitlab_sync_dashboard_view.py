@@ -7,14 +7,18 @@ from gitlab_sync.models import (
     GitLabSyncBranch,
     GitLabSyncCommit,
     GitLabSyncEpic,
+    GitLabSyncEvent,
     GitLabSyncGroup,
     GitLabSyncIssue,
+    GitLabSyncIteration,
     GitLabSyncJob,
     GitLabSyncMergeRequest,
+    GitLabSyncMilestone,
     GitLabSyncPipeline,
     GitLabSyncProject,
     GitLabSyncRepository,
     GitLabSyncSecurityReport,
+    GitLabSyncSnippet,
     GitLabSyncTag,
     GitLabSyncUser,
     GitLabSyncVulnerability,
@@ -46,6 +50,10 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         "jobs": GitLabSyncJob.objects.count(),
         "artifacts": GitLabSyncArtifact.objects.count(),
         "epics": GitLabSyncEpic.objects.count(),
+        "milestones": GitLabSyncMilestone.objects.count(),
+        "iterations": GitLabSyncIteration.objects.count(),
+        "snippets": GitLabSyncSnippet.objects.count(),
+        "events": GitLabSyncEvent.objects.count(),
         "security_reports": GitLabSyncSecurityReport.objects.count(),
         "vulnerabilities": GitLabSyncVulnerability.objects.count(),
     }
@@ -94,6 +102,7 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         "commits_days_back": config.coerced_gitlab_sync_commits_days_back,
         "max_issues_per_project": config.coerced_gitlab_sync_max_issues_per_project,
         "max_merge_requests_per_project": config.coerced_gitlab_sync_max_merge_requests_per_project,
+        "max_events_per_project": config.coerced_gitlab_sync_max_events_per_project,
     }
 
     context = {

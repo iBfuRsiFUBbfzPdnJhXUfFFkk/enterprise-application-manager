@@ -1,0 +1,117 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ tag.name }} - GitLab Tag{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900 font-mono">{{ tag.name }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_tags' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Tags
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if tag.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' tag.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ tag.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Tag Status Badges -->
+    <div class="flex space-x-2 mb-6">
+        {% if tag.protected %}
+        <span class="px-3 py-1 text-sm font-semibold bg-yellow-100 text-yellow-800 rounded-full">
+            Protected
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Tag Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Tag Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Tag Name</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ tag.name }}</dd>
+                </div>
+                {% if tag.message %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Message</dt>
+                    <dd class="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{{ tag.message }}</dd>
+                </div>
+                {% endif %}
+                {% if tag.target %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Target</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ tag.target }}</dd>
+                </div>
+                {% endif %}
+                {% if tag.repository %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Repository</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ tag.repository.name }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Protected</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ tag.protected|yesno:"Yes,No,Unknown" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Commit Information</h2>
+            <dl class="space-y-3">
+                {% if tag.commit_sha %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Commit SHA</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1 break-all">{{ tag.commit_sha }}</dd>
+                </div>
+                {% endif %}
+                {% if tag.commit_short_id %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Short ID</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ tag.commit_short_id }}</dd>
+                </div>
+                {% endif %}
+                {% if tag.commit_title %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Title</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ tag.commit_title }}</dd>
+                </div>
+                {% endif %}
+                {% if tag.commit_message %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Message</dt>
+                    <dd class="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{{ tag.commit_message }}</dd>
+                </div>
+                {% endif %}
+                {% if tag.commit_created_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ tag.commit_created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Release Information -->
+    {% if tag.release_description %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Release Description</h2>
+        <div class="text-sm text-gray-900 whitespace-pre-wrap">{{ tag.release_description }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

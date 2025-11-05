@@ -1,31 +1,44 @@
 from django.urls import path
 
 from gitlab_sync.apis import (
+    gitlab_sync_branches_api,
     gitlab_sync_cancel_job_api,
     gitlab_sync_commits_api,
     gitlab_sync_epics_api,
+    gitlab_sync_events_api,
     gitlab_sync_groups_api,
     gitlab_sync_issues_api,
+    gitlab_sync_iterations_api,
     gitlab_sync_job_status_api,
     gitlab_sync_jobs_api,
     gitlab_sync_link_project_api,
     gitlab_sync_link_user_api,
     gitlab_sync_merge_requests_api,
+    gitlab_sync_milestones_api,
     gitlab_sync_pipelines_api,
     gitlab_sync_projects_api,
+    gitlab_sync_repositories_api,
+    gitlab_sync_snippets_api,
+    gitlab_sync_tags_api,
     gitlab_sync_users_api,
     gitlab_sync_vulnerabilities_api,
 )
 from gitlab_sync.views import (
+    gitlab_sync_branch_detail_view,
+    gitlab_sync_branches_view,
     gitlab_sync_commit_detail_view,
     gitlab_sync_commits_view,
     gitlab_sync_dashboard_view,
     gitlab_sync_epic_detail_view,
     gitlab_sync_epics_view,
+    gitlab_sync_event_detail_view,
+    gitlab_sync_events_view,
     gitlab_sync_group_detail_view,
     gitlab_sync_groups_view,
     gitlab_sync_issue_detail_view,
     gitlab_sync_issues_view,
+    gitlab_sync_iteration_detail_view,
+    gitlab_sync_iterations_view,
     gitlab_sync_job_detail_view,
     gitlab_sync_job_history_view,
     gitlab_sync_jobs_view,
@@ -33,10 +46,18 @@ from gitlab_sync.views import (
     gitlab_sync_link_users_view,
     gitlab_sync_merge_request_detail_view,
     gitlab_sync_merge_requests_view,
+    gitlab_sync_milestone_detail_view,
+    gitlab_sync_milestones_view,
     gitlab_sync_pipeline_detail_view,
     gitlab_sync_pipelines_view,
     gitlab_sync_project_detail_view,
     gitlab_sync_projects_view,
+    gitlab_sync_repositories_view,
+    gitlab_sync_repository_detail_view,
+    gitlab_sync_snippet_detail_view,
+    gitlab_sync_snippets_view,
+    gitlab_sync_tag_detail_view,
+    gitlab_sync_tags_view,
     gitlab_sync_user_detail_view,
     gitlab_sync_users_view,
     gitlab_sync_vulnerabilities_view,
@@ -119,6 +140,17 @@ urlpatterns_gitlab_sync = [
         route="jobs/<int:job_id>/",
         view=gitlab_sync_job_detail_view,
     ),
+    # Branches
+    path(
+        name="gitlab_sync_branches",
+        route="branches/",
+        view=gitlab_sync_branches_view,
+    ),
+    path(
+        name="gitlab_sync_branch_detail",
+        route="branches/<int:branch_id>/",
+        view=gitlab_sync_branch_detail_view,
+    ),
     # Commits
     path(
         name="gitlab_sync_commits",
@@ -141,6 +173,17 @@ urlpatterns_gitlab_sync = [
         route="epics/<int:epic_id>/",
         view=gitlab_sync_epic_detail_view,
     ),
+    # Events
+    path(
+        name="gitlab_sync_events",
+        route="events/",
+        view=gitlab_sync_events_view,
+    ),
+    path(
+        name="gitlab_sync_event_detail",
+        route="events/<int:event_id>/",
+        view=gitlab_sync_event_detail_view,
+    ),
     # Issues
     path(
         name="gitlab_sync_issues",
@@ -152,6 +195,17 @@ urlpatterns_gitlab_sync = [
         route="issues/<int:issue_id>/",
         view=gitlab_sync_issue_detail_view,
     ),
+    # Iterations
+    path(
+        name="gitlab_sync_iterations",
+        route="iterations/",
+        view=gitlab_sync_iterations_view,
+    ),
+    path(
+        name="gitlab_sync_iteration_detail",
+        route="iterations/<int:iteration_id>/",
+        view=gitlab_sync_iteration_detail_view,
+    ),
     # Merge Requests
     path(
         name="gitlab_sync_merge_requests",
@@ -162,6 +216,50 @@ urlpatterns_gitlab_sync = [
         name="gitlab_sync_merge_request_detail",
         route="merge-requests/<int:merge_request_id>/",
         view=gitlab_sync_merge_request_detail_view,
+    ),
+    # Milestones
+    path(
+        name="gitlab_sync_milestones",
+        route="milestones/",
+        view=gitlab_sync_milestones_view,
+    ),
+    path(
+        name="gitlab_sync_milestone_detail",
+        route="milestones/<int:milestone_id>/",
+        view=gitlab_sync_milestone_detail_view,
+    ),
+    # Repositories
+    path(
+        name="gitlab_sync_repositories",
+        route="repositories/",
+        view=gitlab_sync_repositories_view,
+    ),
+    path(
+        name="gitlab_sync_repository_detail",
+        route="repositories/<int:repository_id>/",
+        view=gitlab_sync_repository_detail_view,
+    ),
+    # Snippets
+    path(
+        name="gitlab_sync_snippets",
+        route="snippets/",
+        view=gitlab_sync_snippets_view,
+    ),
+    path(
+        name="gitlab_sync_snippet_detail",
+        route="snippets/<int:snippet_id>/",
+        view=gitlab_sync_snippet_detail_view,
+    ),
+    # Tags
+    path(
+        name="gitlab_sync_tags",
+        route="tags/",
+        view=gitlab_sync_tags_view,
+    ),
+    path(
+        name="gitlab_sync_tag_detail",
+        route="tags/<int:tag_id>/",
+        view=gitlab_sync_tag_detail_view,
     ),
     # Vulnerabilities
     path(
@@ -177,6 +275,11 @@ urlpatterns_gitlab_sync = [
 ]
 
 urlpatterns_gitlab_sync_api = [
+    path(
+        name="gitlab_sync_api_branches",
+        route="branch/",
+        view=gitlab_sync_branches_api,
+    ),
     path(
         name="gitlab_sync_api_groups",
         route="group/",
@@ -203,6 +306,11 @@ urlpatterns_gitlab_sync_api = [
         view=gitlab_sync_issues_api,
     ),
     path(
+        name="gitlab_sync_api_iterations",
+        route="iteration/",
+        view=gitlab_sync_iterations_api,
+    ),
+    path(
         name="gitlab_sync_api_jobs",
         route="job-ci/",
         view=gitlab_sync_jobs_api,
@@ -213,6 +321,11 @@ urlpatterns_gitlab_sync_api = [
         view=gitlab_sync_merge_requests_api,
     ),
     path(
+        name="gitlab_sync_api_milestones",
+        route="milestone/",
+        view=gitlab_sync_milestones_api,
+    ),
+    path(
         name="gitlab_sync_api_commits",
         route="commit/",
         view=gitlab_sync_commits_api,
@@ -221,6 +334,26 @@ urlpatterns_gitlab_sync_api = [
         name="gitlab_sync_api_epics",
         route="epic/",
         view=gitlab_sync_epics_api,
+    ),
+    path(
+        name="gitlab_sync_api_events",
+        route="event/",
+        view=gitlab_sync_events_api,
+    ),
+    path(
+        name="gitlab_sync_api_repositories",
+        route="repository/",
+        view=gitlab_sync_repositories_api,
+    ),
+    path(
+        name="gitlab_sync_api_snippets",
+        route="snippet/",
+        view=gitlab_sync_snippets_api,
+    ),
+    path(
+        name="gitlab_sync_api_tags",
+        route="tag/",
+        view=gitlab_sync_tags_api,
     ),
     path(
         name="gitlab_sync_api_vulnerabilities",

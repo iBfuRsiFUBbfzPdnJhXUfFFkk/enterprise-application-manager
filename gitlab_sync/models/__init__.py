@@ -18,7 +18,11 @@ from gitlab_sync.models.gitlab_sync_pipeline import GitLabSyncPipeline
 
 # GitLab EE entities
 from gitlab_sync.models.gitlab_sync_epic import GitLabSyncEpic
+from gitlab_sync.models.gitlab_sync_event import GitLabSyncEvent
+from gitlab_sync.models.gitlab_sync_iteration import GitLabSyncIteration
+from gitlab_sync.models.gitlab_sync_milestone import GitLabSyncMilestone
 from gitlab_sync.models.gitlab_sync_security_report import GitLabSyncSecurityReport
+from gitlab_sync.models.gitlab_sync_snippet import GitLabSyncSnippet
 from gitlab_sync.models.gitlab_sync_vulnerability import GitLabSyncVulnerability
 
 # Internal tracking
@@ -42,7 +46,11 @@ __all__ = [
     "GitLabSyncPipeline",
     # GitLab EE entities
     "GitLabSyncEpic",
+    "GitLabSyncEvent",
+    "GitLabSyncIteration",
+    "GitLabSyncMilestone",
     "GitLabSyncSecurityReport",
+    "GitLabSyncSnippet",
     "GitLabSyncVulnerability",
     # Internal tracking
     "GitLabSyncJobTracker",

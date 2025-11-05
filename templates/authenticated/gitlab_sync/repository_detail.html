@@ -1,0 +1,105 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ repository }} - GitLab Repository{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">Repository Details</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_repositories' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Repositories
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if repository.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' repository.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ repository.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Repository Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Repository Details</h2>
+            <dl class="space-y-3">
+                {% if repository.default_branch %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Default Branch</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ repository.default_branch }}</dd>
+                </div>
+                {% endif %}
+                {% if repository.http_url_to_repo %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">HTTP URL</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1 break-all">{{ repository.http_url_to_repo }}</dd>
+                </div>
+                {% endif %}
+                {% if repository.ssh_url_to_repo %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">SSH URL</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1 break-all">{{ repository.ssh_url_to_repo }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Storage Statistics</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Total Storage Size</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ repository.storage_size|filesizeformat|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Repository Size</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ repository.repository_size|filesizeformat|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">LFS Objects Size</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ repository.lfs_size|filesizeformat|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Wiki Size</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ repository.wiki_size|filesizeformat|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Packages Size</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ repository.packages_size|filesizeformat|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Snippets Size</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ repository.snippets_size|filesizeformat|default:"—" }}</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Repository Contents -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Repository Contents</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-3">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Branches</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ branches_count }} branch{{ branches_count|pluralize:"es" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Tags</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ tags_count }} tag{{ tags_count|pluralize }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Commits</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ commits_count }} commit{{ commits_count|pluralize }}</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+{% endblock %}
