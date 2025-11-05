@@ -10,7 +10,7 @@ def gitlab_sync_commit_detail_view(request: HttpRequest, sha: str) -> HttpRespon
     GitLab Commit detail view showing comprehensive information.
     """
     commit = get_object_or_404(
-        GitLabSyncCommit.objects.select_related("project", "repository", "author").prefetch_related("pipelines"),
+        GitLabSyncCommit.objects.select_related("project", "repository", "author"),
         sha=sha,
     )
 

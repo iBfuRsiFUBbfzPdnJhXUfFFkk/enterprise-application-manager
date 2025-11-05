@@ -51,6 +51,16 @@
                         </span>
                     </dd>
                 </div>
+                {% if user.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1">
+                        <a href="{{ user.web_url }}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800">
+                            View on GitLab
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
                 {% if user.person %}
                 <div>
                     <dt class="text-sm font-medium text-gray-500">Linked Person</dt>

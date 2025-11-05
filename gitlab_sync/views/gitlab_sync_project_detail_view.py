@@ -10,7 +10,7 @@ def gitlab_sync_project_detail_view(request: HttpRequest, project_id: int) -> Ht
     GitLab Project detail view showing comprehensive information.
     """
     project = get_object_or_404(
-        GitLabSyncProject.objects.select_related("group", "application", "repository").prefetch_related(
+        GitLabSyncProject.objects.select_related("group", "application").prefetch_related(
             "issues", "merge_requests", "pipelines", "commits"
         ),
         id=project_id,

@@ -10,7 +10,7 @@ def gitlab_sync_group_detail_view(request: HttpRequest, group_id: int) -> HttpRe
     GitLab Group detail view showing comprehensive information.
     """
     group = get_object_or_404(
-        GitLabSyncGroup.objects.select_related("parent_group").prefetch_related(
+        GitLabSyncGroup.objects.prefetch_related(
             "projects", "epics", "issues", "merge_requests"
         ),
         id=group_id,
