@@ -7,6 +7,7 @@ from gitlab_sync.apis import (
     gitlab_sync_link_user_api,
     gitlab_sync_pipelines_api,
     gitlab_sync_projects_api,
+    gitlab_sync_users_api,
 )
 from gitlab_sync.views import (
     gitlab_sync_dashboard_view,
@@ -47,6 +48,11 @@ urlpatterns_gitlab_sync_api = [
         name="gitlab_sync_api_pipelines",
         route="pipeline/",
         view=gitlab_sync_pipelines_api,
+    ),
+    path(
+        name="gitlab_sync_api_users",
+        route="user/",
+        view=gitlab_sync_users_api,
     ),
     path(
         name="gitlab_sync_api_link_user",

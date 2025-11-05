@@ -32,6 +32,7 @@ class GitLabSyncUser(
     """
 
     expires_at: datetime | None = create_generic_datetime()
+    last_synced_at: datetime | None = create_generic_datetime()
     locked: bool | None = create_generic_boolean()
     username: str | None = create_generic_varchar()
     email: str | None = create_generic_varchar()
