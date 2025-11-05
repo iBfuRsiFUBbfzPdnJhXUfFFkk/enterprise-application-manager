@@ -164,6 +164,9 @@
                         <button onclick="clearLogs()" class="text-xs px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded">
                             🗑️ Clear
                         </button>
+                        <button onclick="cancelJob()" id="cancel-btn" class="text-xs px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded hidden">
+                            ⛔ Cancel Job
+                        </button>
                     </div>
                 </div>
             </div>
@@ -454,6 +457,7 @@ function showProgress(jobType) {
     document.getElementById('progress-minimized').classList.add('hidden');
     document.getElementById('progress-title').textContent = `Syncing ${jobType}...`;
     document.getElementById('progress-logs').innerHTML = '<div class="text-gray-500">Starting sync...</div>';
+    document.getElementById('cancel-btn').classList.remove('hidden');
     lastLogCount = 0;
 }
 
@@ -481,12 +485,15 @@ function fetchJobStatus() {
                 updateProgress(data);
 
                 // Stop polling if job is complete or failed
-                if (data.is_completed || data.is_failed) {
+                if (data.is_completed || data.is_failed || data.is_cancelled) {
                     stopPolling();
+                    document.getElementById('cancel-btn').classList.add('hidden');
 
                     // Show completion message
                     if (data.is_completed) {
                         showCompletionMessage('success', 'Sync completed successfully!');
+                    } else if (data.is_cancelled) {
+                        showCompletionMessage('error', 'Sync was cancelled');
                     } else {
                         showCompletionMessage('error', 'Sync failed: ' + data.error_messages.join(', '));
                     }
@@ -581,6 +588,60 @@ function toggleAutoScroll() {
 function clearLogs() {
     document.getElementById('progress-logs').innerHTML = '<div class="text-gray-500">Logs cleared...</div>';
     lastLogCount = 0;
+}
+
+// Cancel the current job
+function cancelJob() {
+    if (!currentJobId) {
+        console.log('[GitLabSync] No job to cancel');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to cancel this sync job?')) {
+        return;
+    }
+
+    console.log('[GitLabSync] Cancelling job:', currentJobId);
+
+    fetch(`/authenticated/api/gitlab-sync/job/${currentJobId}/cancel/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('[GitLabSync] Cancel response:', data);
+            if (data.success) {
+                stopPolling();
+                document.getElementById('cancel-btn').classList.add('hidden');
+                showCompletionMessage('error', 'Job cancelled by user');
+            } else {
+                alert('Failed to cancel job: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('[GitLabSync] Error cancelling job:', error);
+            alert('Error cancelling job: ' + error.message);
+        });
+}
+
+// Get CSRF token from cookie
+function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 
 // Check for running jobs on page load (auto-resume)

@@ -1,6 +1,7 @@
 from django.urls import path
 
 from gitlab_sync.apis import (
+    gitlab_sync_cancel_job_api,
     gitlab_sync_groups_api,
     gitlab_sync_job_status_api,
     gitlab_sync_link_user_api,
@@ -56,5 +57,10 @@ urlpatterns_gitlab_sync_api = [
         name="gitlab_sync_api_job_status",
         route="job/<int:job_id>/",
         view=gitlab_sync_job_status_api,
+    ),
+    path(
+        name="gitlab_sync_api_cancel_job",
+        route="job/<int:job_id>/cancel/",
+        view=gitlab_sync_cancel_job_api,
     ),
 ]

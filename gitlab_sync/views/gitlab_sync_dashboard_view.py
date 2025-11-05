@@ -19,6 +19,7 @@ from gitlab_sync.models import (
     GitLabSyncUser,
     GitLabSyncVulnerability,
 )
+from gitlab_sync.utilities import cleanup_stale_jobs
 
 
 def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
@@ -26,7 +27,11 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
     GitLab Sync management dashboard view.
 
     Displays sync statistics, entity counts, and provides sync management controls.
+    Automatically cleans up stale jobs on page load.
     """
+    # Clean up any stale jobs (running > 60 minutes)
+    cleanup_stale_jobs(max_runtime_minutes=60)
+
     stats = {
         "groups": GitLabSyncGroup.objects.count(),
         "projects": GitLabSyncProject.objects.count(),

@@ -58,6 +58,11 @@ class GitLabSyncJobTracker(AbstractBaseModel):
         """Check if job failed."""
         return self.status == "failed"
 
+    @property
+    def is_cancelled(self) -> bool:
+        """Check if job was cancelled."""
+        return self.status == "cancelled"
+
     @staticmethod
     def get_running_jobs() -> QuerySet["GitLabSyncJobTracker"]:
         """Get all currently running jobs."""
