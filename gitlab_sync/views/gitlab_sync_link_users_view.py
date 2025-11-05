@@ -14,9 +14,10 @@ def gitlab_sync_link_users_view(request: HttpRequest) -> HttpResponse:
     unlinked_gitlab_users = GitLabSyncUser.objects.filter(person__isnull=True).order_by(
         "username"
     )
+    # Only get linked users where the person still exists (not deleted)
     linked_gitlab_users = GitLabSyncUser.objects.filter(
         person__isnull=False
-    ).select_related("person")
+    ).select_related("person").exclude(person=None)
     people = Person.objects.filter(is_active=True).order_by("name_last", "name_first")
 
     context = {
