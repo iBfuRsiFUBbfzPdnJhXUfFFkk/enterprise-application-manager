@@ -18,6 +18,7 @@ from core.urls.urlpatterns_cron_job import urlpatterns_cron_job
 from core.urls.urlpatterns_data_point import urlpatterns_data_point
 from core.urls.urlpatterns_data_use_exception import urlpatterns_data_use_exception
 from core.urls.urlpatterns_database import urlpatterns_database
+from core.urls.urlpatterns_database_size import urlpatterns_database_size
 from core.urls.urlpatterns_dependency import urlpatterns_dependency
 from core.urls.urlpatterns_document import urlpatterns_document
 from core.urls.urlpatterns_estimation import urlpatterns_estimation
@@ -88,6 +89,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_data_point,
     *urlpatterns_data_use_exception,
     *urlpatterns_database,
+    *urlpatterns_database_size,
     *urlpatterns_dependency,
     *urlpatterns_document,
     *urlpatterns_estimation,

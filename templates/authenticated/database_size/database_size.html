@@ -1,0 +1,387 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load humanize %}
+
+{% block title %}Database Size Management - Enterprise Application Manager{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Database Size Management</h1>
+        <p class="mt-2 text-sm text-gray-600">Monitor table sizes, track growth trends, and manage database storage</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Database Size -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Database File Size</p>
+                    <p class="text-2xl font-bold text-gray-900" id="totalFileSize">{{ db_file_size|filesizeformat }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Size -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Total Data Size</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_size|filesizeformat }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Count -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+                    <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Total Tables</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ table_stats|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Database Actions</h2>
+        <div class="flex flex-wrap gap-4">
+            <button
+                id="vacuumBtn"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                VACUUM Database
+            </button>
+            <button
+                id="snapshotBtn"
+                class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 flex items-center">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+                Record Snapshot
+            </button>
+        </div>
+        <div id="actionMessage" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Size Distribution Chart -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Size Distribution by Table</h2>
+            <div class="relative" style="height: 300px;">
+                <canvas id="sizeDistributionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Growth Trends Chart -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Growth Trends (Last 30 Days)</h2>
+            <div class="relative" style="height: 300px;">
+                <canvas id="growthTrendsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Details -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Table Size Details</h2>
+        <div class="overflow-x-auto">
+            <table id="tableSizeTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Table Name</th>
+                        <th>Row Count</th>
+                        <th>Data Size</th>
+                        <th>Index Size</th>
+                        <th>Total Size</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in table_stats %}
+                    <tr>
+                        <td class="font-mono text-sm">{{ stat.table_name }}</td>
+                        <td>{{ stat.row_count|intcomma }}</td>
+                        <td data-order="{{ stat.size_bytes }}">{{ stat.size_bytes|filesizeformat }}</td>
+                        <td data-order="{{ stat.index_size_bytes }}">{{ stat.index_size_bytes|filesizeformat }}</td>
+                        <td data-order="{{ stat.total_bytes }}">{{ stat.total_bytes|filesizeformat }}</td>
+                        <td>
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2 mr-2">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ stat.percentage }}%"></div>
+                                </div>
+                                <span class="text-sm text-gray-700">{{ stat.percentage|floatformat:1 }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+(function() {
+    'use strict';
+
+    // Table data from Django context
+    const tableStats = {{ table_stats_json|safe }};
+    const historicalData = {{ historical_data_json|safe }};
+
+    // Format bytes to human readable
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // Initialize DataTable
+    $(document).ready(function() {
+        $('#tableSizeTable').DataTable({
+            order: [[4, 'desc']], // Sort by total size descending
+            pageLength: 25,
+            language: {
+                search: "Filter tables:",
+                lengthMenu: "Show _MENU_ tables per page",
+                info: "Showing _START_ to _END_ of _TOTAL_ tables",
+                infoEmpty: "No tables to display",
+                infoFiltered: "(filtered from _MAX_ total tables)"
+            }
+        });
+    });
+
+    // Size Distribution Pie Chart
+    const topTables = tableStats.slice(0, 10); // Top 10 largest tables
+    const otherSize = tableStats.slice(10).reduce((sum, t) => sum + t.total_bytes, 0);
+
+    const pieCtx = document.getElementById('sizeDistributionChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: [...topTables.map(t => t.table_name), ...(otherSize > 0 ? ['Other'] : [])],
+            datasets: [{
+                data: [...topTables.map(t => t.total_bytes), ...(otherSize > 0 ? [otherSize] : [])],
+                backgroundColor: [
+                    '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+                    '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#84CC16',
+                    '#6B7280'
+                ],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = formatBytes(context.raw);
+                            const percentage = ((context.raw / {{ total_size }}) * 100).toFixed(1);
+                            return label + ': ' + value + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Growth Trends Line Chart
+    const lineCtx = document.getElementById('growthTrendsChart').getContext('2d');
+
+    // Prepare datasets for top 5 tables with historical data
+    const tablesWithHistory = Object.keys(historicalData)
+        .map(tableName => ({
+            name: tableName,
+            data: historicalData[tableName]
+        }))
+        .filter(t => t.data.length > 1)
+        .slice(0, 5);
+
+    const lineDatasets = tablesWithHistory.map((table, index) => ({
+        label: table.name,
+        data: table.data.map(d => ({
+            x: new Date(d.recorded_at),
+            y: d.total_bytes
+        })),
+        borderColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index],
+        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index] + '33',
+        tension: 0.4,
+        fill: false
+    }));
+
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            datasets: lineDatasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + formatBytes(context.raw.y);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'day'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Size (bytes)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return formatBytes(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // VACUUM action
+    document.getElementById('vacuumBtn').addEventListener('click', function() {
+        if (!confirm('VACUUM will rebuild the database file and may take some time. Continue?')) {
+            return;
+        }
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...';
+
+        fetch('{% url "database_vacuum" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(
+                    'VACUUM completed successfully! Space freed: ' + formatBytes(data.space_freed),
+                    'success'
+                );
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showMessage('VACUUM failed: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showMessage('Error: ' + error.message, 'error');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> VACUUM Database';
+        });
+    });
+
+    // Snapshot action
+    document.getElementById('snapshotBtn').addEventListener('click', function() {
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Recording...';
+
+        fetch('{% url "database_snapshot" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(
+                    'Snapshot recorded successfully! ' + data.records_created + ' records created.',
+                    'success'
+                );
+            } else {
+                showMessage('Snapshot failed: ' + data.error, 'error');
+            }
+        })
+        .catch(error => {
+            showMessage('Error: ' + error.message, 'error');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Record Snapshot';
+        });
+    });
+
+    // Show message helper
+    function showMessage(message, type) {
+        const bgColor = type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200';
+        const textColor = type === 'success' ? 'text-green-800' : 'text-red-800';
+        const iconColor = type === 'success' ? 'text-green-400' : 'text-red-400';
+
+        const messageContainer = document.getElementById('actionMessage');
+        messageContainer.innerHTML = `
+            <div class="${bgColor} border rounded-lg p-4">
+                <div class="flex">
+                    <svg class="h-5 w-5 ${iconColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium ${textColor}">${message}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        messageContainer.classList.remove('hidden');
+
+        setTimeout(() => {
+            messageContainer.classList.add('hidden');
+        }, 5000);
+    }
+})();
+</script>
+{% endblock %}
