@@ -15,19 +15,25 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-6 flex space-x-2">
-        <a href="?status=all" class="px-4 py-2 rounded-lg {% if status_filter == 'all' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-            All
-        </a>
-        <a href="?status=running" class="px-4 py-2 rounded-lg {% if status_filter == 'running' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-            Running
-        </a>
-        <a href="?status=completed" class="px-4 py-2 rounded-lg {% if status_filter == 'completed' %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-            Completed
-        </a>
-        <a href="?status=failed" class="px-4 py-2 rounded-lg {% if status_filter == 'failed' %}bg-red-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
-            Failed
-        </a>
+    <div class="mb-6 flex items-center justify-between">
+        <div class="flex space-x-2">
+            <a href="?status=all" class="px-4 py-2 rounded-lg {% if status_filter == 'all' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                All
+            </a>
+            <a href="?status=running" class="px-4 py-2 rounded-lg {% if status_filter == 'running' %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Running
+            </a>
+            <a href="?status=completed" class="px-4 py-2 rounded-lg {% if status_filter == 'completed' %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Completed
+            </a>
+            <a href="?status=failed" class="px-4 py-2 rounded-lg {% if status_filter == 'failed' %}bg-red-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Failed
+            </a>
+            <a href="?status=cancelled" class="px-4 py-2 rounded-lg {% if status_filter == 'cancelled' %}bg-orange-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Cancelled
+            </a>
+        </div>
+        <p class="text-sm text-gray-500">Click a job to view details</p>
     </div>
 
     <!-- Jobs Table -->
@@ -35,17 +41,22 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Job Type</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Started</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Counts</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 {% for job in jobs %}
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 cursor-pointer transition-colors" onclick="openJobDetail({{ job.id }})">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        #{{ job.id }}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {{ job.job_type|title }}
                     </td>
@@ -54,6 +65,7 @@
                             {% if job.status == 'completed' %}bg-green-100 text-green-800
                             {% elif job.status == 'failed' %}bg-red-100 text-red-800
                             {% elif job.status == 'running' %}bg-blue-100 text-blue-800
+                            {% elif job.status == 'cancelled' %}bg-orange-100 text-orange-800
                             {% else %}bg-gray-100 text-gray-800{% endif %}">
                             {{ job.status|title }}
                         </span>
@@ -70,17 +82,25 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div class="w-24 bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ job.progress_percent }}%"></div>
+                            <div class="{% if job.status == 'completed' %}bg-green-600{% elif job.status == 'failed' %}bg-red-600{% elif job.status == 'cancelled' %}bg-orange-600{% else %}bg-blue-600{% endif %} h-2 rounded-full" style="width: {{ job.progress_percent|default:0 }}%"></div>
                         </div>
-                        <span class="text-xs">{{ job.progress_percent }}%</span>
+                        <span class="text-xs">{{ job.progress_percent|default:0 }}%</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ job.current_count|default:0 }} / {{ job.total_count|default:0 }}
+                        {% if job.user %}{{ job.user.username }}{% else %}-{% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" onclick="event.stopPropagation()">
+                        <button onclick="openJobDetail({{ job.id }})" class="text-blue-600 hover:text-blue-900">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
                         No jobs found
                     </td>
                 </tr>
@@ -88,5 +108,336 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Job Detail Modal -->
+    <div id="job-detail-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-xl font-bold text-gray-900" id="modal-title">Job Details</h2>
+                <button onclick="closeJobDetail()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-6">
+                <!-- Job Info Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <p class="text-xs text-gray-500">Job ID</p>
+                        <p class="text-sm font-semibold text-gray-900" id="detail-job-id">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Job Type</p>
+                        <p class="text-sm font-semibold text-gray-900" id="detail-job-type">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Status</p>
+                        <span id="detail-status" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">-</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">User</p>
+                        <p class="text-sm font-semibold text-gray-900" id="detail-user">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Started</p>
+                        <p class="text-sm text-gray-700" id="detail-start-time">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Ended</p>
+                        <p class="text-sm text-gray-700" id="detail-end-time">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Duration</p>
+                        <p class="text-sm text-gray-700" id="detail-duration">-</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500">Progress</p>
+                        <p class="text-sm text-gray-700" id="detail-progress-text">-</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">Progress</span>
+                        <span class="text-sm text-gray-500" id="detail-counts">0 / 0</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-4">
+                        <div id="detail-progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Error Messages -->
+                <div id="detail-errors-section" class="mb-6 hidden">
+                    <h3 class="text-sm font-semibold text-red-900 mb-2">Errors</h3>
+                    <div class="bg-red-50 border border-red-200 rounded p-3">
+                        <ul id="detail-errors" class="list-disc list-inside text-sm text-red-800 space-y-1">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Detailed Logs -->
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-gray-900">Detailed Logs</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="toggleAutoScroll()" id="modal-autoscroll-btn" class="text-xs px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded">
+                                🔒 Auto-scroll: ON
+                            </button>
+                            <button onclick="clearModalLogs()" class="text-xs px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-gray-900 text-green-400 rounded p-4 h-64 overflow-y-auto font-mono text-xs" id="detail-logs">
+                        <div class="text-gray-500">No logs yet...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between">
+                <button id="cancel-job-btn" onclick="cancelJobFromModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg hidden">
+                    ⛔ Cancel Job
+                </button>
+                <div class="flex-1"></div>
+                <button onclick="closeJobDetail()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+let currentDetailJobId = null;
+let detailPollInterval = null;
+let modalAutoScroll = true;
+let lastModalLogCount = 0;
+
+// Open job detail modal
+function openJobDetail(jobId) {
+    currentDetailJobId = jobId;
+    lastModalLogCount = 0;
+    document.getElementById('job-detail-modal').classList.remove('hidden');
+    fetchJobDetail();
+    startDetailPolling();
+}
+
+// Close job detail modal
+function closeJobDetail() {
+    document.getElementById('job-detail-modal').classList.add('hidden');
+    stopDetailPolling();
+    currentDetailJobId = null;
+}
+
+// Fetch job details from API
+function fetchJobDetail() {
+    if (!currentDetailJobId) return;
+
+    fetch(`/authenticated/api/gitlab-sync/job/${currentDetailJobId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateJobDetail(data);
+
+                // Stop polling if job is complete
+                if (data.is_completed || data.is_failed || data.is_cancelled) {
+                    stopDetailPolling();
+                }
+            } else {
+                console.error('[JobDetail] Failed to fetch job details:', data);
+            }
+        })
+        .catch(error => {
+            console.error('[JobDetail] Error fetching job details:', error);
+        });
+}
+
+// Update job detail modal with data
+function updateJobDetail(data) {
+    // Update header
+    document.getElementById('modal-title').textContent = `Job #${data.job_id} - ${data.job_type}`;
+
+    // Update info grid
+    document.getElementById('detail-job-id').textContent = `#${data.job_id}`;
+    document.getElementById('detail-job-type').textContent = data.job_type || '-';
+    document.getElementById('detail-user').textContent = data.user_username || '-';
+    document.getElementById('detail-start-time').textContent = data.start_time ? new Date(data.start_time).toLocaleString() : '-';
+    document.getElementById('detail-end-time').textContent = data.end_time ? new Date(data.end_time).toLocaleString() : '-';
+    document.getElementById('detail-duration').textContent = data.duration_seconds ? `${data.duration_seconds.toFixed(1)}s` : '-';
+    document.getElementById('detail-progress-text').textContent = `${data.progress_percent}%`;
+
+    // Update status badge
+    const statusBadge = document.getElementById('detail-status');
+    statusBadge.textContent = data.status || '-';
+    statusBadge.className = 'px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full';
+    if (data.is_completed) {
+        statusBadge.classList.add('bg-green-100', 'text-green-800');
+    } else if (data.is_failed) {
+        statusBadge.classList.add('bg-red-100', 'text-red-800');
+    } else if (data.is_cancelled) {
+        statusBadge.classList.add('bg-orange-100', 'text-orange-800');
+    } else if (data.is_running) {
+        statusBadge.classList.add('bg-blue-100', 'text-blue-800');
+    } else {
+        statusBadge.classList.add('bg-gray-100', 'text-gray-800');
+    }
+
+    // Update progress bar
+    const progressBar = document.getElementById('detail-progress-bar');
+    progressBar.style.width = `${data.progress_percent}%`;
+    progressBar.className = 'h-4 rounded-full transition-all duration-300';
+    if (data.is_completed) {
+        progressBar.classList.add('bg-green-600');
+    } else if (data.is_failed) {
+        progressBar.classList.add('bg-red-600');
+    } else if (data.is_cancelled) {
+        progressBar.classList.add('bg-orange-600');
+    } else {
+        progressBar.classList.add('bg-blue-600');
+    }
+
+    document.getElementById('detail-counts').textContent = `${data.current_count || 0} / ${data.total_count || 0}`;
+
+    // Update error messages
+    if (data.error_messages && data.error_messages.length > 0) {
+        document.getElementById('detail-errors-section').classList.remove('hidden');
+        const errorsList = document.getElementById('detail-errors');
+        errorsList.innerHTML = '';
+        data.error_messages.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            errorsList.appendChild(li);
+        });
+    } else {
+        document.getElementById('detail-errors-section').classList.add('hidden');
+    }
+
+    // Update logs (only new ones)
+    const logs = data.detailed_logs || [];
+    if (logs.length > lastModalLogCount) {
+        const logsDiv = document.getElementById('detail-logs');
+        const newLogs = logs.slice(lastModalLogCount);
+
+        // Clear "No logs yet" message on first log
+        if (lastModalLogCount === 0 && logs.length > 0) {
+            logsDiv.innerHTML = '';
+        }
+
+        newLogs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.textContent = log;
+            logsDiv.appendChild(logLine);
+        });
+
+        lastModalLogCount = logs.length;
+
+        // Auto-scroll to bottom
+        if (modalAutoScroll) {
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+    }
+
+    // Show/hide cancel button
+    if (data.is_running) {
+        document.getElementById('cancel-job-btn').classList.remove('hidden');
+    } else {
+        document.getElementById('cancel-job-btn').classList.add('hidden');
+    }
+}
+
+// Start polling for job detail updates
+function startDetailPolling() {
+    if (detailPollInterval) clearInterval(detailPollInterval);
+
+    detailPollInterval = setInterval(() => {
+        if (currentDetailJobId) {
+            fetchJobDetail();
+        }
+    }, 2000); // Poll every 2 seconds
+}
+
+// Stop polling for job detail updates
+function stopDetailPolling() {
+    if (detailPollInterval) {
+        clearInterval(detailPollInterval);
+        detailPollInterval = null;
+    }
+}
+
+// Toggle auto-scroll for modal logs
+function toggleAutoScroll() {
+    modalAutoScroll = !modalAutoScroll;
+    const btn = document.getElementById('modal-autoscroll-btn');
+    btn.textContent = modalAutoScroll ? '🔒 Auto-scroll: ON' : '🔓 Auto-scroll: OFF';
+}
+
+// Clear modal logs
+function clearModalLogs() {
+    document.getElementById('detail-logs').innerHTML = '<div class="text-gray-500">Logs cleared...</div>';
+    lastModalLogCount = 0;
+}
+
+// Cancel job from modal
+function cancelJobFromModal() {
+    if (!currentDetailJobId) return;
+
+    if (!confirm('Are you sure you want to cancel this job?')) {
+        return;
+    }
+
+    fetch(`/authenticated/api/gitlab-sync/job/${currentDetailJobId}/cancel/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                fetchJobDetail(); // Refresh the detail view
+                // Optionally reload the page to update the table
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                alert('Failed to cancel job: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('[JobDetail] Error cancelling job:', error);
+            alert('Error cancelling job: ' + error.message);
+        });
+}
+
+// Get CSRF token from cookie
+function getCsrfToken() {
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeJobDetail();
+    }
+});
+</script>
 {% endblock %}

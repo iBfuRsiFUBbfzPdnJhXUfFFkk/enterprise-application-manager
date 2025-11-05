@@ -43,5 +43,6 @@ def gitlab_sync_job_status_api(request: HttpRequest, job_id: int) -> JsonRespons
             "is_completed": job_tracker.is_completed,
             "is_failed": job_tracker.is_failed,
             "is_cancelled": job_tracker.is_cancelled,
+            "user_username": job_tracker.user.username if job_tracker.user else None,
         }
     )
