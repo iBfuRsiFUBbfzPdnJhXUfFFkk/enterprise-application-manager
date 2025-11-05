@@ -22,7 +22,7 @@ def gitlab_sync_link_projects_view(request: HttpRequest) -> HttpResponse:
         .exclude(application=None)
     )
 
-    applications = Application.objects.filter(is_active=True).order_by("name")
+    applications = Application.objects.all().order_by("name")
 
     context = {
         "unlinked_gitlab_projects": unlinked_gitlab_projects,
