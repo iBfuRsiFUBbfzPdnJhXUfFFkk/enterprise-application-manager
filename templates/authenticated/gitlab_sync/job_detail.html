@@ -1,0 +1,184 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ job.name }} - GitLab Job{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">{{ job.name }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_jobs' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Jobs
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if job.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' job.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ job.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Job Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Job Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Name</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Stage</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.stage|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <dd class="mt-1">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if job.status == 'success' %}bg-green-100 text-green-800
+                            {% elif job.status == 'failed' %}bg-red-100 text-red-800
+                            {% elif job.status == 'running' %}bg-blue-100 text-blue-800
+                            {% elif job.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif job.status == 'canceled' %}bg-gray-100 text-gray-800
+                            {% elif job.status == 'skipped' %}bg-purple-100 text-purple-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ job.status }}
+                        </span>
+                    </dd>
+                </div>
+                {% if job.pipeline %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Pipeline</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_pipeline_detail' job.pipeline.id %}">#{{ job.pipeline.id }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if job.user %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Triggered By</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' job.user.id %}">{{ job.user.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Runner Information</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Runner ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.runner_id|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Runner Description</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.runner_description|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Runner Name</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.runner_name|default:"—" }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if job.started_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Started</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.started_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+                {% if job.finished_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Finished</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ job.finished_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+                {% if job.duration %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Duration</dt>
+                    <dd class="text-2xl font-bold text-gray-900 mt-1">{{ job.duration }}s</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Ref Information -->
+    {% if job.ref %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Reference Information</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Ref</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ job.ref }}</dd>
+            </div>
+            {% if job.commit_sha %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Commit SHA</dt>
+                <dd class="text-sm font-mono text-gray-900 mt-1">{{ job.commit_sha|slice:":8" }}</dd>
+            </div>
+            {% endif %}
+        </dl>
+    </div>
+    {% endif %}
+
+    <!-- Coverage -->
+    {% if job.coverage %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Coverage</h2>
+        <div class="flex items-center">
+            <div class="flex-1">
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="bg-green-600 h-4 rounded-full" style="width: {{ job.coverage }}%"></div>
+                </div>
+            </div>
+            <div class="ml-4 text-2xl font-bold text-gray-900">{{ job.coverage }}%</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Failure Reason -->
+    {% if job.failure_reason %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Failure Reason</h2>
+        <p class="text-sm text-red-600">{{ job.failure_reason }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Artifacts -->
+    {% if artifacts_count > 0 %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Artifacts ({{ artifacts_count }})</h2>
+        <div class="space-y-2">
+            {% for artifact in job.artifacts.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <div class="text-sm font-medium text-gray-900">{{ artifact.filename }}</div>
+                <p class="text-xs text-gray-500">Size: {{ artifact.size|filesizeformat }} - {{ artifact.file_type }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

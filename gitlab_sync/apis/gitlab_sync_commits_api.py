@@ -44,7 +44,7 @@ def _sync_commits_background(
         return
 
     config = ThisServerConfiguration.current()
-    days_back = config.coerced_gitlab_sync_pipelines_days_back  # Reuse pipelines config
+    days_back = config.coerced_gitlab_sync_commits_days_back
 
     # Calculate date cutoff for filtering commits
     cutoff_date = timezone.now() - timedelta(days=days_back)

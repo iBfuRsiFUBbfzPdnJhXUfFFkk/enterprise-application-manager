@@ -1,0 +1,190 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}Epic #{{ epic.id }} - GitLab Epic{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">Epic #{{ epic.id }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_epics' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Epics
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if epic.group %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_group_detail' epic.group.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ epic.group.full_path }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Epic Title -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-start justify-between">
+            <h2 class="text-xl font-semibold text-gray-900">{{ epic.title }}</h2>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                {% if epic.state == 'opened' %}bg-green-100 text-green-800
+                {% elif epic.state == 'closed' %}bg-gray-100 text-gray-800
+                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                {{ epic.state }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Epic Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Epic Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">IID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.iid|default:"—" }}</dd>
+                </div>
+                {% if epic.author %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Author</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' epic.author.id %}">{{ epic.author.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if epic.parent_epic %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Parent Epic</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_epic_detail' epic.parent_epic.id %}">
+                            #{{ epic.parent_epic.id }} - {{ epic.parent_epic.title }}
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if epic.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1">
+                        <a href="{{ epic.web_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            View on GitLab
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Updated</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.updated_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if epic.start_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Start Date</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.start_date|date:"M d, Y" }}</dd>
+                </div>
+                {% endif %}
+                {% if epic.due_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Due Date</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.due_date|date:"M d, Y" }}</dd>
+                </div>
+                {% endif %}
+                {% if epic.closed_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Closed</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ epic.closed_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Description -->
+    {% if epic.description %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+        <div class="text-sm text-gray-900 prose max-w-none">
+            <pre class="whitespace-pre-wrap font-sans">{{ epic.description }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Labels -->
+    {% if epic.labels %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Labels</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for label in epic.labels %}
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                {{ label }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Child Epics -->
+    {% if child_epics_count > 0 %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Child Epics ({{ child_epics_count }})</h2>
+        <div class="space-y-2">
+            {% for child in epic.child_epics.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_epic_detail' child.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    #{{ child.id }} - {{ child.title }}
+                </a>
+                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                    {% if child.state == 'opened' %}bg-green-100 text-green-800
+                    {% elif child.state == 'closed' %}bg-gray-100 text-gray-800
+                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ child.state }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Issues -->
+    {% if issues_count > 0 %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Issues ({{ issues_count }})</h2>
+        <div class="space-y-2">
+            {% for issue in epic.issues.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_issue_detail' issue.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    #{{ issue.iid }} - {{ issue.title }}
+                </a>
+                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                    {% if issue.state == 'opened' %}bg-green-100 text-green-800
+                    {% elif issue.state == 'closed' %}bg-gray-100 text-gray-800
+                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                    {{ issue.state }}
+                </span>
+                {% if issue.project %}
+                <p class="text-xs text-gray-500">{{ issue.project.path_with_namespace }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

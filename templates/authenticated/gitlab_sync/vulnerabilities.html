@@ -1,0 +1,143 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}GitLab Vulnerabilities{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">GitLab Vulnerabilities</h1>
+            <p class="mt-2 text-sm text-gray-600">Browse and search security vulnerabilities</p>
+        </div>
+        <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Search and Filter Bar -->
+    <div class="mb-6 bg-white rounded-lg shadow p-6">
+        <form method="get" action="" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" name="search" id="search" value="{{ search_query }}"
+                           placeholder="Search by title..."
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="severity" class="block text-sm font-medium text-gray-700 mb-1">Severity</label>
+                    <select name="severity" id="severity"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All</option>
+                        <option value="critical" {% if severity_filter == 'critical' %}selected{% endif %}>Critical</option>
+                        <option value="high" {% if severity_filter == 'high' %}selected{% endif %}>High</option>
+                        <option value="medium" {% if severity_filter == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="low" {% if severity_filter == 'low' %}selected{% endif %}>Low</option>
+                        <option value="info" {% if severity_filter == 'info' %}selected{% endif %}>Info</option>
+                        <option value="unknown" {% if severity_filter == 'unknown' %}selected{% endif %}>Unknown</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <select name="state" id="state"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All</option>
+                        <option value="detected" {% if state_filter == 'detected' %}selected{% endif %}>Detected</option>
+                        <option value="confirmed" {% if state_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="resolved" {% if state_filter == 'resolved' %}selected{% endif %}>Resolved</option>
+                        <option value="dismissed" {% if state_filter == 'dismissed' %}selected{% endif %}>Dismissed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="mb-4 flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+            Showing <strong>{{ total_count }}</strong> vulnerabilit{{ total_count|pluralize:"y,ies" }}
+        </p>
+    </div>
+
+    <!-- Vulnerabilities Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Title
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Project
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Severity
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        State
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Detected
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for vuln in vulnerabilities %}
+                <tr class="hover:bg-gray-50 cursor-pointer" ondblclick="window.location.href='{% url 'gitlab_sync_vulnerability_detail' vuln.id %}'">
+                    <td class="px-6 py-4">
+                        <div class="text-sm font-medium text-gray-900">{{ vuln.title }}</div>
+                        {% if vuln.description %}
+                        <div class="text-xs text-gray-500 mt-1 truncate max-w-md">{{ vuln.description|truncatewords:15 }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ vuln.project.name }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if vuln.severity == 'critical' %}bg-purple-100 text-purple-800
+                            {% elif vuln.severity == 'high' %}bg-red-100 text-red-800
+                            {% elif vuln.severity == 'medium' %}bg-orange-100 text-orange-800
+                            {% elif vuln.severity == 'low' %}bg-yellow-100 text-yellow-800
+                            {% elif vuln.severity == 'info' %}bg-blue-100 text-blue-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ vuln.severity|upper }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if vuln.state == 'resolved' %}bg-green-100 text-green-800
+                            {% elif vuln.state == 'dismissed' %}bg-gray-100 text-gray-800
+                            {% elif vuln.state == 'confirmed' %}bg-red-100 text-red-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ vuln.state|upper }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {{ vuln.detected_at|date:"M d, Y H:i" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center">
+                        <div class="text-gray-400">
+                            <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <p class="text-sm font-medium">No vulnerabilities found</p>
+                            <p class="text-xs mt-1">Try adjusting your search filters</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

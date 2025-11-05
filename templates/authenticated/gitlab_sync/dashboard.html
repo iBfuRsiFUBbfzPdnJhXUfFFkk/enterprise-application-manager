@@ -120,6 +120,9 @@
                         <li>Groups: Max depth {{ sync_limits.max_group_depth }} levels</li>
                         <li>Projects: Max {{ sync_limits.max_projects_per_group }} per group</li>
                         <li>Pipelines: Last {{ sync_limits.pipelines_days_back }} days, max {{ sync_limits.max_pipelines_per_project }} per project</li>
+                        <li>Commits: Last {{ sync_limits.commits_days_back }} days</li>
+                        <li>Issues: Max {{ sync_limits.max_issues_per_project }} per project</li>
+                        <li>Merge Requests: Max {{ sync_limits.max_merge_requests_per_project }} per project</li>
                     </ul>
                     <a href="{% url 'server_configuration' %}" class="text-xs text-purple-700 hover:text-purple-900 underline mt-2 inline-block">
                         Configure limits
@@ -273,7 +276,7 @@
     <!-- Statistics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
         <!-- Core Entities -->
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_groups' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Groups</p>
@@ -285,9 +288,9 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_projects' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Projects</p>
@@ -299,9 +302,9 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_users' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Users</p>
@@ -313,9 +316,9 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_issues' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Issues</p>
@@ -327,10 +330,10 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
         <!-- CI/CD Entities -->
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_pipelines' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Pipelines</p>
@@ -342,9 +345,9 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_jobs' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Jobs</p>
@@ -356,9 +359,9 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_merge_requests' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Merge Requests</p>
@@ -370,10 +373,10 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
         <!-- Repository Entities -->
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_commits' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Commits</p>
@@ -385,10 +388,10 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
         <!-- EE Features -->
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_epics' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Epics</p>
@@ -400,9 +403,9 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200">
+        <a href="{% url 'gitlab_sync_vulnerabilities' %}" class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow duration-150 p-6 border border-gray-200 cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Vulnerabilities</p>
@@ -414,7 +417,7 @@
                     </svg>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Pipeline Statistics -->

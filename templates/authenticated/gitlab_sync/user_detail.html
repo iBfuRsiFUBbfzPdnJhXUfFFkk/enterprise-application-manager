@@ -1,0 +1,154 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ user.name }} - GitLab User{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">{{ user.name }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_users' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Users
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600">@{{ user.username }}</p>
+    </div>
+
+    <!-- User Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">User Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ user.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Username</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ user.username }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Name</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ user.name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Email</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ user.email|default:"—" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">State</dt>
+                    <dd class="mt-1">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if user.state == 'active' %}bg-green-100 text-green-800
+                            {% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ user.state }}
+                        </span>
+                    </dd>
+                </div>
+                {% if user.person %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Linked Person</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="/authenticated/person/{{ user.person.id }}/">{{ user.person.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Projects</dt>
+                    <dd class="text-2xl font-bold text-gray-900 mt-1">{{ user.projects.count }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Commits</dt>
+                    <dd class="text-2xl font-bold text-gray-900 mt-1">{{ user.authored_commits.count }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Merge Requests</dt>
+                    <dd class="text-2xl font-bold text-gray-900 mt-1">{{ user.authored_merge_requests.count }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ user.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Last Synced</dt>
+                    <dd class="text-sm text-gray-900 mt-1">
+                        {% if user.last_synced_at %}
+                            {{ user.last_synced_at|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-gray-400">Never</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Bio -->
+    {% if user.bio %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Bio</h2>
+        <div class="text-sm text-gray-700 whitespace-pre-wrap">{{ user.bio }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Commits -->
+    {% if user.authored_commits.exists %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Commits</h2>
+        <div class="space-y-2">
+            {% for commit in user.authored_commits.all|slice:":10" %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_commit_detail' commit.sha %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    {{ commit.title }}
+                </a>
+                <p class="text-xs text-gray-500">{{ commit.sha|slice:":8" }} - {{ commit.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Merge Requests -->
+    {% if user.authored_merge_requests.exists %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Merge Requests</h2>
+        <div class="space-y-2">
+            {% for mr in user.authored_merge_requests.all|slice:":10" %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_merge_request_detail' mr.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    !{{ mr.iid }}: {{ mr.title }}
+                </a>
+                <p class="text-xs text-gray-500">
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                        {% if mr.state == 'merged' %}bg-purple-100 text-purple-800
+                        {% elif mr.state == 'opened' %}bg-green-100 text-green-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ mr.state }}
+                    </span>
+                    - {{ mr.created_at|date:"M d, Y H:i" }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

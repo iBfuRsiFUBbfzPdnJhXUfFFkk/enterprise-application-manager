@@ -31,6 +31,9 @@ class ThisServerConfiguration(
     gitlab_sync_max_projects_per_group: int | None = create_generic_integer()
     gitlab_sync_pipelines_days_back: int | None = create_generic_integer()
     gitlab_sync_max_pipelines_per_project: int | None = create_generic_integer()
+    gitlab_sync_commits_days_back: int | None = create_generic_integer()
+    gitlab_sync_max_issues_per_project: int | None = create_generic_integer()
+    gitlab_sync_max_merge_requests_per_project: int | None = create_generic_integer()
     gitlab_sync_operation_timeout_seconds: int | None = create_generic_integer()
     gitlab_sync_skip_group_ids: str | None = create_generic_varchar()
     kpi_developers_to_exclude = create_generic_m2m(to='Person')
@@ -103,6 +106,21 @@ class ThisServerConfiguration(
     def coerced_gitlab_sync_max_pipelines_per_project(self) -> int:
         """Max pipelines to sync per project (default: 50)."""
         return self.gitlab_sync_max_pipelines_per_project or 50
+
+    @property
+    def coerced_gitlab_sync_commits_days_back(self) -> int:
+        """Only sync commits from last X days (default: 30)."""
+        return self.gitlab_sync_commits_days_back or 30
+
+    @property
+    def coerced_gitlab_sync_max_issues_per_project(self) -> int:
+        """Max issues to sync per project (default: 100)."""
+        return self.gitlab_sync_max_issues_per_project or 100
+
+    @property
+    def coerced_gitlab_sync_max_merge_requests_per_project(self) -> int:
+        """Max merge requests to sync per project (default: 50)."""
+        return self.gitlab_sync_max_merge_requests_per_project or 50
 
     @property
     def coerced_gitlab_sync_operation_timeout_seconds(self) -> int:

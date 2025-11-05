@@ -1,0 +1,302 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}MR !{{ merge_request.iid }} - GitLab Merge Request{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">Merge Request !{{ merge_request.iid }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_merge_requests' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Merge Requests
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if merge_request.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' merge_request.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ merge_request.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Merge Request Title -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-start justify-between">
+            <div class="flex-1">
+                <h2 class="text-xl font-semibold text-gray-900">{{ merge_request.title }}</h2>
+                {% if merge_request.draft %}
+                <span class="mt-2 inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                    Draft
+                </span>
+                {% endif %}
+            </div>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                {% if merge_request.state == 'merged' %}bg-purple-100 text-purple-800
+                {% elif merge_request.state == 'opened' %}bg-green-100 text-green-800
+                {% elif merge_request.state == 'closed' %}bg-gray-100 text-gray-800
+                {% elif merge_request.state == 'locked' %}bg-red-100 text-red-800
+                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                {{ merge_request.state }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Merge Request Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_request.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">IID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_request.iid }}</dd>
+                </div>
+                {% if merge_request.author %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Author</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' merge_request.author.id %}">{{ merge_request.author.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if merge_request.merged_by %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Merged By</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' merge_request.merged_by.id %}">{{ merge_request.merged_by.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if merge_request.closed_by %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Closed By</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' merge_request.closed_by.id %}">{{ merge_request.closed_by.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if merge_request.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1">
+                        <a href="{{ merge_request.web_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            View on GitLab
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_request.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Updated</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_request.updated_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if merge_request.merged_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Merged</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_request.merged_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+                {% if merge_request.closed_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Closed</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ merge_request.closed_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Branches -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Branches</h2>
+        <div class="flex items-center justify-center space-x-4">
+            <div class="flex-1 bg-blue-50 rounded-lg p-4 text-center">
+                <p class="text-xs text-gray-500 mb-1">Source Branch</p>
+                <p class="text-sm font-medium text-gray-900">{{ merge_request.source_branch }}</p>
+            </div>
+            <div class="text-gray-400">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </div>
+            <div class="flex-1 bg-green-50 rounded-lg p-4 text-center">
+                <p class="text-xs text-gray-500 mb-1">Target Branch</p>
+                <p class="text-sm font-medium text-gray-900">{{ merge_request.target_branch }}</p>
+            </div>
+        </div>
+        {% if merge_request.sha %}
+        <div class="mt-4 text-center">
+            <p class="text-xs text-gray-500">SHA</p>
+            <p class="text-sm font-mono text-gray-900">{{ merge_request.sha|slice:":8" }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Description -->
+    {% if merge_request.description %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+        <div class="text-sm text-gray-900 prose max-w-none">
+            <pre class="whitespace-pre-wrap font-sans">{{ merge_request.description }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Merge Status -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Merge Status</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Merge Status</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ merge_request.merge_status|default:"—" }}</dd>
+            </div>
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Work in Progress</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ merge_request.work_in_progress|yesno:"Yes,No" }}</dd>
+            </div>
+            {% if merge_request.merge_commit_sha %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Merge Commit SHA</dt>
+                <dd class="text-sm font-mono text-gray-900 mt-1">{{ merge_request.merge_commit_sha|slice:":8" }}</dd>
+            </div>
+            {% endif %}
+            {% if merge_request.squash_commit_sha %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Squash Commit SHA</dt>
+                <dd class="text-sm font-mono text-gray-900 mt-1">{{ merge_request.squash_commit_sha|slice:":8" }}</dd>
+            </div>
+            {% endif %}
+        </dl>
+    </div>
+
+    <!-- Statistics -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Upvotes</h2>
+            <p class="text-3xl font-bold text-green-600">{{ merge_request.upvotes|default:"0" }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Downvotes</h2>
+            <p class="text-3xl font-bold text-red-600">{{ merge_request.downvotes|default:"0" }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">User Notes</h2>
+            <p class="text-3xl font-bold text-gray-900">{{ merge_request.user_notes_count|default:"0" }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Changes</h2>
+            <p class="text-3xl font-bold text-gray-900">{{ merge_request.changes_count|default:"0" }}</p>
+        </div>
+    </div>
+
+    <!-- Labels -->
+    {% if merge_request.labels %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Labels</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for label in merge_request.labels %}
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                {{ label }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Assignees -->
+    {% if assignees %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Assignees ({{ assignees.count }})</h2>
+        <div class="space-y-2">
+            {% for assignee in assignees %}
+            <div class="flex items-center py-2 border-b border-gray-200">
+                <a href="{% url 'gitlab_sync_user_detail' assignee.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    {{ assignee.name }}
+                </a>
+                <span class="ml-2 text-xs text-gray-500">@{{ assignee.username }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Reviewers -->
+    {% if reviewers %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Reviewers ({{ reviewers.count }})</h2>
+        <div class="space-y-2">
+            {% for reviewer in reviewers %}
+            <div class="flex items-center py-2 border-b border-gray-200">
+                <a href="{% url 'gitlab_sync_user_detail' reviewer.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    {{ reviewer.name }}
+                </a>
+                <span class="ml-2 text-xs text-gray-500">@{{ reviewer.username }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Head Pipeline -->
+    {% if merge_request.head_pipeline %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Head Pipeline</h2>
+        <div class="flex items-center justify-between">
+            <a href="{% url 'gitlab_sync_pipeline_detail' merge_request.head_pipeline.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                #{{ merge_request.head_pipeline.id }}
+            </a>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                {% if merge_request.head_pipeline.status == 'success' %}bg-green-100 text-green-800
+                {% elif merge_request.head_pipeline.status == 'failed' %}bg-red-100 text-red-800
+                {% elif merge_request.head_pipeline.status == 'running' %}bg-blue-100 text-blue-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ merge_request.head_pipeline.status }}
+            </span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- All Pipelines -->
+    {% if pipelines_count > 0 %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Pipelines ({{ pipelines_count }})</h2>
+        <div class="space-y-2">
+            {% for pipeline in merge_request.pipelines.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_pipeline_detail' pipeline.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    #{{ pipeline.id }}
+                </a>
+                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                    {% if pipeline.status == 'success' %}bg-green-100 text-green-800
+                    {% elif pipeline.status == 'failed' %}bg-red-100 text-red-800
+                    {% elif pipeline.status == 'running' %}bg-blue-100 text-blue-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ pipeline.status }}
+                </span>
+                <p class="text-xs text-gray-500">Ref: {{ pipeline.ref }} - {{ pipeline.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

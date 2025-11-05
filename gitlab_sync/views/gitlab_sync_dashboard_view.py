@@ -91,6 +91,9 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         "max_projects_per_group": config.coerced_gitlab_sync_max_projects_per_group,
         "pipelines_days_back": config.coerced_gitlab_sync_pipelines_days_back,
         "max_pipelines_per_project": config.coerced_gitlab_sync_max_pipelines_per_project,
+        "commits_days_back": config.coerced_gitlab_sync_commits_days_back,
+        "max_issues_per_project": config.coerced_gitlab_sync_max_issues_per_project,
+        "max_merge_requests_per_project": config.coerced_gitlab_sync_max_merge_requests_per_project,
     }
 
     context = {

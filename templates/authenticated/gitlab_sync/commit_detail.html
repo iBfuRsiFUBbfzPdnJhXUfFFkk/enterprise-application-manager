@@ -1,0 +1,165 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ commit.sha|slice:":8" }} - GitLab Commit{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900 font-mono">{{ commit.sha|slice:":8" }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_commits' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Commits
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if commit.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' commit.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ commit.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Commit Title -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">{{ commit.title }}</h2>
+    </div>
+
+    <!-- Commit Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Commit Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Full SHA</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1 break-all">{{ commit.sha }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Short ID</dt>
+                    <dd class="text-sm font-mono text-gray-900 mt-1">{{ commit.short_id|default:commit.sha|slice:":8" }}</dd>
+                </div>
+                {% if commit.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1">
+                        <a href="{{ commit.web_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            View on GitLab
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Author & Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Author</dt>
+                    <dd class="text-sm mt-1">
+                        {% if commit.author %}
+                        <a href="{% url 'gitlab_sync_user_detail' commit.author.id %}" class="text-blue-600 hover:text-blue-800">
+                            {{ commit.author.name }}
+                        </a>
+                        {% elif commit.author_name %}
+                        {{ commit.author_name }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </dd>
+                </div>
+                {% if commit.author_email %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Author Email</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ commit.author_email }}</dd>
+                </div>
+                {% endif %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Authored</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ commit.authored_date|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if commit.committer_name %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Committer</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ commit.committer_name }}</dd>
+                </div>
+                {% endif %}
+                {% if commit.committed_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Committed</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ commit.committed_date|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Message -->
+    {% if commit.message %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Commit Message</h2>
+        <pre class="text-sm text-gray-900 whitespace-pre-wrap font-mono bg-gray-50 p-4 rounded">{{ commit.message }}</pre>
+    </div>
+    {% endif %}
+
+    <!-- Statistics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Additions</h2>
+            <p class="text-3xl font-bold text-green-600">+{{ commit.stats_additions|default:"0" }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Deletions</h2>
+            <p class="text-3xl font-bold text-red-600">-{{ commit.stats_deletions|default:"0" }}</p>
+        </div>
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Total Changes</h2>
+            <p class="text-3xl font-bold text-gray-900">{{ commit.stats_total|default:"0" }}</p>
+        </div>
+    </div>
+
+    <!-- Parent Commits -->
+    {% if commit.parent_ids %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Parent Commits</h2>
+        <div class="space-y-2">
+            {% for parent_id in commit.parent_ids %}
+            <div class="text-sm font-mono text-blue-600 hover:text-blue-800">
+                <a href="{% url 'gitlab_sync_commit_detail' parent_id %}">{{ parent_id|slice:":8" }}</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pipelines -->
+    {% if pipelines_count > 0 %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Pipelines ({{ pipelines_count }})</h2>
+        <div class="space-y-2">
+            {% for pipeline in commit.pipelines.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_pipeline_detail' pipeline.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    #{{ pipeline.id }}
+                </a>
+                <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                    {% if pipeline.status == 'success' %}bg-green-100 text-green-800
+                    {% elif pipeline.status == 'failed' %}bg-red-100 text-red-800
+                    {% elif pipeline.status == 'running' %}bg-blue-100 text-blue-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ pipeline.status }}
+                </span>
+                <p class="text-xs text-gray-500">Ref: {{ pipeline.ref }} - {{ pipeline.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

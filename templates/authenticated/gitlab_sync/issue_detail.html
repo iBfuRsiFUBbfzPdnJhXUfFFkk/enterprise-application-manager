@@ -1,0 +1,217 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}Issue #{{ issue.iid }} - GitLab Issue{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">Issue #{{ issue.iid }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_issues' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Issues
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        {% if issue.project %}
+        <p class="text-sm text-gray-600">
+            <a href="{% url 'gitlab_sync_project_detail' issue.project.id %}" class="text-blue-600 hover:text-blue-800">
+                {{ issue.project.path_with_namespace }}
+            </a>
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Issue Title -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-start justify-between">
+            <h2 class="text-xl font-semibold text-gray-900">{{ issue.title }}</h2>
+            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                {% if issue.state == 'opened' %}bg-green-100 text-green-800
+                {% elif issue.state == 'closed' %}bg-gray-100 text-gray-800
+                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                {{ issue.state }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Issue Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Issue Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">IID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.iid }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Type</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.issue_type|default:"issue" }}</dd>
+                </div>
+                {% if issue.author %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Author</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' issue.author.id %}">{{ issue.author.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if issue.epic %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Epic</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_epic_detail' issue.epic.id %}">
+                            #{{ issue.epic.id }} - {{ issue.epic.title }}
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+                {% if issue.web_url %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">GitLab Link</dt>
+                    <dd class="text-sm mt-1">
+                        <a href="{{ issue.web_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
+                            View on GitLab
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Updated</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.updated_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% if issue.due_date %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Due Date</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.due_date|date:"M d, Y" }}</dd>
+                </div>
+                {% endif %}
+                {% if issue.closed_at %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Closed</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ issue.closed_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                {% endif %}
+                {% if issue.closed_by %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Closed By</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_user_detail' issue.closed_by.id %}">{{ issue.closed_by.name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Description -->
+    {% if issue.description %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+        <div class="text-sm text-gray-900 prose max-w-none">
+            <pre class="whitespace-pre-wrap font-sans">{{ issue.description }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Metrics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {% if issue.weight %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Weight</h2>
+            <p class="text-3xl font-bold text-gray-900">{{ issue.weight }}</p>
+        </div>
+        {% endif %}
+        {% if issue.time_estimate %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Time Estimate</h2>
+            <p class="text-3xl font-bold text-gray-900">{{ issue.time_estimate }}s</p>
+        </div>
+        {% endif %}
+        {% if issue.total_time_spent %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Time Spent</h2>
+            <p class="text-3xl font-bold text-gray-900">{{ issue.total_time_spent }}s</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Labels -->
+    {% if issue.labels %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Labels</h2>
+        <div class="flex flex-wrap gap-2">
+            {% for label in issue.labels %}
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                {{ label }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Assignees -->
+    {% if assignees %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Assignees ({{ assignees.count }})</h2>
+        <div class="space-y-2">
+            {% for assignee in assignees %}
+            <div class="flex items-center py-2 border-b border-gray-200">
+                <a href="{% url 'gitlab_sync_user_detail' assignee.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    {{ assignee.name }}
+                </a>
+                <span class="ml-2 text-xs text-gray-500">@{{ assignee.username }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- References -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">References</h2>
+        <dl class="space-y-3">
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Reference</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ issue.references|default:"—" }}</dd>
+            </div>
+            {% if issue.upvotes %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Upvotes</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ issue.upvotes }}</dd>
+            </div>
+            {% endif %}
+            {% if issue.downvotes %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">Downvotes</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ issue.downvotes }}</dd>
+            </div>
+            {% endif %}
+            {% if issue.user_notes_count %}
+            <div>
+                <dt class="text-sm font-medium text-gray-500">User Notes</dt>
+                <dd class="text-sm text-gray-900 mt-1">{{ issue.user_notes_count }}</dd>
+            </div>
+            {% endif %}
+        </dl>
+    </div>
+</div>
+{% endblock %}

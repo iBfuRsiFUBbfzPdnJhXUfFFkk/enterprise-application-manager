@@ -3,6 +3,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.utils import timezone
 from gitlab import Gitlab
 
+from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import (
     convert_and_enforce_utc_timezone,
@@ -40,6 +41,9 @@ def _sync_merge_requests_background(
         print(f"[GitLabSync] {sync_result}")
         return
 
+    config = ThisServerConfiguration.current()
+    max_merge_requests = config.coerced_gitlab_sync_max_merge_requests_per_project
+
     projects: QuerySet[GitLabSyncProject] = cast_query_set(
         typ=GitLabSyncProject,
         val=GitLabSyncProject.objects.all(),
@@ -47,7 +51,7 @@ def _sync_merge_requests_background(
 
     project_count = projects.count()
     sync_result.add_log(
-        f"Syncing merge requests from {project_count} projects incrementally..."
+        f"Syncing merge requests from {project_count} projects (max {max_merge_requests} per project)..."
     )
 
     for proj_idx, project in enumerate(projects, 1):
@@ -69,7 +73,7 @@ def _sync_merge_requests_background(
             func=lambda: [
                 mr.asdict()
                 for mr in git_lab_client.projects.get(id=project.id, lazy=True)
-                .mergerequests.list(get_all=True)
+                .mergerequests.list(per_page=100, page=1, max_pages=max(1, max_merge_requests // 100))
             ],
             entity_name=f"Merge requests for project {project.path_with_namespace}",
             max_retries=3,

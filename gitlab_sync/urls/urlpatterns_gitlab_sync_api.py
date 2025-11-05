@@ -17,10 +17,30 @@ from gitlab_sync.apis import (
     gitlab_sync_vulnerabilities_api,
 )
 from gitlab_sync.views import (
+    gitlab_sync_commit_detail_view,
+    gitlab_sync_commits_view,
     gitlab_sync_dashboard_view,
+    gitlab_sync_epic_detail_view,
+    gitlab_sync_epics_view,
+    gitlab_sync_group_detail_view,
+    gitlab_sync_groups_view,
+    gitlab_sync_issue_detail_view,
+    gitlab_sync_issues_view,
+    gitlab_sync_job_detail_view,
     gitlab_sync_job_history_view,
+    gitlab_sync_jobs_view,
     gitlab_sync_link_projects_view,
     gitlab_sync_link_users_view,
+    gitlab_sync_merge_request_detail_view,
+    gitlab_sync_merge_requests_view,
+    gitlab_sync_pipeline_detail_view,
+    gitlab_sync_pipelines_view,
+    gitlab_sync_project_detail_view,
+    gitlab_sync_projects_view,
+    gitlab_sync_user_detail_view,
+    gitlab_sync_users_view,
+    gitlab_sync_vulnerabilities_view,
+    gitlab_sync_vulnerability_detail_view,
 )
 
 urlpatterns_gitlab_sync = [
@@ -43,6 +63,116 @@ urlpatterns_gitlab_sync = [
         name="gitlab_sync_job_history",
         route="job-history/",
         view=gitlab_sync_job_history_view,
+    ),
+    # Groups
+    path(
+        name="gitlab_sync_groups",
+        route="groups/",
+        view=gitlab_sync_groups_view,
+    ),
+    path(
+        name="gitlab_sync_group_detail",
+        route="groups/<int:group_id>/",
+        view=gitlab_sync_group_detail_view,
+    ),
+    # Users
+    path(
+        name="gitlab_sync_users",
+        route="users/",
+        view=gitlab_sync_users_view,
+    ),
+    path(
+        name="gitlab_sync_user_detail",
+        route="users/<int:user_id>/",
+        view=gitlab_sync_user_detail_view,
+    ),
+    # Projects
+    path(
+        name="gitlab_sync_projects",
+        route="projects/",
+        view=gitlab_sync_projects_view,
+    ),
+    path(
+        name="gitlab_sync_project_detail",
+        route="projects/<int:project_id>/",
+        view=gitlab_sync_project_detail_view,
+    ),
+    # Pipelines
+    path(
+        name="gitlab_sync_pipelines",
+        route="pipelines/",
+        view=gitlab_sync_pipelines_view,
+    ),
+    path(
+        name="gitlab_sync_pipeline_detail",
+        route="pipelines/<int:pipeline_id>/",
+        view=gitlab_sync_pipeline_detail_view,
+    ),
+    # Jobs
+    path(
+        name="gitlab_sync_jobs",
+        route="jobs/",
+        view=gitlab_sync_jobs_view,
+    ),
+    path(
+        name="gitlab_sync_job_detail",
+        route="jobs/<int:job_id>/",
+        view=gitlab_sync_job_detail_view,
+    ),
+    # Commits
+    path(
+        name="gitlab_sync_commits",
+        route="commits/",
+        view=gitlab_sync_commits_view,
+    ),
+    path(
+        name="gitlab_sync_commit_detail",
+        route="commits/<str:sha>/",
+        view=gitlab_sync_commit_detail_view,
+    ),
+    # Epics
+    path(
+        name="gitlab_sync_epics",
+        route="epics/",
+        view=gitlab_sync_epics_view,
+    ),
+    path(
+        name="gitlab_sync_epic_detail",
+        route="epics/<int:epic_id>/",
+        view=gitlab_sync_epic_detail_view,
+    ),
+    # Issues
+    path(
+        name="gitlab_sync_issues",
+        route="issues/",
+        view=gitlab_sync_issues_view,
+    ),
+    path(
+        name="gitlab_sync_issue_detail",
+        route="issues/<int:issue_id>/",
+        view=gitlab_sync_issue_detail_view,
+    ),
+    # Merge Requests
+    path(
+        name="gitlab_sync_merge_requests",
+        route="merge-requests/",
+        view=gitlab_sync_merge_requests_view,
+    ),
+    path(
+        name="gitlab_sync_merge_request_detail",
+        route="merge-requests/<int:merge_request_id>/",
+        view=gitlab_sync_merge_request_detail_view,
+    ),
+    # Vulnerabilities
+    path(
+        name="gitlab_sync_vulnerabilities",
+        route="vulnerabilities/",
+        view=gitlab_sync_vulnerabilities_view,
+    ),
+    path(
+        name="gitlab_sync_vulnerability_detail",
+        route="vulnerabilities/<int:vulnerability_id>/",
+        view=gitlab_sync_vulnerability_detail_view,
     ),
 ]
 

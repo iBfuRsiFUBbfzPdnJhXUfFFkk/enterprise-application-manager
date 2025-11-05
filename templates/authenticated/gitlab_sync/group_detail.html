@@ -1,0 +1,143 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}{{ group.full_name }} - GitLab Group{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl font-bold text-gray-900">{{ group.full_name }}</h1>
+            <div class="flex space-x-2">
+                <a href="{% url 'gitlab_sync_groups' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Back to Groups
+                </a>
+                <a href="{% url 'gitlab_sync_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Dashboard
+                </a>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600">{{ group.full_path }}</p>
+    </div>
+
+    <!-- Group Information -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Group Details</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">ID</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ group.id }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Name</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ group.name }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Path</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ group.path }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Full Path</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ group.full_path }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Visibility</dt>
+                    <dd class="mt-1">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if group.visibility == 'public' %}bg-green-100 text-green-800
+                            {% elif group.visibility == 'internal' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ group.visibility }}
+                        </span>
+                    </dd>
+                </div>
+                {% if group.parent %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Parent Group</dt>
+                    <dd class="text-sm text-blue-600 hover:text-blue-800 mt-1">
+                        <a href="{% url 'gitlab_sync_group_detail' group.parent.id %}">{{ group.parent.full_name }}</a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Statistics</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Projects</dt>
+                    <dd class="text-2xl font-bold text-gray-900 mt-1">{{ group.projects.count }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Subgroups</dt>
+                    <dd class="text-2xl font-bold text-gray-900 mt-1">{{ group.subgroups.count }}</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Timestamps</h2>
+            <dl class="space-y-3">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                    <dd class="text-sm text-gray-900 mt-1">{{ group.created_at|date:"M d, Y H:i" }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Last Synced</dt>
+                    <dd class="text-sm text-gray-900 mt-1">
+                        {% if group.last_synced_at %}
+                            {{ group.last_synced_at|date:"M d, Y H:i" }}
+                        {% else %}
+                            <span class="text-gray-400">Never</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Description -->
+    {% if group.description %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+        <div class="text-sm text-gray-700 whitespace-pre-wrap">{{ group.description }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Projects -->
+    {% if group.projects.exists %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Projects ({{ group.projects.count }})</h2>
+        <div class="space-y-2">
+            {% for project in group.projects.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_project_detail' project.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    {{ project.path_with_namespace }}
+                </a>
+                <p class="text-xs text-gray-500">Updated: {{ project.updated_at|date:"M d, Y H:i" }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Subgroups -->
+    {% if group.subgroups.exists %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Subgroups ({{ group.subgroups.count }})</h2>
+        <div class="space-y-2">
+            {% for subgroup in group.subgroups.all %}
+            <div class="border-b border-gray-200 pb-2">
+                <a href="{% url 'gitlab_sync_group_detail' subgroup.id %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                    {{ subgroup.full_name }}
+                </a>
+                <p class="text-xs text-gray-500">{{ subgroup.full_path }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
