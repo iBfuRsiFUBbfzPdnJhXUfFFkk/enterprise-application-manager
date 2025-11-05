@@ -50,6 +50,7 @@ class GitLabSyncPipeline(
     coverage: str | None = create_generic_varchar()
     name: str | None = create_generic_varchar()
     yaml_errors: str | None = create_generic_varchar()
+    last_synced_at: datetime | None = create_generic_datetime()
 
     @property
     def jobs(self):

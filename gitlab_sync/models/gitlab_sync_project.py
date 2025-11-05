@@ -53,6 +53,7 @@ class GitLabSyncProject(
     archived: bool | None = create_generic_boolean()
     star_count: int | None = create_generic_integer()
     forks_count: int | None = create_generic_integer()
+    last_synced_at: datetime | None = create_generic_datetime()
 
     @property
     def repository(self):

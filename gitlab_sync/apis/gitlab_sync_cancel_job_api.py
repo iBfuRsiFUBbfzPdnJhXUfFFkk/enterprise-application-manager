@@ -1,10 +1,12 @@
 from datetime import datetime
 
 from django.http import HttpRequest, JsonResponse
+from django.views.decorators.http import require_http_methods
 
 from gitlab_sync.models import GitLabSyncJobTracker
 
 
+@require_http_methods(["POST"])
 def gitlab_sync_cancel_job_api(request: HttpRequest, job_id: int) -> JsonResponse:
     """
     Cancel a running sync job.
@@ -20,44 +22,45 @@ def gitlab_sync_cancel_job_api(request: HttpRequest, job_id: int) -> JsonRespons
     Returns:
         JSON with success status
     """
-    if request.method != "POST":
-        return JsonResponse(
-            data={"success": False, "error": "Method not allowed"}, status=405
+    try:
+        job_tracker = GitLabSyncJobTracker.objects.filter(id=job_id).first()
+
+        if not job_tracker:
+            return JsonResponse(
+                data={"success": False, "error": "Job not found"}, status=404
+            )
+
+        if job_tracker.status != "running":
+            return JsonResponse(
+                data={
+                    "success": False,
+                    "error": f"Job is not running (status: {job_tracker.status})",
+                },
+                status=400,
+            )
+
+        # Mark as cancelled
+        job_tracker.status = "cancelled"
+        job_tracker.end_time = datetime.now()
+
+        # Add cancellation log
+        if not job_tracker.detailed_logs:
+            job_tracker.detailed_logs = []
+        job_tracker.detailed_logs.append(
+            f"[{datetime.now().strftime('%H:%M:%S')}] ⚠️ Job cancelled by user"
         )
 
-    job_tracker = GitLabSyncJobTracker.objects.filter(id=job_id).first()
+        job_tracker.save()
 
-    if not job_tracker:
-        return JsonResponse(
-            data={"success": False, "error": "Job not found"}, status=404
-        )
-
-    if job_tracker.status != "running":
         return JsonResponse(
             data={
-                "success": False,
-                "error": f"Job is not running (status: {job_tracker.status})",
-            },
-            status=400,
+                "success": True,
+                "message": "Job cancelled successfully",
+                "job_id": job_id,
+            }
         )
-
-    # Mark as cancelled
-    job_tracker.status = "cancelled"
-    job_tracker.end_time = datetime.now()
-
-    # Add cancellation log
-    if not job_tracker.detailed_logs:
-        job_tracker.detailed_logs = []
-    job_tracker.detailed_logs.append(
-        f"[{datetime.now().strftime('%H:%M:%S')}] ⚠️ Job cancelled by user"
-    )
-
-    job_tracker.save()
-
-    return JsonResponse(
-        data={
-            "success": True,
-            "message": "Job cancelled successfully",
-            "job_id": job_id,
-        }
-    )
+    except Exception as error:
+        return JsonResponse(
+            data={"success": False, "error": f"Error cancelling job: {str(error)}"},
+            status=500,
+        )
