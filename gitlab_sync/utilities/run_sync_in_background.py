@@ -24,6 +24,8 @@ def run_sync_in_background(
     """
     from datetime import datetime
 
+    from django.db import connection
+
     job_tracker = GitLabSyncJobTracker.objects.create(
         job_type=job_type,
         status="running",
@@ -34,16 +36,31 @@ def run_sync_in_background(
         user=request.user if request.user.is_authenticated else None,
     )
 
+    print(f"[RunSync] Created job tracker {job_tracker.id} for {job_type}")
+
     def thread_target():
         """Target function for background thread."""
         try:
+            # Close the old database connection to force a new one in this thread
+            connection.close()
+
+            print(f"[RunSync] Starting sync function for job {job_tracker.id}")
             sync_function(request, job_tracker)
 
+            # Refresh from database and check status
+            job_tracker.refresh_from_db()
             if job_tracker.status == "running":
                 job_tracker.status = "completed"
                 job_tracker.save()
+                print(f"[RunSync] Job {job_tracker.id} completed successfully")
 
         except Exception as error:
+            print(f"[RunSync] Job {job_tracker.id} failed with error: {error}")
+            import traceback
+
+            traceback.print_exc()
+
+            job_tracker.refresh_from_db()
             job_tracker.status = "failed"
             job_tracker.error_messages = [str(error)]
             job_tracker.end_time = datetime.now()

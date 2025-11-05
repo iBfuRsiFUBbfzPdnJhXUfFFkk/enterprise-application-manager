@@ -426,19 +426,24 @@ let lastLogCount = 0;
 
 // Start a sync job
 function syncEntity(entityType) {
+    console.log('[GitLabSync] Starting sync for:', entityType);
     // Start the job
     fetch(`/authenticated/api/gitlab-sync/${entityType}/`)
         .then(response => response.json())
         .then(data => {
+            console.log('[GitLabSync] Sync started:', data);
             if (data.success && data.job_id) {
                 currentJobId = data.job_id;
+                console.log('[GitLabSync] Job ID:', currentJobId);
                 showProgress(data.job_type);
                 startPolling();
             } else {
+                console.error('[GitLabSync] Failed to start sync:', data);
                 alert('Failed to start sync: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
+            console.error('[GitLabSync] Error starting sync:', error);
             alert('Error starting sync: ' + error.message);
         });
 }
@@ -471,6 +476,7 @@ function fetchJobStatus() {
     fetch(`/authenticated/api/gitlab-sync/job/${currentJobId}/`)
         .then(response => response.json())
         .then(data => {
+            console.log('[GitLabSync] Job status:', data);
             if (data.success) {
                 updateProgress(data);
 
@@ -485,10 +491,12 @@ function fetchJobStatus() {
                         showCompletionMessage('error', 'Sync failed: ' + data.error_messages.join(', '));
                     }
                 }
+            } else {
+                console.error('[GitLabSync] Job status fetch failed:', data);
             }
         })
         .catch(error => {
-            console.error('Error fetching job status:', error);
+            console.error('[GitLabSync] Error fetching job status:', error);
         });
 }
 
