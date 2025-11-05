@@ -67,12 +67,21 @@ def _sync_events_background(
             f"📥 About to fetch events from project {project.path_with_namespace} (project {proj_idx}/{project_count})...",
         )
 
+        # Calculate pagination: if max_events < 100, use max_events as per_page
+        # Otherwise use 100 per page and calculate max_pages
+        if max_events <= 100:
+            per_page = max_events
+            max_pages = 1
+        else:
+            per_page = 100
+            max_pages = (max_events + 99) // 100  # Ceiling division
+
         events, error = handle_gitlab_api_errors(
             func=lambda: [
                 e.asdict()
                 for e in git_lab_client.projects.get(id=project.id, lazy=True)
-                .events.list(per_page=100, page=1, max_pages=max(1, max_events // 100))
-            ],
+                .events.list(per_page=per_page, max_pages=max_pages)
+            ][:max_events],  # Slice to exact limit
             entity_name=f"Events for project {project.path_with_namespace}",
             max_retries=3,
         )
