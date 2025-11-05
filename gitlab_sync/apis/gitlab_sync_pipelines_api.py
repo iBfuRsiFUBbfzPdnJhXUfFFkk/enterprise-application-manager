@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import cast
 
 from django.db.models import QuerySet
@@ -5,6 +6,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from gitlab import Gitlab
 from gitlab.v4.objects import Project, ProjectPipeline
 
+from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import (
     convert_and_enforce_utc_timezone,
@@ -49,15 +51,33 @@ def _sync_pipelines_background(
         print(f"[GitLabSync] {sync_result}")
         return
 
+    config = ThisServerConfiguration.current()
+    max_pipelines_per_project = config.coerced_gitlab_sync_max_pipelines_per_project
+    days_back = config.coerced_gitlab_sync_pipelines_days_back
+
+    # Calculate date cutoff for filtering pipelines
+    cutoff_date = datetime.now() - timedelta(days=days_back)
+    updated_after = cutoff_date.strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
     projects: QuerySet[GitLabSyncProject] = cast_query_set(
         typ=GitLabSyncProject,
         val=GitLabSyncProject.objects.all(),
     )
 
     project_count = projects.count()
-    sync_result.add_log(f"Fetching pipelines from {project_count} projects...")
+    sync_result.add_log(
+        f"Fetching pipelines from {project_count} projects "
+        f"(max {max_pipelines_per_project} per project, last {days_back} days)..."
+    )
 
     all_pipelines: list[dict] = []
+
+    # Update query params to limit pipelines per project and filter by date
+    limited_query_parameters = {
+        **query_parameters,
+        "per_page": max_pipelines_per_project,
+        "updated_after": updated_after,
+    }
 
     for proj_idx, project in enumerate(projects, 1):
         pipelines, error = handle_gitlab_api_errors(
@@ -66,7 +86,7 @@ def _sync_pipelines_background(
                 for p in cast(
                     list[ProjectPipeline],
                     git_lab_client.projects.get(id=project.id, lazy=True)
-                    .pipelines.list(**query_parameters),
+                    .pipelines.list(**limited_query_parameters),
                 )
             ],
             entity_name=f"Pipelines for project {project.path_with_namespace}",

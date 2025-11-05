@@ -85,7 +85,7 @@
     </div>
     {% endif %}
 
-    <div class="mb-6">
+    <div class="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div class="flex items-start">
                 <svg class="w-5 h-5 text-blue-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,6 +98,25 @@
                         <li>Sync Projects - Fetches projects from all synced groups</li>
                         <li>Sync Pipelines - Fetches pipelines from all synced projects</li>
                     </ol>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-purple-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                </svg>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-purple-900">Active Sync Limits:</p>
+                    <ul class="text-sm text-purple-800 mt-1 space-y-1">
+                        <li>Groups: Max depth {{ sync_limits.max_group_depth }} levels</li>
+                        <li>Projects: Max {{ sync_limits.max_projects_per_group }} per group</li>
+                        <li>Pipelines: Last {{ sync_limits.pipelines_days_back }} days, max {{ sync_limits.max_pipelines_per_project }} per project</li>
+                    </ul>
+                    <a href="{% url 'server_configuration' %}" class="text-xs text-purple-700 hover:text-purple-900 underline mt-2 inline-block">
+                        Configure limits
+                    </a>
                 </div>
             </div>
         </div>

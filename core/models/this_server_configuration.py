@@ -27,6 +27,10 @@ class ThisServerConfiguration(
     connection_git_lab_top_level_group_id: str | None = create_generic_varchar()
     connection_google_maps_api_key: Secret | None = create_generic_fk(to=Secret, related_name='server_config_google_maps')
     connection_chatgpt_api_key: Secret | None = create_generic_fk(to=Secret, related_name='server_config_chatgpt')
+    gitlab_sync_max_group_depth: int | None = create_generic_integer()
+    gitlab_sync_max_projects_per_group: int | None = create_generic_integer()
+    gitlab_sync_pipelines_days_back: int | None = create_generic_integer()
+    gitlab_sync_max_pipelines_per_project: int | None = create_generic_integer()
     kpi_developers_to_exclude = create_generic_m2m(to='Person')
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
@@ -77,6 +81,26 @@ class ThisServerConfiguration(
     @property
     def coerced_scrum_number_of_weeks_in_a_sprint(self) -> int:
         return self.scrum_number_of_weeks_in_a_sprint or 3
+
+    @property
+    def coerced_gitlab_sync_max_group_depth(self) -> int:
+        """Max depth for recursive group syncing (default: 5 levels)."""
+        return self.gitlab_sync_max_group_depth or 5
+
+    @property
+    def coerced_gitlab_sync_max_projects_per_group(self) -> int:
+        """Max projects to sync per group (default: 100)."""
+        return self.gitlab_sync_max_projects_per_group or 100
+
+    @property
+    def coerced_gitlab_sync_pipelines_days_back(self) -> int:
+        """Only sync pipelines from last X days (default: 30)."""
+        return self.gitlab_sync_pipelines_days_back or 30
+
+    @property
+    def coerced_gitlab_sync_max_pipelines_per_project(self) -> int:
+        """Max pipelines to sync per project (default: 50)."""
+        return self.gitlab_sync_max_pipelines_per_project or 50
 
     @staticmethod
     def current() -> 'ThisServerConfiguration':

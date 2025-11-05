@@ -90,6 +90,56 @@
                     </div>
                 </div>
 
+                <!-- GitLab Sync Limits -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">GitLab Sync Limits</h2>
+                        <p class="mt-1 text-sm text-gray-500">Control depth and scope of GitLab synchronization to prevent long-running syncs</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.gitlab_sync_max_group_depth.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Maximum depth for recursive group syncing (default: 5)">
+                                Max Group Depth
+                            </label>
+                            {{ form.gitlab_sync_max_group_depth }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Levels of subgroups to sync recursively. Default: 5 levels.
+                            </p>
+                            {% if form.gitlab_sync_max_group_depth.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_max_group_depth.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_max_projects_per_group.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Maximum projects to sync per group (default: 100)">
+                                Max Projects Per Group
+                            </label>
+                            {{ form.gitlab_sync_max_projects_per_group }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Limit projects fetched from each group. Default: 100 projects.
+                            </p>
+                            {% if form.gitlab_sync_max_projects_per_group.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_max_projects_per_group.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_pipelines_days_back.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Only sync pipelines updated in the last X days (default: 30)">
+                                Pipelines Days Back
+                            </label>
+                            {{ form.gitlab_sync_pipelines_days_back }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Only sync pipelines updated in the last X days. Default: 30 days.
+                            </p>
+                            {% if form.gitlab_sync_pipelines_days_back.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_pipelines_days_back.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_max_pipelines_per_project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Maximum pipelines to sync per project (default: 50)">
+                                Max Pipelines Per Project
+                            </label>
+                            {{ form.gitlab_sync_max_pipelines_per_project }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Limit pipelines fetched from each project. Default: 50 pipelines.
+                            </p>
+                            {% if form.gitlab_sync_max_pipelines_per_project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_max_pipelines_per_project.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Google Maps Integration -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">

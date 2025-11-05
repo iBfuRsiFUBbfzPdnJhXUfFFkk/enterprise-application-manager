@@ -86,6 +86,13 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         and config.connection_git_lab_top_level_group_id
     )
 
+    sync_limits = {
+        "max_group_depth": config.coerced_gitlab_sync_max_group_depth,
+        "max_projects_per_group": config.coerced_gitlab_sync_max_projects_per_group,
+        "pipelines_days_back": config.coerced_gitlab_sync_pipelines_days_back,
+        "max_pipelines_per_project": config.coerced_gitlab_sync_max_pipelines_per_project,
+    }
+
     context = {
         "stats": stats,
         "recent_projects": recent_projects,
@@ -97,6 +104,7 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         "gitlab_configured": gitlab_configured,
         "gitlab_hostname": config.connection_git_lab_hostname,
         "gitlab_group_id": config.connection_git_lab_top_level_group_id,
+        "sync_limits": sync_limits,
     }
 
     return base_render(

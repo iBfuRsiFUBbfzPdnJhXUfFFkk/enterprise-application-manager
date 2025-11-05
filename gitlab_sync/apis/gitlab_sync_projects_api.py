@@ -5,6 +5,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from gitlab import Gitlab
 from gitlab.v4.objects import Group, GroupProject
 
+from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.convert_and_enforce_utc_timezone import (
     convert_and_enforce_utc_timezone,
@@ -60,17 +61,25 @@ def _sync_projects_background(
         print(f"[GitLabSync] {sync_result}")
         return
 
+    config = ThisServerConfiguration.current()
+    max_projects_per_group = config.coerced_gitlab_sync_max_projects_per_group
+
     group_count = git_lab_groups.count()
-    sync_result.add_log(f"Fetching projects from {group_count} groups...")
+    sync_result.add_log(
+        f"Fetching projects from {group_count} groups (max {max_projects_per_group} per group)..."
+    )
 
     all_projects: set[GroupProject] = set()
+
+    # Update query params to limit projects per group
+    limited_query_parameters = {**query_parameters, "per_page": max_projects_per_group}
 
     for idx, git_lab_group in enumerate(git_lab_groups, 1):
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupProject],
                 git_lab_client.groups.get(id=git_lab_group.id).projects.list(
-                    **query_parameters
+                    **limited_query_parameters
                 ),
             ),
             entity_name=f"Projects for group {git_lab_group.full_path}",

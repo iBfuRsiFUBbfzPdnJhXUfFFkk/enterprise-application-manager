@@ -27,6 +27,8 @@ def recurse_groups(
     git_lab_client: Gitlab | None = None,
     parent_group: Group | None = None,
     query_parameters: GitLabApiCommonQueryParameters | None = None,
+    current_depth: int = 0,
+    max_depth: int = 5,
 ) -> set[Group]:
     """
     Recursively fetch all subgroups from a parent group.
@@ -36,6 +38,8 @@ def recurse_groups(
         git_lab_client: GitLab API client
         parent_group: Parent group to fetch subgroups from
         query_parameters: Query parameters for API calls
+        current_depth: Current recursion depth (default: 0)
+        max_depth: Maximum recursion depth (default: 5)
 
     Returns:
         Set of all groups (parent + all subgroups)
@@ -45,6 +49,8 @@ def recurse_groups(
     if git_lab_client is None:
         return all_groups
     if parent_group is None:
+        return all_groups
+    if current_depth >= max_depth:
         return all_groups
 
     subgroups, error = handle_gitlab_api_errors(
@@ -75,6 +81,8 @@ def recurse_groups(
             git_lab_client=git_lab_client,
             parent_group=child_group,
             query_parameters=query_parameters,
+            current_depth=current_depth + 1,
+            max_depth=max_depth,
         )
 
     return all_groups
@@ -133,12 +141,17 @@ def _sync_groups_background(
         print(f"[GitLabSync] {sync_result}")
         return
 
-    sync_result.add_log("✓ Fetched top-level group, recursing subgroups...")
+    max_depth = config.coerced_gitlab_sync_max_group_depth
+    sync_result.add_log(
+        f"✓ Fetched top-level group, recursing subgroups (max depth: {max_depth})..."
+    )
     all_groups: set[Group] = recurse_groups(
         all_groups={group_parent},
         git_lab_client=git_lab_client,
         parent_group=group_parent,
         query_parameters=query_parameters,
+        current_depth=0,
+        max_depth=max_depth,
     )
 
     group_dicts: list[dict] = [group.asdict() for group in list(all_groups)]
