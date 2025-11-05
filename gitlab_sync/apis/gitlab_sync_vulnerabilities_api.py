@@ -75,7 +75,7 @@ def _sync_vulnerabilities_background(
         )
 
         if error:
-            # Check if this is a 403 Forbidden error or feature not available - if so, just log and continue
+            # Check if this is a 403 Forbidden error, feature not available, or attribute error - if so, just log and continue
             error_str = str(error).lower()
             if (
                 "403" in error_str
@@ -85,6 +85,9 @@ def _sync_vulnerabilities_background(
                 or "404" in error_str
                 or "not found" in error_str
                 or "ultimate" in error_str
+                or "no attribute" in error_str
+                or "has no attribute 'vulnerabilities'" in error_str
+                or "attributeerror" in error_str
             ):
                 sync_result.add_log(
                     f"⚠️ Vulnerabilities not available for project {project.path_with_namespace} (may require GitLab EE Ultimate) - skipping"
