@@ -128,16 +128,16 @@ def _sync_merge_requests_background(
                 )
                 sync_result.add_log(f"✓ Database get_or_create succeeded for merge request {mr_id} (created={created})")
 
-                # Check if we need to update (compare updated_at from GitLab with our last_synced_at)
+                # Check if we need to update (compare updated_at from GitLab with our stored updated_at)
                 mr_updated_at = convert_and_enforce_utc_timezone(
                     datetime_string=mr_dict.get("updated_at")
                 )
 
                 needs_update = created or (
-                    merge_request.last_synced_at is None
+                    merge_request.updated_at is None
                     or (
                         mr_updated_at
-                        and mr_updated_at > merge_request.last_synced_at
+                        and mr_updated_at > merge_request.updated_at
                     )
                 )
 
@@ -228,7 +228,6 @@ def _sync_merge_requests_background(
                 merge_request.prepared_at = convert_and_enforce_utc_timezone(
                     datetime_string=mr_dict.get("prepared_at")
                 )
-                merge_request.last_synced_at = timezone.now()
 
                 sync_result.add_log(f"💾 About to save merge request {mr_id} to database...")
                 merge_request.save()

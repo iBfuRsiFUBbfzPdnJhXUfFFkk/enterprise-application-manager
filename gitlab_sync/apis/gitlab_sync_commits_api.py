@@ -144,22 +144,10 @@ def _sync_commits_background(
                 )
                 sync_result.add_log(f"✓ Database get_or_create succeeded for commit {commit_sha[:8]} (created={created})")
 
-                # Check if we need to update (commits rarely change, but we'll check created_at)
-                commit_created_at = convert_and_enforce_utc_timezone(
-                    datetime_string=commit_dict.get("created_at")
-                )
-
-                needs_update = created or (
-                    commit.last_synced_at is None
-                    or (
-                        commit_created_at
-                        and commit_created_at > commit.last_synced_at
-                    )
-                )
-
-                if not needs_update:
+                # Commits don't change once created, so skip if already exists
+                if not created:
                     sync_result.add_skip()
-                    sync_result.add_log(f"⊘ Skipped unchanged commit {commit_sha[:8]}")
+                    sync_result.add_log(f"⊘ Skipped existing commit {commit_sha[:8]}")
                     continue
 
                 # Update commit fields
@@ -189,14 +177,15 @@ def _sync_commits_background(
                     commit.deletions = stats.get("deletions")
                     commit.total_changes = stats.get("total")
 
-                commit.created_at = commit_created_at
+                commit.created_at = convert_and_enforce_utc_timezone(
+                    datetime_string=commit_dict.get("created_at")
+                )
                 commit.authored_date = convert_and_enforce_utc_timezone(
                     datetime_string=commit_dict.get("authored_date")
                 )
                 commit.committed_date = convert_and_enforce_utc_timezone(
                     datetime_string=commit_dict.get("committed_date")
                 )
-                commit.last_synced_at = timezone.now()
 
                 sync_result.add_log(f"💾 About to save commit {commit_sha[:8]} to database...")
                 commit.save()

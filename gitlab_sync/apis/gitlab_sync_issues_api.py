@@ -128,16 +128,16 @@ def _sync_issues_background(
                 )
                 sync_result.add_log(f"✓ Database get_or_create succeeded for issue {issue_id} (created={created})")
 
-                # Check if we need to update (compare updated_at from GitLab with our last_synced_at)
+                # Check if we need to update (compare updated_at from GitLab with our stored updated_at)
                 issue_updated_at = convert_and_enforce_utc_timezone(
                     datetime_string=issue_dict.get("updated_at")
                 )
 
                 needs_update = created or (
-                    issue.last_synced_at is None
+                    issue.updated_at is None
                     or (
                         issue_updated_at
-                        and issue_updated_at > issue.last_synced_at
+                        and issue_updated_at > issue.updated_at
                     )
                 )
 
@@ -204,7 +204,6 @@ def _sync_issues_background(
                 issue.closed_at = convert_and_enforce_utc_timezone(
                     datetime_string=issue_dict.get("closed_at")
                 )
-                issue.last_synced_at = timezone.now()
 
                 sync_result.add_log(f"💾 About to save issue {issue_id} to database...")
                 issue.save()
