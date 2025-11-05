@@ -61,20 +61,23 @@ def _sync_projects_background(
         print(f"[GitLabSync] {sync_result}")
         return
 
+    from datetime import datetime
+
     config = ThisServerConfiguration.current()
     max_projects_per_group = config.coerced_gitlab_sync_max_projects_per_group
 
     group_count = git_lab_groups.count()
     sync_result.add_log(
-        f"Fetching projects from {group_count} groups (max {max_projects_per_group} per group)..."
+        f"Syncing projects from {group_count} groups incrementally (max {max_projects_per_group} per group)..."
     )
-
-    all_projects: set[GroupProject] = set()
 
     # Update query params to limit projects per group
     limited_query_parameters = {**query_parameters, "per_page": max_projects_per_group}
 
-    for idx, git_lab_group in enumerate(git_lab_groups, 1):
+    processed_count = 0
+    estimated_total = group_count * 10  # Rough estimate
+
+    for group_idx, git_lab_group in enumerate(git_lab_groups, 1):
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupProject],
@@ -87,91 +90,119 @@ def _sync_projects_background(
         )
 
         if error:
-            sync_result.add_log(f"❌ Error fetching projects for {git_lab_group.full_path}: {error}")
+            sync_result.add_log(
+                f"❌ Error fetching projects for {git_lab_group.full_path}: {error}"
+            )
             sync_result.add_failure(error)
             continue
 
-        if projects:
-            all_projects.update(projects)
-            sync_result.add_log(
-                f"✓ Fetched {len(projects)} projects from {git_lab_group.full_path} ({idx}/{group_count})"
-            )
-
-    total_projects = len(all_projects)
-    sync_result.add_log(f"✓ Found {total_projects} unique projects to sync")
-    project_dicts: list[dict] = [project.asdict() for project in list(all_projects)]
-    sync_result.update_progress(0, total_projects)
-
-    for proj_idx, project_dict in enumerate(project_dicts, 1):
-        project_id: int | None = project_dict.get("id")
-        if project_id is None:
-            sync_result.add_skip()
+        if not projects:
             continue
 
-        try:
-            git_lab_project, created = GitLabSyncProject.objects.get_or_create(
-                id=project_id
-            )
+        # Process each project immediately
+        for project in projects:
+            processed_count += 1
+            project_dict = project.asdict()
+            project_id: int | None = project_dict.get("id")
 
-            git_lab_project.avatar_url = project_dict.get("avatar_url")
-            git_lab_project.container_registry_image_prefix = project_dict.get(
-                "container_registry_image_prefix"
-            )
-            git_lab_project.default_branch = project_dict.get("default_branch") or "main"
-            git_lab_project.description = project_dict.get("description")
-            git_lab_project.http_url_to_repo = project_dict.get("http_url_to_repo")
-            git_lab_project.name = project_dict.get("name")
-            git_lab_project.name_with_namespace = project_dict.get(
-                "name_with_namespace"
-            )
-            git_lab_project.open_issues_count = project_dict.get("open_issues_count") or 0
-            git_lab_project.path = project_dict.get("path")
-            git_lab_project.path_with_namespace = project_dict.get(
-                "path_with_namespace"
-            )
-            git_lab_project.readme_url = project_dict.get("readme_url")
-            git_lab_project.ssh_url_to_repo = project_dict.get("ssh_url_to_repo")
-            git_lab_project.web_url = project_dict.get("web_url")
-            git_lab_project.visibility = project_dict.get("visibility")
-            git_lab_project.archived = project_dict.get("archived")
-            git_lab_project.star_count = project_dict.get("star_count") or 0
-            git_lab_project.forks_count = project_dict.get("forks_count") or 0
+            if project_id is None:
+                sync_result.add_skip()
+                continue
 
-            git_lab_project.created_at = convert_and_enforce_utc_timezone(
-                datetime_string=project_dict.get("created_at")
-            )
-            git_lab_project.last_activity_at = convert_and_enforce_utc_timezone(
-                datetime_string=project_dict.get("last_activity_at")
-            )
-            git_lab_project.updated_at = convert_and_enforce_utc_timezone(
-                datetime_string=project_dict.get("updated_at")
-            )
+            try:
+                git_lab_project, created = GitLabSyncProject.objects.get_or_create(
+                    id=project_id
+                )
 
-            namespace = project_dict.get("namespace")
-            if namespace:
-                namespace_id = namespace.get("id")
-                namespace_kind = namespace.get("kind")
-                if namespace_kind == "group":
-                    group = GitLabSyncGroup.objects.filter(id=namespace_id).first()
-                    if group:
-                        git_lab_project.group = group
+                # Check if we need to update (compare updated_at from GitLab with our last_synced_at)
+                project_updated_at = convert_and_enforce_utc_timezone(
+                    datetime_string=project_dict.get("updated_at")
+                )
 
-            git_lab_project.save()
-            sync_result.add_success()
-            sync_result.update_progress(
-                proj_idx,
-                total_projects,
-                f"✓ Synced project {git_lab_project.name_with_namespace}",
-            )
+                needs_update = created or (
+                    git_lab_project.last_synced_at is None
+                    or (
+                        project_updated_at
+                        and project_updated_at > git_lab_project.last_synced_at
+                    )
+                )
 
-        except Exception as error:
-            error_msg = f"Failed to save project {project_id}: {str(error)}"
-            sync_result.add_failure(error_msg)
-            sync_result.add_log(f"❌ {error_msg}")
-            continue
+                if not needs_update:
+                    sync_result.add_skip()
+                    sync_result.update_progress(
+                        processed_count,
+                        estimated_total,
+                        f"⊘ Skipped unchanged project {project_dict.get('path_with_namespace')}",
+                    )
+                    continue
+
+                # Update project fields
+                git_lab_project.avatar_url = project_dict.get("avatar_url")
+                git_lab_project.container_registry_image_prefix = project_dict.get(
+                    "container_registry_image_prefix"
+                )
+                git_lab_project.default_branch = (
+                    project_dict.get("default_branch") or "main"
+                )
+                git_lab_project.description = project_dict.get("description")
+                git_lab_project.http_url_to_repo = project_dict.get("http_url_to_repo")
+                git_lab_project.name = project_dict.get("name")
+                git_lab_project.name_with_namespace = project_dict.get(
+                    "name_with_namespace"
+                )
+                git_lab_project.open_issues_count = (
+                    project_dict.get("open_issues_count") or 0
+                )
+                git_lab_project.path = project_dict.get("path")
+                git_lab_project.path_with_namespace = project_dict.get(
+                    "path_with_namespace"
+                )
+                git_lab_project.readme_url = project_dict.get("readme_url")
+                git_lab_project.ssh_url_to_repo = project_dict.get("ssh_url_to_repo")
+                git_lab_project.web_url = project_dict.get("web_url")
+                git_lab_project.visibility = project_dict.get("visibility")
+                git_lab_project.archived = project_dict.get("archived")
+                git_lab_project.star_count = project_dict.get("star_count") or 0
+                git_lab_project.forks_count = project_dict.get("forks_count") or 0
+
+                git_lab_project.created_at = convert_and_enforce_utc_timezone(
+                    datetime_string=project_dict.get("created_at")
+                )
+                git_lab_project.last_activity_at = convert_and_enforce_utc_timezone(
+                    datetime_string=project_dict.get("last_activity_at")
+                )
+                git_lab_project.updated_at = project_updated_at
+                git_lab_project.last_synced_at = datetime.now()
+
+                namespace = project_dict.get("namespace")
+                if namespace:
+                    namespace_id = namespace.get("id")
+                    namespace_kind = namespace.get("kind")
+                    if namespace_kind == "group":
+                        group = GitLabSyncGroup.objects.filter(id=namespace_id).first()
+                        if group:
+                            git_lab_project.group = group
+
+                git_lab_project.save()
+                sync_result.add_success()
+                sync_result.update_progress(
+                    processed_count,
+                    estimated_total,
+                    f"✓ Synced project {git_lab_project.name_with_namespace}",
+                )
+
+            except Exception as error:
+                error_msg = f"Failed to save project {project_id}: {str(error)}"
+                sync_result.add_failure(error_msg)
+                sync_result.add_log(f"❌ {error_msg}")
+                continue
+
+        # Update estimate based on actual projects found
+        estimated_total = max(estimated_total, processed_count + (group_count - group_idx) * 10)
 
     sync_result.add_log(
-        f"✓ Sync complete: {sync_result.synced_count} synced, {sync_result.failed_count} failed"
+        f"✓ Sync complete: {sync_result.synced_count} synced, "
+        f"{sync_result.skipped_count} skipped, {sync_result.failed_count} failed"
     )
     sync_result.finish()
     print(f"[GitLabSync] {sync_result}")
