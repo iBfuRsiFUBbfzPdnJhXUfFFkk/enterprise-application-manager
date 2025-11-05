@@ -99,8 +99,11 @@ def handle_gitlab_api_errors(
             continue
 
         except Exception as error:
+            import traceback
+            error_trace = traceback.format_exc()
             error_msg = f"Unexpected error for {entity_name}: {str(error)}"
             print(f"[GitLabSync] {error_msg}")
+            print(f"[GitLabSync] Stack trace:\n{error_trace}")
             return None, error_msg
 
     return None, last_error

@@ -196,9 +196,13 @@ def _sync_pipelines_background(
                 )
 
             except Exception as error:
+                import traceback
+                error_trace = traceback.format_exc()
                 error_msg = f"Failed to save pipeline {pipeline_id}: {str(error)}"
                 sync_result.add_failure(error_msg)
                 sync_result.add_log(f"❌ {error_msg}")
+                print(f"[GitLabSync] {error_msg}")
+                print(f"[GitLabSync] Stack trace:\n{error_trace}")
                 continue
 
         # Update estimate based on actual pipelines found

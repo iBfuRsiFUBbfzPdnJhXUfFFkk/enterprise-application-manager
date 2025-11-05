@@ -58,13 +58,55 @@ def run_sync_in_background(
             print(f"[RunSync] Job {job_tracker.id} failed with error: {error}")
             import traceback
 
+            error_trace = traceback.format_exc()
             traceback.print_exc()
 
-            job_tracker.refresh_from_db()
-            job_tracker.status = "failed"
-            job_tracker.error_messages = [str(error)]
-            job_tracker.end_time = datetime.now()
-            job_tracker.save()
+            try:
+                job_tracker.refresh_from_db()
+                job_tracker.status = "failed"
+
+                # Add detailed error information to logs
+                error_timestamp = datetime.now().strftime("%H:%M:%S")
+                if not job_tracker.detailed_logs:
+                    job_tracker.detailed_logs = []
+                job_tracker.detailed_logs.append(
+                    f"[{error_timestamp}] ❌ Critical error: {str(error)}"
+                )
+                job_tracker.detailed_logs.append(
+                    f"[{error_timestamp}] Stack trace: {error_trace}"
+                )
+
+                if not job_tracker.error_messages:
+                    job_tracker.error_messages = []
+                job_tracker.error_messages.append(str(error))
+                job_tracker.end_time = datetime.now()
+                job_tracker.save()
+                print(f"[RunSync] Job {job_tracker.id} marked as failed")
+            except Exception as update_error:
+                print(f"[RunSync] CRITICAL: Failed to update job tracker on error: {update_error}")
+                traceback.print_exc()
+
+        finally:
+            # Final safety net - ensure job is never left in "running" state
+            try:
+                job_tracker.refresh_from_db()
+                if job_tracker.status == "running":
+                    print(f"[RunSync] WARNING: Job {job_tracker.id} still running after completion, forcing failure state")
+                    job_tracker.status = "failed"
+                    error_timestamp = datetime.now().strftime("%H:%M:%S")
+                    if not job_tracker.detailed_logs:
+                        job_tracker.detailed_logs = []
+                    job_tracker.detailed_logs.append(
+                        f"[{error_timestamp}] ⚠️ Job did not complete normally - forced to failed state"
+                    )
+                    if not job_tracker.error_messages:
+                        job_tracker.error_messages = []
+                    job_tracker.error_messages.append("Job did not update status properly - possible permission or database error")
+                    job_tracker.end_time = datetime.now()
+                    job_tracker.save()
+            except Exception as final_error:
+                print(f"[RunSync] CRITICAL: Failed final safety update for job {job_tracker.id}: {final_error}")
+                traceback.print_exc()
 
     thread = threading.Thread(target=thread_target, daemon=True)
     thread.start()

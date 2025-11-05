@@ -74,7 +74,9 @@ class SyncResult:
                 id=self.job_tracker_id
             ).first()
             if not job_tracker:
-                print(f"[SyncResult] Job tracker {self.job_tracker_id} not found!")
+                error_msg = f"Job tracker {self.job_tracker_id} not found!"
+                print(f"[SyncResult] {error_msg}")
+                self.logs.append(f"[{datetime.now().strftime('%H:%M:%S')}] ❌ {error_msg}")
                 return
 
             job_tracker.current_count = self.current_count
@@ -92,10 +94,16 @@ class SyncResult:
                 f"[SyncResult] Updated job {self.job_tracker_id}: {self.current_count}/{self.estimated_total} ({self._calculate_progress_percent()}%)"
             )
         except Exception as e:
-            print(f"[SyncResult] Error updating job tracker: {e}")
+            error_msg = f"Error updating job tracker: {e}"
+            print(f"[SyncResult] {error_msg}")
             import traceback
-
             traceback.print_exc()
+
+            # Add error to logs so it's visible if we can update later
+            timestamp = datetime.now().strftime("%H:%M:%S")
+            self.logs.append(f"[{timestamp}] ❌ Database update error: {str(e)}")
+            self.errors.append(f"Job tracker update failed: {str(e)}")
+            self.success = False
 
     def _calculate_progress_percent(self) -> int:
         """Calculate progress as a percentage (0-100)."""
