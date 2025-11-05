@@ -169,6 +169,36 @@
                             </p>
                             {% if form.gitlab_sync_max_merge_requests_per_project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_max_merge_requests_per_project.errors.0 }}</p>{% endif %}
                         </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_max_events_per_project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Maximum events to sync per project (default: 100)">
+                                Max Events Per Project
+                            </label>
+                            {{ form.gitlab_sync_max_events_per_project }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Limit events fetched from each project. Default: 100 events.
+                            </p>
+                            {% if form.gitlab_sync_max_events_per_project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_max_events_per_project.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.gitlab_sync_operation_timeout_seconds.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Timeout for GitLab API operations in seconds (default: 300)">
+                                Operation Timeout (seconds)
+                            </label>
+                            {{ form.gitlab_sync_operation_timeout_seconds }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                API operation timeout. Default: 300 seconds (5 minutes).
+                            </p>
+                            {% if form.gitlab_sync_operation_timeout_seconds.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_operation_timeout_seconds.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.gitlab_sync_skip_group_ids.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Comma-separated list of group IDs to skip during sync">
+                                Skip Group IDs
+                            </label>
+                            {{ form.gitlab_sync_skip_group_ids }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Comma-separated list of GitLab group IDs to exclude from sync (e.g., 123,456,789).
+                            </p>
+                            {% if form.gitlab_sync_skip_group_ids.errors %}<p class="mt-2 text-sm text-red-600">{{ form.gitlab_sync_skip_group_ids.errors.0 }}</p>{% endif %}
+                        </div>
                     </div>
                 </div>
 
