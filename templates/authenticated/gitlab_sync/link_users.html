@@ -1,0 +1,299 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block title %}Link GitLab Users to People{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Link GitLab Users to People</h1>
+        <p class="mt-2 text-sm text-gray-600">Drag GitLab users onto People to create links</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Unlinked GitLab Users -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                Unlinked GitLab Users ({{ unlinked_gitlab_users.count }})
+            </h2>
+            <div class="space-y-2 max-h-96 overflow-y-auto">
+                {% for gitlab_user in unlinked_gitlab_users %}
+                <div
+                    class="gitlab-user p-3 border-2 border-gray-300 rounded-lg hover:border-orange-500 cursor-move bg-gray-50 transition-colors"
+                    draggable="true"
+                    data-gitlab-user-id="{{ gitlab_user.id }}"
+                    data-gitlab-username="{{ gitlab_user.username }}"
+                >
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {% if gitlab_user.avatar_url %}
+                            <img src="{{ gitlab_user.avatar_url }}" alt="{{ gitlab_user.username }}" class="w-10 h-10 rounded-full">
+                            {% else %}
+                            <div class="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold">
+                                {{ gitlab_user.username|first|upper }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">{{ gitlab_user.username }}</p>
+                            {% if gitlab_user.name %}
+                            <p class="text-xs text-gray-500">{{ gitlab_user.name }}</p>
+                            {% endif %}
+                            {% if gitlab_user.email %}
+                            <p class="text-xs text-gray-500">{{ gitlab_user.email }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500 italic">All GitLab users are linked!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- People (Drop Targets) -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                People ({{ people.count }})
+            </h2>
+            <div class="mb-3">
+                <input
+                    type="text"
+                    id="person-search"
+                    placeholder="Search people..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+            </div>
+            <div class="space-y-2 max-h-96 overflow-y-auto" id="people-list">
+                {% for person in people %}
+                <div
+                    class="person-drop-zone p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    data-person-id="{{ person.id }}"
+                    data-person-name="{{ person.full_name_for_human }}"
+                >
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold">
+                                {{ person.name_first|first|upper }}{{ person.name_last|first|upper }}
+                            </div>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900">{{ person.full_name_for_human }}</p>
+                            {% if person.job_title %}
+                            <p class="text-xs text-gray-500">{{ person.job_title }}</p>
+                            {% endif %}
+                            {% if person.communication_email %}
+                            <p class="text-xs text-gray-500">{{ person.communication_email }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            Drop here →
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-sm text-gray-500 italic">No active people found.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Linked Users -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+            </svg>
+            Linked Users ({{ linked_gitlab_users.count }})
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="linked-users-list">
+            {% for gitlab_user in linked_gitlab_users %}
+            <div class="border-2 border-green-200 rounded-lg p-4 bg-green-50" data-link-id="{{ gitlab_user.id }}">
+                <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center flex-1">
+                        {% if gitlab_user.avatar_url %}
+                        <img src="{{ gitlab_user.avatar_url }}" alt="{{ gitlab_user.username }}" class="w-8 h-8 rounded-full">
+                        {% else %}
+                        <div class="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold text-xs">
+                            {{ gitlab_user.username|first|upper }}
+                        </div>
+                        {% endif %}
+                        <div class="ml-2">
+                            <p class="text-sm font-semibold text-gray-900">{{ gitlab_user.username }}</p>
+                            {% if gitlab_user.email %}
+                            <p class="text-xs text-gray-500">{{ gitlab_user.email }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <button
+                        onclick="unlinkUser({{ gitlab_user.id }}, '{{ gitlab_user.username }}')"
+                        class="text-red-600 hover:text-red-800 transition-colors"
+                        title="Unlink"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex items-center pt-2 border-t border-green-300">
+                    <svg class="w-4 h-4 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                    <p class="text-sm text-gray-700 font-medium">{{ gitlab_user.person.full_name_for_human }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-sm text-gray-500 italic col-span-full">No linked users yet. Drag GitLab users onto People to create links.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="status-message" class="fixed bottom-4 right-4 hidden"></div>
+</div>
+
+<script>
+// Get CSRF token for API calls
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+const csrftoken = getCookie('csrftoken');
+
+// Show status message
+function showStatus(message, type = 'success') {
+    const statusDiv = document.getElementById('status-message');
+    statusDiv.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    } text-white font-medium`;
+    statusDiv.textContent = message;
+    statusDiv.classList.remove('hidden');
+
+    setTimeout(() => {
+        statusDiv.classList.add('hidden');
+    }, 3000);
+}
+
+// Drag and Drop for GitLab Users
+document.querySelectorAll('.gitlab-user').forEach(user => {
+    user.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('gitlab_user_id', e.target.dataset.gitlabUserId);
+        e.dataTransfer.setData('gitlab_username', e.target.dataset.gitlabUsername);
+        e.target.style.opacity = '0.5';
+    });
+
+    user.addEventListener('dragend', (e) => {
+        e.target.style.opacity = '1';
+    });
+});
+
+// Drop zones for People
+document.querySelectorAll('.person-drop-zone').forEach(zone => {
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.classList.add('border-blue-600', 'bg-blue-100');
+    });
+
+    zone.addEventListener('dragleave', (e) => {
+        zone.classList.remove('border-blue-600', 'bg-blue-100');
+    });
+
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.classList.remove('border-blue-600', 'bg-blue-100');
+
+        const gitlabUserId = e.dataTransfer.getData('gitlab_user_id');
+        const gitlabUsername = e.dataTransfer.getData('gitlab_username');
+        const personId = zone.dataset.personId;
+        const personName = zone.dataset.personName;
+
+        linkUser(gitlabUserId, personId, gitlabUsername, personName);
+    });
+});
+
+// Link user API call
+function linkUser(gitlabUserId, personId, gitlabUsername, personName) {
+    fetch('{% url "gitlab_sync_api_link_user" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            gitlab_user_id: parseInt(gitlabUserId),
+            person_id: parseInt(personId)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showStatus(`Linked ${gitlabUsername} to ${personName}`);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showStatus(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        showStatus(`Error: ${error.message}`, 'error');
+    });
+}
+
+// Unlink user
+function unlinkUser(gitlabUserId, gitlabUsername) {
+    if (!confirm(`Unlink ${gitlabUsername}?`)) return;
+
+    fetch('{% url "gitlab_sync_api_link_user" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({
+            gitlab_user_id: parseInt(gitlabUserId),
+            person_id: null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showStatus(`Unlinked ${gitlabUsername}`);
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showStatus(`Error: ${data.error}`, 'error');
+        }
+    })
+    .catch(error => {
+        showStatus(`Error: ${error.message}`, 'error');
+    });
+}
+
+// Search people
+document.getElementById('person-search').addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.person-drop-zone').forEach(zone => {
+        const personName = zone.dataset.personName.toLowerCase();
+        if (personName.includes(searchTerm)) {
+            zone.style.display = '';
+        } else {
+            zone.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,12 @@
+GITLAB_SYNC_JOB_STATUS_PENDING: str = "pending"
+GITLAB_SYNC_JOB_STATUS_RUNNING: str = "running"
+GITLAB_SYNC_JOB_STATUS_COMPLETED: str = "completed"
+GITLAB_SYNC_JOB_STATUS_FAILED: str = "failed"
+
+# noinspection DuplicatedCode
+GITLAB_SYNC_JOB_STATUS_CHOICES: list[tuple[str, str]] = [
+    (GITLAB_SYNC_JOB_STATUS_PENDING, "Pending"),
+    (GITLAB_SYNC_JOB_STATUS_RUNNING, "Running"),
+    (GITLAB_SYNC_JOB_STATUS_COMPLETED, "Completed"),
+    (GITLAB_SYNC_JOB_STATUS_FAILED, "Failed"),
+]

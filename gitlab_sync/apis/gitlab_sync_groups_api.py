@@ -14,8 +14,12 @@ from git_lab.apis.common.get_common_query_parameters import (
     GitLabApiCommonQueryParameters,
     get_common_query_parameters,
 )
-from gitlab_sync.models import GitLabSyncGroup
-from gitlab_sync.utilities import SyncResult, handle_gitlab_api_errors
+from gitlab_sync.models import GitLabSyncGroup, GitLabSyncJobTracker
+from gitlab_sync.utilities import (
+    SyncResult,
+    handle_gitlab_api_errors,
+    run_sync_in_background,
+)
 
 
 def recurse_groups(
@@ -76,16 +80,14 @@ def recurse_groups(
     return all_groups
 
 
-def gitlab_sync_groups_api(
-    request: HttpRequest,
-) -> JsonResponse | HttpResponse:
-    """
-    Sync GitLab groups from GitLab EE 17.11.6 with improved error handling.
-
-    This is the FIRST endpoint to call - it syncs the top-level group and all
-    subgroups. Projects sync depends on groups existing first.
-    """
-    sync_result = SyncResult(entity_type="GitLabSyncGroup")
+def _sync_groups_background(
+    request: HttpRequest, job_tracker: GitLabSyncJobTracker
+) -> None:
+    """Background function to sync groups with progress tracking."""
+    sync_result = SyncResult(
+        entity_type="GitLabSyncGroup", job_tracker_id=job_tracker.id
+    )
+    sync_result.add_log("Starting groups sync...")
 
     query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(
         request=request
@@ -93,22 +95,27 @@ def gitlab_sync_groups_api(
 
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
+        sync_result.add_log("❌ Failed to get GitLab client - check configuration")
         sync_result.add_failure("Failed to get GitLab client - check configuration")
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
-        return JsonResponse(data=sync_result.to_dict(), safe=False, status=500)
+        return
 
     config = ThisServerConfiguration.current()
     connection_git_lab_top_level_group_id = config.connection_git_lab_top_level_group_id
 
     if not connection_git_lab_top_level_group_id:
+        sync_result.add_log("❌ GitLab top-level group ID not configured")
         sync_result.add_failure(
             "GitLab top-level group ID not configured in ThisServerConfiguration"
         )
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
-        return JsonResponse(data=sync_result.to_dict(), safe=False, status=500)
+        return
 
+    sync_result.add_log(
+        f"Fetching top-level group {connection_git_lab_top_level_group_id}..."
+    )
     group_parent, error = handle_gitlab_api_errors(
         func=lambda: git_lab_client.groups.get(
             id=connection_git_lab_top_level_group_id
@@ -118,13 +125,15 @@ def gitlab_sync_groups_api(
     )
 
     if error or not group_parent:
+        sync_result.add_log(f"❌ Failed to fetch top-level group: {error}")
         sync_result.add_failure(
             f"Failed to fetch top-level group: {error or 'Group not found'}"
         )
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
-        return JsonResponse(data=sync_result.to_dict(), safe=False, status=500)
+        return
 
+    sync_result.add_log("✓ Fetched top-level group, recursing subgroups...")
     all_groups: set[Group] = recurse_groups(
         all_groups={group_parent},
         git_lab_client=git_lab_client,
@@ -133,8 +142,11 @@ def gitlab_sync_groups_api(
     )
 
     group_dicts: list[dict] = [group.asdict() for group in list(all_groups)]
+    total_groups = len(group_dicts)
+    sync_result.add_log(f"✓ Found {total_groups} groups to sync")
+    sync_result.update_progress(0, total_groups)
 
-    for group_dict in group_dicts:
+    for idx, group_dict in enumerate(group_dicts, 1):
         group_id: int | None = group_dict.get("id")
         if group_id is None:
             sync_result.add_skip()
@@ -158,13 +170,36 @@ def gitlab_sync_groups_api(
 
             git_lab_group.save()
             sync_result.add_success()
+            sync_result.update_progress(
+                idx, total_groups, f"✓ Synced group {git_lab_group.full_path}"
+            )
 
         except Exception as error:
             error_msg = f"Failed to save group {group_id}: {str(error)}"
             sync_result.add_failure(error_msg)
+            sync_result.add_log(f"❌ {error_msg}")
             continue
 
+    sync_result.add_log(
+        f"✓ Sync complete: {sync_result.synced_count} synced, {sync_result.failed_count} failed"
+    )
     sync_result.finish()
     print(f"[GitLabSync] {sync_result}")
 
-    return JsonResponse(data=sync_result.to_dict(), safe=False)
+
+def gitlab_sync_groups_api(
+    request: HttpRequest,
+) -> JsonResponse | HttpResponse:
+    """
+    Sync GitLab groups from GitLab EE 17.11.6 with background job tracking.
+
+    This is the FIRST endpoint to call - it syncs the top-level group and all
+    subgroups. Projects sync depends on groups existing first.
+
+    Returns immediately with job_id for progress tracking.
+    """
+    job_tracker = run_sync_in_background("groups", _sync_groups_background, request)
+
+    return JsonResponse(
+        data={"success": True, "job_id": job_tracker.id, "job_type": "groups"}
+    )

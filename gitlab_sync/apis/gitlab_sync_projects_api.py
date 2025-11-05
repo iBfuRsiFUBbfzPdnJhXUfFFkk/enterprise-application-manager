@@ -15,20 +15,22 @@ from git_lab.apis.common.get_common_query_parameters import (
     GitLabApiCommonQueryParameters,
     get_common_query_parameters,
 )
-from gitlab_sync.models import GitLabSyncGroup, GitLabSyncProject
-from gitlab_sync.utilities import SyncResult, handle_gitlab_api_errors
+from gitlab_sync.models import GitLabSyncGroup, GitLabSyncJobTracker, GitLabSyncProject
+from gitlab_sync.utilities import (
+    SyncResult,
+    handle_gitlab_api_errors,
+    run_sync_in_background,
+)
 
 
-def gitlab_sync_projects_api(
-    request: HttpRequest,
-) -> JsonResponse | HttpResponse:
-    """
-    Sync GitLab projects from GitLab EE 17.11.6 with improved error handling.
-
-    This API endpoint fetches projects from all GitLab groups and syncs them
-    to the local database with enhanced error handling and retry logic.
-    """
-    sync_result = SyncResult(entity_type="GitLabSyncProject")
+def _sync_projects_background(
+    request: HttpRequest, job_tracker: GitLabSyncJobTracker
+) -> None:
+    """Background function to sync projects with progress tracking."""
+    sync_result = SyncResult(
+        entity_type="GitLabSyncProject", job_tracker_id=job_tracker.id
+    )
+    sync_result.add_log("Starting projects sync...")
 
     query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(
         request=request
@@ -36,10 +38,11 @@ def gitlab_sync_projects_api(
 
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
+        sync_result.add_log("❌ Failed to get GitLab client")
         sync_result.add_failure("Failed to get GitLab client")
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
-        return generic_500(request=request)
+        return
 
     git_lab_groups: QuerySet[GitLabSyncGroup] = cast_query_set(
         typ=GitLabSyncGroup,
@@ -47,16 +50,22 @@ def gitlab_sync_projects_api(
     )
 
     if not git_lab_groups.exists():
+        sync_result.add_log(
+            "❌ No groups found - please sync groups first using the 'Sync Groups' button"
+        )
         sync_result.add_failure(
             "No groups found - please sync groups first using the 'Sync Groups' button"
         )
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
-        return JsonResponse(data=sync_result.to_dict(), safe=False, status=400)
+        return
+
+    group_count = git_lab_groups.count()
+    sync_result.add_log(f"Fetching projects from {group_count} groups...")
 
     all_projects: set[GroupProject] = set()
 
-    for git_lab_group in git_lab_groups:
+    for idx, git_lab_group in enumerate(git_lab_groups, 1):
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupProject],
@@ -69,15 +78,22 @@ def gitlab_sync_projects_api(
         )
 
         if error:
+            sync_result.add_log(f"❌ Error fetching projects for {git_lab_group.full_path}: {error}")
             sync_result.add_failure(error)
             continue
 
         if projects:
             all_projects.update(projects)
+            sync_result.add_log(
+                f"✓ Fetched {len(projects)} projects from {git_lab_group.full_path} ({idx}/{group_count})"
+            )
 
+    total_projects = len(all_projects)
+    sync_result.add_log(f"✓ Found {total_projects} unique projects to sync")
     project_dicts: list[dict] = [project.asdict() for project in list(all_projects)]
+    sync_result.update_progress(0, total_projects)
 
-    for project_dict in project_dicts:
+    for proj_idx, project_dict in enumerate(project_dicts, 1):
         project_id: int | None = project_dict.get("id")
         if project_id is None:
             sync_result.add_skip()
@@ -133,13 +149,38 @@ def gitlab_sync_projects_api(
 
             git_lab_project.save()
             sync_result.add_success()
+            sync_result.update_progress(
+                proj_idx,
+                total_projects,
+                f"✓ Synced project {git_lab_project.name_with_namespace}",
+            )
 
         except Exception as error:
             error_msg = f"Failed to save project {project_id}: {str(error)}"
             sync_result.add_failure(error_msg)
+            sync_result.add_log(f"❌ {error_msg}")
             continue
 
+    sync_result.add_log(
+        f"✓ Sync complete: {sync_result.synced_count} synced, {sync_result.failed_count} failed"
+    )
     sync_result.finish()
     print(f"[GitLabSync] {sync_result}")
 
-    return JsonResponse(data=sync_result.to_dict(), safe=False)
+
+def gitlab_sync_projects_api(
+    request: HttpRequest,
+) -> JsonResponse | HttpResponse:
+    """
+    Sync GitLab projects from GitLab EE 17.11.6 with background job tracking.
+
+    This API endpoint fetches projects from all GitLab groups and syncs them
+    to the local database with enhanced error handling and retry logic.
+
+    Returns immediately with job_id for progress tracking.
+    """
+    job_tracker = run_sync_in_background("projects", _sync_projects_background, request)
+
+    return JsonResponse(
+        data={"success": True, "job_id": job_tracker.id, "job_type": "projects"}
+    )

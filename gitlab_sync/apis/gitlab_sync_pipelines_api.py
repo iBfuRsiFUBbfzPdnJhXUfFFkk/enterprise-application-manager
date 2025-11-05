@@ -15,20 +15,27 @@ from git_lab.apis.common.get_common_query_parameters import (
     GitLabApiCommonQueryParameters,
     get_common_query_parameters,
 )
-from gitlab_sync.models import GitLabSyncPipeline, GitLabSyncProject, GitLabSyncUser
-from gitlab_sync.utilities import SyncResult, handle_gitlab_api_errors
+from gitlab_sync.models import (
+    GitLabSyncJobTracker,
+    GitLabSyncPipeline,
+    GitLabSyncProject,
+    GitLabSyncUser,
+)
+from gitlab_sync.utilities import (
+    SyncResult,
+    handle_gitlab_api_errors,
+    run_sync_in_background,
+)
 
 
-def gitlab_sync_pipelines_api(
-    request: HttpRequest,
-) -> JsonResponse | HttpResponse:
-    """
-    Sync CI/CD pipelines from GitLab EE 17.11.6 with improved error handling.
-
-    New functionality not present in the original git_lab app.
-    Tracks pipeline executions for build/test/deploy monitoring.
-    """
-    sync_result = SyncResult(entity_type="GitLabSyncPipeline")
+def _sync_pipelines_background(
+    request: HttpRequest, job_tracker: GitLabSyncJobTracker
+) -> None:
+    """Background function to sync pipelines with progress tracking."""
+    sync_result = SyncResult(
+        entity_type="GitLabSyncPipeline", job_tracker_id=job_tracker.id
+    )
+    sync_result.add_log("Starting pipelines sync...")
 
     query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(
         request=request
@@ -36,19 +43,23 @@ def gitlab_sync_pipelines_api(
 
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
+        sync_result.add_log("❌ Failed to get GitLab client")
         sync_result.add_failure("Failed to get GitLab client")
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
-        return generic_500(request=request)
+        return
 
     projects: QuerySet[GitLabSyncProject] = cast_query_set(
         typ=GitLabSyncProject,
         val=GitLabSyncProject.objects.all(),
     )
 
+    project_count = projects.count()
+    sync_result.add_log(f"Fetching pipelines from {project_count} projects...")
+
     all_pipelines: list[dict] = []
 
-    for project in projects:
+    for proj_idx, project in enumerate(projects, 1):
         pipelines, error = handle_gitlab_api_errors(
             func=lambda: [
                 p.asdict()
@@ -63,6 +74,7 @@ def gitlab_sync_pipelines_api(
         )
 
         if error:
+            sync_result.add_log(f"❌ Error fetching pipelines for {project.path_with_namespace}: {error}")
             sync_result.add_failure(error)
             continue
 
@@ -70,8 +82,15 @@ def gitlab_sync_pipelines_api(
             for pipeline in pipelines:
                 pipeline["_project_id"] = project.id
             all_pipelines.extend(pipelines)
+            sync_result.add_log(
+                f"✓ Fetched {len(pipelines)} pipelines from {project.path_with_namespace} ({proj_idx}/{project_count})"
+            )
 
-    for pipeline_dict in all_pipelines:
+    total_pipelines = len(all_pipelines)
+    sync_result.add_log(f"✓ Found {total_pipelines} pipelines to sync")
+    sync_result.update_progress(0, total_pipelines)
+
+    for pip_idx, pipeline_dict in enumerate(all_pipelines, 1):
         pipeline_id: int | None = pipeline_dict.get("id")
         if pipeline_id is None:
             sync_result.add_skip()
@@ -118,13 +137,36 @@ def gitlab_sync_pipelines_api(
 
             pipeline.save()
             sync_result.add_success()
+            sync_result.update_progress(
+                pip_idx, total_pipelines, f"✓ Synced pipeline #{pipeline_id}"
+            )
 
         except Exception as error:
             error_msg = f"Failed to save pipeline {pipeline_id}: {str(error)}"
             sync_result.add_failure(error_msg)
+            sync_result.add_log(f"❌ {error_msg}")
             continue
 
+    sync_result.add_log(
+        f"✓ Sync complete: {sync_result.synced_count} synced, {sync_result.failed_count} failed"
+    )
     sync_result.finish()
     print(f"[GitLabSync] {sync_result}")
 
-    return JsonResponse(data=sync_result.to_dict(), safe=False)
+
+def gitlab_sync_pipelines_api(
+    request: HttpRequest,
+) -> JsonResponse | HttpResponse:
+    """
+    Sync CI/CD pipelines from GitLab EE 17.11.6 with background job tracking.
+
+    New functionality not present in the original git_lab app.
+    Tracks pipeline executions for build/test/deploy monitoring.
+
+    Returns immediately with job_id for progress tracking.
+    """
+    job_tracker = run_sync_in_background("pipelines", _sync_pipelines_background, request)
+
+    return JsonResponse(
+        data={"success": True, "job_id": job_tracker.id, "job_type": "pipelines"}
+    )

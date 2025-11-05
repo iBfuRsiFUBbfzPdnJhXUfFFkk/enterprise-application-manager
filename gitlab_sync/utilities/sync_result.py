@@ -8,7 +8,7 @@ class SyncResult:
     Tracks the result of a GitLab entity sync operation.
 
     Provides detailed statistics about the sync process including
-    success/failure counts and error messages.
+    success/failure counts, error messages, and real-time progress updates.
     """
 
     entity_type: str
@@ -17,8 +17,12 @@ class SyncResult:
     failed_count: int = 0
     skipped_count: int = 0
     errors: list[str] = field(default_factory=list)
+    logs: list[str] = field(default_factory=list)
     start_time: datetime = field(default_factory=datetime.now)
     end_time: datetime | None = None
+    job_tracker_id: int | None = None
+    current_count: int = 0
+    estimated_total: int = 0
 
     def add_success(self) -> None:
         """Increment successful sync count."""
@@ -38,6 +42,60 @@ class SyncResult:
     def finish(self) -> None:
         """Mark sync as finished and record end time."""
         self.end_time = datetime.now()
+        self._update_job_tracker()
+
+    def add_log(self, message: str) -> None:
+        """Add a log message and update job tracker."""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        log_entry = f"[{timestamp}] {message}"
+        self.logs.append(log_entry)
+        self._update_job_tracker()
+
+    def update_progress(
+        self, current: int, total: int, message: str | None = None
+    ) -> None:
+        """Update progress tracking and job tracker."""
+        self.current_count = current
+        self.estimated_total = total
+        if message:
+            self.add_log(message)
+        else:
+            self._update_job_tracker()
+
+    def _update_job_tracker(self) -> None:
+        """Update the database job tracker with current progress."""
+        if not self.job_tracker_id:
+            return
+
+        try:
+            from gitlab_sync.models import GitLabSyncJobTracker
+
+            job_tracker = GitLabSyncJobTracker.objects.filter(
+                id=self.job_tracker_id
+            ).first()
+            if not job_tracker:
+                return
+
+            job_tracker.current_count = self.current_count
+            job_tracker.total_count = self.estimated_total
+            job_tracker.progress_percent = self._calculate_progress_percent()
+            job_tracker.error_messages = self.errors
+            job_tracker.detailed_logs = self.logs
+            job_tracker.end_time = self.end_time
+
+            if self.end_time:
+                job_tracker.status = "failed" if not self.success else "completed"
+
+            job_tracker.save()
+        except Exception:
+            pass
+
+    def _calculate_progress_percent(self) -> int:
+        """Calculate progress as a percentage (0-100)."""
+        if self.estimated_total == 0:
+            return 0
+        percent = int((self.current_count / self.estimated_total) * 100)
+        return min(percent, 100)
 
     @property
     def duration_seconds(self) -> float:
@@ -62,8 +120,13 @@ class SyncResult:
             "total_processed": self.total_processed,
             "duration_seconds": self.duration_seconds,
             "errors": self.errors,
+            "logs": self.logs,
             "start_time": self.start_time.isoformat(),
             "end_time": self.end_time.isoformat() if self.end_time else None,
+            "job_tracker_id": self.job_tracker_id,
+            "current_count": self.current_count,
+            "estimated_total": self.estimated_total,
+            "progress_percent": self._calculate_progress_percent(),
         }
 
     def __str__(self) -> str:

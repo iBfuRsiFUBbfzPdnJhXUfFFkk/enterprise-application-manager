@@ -21,6 +21,9 @@ from gitlab_sync.models.gitlab_sync_epic import GitLabSyncEpic
 from gitlab_sync.models.gitlab_sync_security_report import GitLabSyncSecurityReport
 from gitlab_sync.models.gitlab_sync_vulnerability import GitLabSyncVulnerability
 
+# Internal tracking
+from gitlab_sync.models.gitlab_sync_job_tracker import GitLabSyncJobTracker
+
 __all__ = [
     # Core entities
     "GitLabSyncGroup",
@@ -41,4 +44,6 @@ __all__ = [
     "GitLabSyncEpic",
     "GitLabSyncSecurityReport",
     "GitLabSyncVulnerability",
+    # Internal tracking
+    "GitLabSyncJobTracker",
 ]

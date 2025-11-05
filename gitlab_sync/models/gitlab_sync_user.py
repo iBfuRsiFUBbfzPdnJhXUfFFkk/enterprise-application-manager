@@ -5,6 +5,7 @@ from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.cast_query_set import cast_query_set
 from django_generic_model_fields.create_generic_boolean import create_generic_boolean
 from django_generic_model_fields.create_generic_datetime import create_generic_datetime
+from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabAvatarUrl,
@@ -35,6 +36,7 @@ class GitLabSyncUser(
     username: str | None = create_generic_varchar()
     email: str | None = create_generic_varchar()
     bot: bool | None = create_generic_boolean()
+    person: "Person | None" = create_generic_fk(to="core.Person")
 
     @property
     def commits_authored(self):
