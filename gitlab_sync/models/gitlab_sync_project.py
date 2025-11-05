@@ -36,6 +36,10 @@ class GitLabSyncProject(
     Improved implementation with enhanced repository tracking capabilities.
     """
 
+    application = create_generic_fk(
+        related_name="gitlab_sync_projects",
+        to="core.Application",
+    )
     container_registry_image_prefix: str | None = create_generic_varchar()
     default_branch: str | None = create_generic_varchar()
     group = create_generic_fk(
