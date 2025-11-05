@@ -19,6 +19,7 @@ from git_lab.apis.common.get_common_query_parameters import (
 from gitlab_sync.models import GitLabSyncGroup, GitLabSyncJobTracker, GitLabSyncProject
 from gitlab_sync.utilities import (
     SyncResult,
+    check_job_cancelled,
     handle_gitlab_api_errors,
     run_sync_in_background,
 )
@@ -78,6 +79,13 @@ def _sync_projects_background(
     estimated_total = group_count * 10  # Rough estimate
 
     for group_idx, git_lab_group in enumerate(git_lab_groups, 1):
+        # Check if job was cancelled
+        if check_job_cancelled(sync_result.job_tracker_id):
+            sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
+            sync_result.finish()
+            print(f"[GitLabSync] {sync_result}")
+            return
+
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupProject],
@@ -101,6 +109,13 @@ def _sync_projects_background(
 
         # Process each project immediately
         for project in projects:
+            # Check if job was cancelled
+            if check_job_cancelled(sync_result.job_tracker_id):
+                sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
+                sync_result.finish()
+                print(f"[GitLabSync] {sync_result}")
+                return
+
             processed_count += 1
             project_dict = project.asdict()
             project_id: int | None = project_dict.get("id")

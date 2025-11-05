@@ -31,6 +31,7 @@ class ThisServerConfiguration(
     gitlab_sync_max_projects_per_group: int | None = create_generic_integer()
     gitlab_sync_pipelines_days_back: int | None = create_generic_integer()
     gitlab_sync_max_pipelines_per_project: int | None = create_generic_integer()
+    gitlab_sync_operation_timeout_seconds: int | None = create_generic_integer()
     kpi_developers_to_exclude = create_generic_m2m(to='Person')
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
@@ -101,6 +102,11 @@ class ThisServerConfiguration(
     def coerced_gitlab_sync_max_pipelines_per_project(self) -> int:
         """Max pipelines to sync per project (default: 50)."""
         return self.gitlab_sync_max_pipelines_per_project or 50
+
+    @property
+    def coerced_gitlab_sync_operation_timeout_seconds(self) -> int:
+        """Max seconds to wait for a single sync operation (default: 300 = 5 minutes)."""
+        return self.gitlab_sync_operation_timeout_seconds or 300
 
     @staticmethod
     def current() -> 'ThisServerConfiguration':

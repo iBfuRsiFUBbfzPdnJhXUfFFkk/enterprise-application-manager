@@ -25,6 +25,7 @@ from gitlab_sync.models import (
 )
 from gitlab_sync.utilities import (
     SyncResult,
+    check_job_cancelled,
     handle_gitlab_api_errors,
     run_sync_in_background,
 )
@@ -81,6 +82,13 @@ def _sync_pipelines_background(
     estimated_total = project_count * 5  # Rough estimate
 
     for proj_idx, project in enumerate(projects, 1):
+        # Check if job was cancelled
+        if check_job_cancelled(sync_result.job_tracker_id):
+            sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
+            sync_result.finish()
+            print(f"[GitLabSync] {sync_result}")
+            return
+
         pipelines, error = handle_gitlab_api_errors(
             func=lambda: [
                 p.asdict()
@@ -106,6 +114,13 @@ def _sync_pipelines_background(
 
         # Process each pipeline immediately
         for pipeline_dict in pipelines:
+            # Check if job was cancelled
+            if check_job_cancelled(sync_result.job_tracker_id):
+                sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
+                sync_result.finish()
+                print(f"[GitLabSync] {sync_result}")
+                return
+
             processed_count += 1
             pipeline_id: int | None = pipeline_dict.get("id")
 

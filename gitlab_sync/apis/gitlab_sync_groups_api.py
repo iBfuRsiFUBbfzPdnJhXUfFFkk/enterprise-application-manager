@@ -17,6 +17,7 @@ from git_lab.apis.common.get_common_query_parameters import (
 from gitlab_sync.models import GitLabSyncGroup, GitLabSyncJobTracker
 from gitlab_sync.utilities import (
     SyncResult,
+    check_job_cancelled,
     handle_gitlab_api_errors,
     run_sync_in_background,
 )
@@ -144,6 +145,11 @@ def recurse_groups(
     groups_at_level = 0
 
     for subgroup in subgroups:
+        # Check if job was cancelled
+        if sync_result and check_job_cancelled(sync_result.job_tracker_id):
+            sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
+            return groups_at_level
+
         child_group, error = handle_gitlab_api_errors(
             func=lambda: git_lab_client.groups.get(id=subgroup.id),
             entity_name=f"Group {subgroup.id}",
@@ -282,6 +288,13 @@ def _sync_groups_background(
             sync_result.add_log(
                 f"⊘ Skipped unchanged top-level group {parent_dict.get('full_path')}"
             )
+
+    # Check if job was cancelled before recursing
+    if check_job_cancelled(sync_result.job_tracker_id):
+        sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
+        sync_result.finish()
+        print(f"[GitLabSync] {sync_result}")
+        return
 
     # Recursively process subgroups (they save immediately)
     recurse_groups(
