@@ -60,6 +60,7 @@ from core.urls.urlpatterns_settings import urlpatterns_settings
 from core.urls.urlpatterns_this_api import urlpatterns_this_api
 from core.views import home_view
 from core.views.link.link_short_redirect_view import link_short_redirect_view
+from gitlab_sync.urls import urlpatterns_gitlab_sync
 from kpi.urls import urlpatterns_kpi
 
 urlpatterns_authenticated: list[URLPattern | URLResolver] = [
@@ -126,6 +127,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_this_api,
     *urlpatterns_tool,
     *urlpatterns_vulnerability,
+    path(name="gitlab_sync", route='gitlab-sync/', view=include(arg=urlpatterns_gitlab_sync)),
     path(name="kpi", route='kpi/', view=include(arg=(urlpatterns_kpi, 'kpi'), namespace="kpi")),
     *urlpatterns_api
 ]
