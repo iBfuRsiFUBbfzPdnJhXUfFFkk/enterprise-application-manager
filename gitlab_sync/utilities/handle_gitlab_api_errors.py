@@ -57,6 +57,12 @@ def handle_gitlab_api_errors(
             return None, error_msg
 
         except GitlabGetError as error:
+            # Check for 403 Forbidden - don't retry, return immediately
+            if hasattr(error, "response_code") and error.response_code == 403:
+                error_msg = f"403 Forbidden: Access denied to {entity_name}"
+                print(f"[GitLabSync] {error_msg}")
+                return None, error_msg
+
             error_msg = f"Failed to get {entity_name}: {error.error_message}"
             print(f"[GitLabSync] {error_msg}")
             last_error = error_msg
@@ -71,6 +77,12 @@ def handle_gitlab_api_errors(
             continue
 
         except GitlabListError as error:
+            # Check for 403 Forbidden - don't retry, return immediately
+            if hasattr(error, "response_code") and error.response_code == 403:
+                error_msg = f"403 Forbidden: Access denied to {entity_name}"
+                print(f"[GitLabSync] {error_msg}")
+                return None, error_msg
+
             error_msg = f"Failed to list {entity_name}: {error.error_message}"
             print(f"[GitLabSync] {error_msg}")
             last_error = error_msg
