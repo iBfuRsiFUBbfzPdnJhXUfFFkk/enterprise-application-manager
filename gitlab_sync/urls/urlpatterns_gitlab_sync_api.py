@@ -2,13 +2,19 @@ from django.urls import path
 
 from gitlab_sync.apis import (
     gitlab_sync_cancel_job_api,
+    gitlab_sync_commits_api,
+    gitlab_sync_epics_api,
     gitlab_sync_groups_api,
+    gitlab_sync_issues_api,
     gitlab_sync_job_status_api,
+    gitlab_sync_jobs_api,
     gitlab_sync_link_project_api,
     gitlab_sync_link_user_api,
+    gitlab_sync_merge_requests_api,
     gitlab_sync_pipelines_api,
     gitlab_sync_projects_api,
     gitlab_sync_users_api,
+    gitlab_sync_vulnerabilities_api,
 )
 from gitlab_sync.views import (
     gitlab_sync_dashboard_view,
@@ -60,6 +66,36 @@ urlpatterns_gitlab_sync_api = [
         name="gitlab_sync_api_users",
         route="user/",
         view=gitlab_sync_users_api,
+    ),
+    path(
+        name="gitlab_sync_api_issues",
+        route="issue/",
+        view=gitlab_sync_issues_api,
+    ),
+    path(
+        name="gitlab_sync_api_jobs",
+        route="job-ci/",
+        view=gitlab_sync_jobs_api,
+    ),
+    path(
+        name="gitlab_sync_api_merge_requests",
+        route="merge-request/",
+        view=gitlab_sync_merge_requests_api,
+    ),
+    path(
+        name="gitlab_sync_api_commits",
+        route="commit/",
+        view=gitlab_sync_commits_api,
+    ),
+    path(
+        name="gitlab_sync_api_epics",
+        route="epic/",
+        view=gitlab_sync_epics_api,
+    ),
+    path(
+        name="gitlab_sync_api_vulnerabilities",
+        route="vulnerability/",
+        view=gitlab_sync_vulnerabilities_api,
     ),
     path(
         name="gitlab_sync_api_link_user",
