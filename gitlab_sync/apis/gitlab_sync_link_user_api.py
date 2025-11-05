@@ -1,11 +1,15 @@
 import json
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from core.models.person import Person
 from gitlab_sync.models import GitLabSyncUser
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
 def gitlab_sync_link_user_api(
     request: HttpRequest,
 ) -> JsonResponse | HttpResponse:
@@ -18,11 +22,6 @@ def gitlab_sync_link_user_api(
         "person_id": int | null (null to unlink)
     }
     """
-    if request.method != "POST":
-        return JsonResponse(
-            data={"success": False, "error": "Method not allowed"}, status=405
-        )
-
     try:
         data = json.loads(request.body)
         gitlab_user_id = data.get("gitlab_user_id")
