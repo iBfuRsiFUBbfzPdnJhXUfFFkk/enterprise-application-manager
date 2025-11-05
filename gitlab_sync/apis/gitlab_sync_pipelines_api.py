@@ -89,6 +89,8 @@ def _sync_pipelines_background(
             print(f"[GitLabSync] {sync_result}")
             return
 
+        sync_result.add_log(f"📥 About to fetch pipelines from project {project.path_with_namespace} (project {proj_idx}/{project_count})...")
+
         pipelines, error = handle_gitlab_api_errors(
             func=lambda: [
                 p.asdict()
@@ -110,7 +112,10 @@ def _sync_pipelines_background(
             continue
 
         if not pipelines:
+            sync_result.add_log(f"⊘ No pipelines found in project {project.path_with_namespace}")
             continue
+
+        sync_result.add_log(f"✓ Fetched {len(pipelines)} pipelines from {project.path_with_namespace}, about to process...")
 
         # Process each pipeline immediately
         for pipeline_dict in pipelines:
@@ -129,9 +134,11 @@ def _sync_pipelines_background(
                 continue
 
             try:
+                sync_result.add_log(f"💾 About to get_or_create pipeline {pipeline_id} in database...")
                 pipeline, created = GitLabSyncPipeline.objects.get_or_create(
                     id=pipeline_id
                 )
+                sync_result.add_log(f"✓ Database get_or_create succeeded for pipeline {pipeline_id} (created={created})")
 
                 # Check if we need to update (compare updated_at from GitLab with our last_synced_at)
                 pipeline_updated_at = convert_and_enforce_utc_timezone(
@@ -189,7 +196,9 @@ def _sync_pipelines_background(
                 )
                 pipeline.last_synced_at = datetime.now()
 
+                sync_result.add_log(f"💾 About to save pipeline {pipeline_id} to database...")
                 pipeline.save()
+                sync_result.add_log(f"✓ Database save succeeded for pipeline {pipeline_id}")
                 sync_result.add_success()
                 sync_result.update_progress(
                     processed_count, estimated_total, f"✓ Synced pipeline #{pipeline_id}"

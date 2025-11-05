@@ -47,7 +47,9 @@ def process_and_save_group(
 
     try:
         # Get or create the group
+        sync_result.add_log(f"💾 About to get_or_create group {group_id} in database...")
         git_lab_group, created = GitLabSyncGroup.objects.get_or_create(id=group_id)
+        sync_result.add_log(f"✓ Database get_or_create succeeded (created={created})")
 
         # Check if we need to update (new or updated since last sync)
         group_created_at = convert_and_enforce_utc_timezone(
@@ -78,7 +80,9 @@ def process_and_save_group(
         git_lab_group.created_at = group_created_at
         git_lab_group.last_synced_at = datetime.now()
 
+        sync_result.add_log(f"💾 About to save group {group_id} to database...")
         git_lab_group.save()
+        sync_result.add_log(f"✓ Database save succeeded for group {group_id}")
         sync_result.add_success()
         sync_result.update_progress(
             idx, total, f"✓ Synced group {git_lab_group.full_path}"
@@ -154,11 +158,20 @@ def recurse_groups(
             sync_result.add_log("⚠️ Job cancelled by user, stopping sync...")
             return groups_at_level
 
+        if sync_result:
+            sync_result.add_log(f"📥 About to fetch group {subgroup.id} from GitLab API...")
+
         child_group, error = handle_gitlab_api_errors(
             func=lambda: git_lab_client.groups.get(id=subgroup.id),
             entity_name=f"Group {subgroup.id}",
             max_retries=3,
         )
+
+        if sync_result:
+            if error:
+                sync_result.add_log(f"⚠️ Failed to fetch group {subgroup.id}")
+            else:
+                sync_result.add_log(f"✓ Fetched group {subgroup.id}, about to process...")
 
         if error or not child_group:
             continue
@@ -224,7 +237,7 @@ def _sync_groups_background(
         return
 
     sync_result.add_log(
-        f"Fetching top-level group {connection_git_lab_top_level_group_id}..."
+        f"📥 About to fetch top-level group {connection_git_lab_top_level_group_id} from GitLab API..."
     )
     group_parent, error = handle_gitlab_api_errors(
         func=lambda: git_lab_client.groups.get(
@@ -299,6 +312,8 @@ def _sync_groups_background(
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
         return
+
+    sync_result.add_log(f"🔄 About to start recursive subgroup processing (max depth: {max_depth})...")
 
     # Recursively process subgroups (they save immediately)
     recurse_groups(

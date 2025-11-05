@@ -86,6 +86,8 @@ def _sync_projects_background(
             print(f"[GitLabSync] {sync_result}")
             return
 
+        sync_result.add_log(f"📥 About to fetch projects from group {git_lab_group.full_path} (group {group_idx}/{group_count})...")
+
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupProject],
@@ -105,7 +107,10 @@ def _sync_projects_background(
             continue
 
         if not projects:
+            sync_result.add_log(f"⊘ No projects found in group {git_lab_group.full_path}")
             continue
+
+        sync_result.add_log(f"✓ Fetched {len(projects)} projects from {git_lab_group.full_path}, about to process...")
 
         # Process each project immediately
         for project in projects:
@@ -125,9 +130,11 @@ def _sync_projects_background(
                 continue
 
             try:
+                sync_result.add_log(f"💾 About to get_or_create project {project_id} in database...")
                 git_lab_project, created = GitLabSyncProject.objects.get_or_create(
                     id=project_id
                 )
+                sync_result.add_log(f"✓ Database get_or_create succeeded for project {project_id} (created={created})")
 
                 # Check if we need to update (compare updated_at from GitLab with our last_synced_at)
                 project_updated_at = convert_and_enforce_utc_timezone(
@@ -189,6 +196,7 @@ def _sync_projects_background(
                 git_lab_project.updated_at = project_updated_at
                 git_lab_project.last_synced_at = datetime.now()
 
+                sync_result.add_log(f"💾 About to process namespace for project {project_id}...")
                 namespace = project_dict.get("namespace")
                 if namespace:
                     namespace_id = namespace.get("id")
@@ -198,7 +206,9 @@ def _sync_projects_background(
                         if group:
                             git_lab_project.group = group
 
+                sync_result.add_log(f"💾 About to save project {project_id} to database...")
                 git_lab_project.save()
+                sync_result.add_log(f"✓ Database save succeeded for project {project_id}")
                 sync_result.add_success()
                 sync_result.update_progress(
                     processed_count,
