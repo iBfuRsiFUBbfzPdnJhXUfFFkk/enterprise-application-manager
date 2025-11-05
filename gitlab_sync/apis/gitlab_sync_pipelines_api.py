@@ -99,6 +99,14 @@ def _sync_pipelines_background(
         )
 
         if error:
+            # Check if this is a 403 Forbidden error - if so, just log and continue without failing
+            if "403" in str(error) or "Forbidden" in str(error):
+                sync_result.add_log(
+                    f"⚠️ Access denied (403) for pipelines in {project.path_with_namespace} - skipping"
+                )
+                continue
+
+            # For other errors, add as failure
             sync_result.add_log(
                 f"❌ Error fetching pipelines for {project.path_with_namespace}: {error}"
             )
