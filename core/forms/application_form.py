@@ -1,3 +1,5 @@
+from django.forms import SelectMultiple
+
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
 from core.forms.common.generic_choice_field import generic_choice_field
@@ -25,6 +27,27 @@ class ApplicationForm(BaseModelForm):
     person_stakeholders = generic_person_multiple_choice_field(is_stakeholder=True)
     service_providers = generic_multiple_choice_field(queryset=ServiceProvider.objects.all())
     tools = generic_multiple_choice_field(queryset=Tool.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # List of multi-select fields to apply Select2
+        multi_select_fields = [
+            'application_groups',
+            'application_upstream_dependencies',
+            'application_downstream_dependencies',
+            'service_providers',
+            'tools',
+            'person_developers',
+            'person_stakeholders',
+        ]
+
+        # Update all multi-select fields to use SelectMultiple widget with Select2
+        for field_name in multi_select_fields:
+            if field_name in self.fields:
+                field = self.fields[field_name]
+                field.widget = SelectMultiple(attrs={'class': f'select2-{field_name.replace("_", "-")}'})
+                field.widget.choices = field.choices
 
     class Meta(BaseModelFormMeta):
         model = Application
