@@ -79,7 +79,7 @@
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
                             <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold">
-                                {{ person.name_first|first|upper }}{{ person.name_last|first|upper }}
+                                {{ person.name_first|default:"?"|first|upper }}{{ person.name_last|default:"?"|first|upper }}
                             </div>
                         </div>
                         <div class="ml-3 flex-1">
