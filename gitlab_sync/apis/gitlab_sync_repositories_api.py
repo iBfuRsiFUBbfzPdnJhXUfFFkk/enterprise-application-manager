@@ -94,13 +94,11 @@ def _sync_repositories_background(
         try:
             sync_result.add_log(f"💾 About to get_or_create repository for {project.path_with_namespace}...")
             repository, created = GitLabSyncRepository.objects.get_or_create(
-                project=project,
-                defaults={"name": f"{project.name} Repository"}
+                project=project
             )
             sync_result.add_log(f"✓ Database get_or_create succeeded for repository (created={created})")
 
             # Update repository fields
-            repository.name = f"{project.name} Repository"
             repository.default_branch = project_data.get("default_branch")
             repository.http_url_to_repo = project_data.get("http_url_to_repo")
             repository.ssh_url_to_repo = project_data.get("ssh_url_to_repo")
