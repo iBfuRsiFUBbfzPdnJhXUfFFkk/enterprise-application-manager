@@ -23,7 +23,7 @@
     <!-- Search and Filters -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <!-- Search -->
                 <div class="md:col-span-2">
                     <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
@@ -55,6 +55,18 @@
                         <option value="">All Applications</option>
                         <option value="active">Active Only</option>
                         <option value="legacy">Legacy Only</option>
+                    </select>
+                </div>
+
+                <!-- Pipeline Status Filter -->
+                <div>
+                    <label for="pipeline-filter" class="block text-sm font-medium text-gray-700 mb-1">Pipeline</label>
+                    <select id="pipeline-filter"
+                            class="block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        <option value="">All Statuses</option>
+                        <option value="passing">Passing</option>
+                        <option value="failing">Failing</option>
+                        <option value="unknown">Unknown</option>
                     </select>
                 </div>
             </div>
@@ -89,7 +101,8 @@
                  data-name="{{ model.name|lower }}"
                  data-acronym="{{ model.acronym|lower }}"
                  data-platform="{{ model.type_platform_target|default:''|lower }}"
-                 data-legacy="{{ model.is_legacy|yesno:'legacy,active' }}">
+                 data-legacy="{{ model.is_legacy|yesno:'legacy,active' }}"
+                 data-pipeline="{{ model.pipeline_status|default:''|lower }}">
                 <div class="p-6">
                     <!-- Header -->
                     <div class="flex justify-between items-start mb-4">
@@ -197,6 +210,7 @@
                             data-acronym="{{ model.acronym|lower }}"
                             data-platform="{{ model.type_platform_target|default:''|lower }}"
                             data-legacy="{{ model.is_legacy|yesno:'legacy,active' }}"
+                            data-pipeline="{{ model.pipeline_status|default:''|lower }}"
                             ondblclick='window.location.href = "{% url 'application_detail' model_id=model.id %}"'>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ model.acronym }}</div>
@@ -358,6 +372,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('search-input').addEventListener('input', filterApplications);
     document.getElementById('platform-filter').addEventListener('change', filterApplications);
     document.getElementById('legacy-filter').addEventListener('change', filterApplications);
+    document.getElementById('pipeline-filter').addEventListener('change', filterApplications);
 
     // Initial filter
     filterApplications();
@@ -395,6 +410,7 @@ function filterApplications() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const platformFilter = document.getElementById('platform-filter').value.toLowerCase();
     const legacyFilter = document.getElementById('legacy-filter').value;
+    const pipelineFilter = document.getElementById('pipeline-filter').value.toLowerCase();
 
     const cards = document.querySelectorAll('.app-card');
     const rows = document.querySelectorAll('.app-row');
@@ -407,6 +423,7 @@ function filterApplications() {
         const acronym = item.dataset.acronym || '';
         const platform = item.dataset.platform || '';
         const legacy = item.dataset.legacy || '';
+        const pipeline = item.dataset.pipeline || '';
 
         const matchesSearch = !searchTerm ||
                              name.includes(searchTerm) ||
@@ -417,7 +434,9 @@ function filterApplications() {
 
         const matchesLegacy = !legacyFilter || legacy === legacyFilter;
 
-        if (matchesSearch && matchesPlatform && matchesLegacy) {
+        const matchesPipeline = !pipelineFilter || pipeline === pipelineFilter;
+
+        if (matchesSearch && matchesPlatform && matchesLegacy && matchesPipeline) {
             item.style.display = '';
             visibleCount++;
         } else {

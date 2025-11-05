@@ -1,0 +1,277 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Centralized Logging Dashboard</h1>
+                    <p class="mt-1 text-sm text-gray-500">Overview of centralized logging implementation status</p>
+                </div>
+                <a href="{% url 'application' %}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Applications
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Total Applications -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Applications</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_count }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implemented -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Implemented</p>
+                        <p class="text-2xl font-bold text-green-600">{{ implemented_count }}</p>
+                        <p class="text-xs text-gray-500">{{ implemented_percentage }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Not Implemented -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Not Implemented</p>
+                        <p class="text-2xl font-bold text-red-600">{{ not_implemented_count }}</p>
+                        <p class="text-xs text-gray-500">{{ not_implemented_percentage }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unknown -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Unknown</p>
+                        <p class="text-2xl font-bold text-gray-600">{{ unknown_count }}</p>
+                        <p class="text-xs text-gray-500">{{ unknown_percentage }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visual Progress Bar -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Centralized Logging Status Distribution</h2>
+            <div class="flex h-8 rounded-lg overflow-hidden">
+                {% if implemented_count > 0 %}
+                <div class="bg-green-500 flex items-center justify-center text-white text-xs font-medium"
+                     style="width: {{ implemented_percentage }}%"
+                     title="Implemented: {{ implemented_count }} ({{ implemented_percentage }}%)">
+                    {% if implemented_percentage > 10 %}{{ implemented_percentage }}%{% endif %}
+                </div>
+                {% endif %}
+                {% if not_implemented_count > 0 %}
+                <div class="bg-red-500 flex items-center justify-center text-white text-xs font-medium"
+                     style="width: {{ not_implemented_percentage }}%"
+                     title="Not Implemented: {{ not_implemented_count }} ({{ not_implemented_percentage }}%)">
+                    {% if not_implemented_percentage > 10 %}{{ not_implemented_percentage }}%{% endif %}
+                </div>
+                {% endif %}
+                {% if unknown_count > 0 %}
+                <div class="bg-gray-400 flex items-center justify-center text-white text-xs font-medium"
+                     style="width: {{ unknown_percentage }}%"
+                     title="Unknown: {{ unknown_count }} ({{ unknown_percentage }}%)">
+                    {% if unknown_percentage > 10 %}{{ unknown_percentage }}%{% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="flex justify-between mt-4 text-sm">
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-green-500 rounded mr-2"></span>
+                    <span class="text-gray-600">Implemented ({{ implemented_count }})</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-red-500 rounded mr-2"></span>
+                    <span class="text-gray-600">Not Implemented ({{ not_implemented_count }})</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-3 h-3 bg-gray-400 rounded mr-2"></span>
+                    <span class="text-gray-600">Unknown ({{ unknown_count }})</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Lists in Tabs -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="border-b border-gray-200">
+                <nav class="flex -mb-px">
+                    <button onclick="showTab('not-implemented')" id="tab-not-implemented"
+                            class="tab-button tab-active px-6 py-4 text-sm font-medium border-b-2">
+                        Not Implemented ({{ not_implemented_count }})
+                    </button>
+                    <button onclick="showTab('implemented')" id="tab-implemented"
+                            class="tab-button px-6 py-4 text-sm font-medium border-b-2">
+                        Implemented ({{ implemented_count }})
+                    </button>
+                    <button onclick="showTab('unknown')" id="tab-unknown"
+                            class="tab-button px-6 py-4 text-sm font-medium border-b-2">
+                        Unknown Status ({{ unknown_count }})
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Not Implemented Applications -->
+            <div id="content-not-implemented" class="tab-content">
+                <div class="p-6">
+                    {% if not_implemented_apps %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for app in not_implemented_apps %}
+                        <a href="{% url 'application_detail' model_id=app.id %}"
+                           class="block p-4 border border-red-200 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-900 truncate">{{ app.acronym }}</h3>
+                                    <p class="text-xs text-gray-600 truncate mt-1">{{ app.name }}</p>
+                                </div>
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-200 text-red-800">
+                                    NOT IMPL
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No applications without centralized logging</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Implemented Applications -->
+            <div id="content-implemented" class="tab-content hidden">
+                <div class="p-6">
+                    {% if implemented_apps %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for app in implemented_apps %}
+                        <a href="{% url 'application_detail' model_id=app.id %}"
+                           class="block p-4 border border-green-200 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-900 truncate">{{ app.acronym }}</h3>
+                                    <p class="text-xs text-gray-600 truncate mt-1">{{ app.name }}</p>
+                                </div>
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-200 text-green-800">
+                                    IMPL
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No applications with centralized logging</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Unknown Applications -->
+            <div id="content-unknown" class="tab-content hidden">
+                <div class="p-6">
+                    {% if unknown_apps %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for app in unknown_apps %}
+                        <a href="{% url 'application_detail' model_id=app.id %}"
+                           class="block p-4 border border-gray-200 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-sm font-semibold text-gray-900 truncate">{{ app.acronym }}</h3>
+                                    <p class="text-xs text-gray-600 truncate mt-1">{{ app.name }}</p>
+                                </div>
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-200 text-gray-800">
+                                    UNKNOWN
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-gray-500 text-center py-8">No applications with unknown status</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tab-button {
+    color: #6b7280;
+    border-color: transparent;
+    transition: all 0.2s;
+}
+
+.tab-button:hover {
+    color: #374151;
+    border-color: #e5e7eb;
+}
+
+.tab-button.tab-active {
+    color: #2563eb;
+    border-color: #2563eb;
+}
+</style>
+
+<script>
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('tab-active');
+    });
+
+    // Show selected tab content
+    document.getElementById('content-' + tabName).classList.remove('hidden');
+
+    // Add active class to selected tab
+    document.getElementById('tab-' + tabName).classList.add('tab-active');
+}
+</script>
+{% endblock %}

@@ -8,8 +8,12 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_CHOICES
 from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CHOICES
+from core.models.common.enums.centralized_logging_status_choices import (
+    CENTRALIZED_LOGGING_STATUS_CHOICES,
+)
 from core.models.common.enums.deployment_medium_choices import DEPLOYMENT_MEDIUM_CHOICES
 from core.models.common.enums.lifecycle_choices import LIFECYCLE_CHOICES
+from core.models.common.enums.pipeline_status_choices import PIPELINE_STATUS_CHOICES
 from core.models.common.enums.platform_target_choices import PLATFORM_TARGET_CHOICES
 from django_generic_model_fields.create_generic_date import create_generic_date
 from django_generic_model_fields.create_generic_enum import create_generic_enum
@@ -68,6 +72,8 @@ class Application(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractCom
     person_stakeholders = create_generic_m2m(related_name='applications_stakeholder_of', to=Person)
     service_providers = create_generic_m2m(related_name='applications_that_use_service_provider', to=ServiceProvider)
     tools = create_generic_m2m(related_name='applications_that_use_tool', to=Tool)
+    centralized_logging_status = create_generic_enum(choices=CENTRALIZED_LOGGING_STATUS_CHOICES)
+    pipeline_status = create_generic_enum(choices=PIPELINE_STATUS_CHOICES)
     type_authentication = create_generic_enum(choices=AUTHENTICATION_TYPE_CHOICES)
     type_authorization = create_generic_enum(choices=AUTHORIZATION_TYPE_CHOICES)
     type_deployment_medium = create_generic_enum(choices=DEPLOYMENT_MEDIUM_CHOICES)
