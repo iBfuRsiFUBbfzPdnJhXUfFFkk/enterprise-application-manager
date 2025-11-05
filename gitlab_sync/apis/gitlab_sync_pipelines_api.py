@@ -12,11 +12,6 @@ from core.utilities.convert_and_enforce_utc_timezone import (
     convert_and_enforce_utc_timezone,
 )
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
-from core.views.generic.generic_500 import generic_500
-from git_lab.apis.common.get_common_query_parameters import (
-    GitLabApiCommonQueryParameters,
-    get_common_query_parameters,
-)
 from gitlab_sync.models import (
     GitLabSyncJobTracker,
     GitLabSyncPipeline,
@@ -39,10 +34,6 @@ def _sync_pipelines_background(
         entity_type="GitLabSyncPipeline", job_tracker_id=job_tracker.id
     )
     sync_result.add_log("Starting pipelines sync...")
-
-    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(
-        request=request
-    )
 
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
@@ -71,11 +62,13 @@ def _sync_pipelines_background(
         f"(max {max_pipelines_per_project} per project, last {days_back} days)..."
     )
 
-    # Update query params to limit pipelines per project and filter by date
+    # CRITICAL: Set all=False to only fetch first page, not all pages!
+    # The all=True from get_common_query_parameters() causes it to fetch ALL pipelines
     limited_query_parameters = {
-        **query_parameters,
         "per_page": max_pipelines_per_project,
         "updated_after": updated_after,
+        "all": False,  # Only get first page
+        "get_all": False,  # Don't auto-paginate
     }
 
     processed_count = 0
