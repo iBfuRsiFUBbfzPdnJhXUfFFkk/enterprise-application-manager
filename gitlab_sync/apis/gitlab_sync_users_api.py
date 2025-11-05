@@ -66,8 +66,6 @@ def _sync_users_background(
         f"Syncing users from {group_count} groups incrementally..."
     )
 
-    processed_count = 0
-    estimated_total = group_count * 10  # Rough estimate
     seen_user_ids = set()  # Track users we've already processed to avoid duplicates
 
     for group_idx, git_lab_group in enumerate(git_lab_groups, 1):
@@ -78,8 +76,11 @@ def _sync_users_background(
             print(f"[GitLabSync] {sync_result}")
             return
 
-        sync_result.add_log(
-            f"📥 About to fetch users from group {git_lab_group.full_path} (group {group_idx}/{group_count})..."
+        # Update progress at group level (more accurate than user level)
+        sync_result.update_progress(
+            group_idx - 1,
+            group_count,
+            f"📥 About to fetch users from group {git_lab_group.full_path} (group {group_idx}/{group_count})...",
         )
 
         members, error = handle_gitlab_api_errors(
@@ -117,7 +118,6 @@ def _sync_users_background(
                 print(f"[GitLabSync] {sync_result}")
                 return
 
-            processed_count += 1
             member_dict = member.asdict()
             user_id: int | None = member_dict.get("id")
 
@@ -128,10 +128,8 @@ def _sync_users_background(
             # Skip if we've already processed this user from another group
             if user_id in seen_user_ids:
                 sync_result.add_skip()
-                sync_result.update_progress(
-                    processed_count,
-                    estimated_total,
-                    f"⊘ Skipped already-processed user {member_dict.get('username')}",
+                sync_result.add_log(
+                    f"⊘ Skipped already-processed user {member_dict.get('username')}"
                 )
                 continue
 
@@ -161,10 +159,8 @@ def _sync_users_background(
 
                 if not needs_update:
                     sync_result.add_skip()
-                    sync_result.update_progress(
-                        processed_count,
-                        estimated_total,
-                        f"⊘ Skipped unchanged user {member_dict.get('username')}",
+                    sync_result.add_log(
+                        f"⊘ Skipped unchanged user {member_dict.get('username')}"
                     )
                     continue
 
@@ -188,11 +184,6 @@ def _sync_users_background(
                 git_lab_user.save()
                 sync_result.add_log(f"✓ Database save succeeded for user {user_id}")
                 sync_result.add_success()
-                sync_result.update_progress(
-                    processed_count,
-                    estimated_total,
-                    f"✓ Synced user {git_lab_user.username}",
-                )
 
             except Exception as error:
                 import traceback
@@ -205,10 +196,8 @@ def _sync_users_background(
                 print(f"[GitLabSync] Stack trace:\n{error_trace}")
                 continue
 
-        # Update estimate based on actual users found
-        estimated_total = max(
-            estimated_total, processed_count + (group_count - group_idx) * 10
-        )
+    # Final progress update
+    sync_result.update_progress(group_count, group_count, None)
 
     sync_result.add_log(
         f"✓ Sync complete: {sync_result.synced_count} synced, "

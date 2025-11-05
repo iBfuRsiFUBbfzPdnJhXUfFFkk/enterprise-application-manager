@@ -79,9 +79,6 @@ def _sync_projects_background(
         "get_all": False,  # Don't auto-paginate
     }
 
-    processed_count = 0
-    estimated_total = group_count * 10  # Rough estimate
-
     for group_idx, git_lab_group in enumerate(git_lab_groups, 1):
         # Check if job was cancelled
         if check_job_cancelled(sync_result.job_tracker_id):
@@ -97,7 +94,12 @@ def _sync_projects_background(
             )
             continue
 
-        sync_result.add_log(f"📥 About to fetch projects from group {git_lab_group.full_path} (group {group_idx}/{group_count})...")
+        # Update progress at group level (more accurate than project level)
+        sync_result.update_progress(
+            group_idx - 1,
+            group_count,
+            f"📥 About to fetch projects from group {git_lab_group.full_path} (group {group_idx}/{group_count})...",
+        )
 
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
@@ -132,7 +134,6 @@ def _sync_projects_background(
                 print(f"[GitLabSync] {sync_result}")
                 return
 
-            processed_count += 1
             project_dict = project.asdict()
             project_id: int | None = project_dict.get("id")
 
@@ -162,10 +163,8 @@ def _sync_projects_background(
 
                 if not needs_update:
                     sync_result.add_skip()
-                    sync_result.update_progress(
-                        processed_count,
-                        estimated_total,
-                        f"⊘ Skipped unchanged project {project_dict.get('path_with_namespace')}",
+                    sync_result.add_log(
+                        f"⊘ Skipped unchanged project {project_dict.get('path_with_namespace')}"
                     )
                     continue
 
@@ -221,11 +220,6 @@ def _sync_projects_background(
                 git_lab_project.save()
                 sync_result.add_log(f"✓ Database save succeeded for project {project_id}")
                 sync_result.add_success()
-                sync_result.update_progress(
-                    processed_count,
-                    estimated_total,
-                    f"✓ Synced project {git_lab_project.name_with_namespace}",
-                )
 
             except Exception as error:
                 import traceback
@@ -237,8 +231,8 @@ def _sync_projects_background(
                 print(f"[GitLabSync] Stack trace:\n{error_trace}")
                 continue
 
-        # Update estimate based on actual projects found
-        estimated_total = max(estimated_total, processed_count + (group_count - group_idx) * 10)
+    # Final progress update
+    sync_result.update_progress(group_count, group_count, None)
 
     sync_result.add_log(
         f"✓ Sync complete: {sync_result.synced_count} synced, "

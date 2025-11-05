@@ -72,9 +72,6 @@ def _sync_pipelines_background(
         "get_all": False,  # Don't auto-paginate
     }
 
-    processed_count = 0
-    estimated_total = project_count * 5  # Rough estimate
-
     for proj_idx, project in enumerate(projects, 1):
         # Check if job was cancelled
         if check_job_cancelled(sync_result.job_tracker_id):
@@ -83,7 +80,12 @@ def _sync_pipelines_background(
             print(f"[GitLabSync] {sync_result}")
             return
 
-        sync_result.add_log(f"📥 About to fetch pipelines from project {project.path_with_namespace} (project {proj_idx}/{project_count})...")
+        # Update progress at project level (more accurate than pipeline level)
+        sync_result.update_progress(
+            proj_idx - 1,
+            project_count,
+            f"📥 About to fetch pipelines from project {project.path_with_namespace} (project {proj_idx}/{project_count})...",
+        )
 
         pipelines, error = handle_gitlab_api_errors(
             func=lambda: [
@@ -134,7 +136,6 @@ def _sync_pipelines_background(
                 print(f"[GitLabSync] {sync_result}")
                 return
 
-            processed_count += 1
             pipeline_id: int | None = pipeline_dict.get("id")
 
             if pipeline_id is None:
@@ -163,11 +164,7 @@ def _sync_pipelines_background(
 
                 if not needs_update:
                     sync_result.add_skip()
-                    sync_result.update_progress(
-                        processed_count,
-                        estimated_total,
-                        f"⊘ Skipped unchanged pipeline #{pipeline_id}",
-                    )
+                    sync_result.add_log(f"⊘ Skipped unchanged pipeline #{pipeline_id}")
                     continue
 
                 # Update pipeline fields
@@ -208,9 +205,6 @@ def _sync_pipelines_background(
                 pipeline.save()
                 sync_result.add_log(f"✓ Database save succeeded for pipeline {pipeline_id}")
                 sync_result.add_success()
-                sync_result.update_progress(
-                    processed_count, estimated_total, f"✓ Synced pipeline #{pipeline_id}"
-                )
 
             except Exception as error:
                 import traceback
@@ -222,10 +216,8 @@ def _sync_pipelines_background(
                 print(f"[GitLabSync] Stack trace:\n{error_trace}")
                 continue
 
-        # Update estimate based on actual pipelines found
-        estimated_total = max(
-            estimated_total, processed_count + (project_count - proj_idx) * 5
-        )
+    # Final progress update
+    sync_result.update_progress(project_count, project_count, None)
 
     sync_result.add_log(
         f"✓ Sync complete: {sync_result.synced_count} synced, "
