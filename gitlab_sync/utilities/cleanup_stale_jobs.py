@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+
+from django.utils import timezone
 
 from gitlab_sync.models import GitLabSyncJobTracker
 
@@ -16,7 +18,7 @@ def cleanup_stale_jobs(max_runtime_minutes: int = 60) -> int:
     Returns:
         Number of jobs cleaned up
     """
-    cutoff_time = datetime.now() - timedelta(minutes=max_runtime_minutes)
+    cutoff_time = timezone.now() - timedelta(minutes=max_runtime_minutes)
 
     # Find jobs that are still "running" but started more than max_runtime_minutes ago
     stale_jobs = GitLabSyncJobTracker.objects.filter(
@@ -27,7 +29,7 @@ def cleanup_stale_jobs(max_runtime_minutes: int = 60) -> int:
     for job in stale_jobs:
         # Mark as failed with explanation
         job.status = "failed"
-        job.end_time = datetime.now()
+        job.end_time = timezone.now()
 
         if not job.error_messages:
             job.error_messages = []
@@ -39,7 +41,7 @@ def cleanup_stale_jobs(max_runtime_minutes: int = 60) -> int:
         if not job.detailed_logs:
             job.detailed_logs = []
         job.detailed_logs.append(
-            f"[{datetime.now().strftime('%H:%M:%S')}] ⚠️ Job automatically marked as failed - exceeded runtime limit"
+            f"[{timezone.now().strftime('%H:%M:%S')}] ⚠️ Job automatically marked as failed - exceeded runtime limit"
         )
 
         job.save()

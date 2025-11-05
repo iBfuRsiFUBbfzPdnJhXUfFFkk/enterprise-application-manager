@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.utils import timezone
 from gitlab import Gitlab
 from gitlab.v4.objects import Project, ProjectPipeline
 
@@ -48,7 +49,7 @@ def _sync_pipelines_background(
     days_back = config.coerced_gitlab_sync_pipelines_days_back
 
     # Calculate date cutoff for filtering pipelines
-    cutoff_date = datetime.now() - timedelta(days=days_back)
+    cutoff_date = timezone.now() - timedelta(days=days_back)
     updated_after = cutoff_date.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     projects: QuerySet[GitLabSyncProject] = cast_query_set(
@@ -187,7 +188,7 @@ def _sync_pipelines_background(
                 pipeline.finished_at = convert_and_enforce_utc_timezone(
                     datetime_string=pipeline_dict.get("finished_at")
                 )
-                pipeline.last_synced_at = datetime.now()
+                pipeline.last_synced_at = timezone.now()
 
                 sync_result.add_log(f"💾 About to save pipeline {pipeline_id} to database...")
                 pipeline.save()

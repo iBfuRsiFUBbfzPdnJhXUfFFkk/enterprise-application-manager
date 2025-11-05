@@ -3,6 +3,7 @@ from typing import cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.utils import timezone
 from gitlab import Gitlab
 from gitlab.v4.objects import GroupMember
 
@@ -181,7 +182,7 @@ def _sync_users_background(
                 git_lab_user.expires_at = convert_and_enforce_utc_timezone(
                     datetime_string=member_dict.get("expires_at")
                 )
-                git_lab_user.last_synced_at = datetime.now()
+                git_lab_user.last_synced_at = timezone.now()
 
                 sync_result.add_log(f"💾 About to save user {user_id} to database...")
                 git_lab_user.save()

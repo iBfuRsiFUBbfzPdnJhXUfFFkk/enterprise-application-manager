@@ -2,6 +2,7 @@ from typing import cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.utils import timezone
 from gitlab import Gitlab
 from gitlab.v4.objects import Group, GroupProject
 
@@ -204,7 +205,7 @@ def _sync_projects_background(
                     datetime_string=project_dict.get("last_activity_at")
                 )
                 git_lab_project.updated_at = project_updated_at
-                git_lab_project.last_synced_at = datetime.now()
+                git_lab_project.last_synced_at = timezone.now()
 
                 sync_result.add_log(f"💾 About to process namespace for project {project_id}...")
                 namespace = project_dict.get("namespace")

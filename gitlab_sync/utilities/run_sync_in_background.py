@@ -2,6 +2,7 @@ import threading
 from typing import Callable
 
 from django.http import HttpRequest
+from django.utils import timezone
 
 from gitlab_sync.models import GitLabSyncJobTracker
 
@@ -22,8 +23,6 @@ def run_sync_in_background(
     Returns:
         GitLabSyncJobTracker: The created job tracker instance
     """
-    from datetime import datetime
-
     from django.db import connection
 
     job_tracker = GitLabSyncJobTracker.objects.create(
@@ -32,7 +31,7 @@ def run_sync_in_background(
         progress_percent=0,
         current_count=0,
         total_count=0,
-        start_time=datetime.now(),
+        start_time=timezone.now(),
         user=request.user if request.user.is_authenticated else None,
     )
 
@@ -66,7 +65,7 @@ def run_sync_in_background(
                 job_tracker.status = "failed"
 
                 # Add detailed error information to logs
-                error_timestamp = datetime.now().strftime("%H:%M:%S")
+                error_timestamp = timezone.now().strftime("%H:%M:%S")
                 if not job_tracker.detailed_logs:
                     job_tracker.detailed_logs = []
                 job_tracker.detailed_logs.append(
@@ -79,7 +78,7 @@ def run_sync_in_background(
                 if not job_tracker.error_messages:
                     job_tracker.error_messages = []
                 job_tracker.error_messages.append(str(error))
-                job_tracker.end_time = datetime.now()
+                job_tracker.end_time = timezone.now()
                 job_tracker.save()
                 print(f"[RunSync] Job {job_tracker.id} marked as failed")
             except Exception as update_error:
@@ -93,7 +92,7 @@ def run_sync_in_background(
                 if job_tracker.status == "running":
                     print(f"[RunSync] WARNING: Job {job_tracker.id} still running after completion, forcing failure state")
                     job_tracker.status = "failed"
-                    error_timestamp = datetime.now().strftime("%H:%M:%S")
+                    error_timestamp = timezone.now().strftime("%H:%M:%S")
                     if not job_tracker.detailed_logs:
                         job_tracker.detailed_logs = []
                     job_tracker.detailed_logs.append(
@@ -102,7 +101,7 @@ def run_sync_in_background(
                     if not job_tracker.error_messages:
                         job_tracker.error_messages = []
                     job_tracker.error_messages.append("Job did not update status properly - possible permission or database error")
-                    job_tracker.end_time = datetime.now()
+                    job_tracker.end_time = timezone.now()
                     job_tracker.save()
             except Exception as final_error:
                 print(f"[RunSync] CRITICAL: Failed final safety update for job {job_tracker.id}: {final_error}")

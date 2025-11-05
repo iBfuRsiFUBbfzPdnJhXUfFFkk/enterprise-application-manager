@@ -1,6 +1,7 @@
 from typing import cast
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.utils import timezone
 from gitlab import Gitlab
 from gitlab.v4.objects import Group, GroupSubgroup
 
@@ -78,7 +79,7 @@ def process_and_save_group(
         git_lab_group.web_url = group_dict.get("web_url")
         git_lab_group.visibility = group_dict.get("visibility")
         git_lab_group.created_at = group_created_at
-        git_lab_group.last_synced_at = datetime.now()
+        git_lab_group.last_synced_at = timezone.now()
 
         sync_result.add_log(f"💾 About to save group {group_id} to database...")
         git_lab_group.save()
@@ -296,7 +297,7 @@ def _sync_groups_background(
             git_lab_group.web_url = parent_dict.get("web_url")
             git_lab_group.visibility = parent_dict.get("visibility")
             git_lab_group.created_at = parent_created_at
-            git_lab_group.last_synced_at = datetime.now()
+            git_lab_group.last_synced_at = timezone.now()
             git_lab_group.save()
             sync_result.add_success()
             sync_result.add_log(f"✓ Synced top-level group {git_lab_group.full_path}")

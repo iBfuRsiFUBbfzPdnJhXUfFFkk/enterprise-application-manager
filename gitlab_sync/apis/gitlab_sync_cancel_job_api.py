@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.http import HttpRequest, JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
@@ -43,13 +42,13 @@ def gitlab_sync_cancel_job_api(request: HttpRequest, job_id: int) -> JsonRespons
 
         # Mark as cancelled
         job_tracker.status = "cancelled"
-        job_tracker.end_time = datetime.now()
+        job_tracker.end_time = timezone.now()
 
         # Add cancellation log
         if not job_tracker.detailed_logs:
             job_tracker.detailed_logs = []
         job_tracker.detailed_logs.append(
-            f"[{datetime.now().strftime('%H:%M:%S')}] ⚠️ Job cancelled by user"
+            f"[{timezone.now().strftime('%H:%M:%S')}] ⚠️ Job cancelled by user"
         )
 
         job_tracker.save()

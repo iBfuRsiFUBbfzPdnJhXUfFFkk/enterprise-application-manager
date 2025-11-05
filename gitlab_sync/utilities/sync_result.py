@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from django.utils import timezone
+
 
 @dataclass
 class SyncResult:
@@ -18,7 +20,7 @@ class SyncResult:
     skipped_count: int = 0
     errors: list[str] = field(default_factory=list)
     logs: list[str] = field(default_factory=list)
-    start_time: datetime = field(default_factory=datetime.now)
+    start_time: datetime = field(default_factory=timezone.now)
     end_time: datetime | None = None
     job_tracker_id: int | None = None
     current_count: int = 0
@@ -41,12 +43,12 @@ class SyncResult:
 
     def finish(self) -> None:
         """Mark sync as finished and record end time."""
-        self.end_time = datetime.now()
+        self.end_time = timezone.now()
         self._update_job_tracker()
 
     def add_log(self, message: str) -> None:
         """Add a log message and update job tracker."""
-        timestamp = datetime.now().strftime("%H:%M:%S")
+        timestamp = timezone.now().strftime("%H:%M:%S")
         log_entry = f"[{timestamp}] {message}"
         self.logs.append(log_entry)
         self._update_job_tracker()
@@ -76,7 +78,7 @@ class SyncResult:
             if not job_tracker:
                 error_msg = f"Job tracker {self.job_tracker_id} not found!"
                 print(f"[SyncResult] {error_msg}")
-                self.logs.append(f"[{datetime.now().strftime('%H:%M:%S')}] ❌ {error_msg}")
+                self.logs.append(f"[{timezone.now().strftime('%H:%M:%S')}] ❌ {error_msg}")
                 return
 
             job_tracker.current_count = self.current_count
@@ -100,7 +102,7 @@ class SyncResult:
             traceback.print_exc()
 
             # Add error to logs so it's visible if we can update later
-            timestamp = datetime.now().strftime("%H:%M:%S")
+            timestamp = timezone.now().strftime("%H:%M:%S")
             self.logs.append(f"[{timestamp}] ❌ Database update error: {str(e)}")
             self.errors.append(f"Job tracker update failed: {str(e)}")
             self.success = False
