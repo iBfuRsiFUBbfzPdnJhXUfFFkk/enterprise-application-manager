@@ -12,10 +12,6 @@ from core.utilities.convert_and_enforce_utc_timezone import (
     convert_and_enforce_utc_timezone,
 )
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
-from git_lab.apis.common.get_common_query_parameters import (
-    GitLabApiCommonQueryParameters,
-    get_common_query_parameters,
-)
 from gitlab_sync.models import GitLabSyncGroup, GitLabSyncJobTracker, GitLabSyncUser
 from gitlab_sync.utilities import (
     SyncResult,
@@ -34,9 +30,11 @@ def _sync_users_background(
     )
     sync_result.add_log("Starting users sync...")
 
-    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(
-        request=request
-    )
+    # Members API only supports basic parameters (not the common ones used for issues/MRs)
+    members_query_parameters = {
+        "all": True,
+        "per_page": 100,
+    }
 
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
@@ -87,7 +85,7 @@ def _sync_users_background(
             func=lambda: cast(
                 list[GroupMember],
                 git_lab_client.groups.get(id=git_lab_group.id, lazy=True).members.list(
-                    **query_parameters
+                    **members_query_parameters
                 ),
             ),
             entity_name=f"Members for group {git_lab_group.full_path}",
