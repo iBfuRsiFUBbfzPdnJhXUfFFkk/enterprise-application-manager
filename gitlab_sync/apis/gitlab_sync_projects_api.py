@@ -11,11 +11,6 @@ from core.utilities.convert_and_enforce_utc_timezone import (
     convert_and_enforce_utc_timezone,
 )
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
-from core.views.generic.generic_500 import generic_500
-from git_lab.apis.common.get_common_query_parameters import (
-    GitLabApiCommonQueryParameters,
-    get_common_query_parameters,
-)
 from gitlab_sync.models import GitLabSyncGroup, GitLabSyncJobTracker, GitLabSyncProject
 from gitlab_sync.utilities import (
     SyncResult,
@@ -34,10 +29,6 @@ def _sync_projects_background(
     )
     sync_result.add_log("Starting projects sync...")
 
-    query_parameters: GitLabApiCommonQueryParameters = get_common_query_parameters(
-        request=request
-    )
-
     git_lab_client: Gitlab | None = get_git_lab_client()
     if git_lab_client is None:
         sync_result.add_log("❌ Failed to get GitLab client")
@@ -45,6 +36,10 @@ def _sync_projects_background(
         sync_result.finish()
         print(f"[GitLabSync] {sync_result}")
         return
+
+    config = ThisServerConfiguration.current()
+    max_projects_per_group = config.coerced_gitlab_sync_max_projects_per_group
+    skip_group_ids = config.parsed_gitlab_sync_skip_group_ids
 
     git_lab_groups: QuerySet[GitLabSyncGroup] = cast_query_set(
         typ=GitLabSyncGroup,
@@ -64,16 +59,24 @@ def _sync_projects_background(
 
     from datetime import datetime
 
-    config = ThisServerConfiguration.current()
-    max_projects_per_group = config.coerced_gitlab_sync_max_projects_per_group
-
     group_count = git_lab_groups.count()
+
+    if skip_group_ids:
+        sync_result.add_log(
+            f"⚠️ Skipping {len(skip_group_ids)} configured group(s): {', '.join(str(gid) for gid in skip_group_ids)}"
+        )
+
     sync_result.add_log(
         f"Syncing projects from {group_count} groups incrementally (max {max_projects_per_group} per group)..."
     )
 
-    # Update query params to limit projects per group
-    limited_query_parameters = {**query_parameters, "per_page": max_projects_per_group}
+    # CRITICAL: Set all=False to only fetch first page, not all pages!
+    # The all=True from get_common_query_parameters() causes it to fetch ALL projects
+    limited_query_parameters = {
+        "per_page": max_projects_per_group,
+        "all": False,  # Only get first page
+        "get_all": False,  # Don't auto-paginate
+    }
 
     processed_count = 0
     estimated_total = group_count * 10  # Rough estimate
@@ -85,6 +88,13 @@ def _sync_projects_background(
             sync_result.finish()
             print(f"[GitLabSync] {sync_result}")
             return
+
+        # Skip groups in the skip list
+        if git_lab_group.id in skip_group_ids:
+            sync_result.add_log(
+                f"⊘ Skipping group {git_lab_group.full_path} (ID: {git_lab_group.id}) - in skip list"
+            )
+            continue
 
         sync_result.add_log(f"📥 About to fetch projects from group {git_lab_group.full_path} (group {group_idx}/{group_count})...")
 

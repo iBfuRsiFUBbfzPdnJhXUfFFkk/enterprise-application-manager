@@ -32,6 +32,7 @@ class ThisServerConfiguration(
     gitlab_sync_pipelines_days_back: int | None = create_generic_integer()
     gitlab_sync_max_pipelines_per_project: int | None = create_generic_integer()
     gitlab_sync_operation_timeout_seconds: int | None = create_generic_integer()
+    gitlab_sync_skip_group_ids: str | None = create_generic_varchar()
     kpi_developers_to_exclude = create_generic_m2m(to='Person')
     scrum_capacity_base_per_day: float | None = create_generic_decimal()
     scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
@@ -107,6 +108,20 @@ class ThisServerConfiguration(
     def coerced_gitlab_sync_operation_timeout_seconds(self) -> int:
         """Max seconds to wait for a single sync operation (default: 300 = 5 minutes)."""
         return self.gitlab_sync_operation_timeout_seconds or 300
+
+    @property
+    def parsed_gitlab_sync_skip_group_ids(self) -> set[int]:
+        """Parse comma-separated group IDs to skip during sync (e.g., '123,456,789')."""
+        if not self.gitlab_sync_skip_group_ids:
+            return set()
+        try:
+            return {
+                int(gid.strip())
+                for gid in self.gitlab_sync_skip_group_ids.split(',')
+                if gid.strip()
+            }
+        except (ValueError, AttributeError):
+            return set()
 
     @staticmethod
     def current() -> 'ThisServerConfiguration':
