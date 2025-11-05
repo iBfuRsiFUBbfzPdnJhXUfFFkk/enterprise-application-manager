@@ -77,6 +77,14 @@ class GitLabSyncMergeRequest(
         related_name="merge_requests",
         to="gitlab_sync.GitLabSyncPipeline",
     )
+    milestone = create_generic_fk(
+        related_name="merge_requests",
+        to="gitlab_sync.GitLabSyncMilestone",
+    )
+    iteration = create_generic_fk(
+        related_name="merge_requests",
+        to="gitlab_sync.GitLabSyncIteration",
+    )
     blocking_discussions_resolved: bool | None = create_generic_boolean()
     draft: bool | None = create_generic_boolean()
     has_conflicts: bool | None = create_generic_boolean()

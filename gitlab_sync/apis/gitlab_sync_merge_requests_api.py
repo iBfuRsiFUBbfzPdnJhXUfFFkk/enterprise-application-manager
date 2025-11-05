@@ -10,8 +10,10 @@ from core.utilities.convert_and_enforce_utc_timezone import (
 )
 from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from gitlab_sync.models import (
+    GitLabSyncIteration,
     GitLabSyncJobTracker,
     GitLabSyncMergeRequest,
+    GitLabSyncMilestone,
     GitLabSyncPipeline,
     GitLabSyncProject,
     GitLabSyncUser,
@@ -178,6 +180,20 @@ def _sync_merge_requests_background(
                     pipeline = GitLabSyncPipeline.objects.filter(id=head_pipeline_dict.get("id")).first()
                     if pipeline:
                         merge_request.head_pipeline = pipeline
+
+                # Handle milestone
+                milestone_dict = mr_dict.get("milestone")
+                if milestone_dict:
+                    milestone = GitLabSyncMilestone.objects.filter(id=milestone_dict.get("id")).first()
+                    if milestone:
+                        merge_request.milestone = milestone
+
+                # Handle iteration
+                iteration_dict = mr_dict.get("iteration")
+                if iteration_dict:
+                    iteration = GitLabSyncIteration.objects.filter(id=iteration_dict.get("id")).first()
+                    if iteration:
+                        merge_request.iteration = iteration
 
                 merge_request.iid = mr_dict.get("iid")
                 merge_request.title = mr_dict.get("title")

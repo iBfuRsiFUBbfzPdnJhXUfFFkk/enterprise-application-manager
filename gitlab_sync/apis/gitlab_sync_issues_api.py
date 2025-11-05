@@ -12,7 +12,9 @@ from core.utilities.git_lab.get_git_lab_client import get_git_lab_client
 from gitlab_sync.models import (
     GitLabSyncEpic,
     GitLabSyncIssue,
+    GitLabSyncIteration,
     GitLabSyncJobTracker,
+    GitLabSyncMilestone,
     GitLabSyncProject,
     GitLabSyncUser,
 )
@@ -171,6 +173,20 @@ def _sync_issues_background(
                     epic = GitLabSyncEpic.objects.filter(id=epic_dict.get("id")).first()
                     if epic:
                         issue.epic = epic
+
+                # Handle milestone
+                milestone_dict = issue_dict.get("milestone")
+                if milestone_dict:
+                    milestone = GitLabSyncMilestone.objects.filter(id=milestone_dict.get("id")).first()
+                    if milestone:
+                        issue.milestone = milestone
+
+                # Handle iteration
+                iteration_dict = issue_dict.get("iteration")
+                if iteration_dict:
+                    iteration = GitLabSyncIteration.objects.filter(id=iteration_dict.get("id")).first()
+                    if iteration:
+                        issue.iteration = iteration
 
                 issue.iid = issue_dict.get("iid")
                 issue.title = issue_dict.get("title")

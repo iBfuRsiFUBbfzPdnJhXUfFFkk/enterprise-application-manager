@@ -66,6 +66,14 @@ class GitLabSyncIssue(
         related_name="issues",
         to="gitlab_sync.GitLabSyncEpic",
     )
+    milestone = create_generic_fk(
+        related_name="issues",
+        to="gitlab_sync.GitLabSyncMilestone",
+    )
+    iteration = create_generic_fk(
+        related_name="issues",
+        to="gitlab_sync.GitLabSyncIteration",
+    )
     blocking_issues_count: int | None = create_generic_integer()
     has_tasks: bool | None = create_generic_boolean()
     issue_type: str | None = create_generic_varchar()
