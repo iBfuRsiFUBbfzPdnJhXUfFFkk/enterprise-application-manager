@@ -162,7 +162,7 @@ def recurse_groups(
             sync_result.add_log(f"📥 About to fetch group {subgroup.id} from GitLab API...")
 
         child_group, error = handle_gitlab_api_errors(
-            func=lambda: git_lab_client.groups.get(id=subgroup.id),
+            func=lambda: git_lab_client.groups.get(id=subgroup.id, lazy=False),
             entity_name=f"Group {subgroup.id}",
             max_retries=3,
         )
@@ -241,7 +241,7 @@ def _sync_groups_background(
     )
     group_parent, error = handle_gitlab_api_errors(
         func=lambda: git_lab_client.groups.get(
-            id=connection_git_lab_top_level_group_id
+            id=connection_git_lab_top_level_group_id, lazy=False
         ),
         entity_name=f"Top-level group {connection_git_lab_top_level_group_id}",
         max_retries=3,

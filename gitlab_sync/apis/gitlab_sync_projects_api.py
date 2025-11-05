@@ -91,7 +91,7 @@ def _sync_projects_background(
         projects, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupProject],
-                git_lab_client.groups.get(id=git_lab_group.id).projects.list(
+                git_lab_client.groups.get(id=git_lab_group.id, lazy=True).projects.list(
                     **limited_query_parameters
                 ),
             ),

@@ -86,7 +86,7 @@ def _sync_users_background(
         members, error = handle_gitlab_api_errors(
             func=lambda: cast(
                 list[GroupMember],
-                git_lab_client.groups.get(id=git_lab_group.id).members.list(
+                git_lab_client.groups.get(id=git_lab_group.id, lazy=True).members.list(
                     **query_parameters
                 ),
             ),
