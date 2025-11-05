@@ -46,6 +46,14 @@ def gitlab_sync_projects_api(
         val=GitLabSyncGroup.objects.all(),
     )
 
+    if not git_lab_groups.exists():
+        sync_result.add_failure(
+            "No groups found - please sync groups first using the 'Sync Groups' button"
+        )
+        sync_result.finish()
+        print(f"[GitLabSync] {sync_result}")
+        return JsonResponse(data=sync_result.to_dict(), safe=False, status=400)
+
     all_projects: set[GroupProject] = set()
 
     for git_lab_group in git_lab_groups:

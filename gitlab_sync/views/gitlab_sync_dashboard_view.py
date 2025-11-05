@@ -1,5 +1,6 @@
 from django.http import HttpRequest, HttpResponse
 
+from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.base_render import base_render
 from gitlab_sync.models import (
     GitLabSyncArtifact,
@@ -73,6 +74,13 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         "low": GitLabSyncVulnerability.objects.filter(severity="low").count(),
     }
 
+    config = ThisServerConfiguration.current()
+    gitlab_configured = bool(
+        config.connection_git_lab_hostname
+        and config.connection_git_lab_token
+        and config.connection_git_lab_top_level_group_id
+    )
+
     context = {
         "stats": stats,
         "recent_projects": recent_projects,
@@ -81,6 +89,9 @@ def gitlab_sync_dashboard_view(request: HttpRequest) -> HttpResponse:
         "pipeline_stats": pipeline_stats,
         "mr_stats": mr_stats,
         "vulnerability_stats": vulnerability_stats,
+        "gitlab_configured": gitlab_configured,
+        "gitlab_hostname": config.connection_git_lab_hostname,
+        "gitlab_group_id": config.connection_git_lab_top_level_group_id,
     }
 
     return base_render(
