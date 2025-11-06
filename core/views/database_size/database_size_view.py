@@ -2,8 +2,9 @@ from typing import Mapping, Any
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.db import connection, transaction
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
-from datetime import datetime, timedelta
+from datetime import timedelta
 from collections import defaultdict
 import json
 
@@ -99,7 +100,7 @@ def get_historical_data(days: int = 30) -> dict[str, list[dict[str, Any]]]:
     Get historical size data for trend analysis.
     Returns data grouped by table name.
     """
-    cutoff_date = datetime.now() - timedelta(days=days)
+    cutoff_date = timezone.now() - timedelta(days=days)
     history_records = DatabaseSizeHistory.objects.filter(
         recorded_at__gte=cutoff_date
     ).order_by('table_name', 'recorded_at')
