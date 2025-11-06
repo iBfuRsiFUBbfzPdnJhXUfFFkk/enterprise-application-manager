@@ -5,6 +5,11 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hidden CSRF token for JavaScript -->
+    <form id="csrfForm" style="display: none;">
+        {% csrf_token %}
+    </form>
+
     <!-- Page Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Database Size Management</h1>
@@ -142,11 +147,12 @@
     </div>
 </div>
 
-<!-- Load Chart.js -->
+<!-- Load Chart.js and date adapter -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
 <script>
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     'use strict';
 
     // Table data from Django context
@@ -162,19 +168,23 @@
         return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
     }
 
+    // Get CSRF token from the hidden form
+    const csrfInput = document.querySelector('#csrfForm input[name="csrfmiddlewaretoken"]');
+    const csrftoken = csrfInput ? csrfInput.value : null;
+    console.log('CSRF Token loaded:', csrftoken ? 'Yes' : 'No');
+    console.log('CSRF Token value (first 10 chars):', csrftoken ? csrftoken.substring(0, 10) + '...' : 'null');
+
     // Initialize DataTable
-    $(document).ready(function() {
-        $('#tableSizeTable').DataTable({
-            order: [[4, 'desc']], // Sort by total size descending
-            pageLength: 25,
-            language: {
-                search: "Filter tables:",
-                lengthMenu: "Show _MENU_ tables per page",
-                info: "Showing _START_ to _END_ of _TOTAL_ tables",
-                infoEmpty: "No tables to display",
-                infoFiltered: "(filtered from _MAX_ total tables)"
-            }
-        });
+    $('#tableSizeTable').DataTable({
+        order: [[4, 'desc']], // Sort by total size descending
+        pageLength: 25,
+        language: {
+            search: "Filter tables:",
+            lengthMenu: "Show _MENU_ tables per page",
+            info: "Showing _START_ to _END_ of _TOTAL_ tables",
+            infoEmpty: "No tables to display",
+            infoFiltered: "(filtered from _MAX_ total tables)"
+        }
     });
 
     // Size Distribution Pie Chart
@@ -287,75 +297,106 @@
     });
 
     // VACUUM action
-    document.getElementById('vacuumBtn').addEventListener('click', function() {
-        if (!confirm('VACUUM will rebuild the database file and may take some time. Continue?')) {
-            return;
-        }
+    const vacuumBtn = document.getElementById('vacuumBtn');
+    console.log('VACUUM button found:', vacuumBtn ? 'Yes' : 'No');
 
-        const btn = this;
-        btn.disabled = true;
-        btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...';
+    if (vacuumBtn) {
+        vacuumBtn.addEventListener('click', function() {
+            console.log('VACUUM button clicked');
 
-        fetch('{% url "database_vacuum" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
+            if (!confirm('VACUUM will rebuild the database file and may take some time. Continue?')) {
+                console.log('VACUUM cancelled by user');
+                return;
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showMessage(
-                    'VACUUM completed successfully! Space freed: ' + formatBytes(data.space_freed),
-                    'success'
-                );
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                showMessage('VACUUM failed: ' + data.error, 'error');
-            }
-        })
-        .catch(error => {
-            showMessage('Error: ' + error.message, 'error');
-        })
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> VACUUM Database';
+
+            console.log('Starting VACUUM operation...');
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing...';
+
+            console.log('Sending fetch request to:', '{% url "database_vacuum" %}');
+            console.log('CSRF token:', csrftoken);
+
+            fetch('{% url "database_vacuum" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    showMessage(
+                        'VACUUM completed successfully! Space freed: ' + formatBytes(data.space_freed),
+                        'success'
+                    );
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showMessage('VACUUM failed: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                showMessage('Error: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> VACUUM Database';
+            });
         });
-    });
+    }
 
     // Snapshot action
-    document.getElementById('snapshotBtn').addEventListener('click', function() {
-        const btn = this;
-        btn.disabled = true;
-        btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Recording...';
+    const snapshotBtn = document.getElementById('snapshotBtn');
+    console.log('Snapshot button found:', snapshotBtn ? 'Yes' : 'No');
 
-        fetch('{% url "database_snapshot" %}', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showMessage(
-                    'Snapshot recorded successfully! ' + data.records_created + ' records created.',
-                    'success'
-                );
-            } else {
-                showMessage('Snapshot failed: ' + data.error, 'error');
-            }
-        })
-        .catch(error => {
-            showMessage('Error: ' + error.message, 'error');
-        })
-        .finally(() => {
-            btn.disabled = false;
-            btn.innerHTML = '<svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Record Snapshot';
+    if (snapshotBtn) {
+        snapshotBtn.addEventListener('click', function() {
+            console.log('Snapshot button clicked');
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Recording...';
+
+            console.log('Sending fetch request to:', '{% url "database_snapshot" %}');
+
+            fetch('{% url "database_snapshot" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    showMessage(
+                        'Snapshot recorded successfully! ' + data.records_created + ' records created.',
+                        'success'
+                    );
+                } else {
+                    showMessage('Snapshot failed: ' + data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                showMessage('Error: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Record Snapshot';
+            });
         });
-    });
+    }
 
     // Show message helper
     function showMessage(message, type) {
@@ -382,6 +423,8 @@
             messageContainer.classList.add('hidden');
         }, 5000);
     }
-})();
+
+    console.log('Database size page JavaScript loaded successfully');
+});
 </script>
 {% endblock %}
