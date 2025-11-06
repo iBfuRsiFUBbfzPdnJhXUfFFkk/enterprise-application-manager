@@ -1,7 +1,7 @@
 from typing import Mapping, Any
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.db import connection
+from django.db import connection, transaction
 from django.views.decorators.http import require_http_methods
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -186,35 +186,46 @@ def database_vacuum_action(request: HttpRequest) -> JsonResponse:
     """
     Perform VACUUM operation on the database.
     Only accessible to superusers.
+
+    Note: VACUUM must run outside of a transaction in SQLite.
     """
     if not request.user.is_superuser:
         return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
 
     try:
-        with connection.cursor() as cursor:
-            # Get size before vacuum
-            cursor.execute("PRAGMA page_count")
-            pages_before = cursor.fetchone()[0]
-            cursor.execute("PRAGMA page_size")
-            page_size = cursor.fetchone()[0]
-            size_before = pages_before * page_size
+        # Set autocommit mode to ensure VACUUM runs outside a transaction
+        old_autocommit = transaction.get_autocommit()
+        transaction.set_autocommit(True)
 
-            # Perform VACUUM
-            cursor.execute("VACUUM")
+        try:
+            with connection.cursor() as cursor:
+                # Get size before vacuum
+                cursor.execute("PRAGMA page_count")
+                pages_before = cursor.fetchone()[0]
+                cursor.execute("PRAGMA page_size")
+                page_size = cursor.fetchone()[0]
+                size_before = pages_before * page_size
 
-            # Get size after vacuum
-            cursor.execute("PRAGMA page_count")
-            pages_after = cursor.fetchone()[0]
-            size_after = pages_after * page_size
+                # Perform VACUUM (must be outside transaction)
+                cursor.execute("VACUUM")
 
-            space_freed = size_before - size_after
+                # Get size after vacuum
+                cursor.execute("PRAGMA page_count")
+                pages_after = cursor.fetchone()[0]
+                size_after = pages_after * page_size
 
-        return JsonResponse({
-            'success': True,
-            'size_before': size_before,
-            'size_after': size_after,
-            'space_freed': space_freed,
-        })
+                space_freed = size_before - size_after
+
+            return JsonResponse({
+                'success': True,
+                'size_before': size_before,
+                'size_after': size_after,
+                'space_freed': space_freed,
+            })
+        finally:
+            # Restore original autocommit setting
+            transaction.set_autocommit(old_autocommit)
+
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
