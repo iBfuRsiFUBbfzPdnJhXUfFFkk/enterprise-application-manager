@@ -1,6 +1,12 @@
 # PowerShell script to vacuum the SQLite database
 # This reclaims unused space and optimizes the database file
 
+[CmdletBinding()]
+param(
+    [Parameter(Mandatory=$false, HelpMessage="Path to sqlite3.exe executable")]
+    [string]$Sqlite3Path
+)
+
 $ErrorActionPreference = "Stop"
 
 $DB_FILE = "db.sqlite3"
@@ -13,14 +19,29 @@ if (-not (Test-Path $DB_PATH)) {
     exit 1
 }
 
-# Check if sqlite3 command is available
-$sqlite3Path = $null
-try {
-    $sqlite3Path = Get-Command sqlite3 -ErrorAction Stop | Select-Object -ExpandProperty Source
-} catch {
-    Write-Host "Error: sqlite3 command not found. Please install SQLite." -ForegroundColor Red
-    Write-Host "Download from: https://www.sqlite.org/download.html" -ForegroundColor Yellow
-    exit 1
+# Determine sqlite3 path
+$sqlite3Exe = $null
+
+if ($Sqlite3Path) {
+    # Use provided path
+    if (-not (Test-Path $Sqlite3Path)) {
+        Write-Host "Error: sqlite3 executable not found at specified path: $Sqlite3Path" -ForegroundColor Red
+        exit 1
+    }
+    $sqlite3Exe = $Sqlite3Path
+    Write-Host "Using sqlite3 from: $sqlite3Exe" -ForegroundColor Yellow
+    Write-Host ""
+} else {
+    # Try to find sqlite3 in PATH
+    try {
+        $sqlite3Exe = Get-Command sqlite3 -ErrorAction Stop | Select-Object -ExpandProperty Source
+    } catch {
+        Write-Host "Error: sqlite3 command not found in PATH. Please install SQLite or specify path with -Sqlite3Path parameter." -ForegroundColor Red
+        Write-Host "Download from: https://www.sqlite.org/download.html" -ForegroundColor Yellow
+        Write-Host "" -ForegroundColor Yellow
+        Write-Host "Usage: .\vacuum_db.ps1 -Sqlite3Path 'C:\path\to\sqlite3.exe'" -ForegroundColor Yellow
+        exit 1
+    }
 }
 
 Write-Host "Database VACUUM Utility" -ForegroundColor Cyan
@@ -39,7 +60,7 @@ Write-Host "Running VACUUM..." -ForegroundColor Yellow
 
 # Run VACUUM command
 try {
-    & sqlite3 $DB_PATH "VACUUM;"
+    & $sqlite3Exe $DB_PATH "VACUUM;"
 } catch {
     Write-Host "Error running VACUUM: $_" -ForegroundColor Red
     exit 1
