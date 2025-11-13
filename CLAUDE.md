@@ -40,7 +40,7 @@ Create a `.env` file in the root directory with these variables (see `.documenta
 - `DEBUG` - Debug mode (True/False)
 - `ALLOWED_HOSTS` - JSON array of allowed hosts
 - `ENCRYPTION_SECRET` - Encryption key for sensitive data
-- `SHOULD_USE_LDAP` - Enable LDAP authentication (True/False)
+- `SHOULD_USE_LDAP` - Enable LDAP authentication (True/False, defaults to False)
 - LDAP configuration (`AUTH_LDAP_*` variables) if using LDAP
 - Email configuration (`EMAIL_*` variables)
 
@@ -98,9 +98,18 @@ Freeze requirements:
 ```
 
 Install requirements:
+
+**Unix/Linux/Mac (with LDAP support):**
 ```bash
 .venv/bin/python -m pip install -r requirements.txt
 ```
+
+**Windows (without LDAP support):**
+```bash
+.venv/bin/python -m pip install -r requirements-windows.txt
+```
+
+**Note:** The `requirements-windows.txt` file excludes LDAP packages (`django-auth-ldap` and `python-ldap`) which can be difficult to install on Windows. When using this file, ensure `SHOULD_USE_LDAP=False` in your `.env` file (this is the default).
 
 ### Testing
 
