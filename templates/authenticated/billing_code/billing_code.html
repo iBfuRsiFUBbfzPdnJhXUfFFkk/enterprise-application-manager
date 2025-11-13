@@ -11,21 +11,17 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     <!-- Filter Toggle -->
-                    <a href="?show_inactive={% if show_inactive %}false{% else %}true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                    <button id="toggleInactiveBtn" onclick="toggleInactive()"
                        class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        {% if show_inactive %}
-                        <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="hideIcon" class="h-4 w-4 mr-1.5 text-gray-500 {% if not show_inactive %}hidden{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
                         </svg>
-                        Hide Inactive
-                        {% else %}
-                        <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="showIcon" class="h-4 w-4 mr-1.5 text-gray-500 {% if show_inactive %}hidden{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                         </svg>
-                        Show Inactive
-                        {% endif %}
-                    </a>
+                        <span id="toggleText">{% if show_inactive %}Hide Inactive{% else %}Show Inactive{% endif %}</span>
+                    </button>
                     <a href="{% url 'billing_code_new' %}"
                        class="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
                         <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -64,11 +60,33 @@
                 {% endif %}
             </div>
 
+            <!-- Filter Chips -->
+            {% if applications_with_billing_codes %}
+            <div class="mt-4">
+                <div class="flex flex-wrap gap-2 items-center">
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Filter by Application:</span>
+                    <a href="?{% if show_inactive %}show_inactive=true&{% endif %}{% if search_query %}search={{ search_query|urlencode }}&{% endif %}sort={{ sort_by }}&dir={{ sort_dir }}"
+                       class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors duration-150 {% if not application_filter %}bg-blue-100 text-blue-800 border-2 border-blue-500{% else %}bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200{% endif %}">
+                        All
+                    </a>
+                    {% for app in applications_with_billing_codes %}
+                    <a href="?application={{ app.id }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}&sort={{ sort_by }}&dir={{ sort_dir }}"
+                       class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors duration-150 {% if application_filter == app.id|stringformat:'s' %}bg-blue-100 text-blue-800 border-2 border-blue-500{% else %}bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200{% endif %}"
+                       title="{{ app.name }}">
+                        {% if app.acronym %}{{ app.acronym }}{% else %}{{ app.name|truncatechars:20 }}{% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Results Summary -->
-            {% if search_query or page_obj.paginator.count > 0 %}
+            {% if search_query or application_filter or page_obj.paginator.count > 0 %}
             <div class="mt-3 text-sm text-gray-600">
                 {% if search_query %}
                     Showing {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "{{ search_query }}"
+                {% elif application_filter %}
+                    Showing {{ page_obj.paginator.count }} billing code{{ page_obj.paginator.count|pluralize }} for selected application
                 {% else %}
                     Showing {{ page_obj.paginator.count }} billing code{{ page_obj.paginator.count|pluralize }}
                 {% endif %}
@@ -84,93 +102,187 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Group</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Replaces</th>
-                            <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projects</th>
-                            <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Actions</th>
+                            <th class="px-2 py-1.5 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Actions</th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                                <a href="?sort=status&dir={% if sort_by == 'status' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="group inline-flex items-center hover:text-gray-900">
+                                    Status
+                                    <span class="ml-1 flex-none rounded {% if sort_by == 'status' %}text-gray-900{% else %}text-gray-400 group-hover:text-gray-700{% endif %}">
+                                        {% if sort_by == 'status' %}
+                                            {% if sort_dir == 'asc' %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                            {% else %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {% endif %}
+                                        {% else %}
+                                            <svg class="h-3 w-3 opacity-0 group-hover:opacity-100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <a href="?sort=name&dir={% if sort_by == 'name' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="group inline-flex items-center hover:text-gray-900">
+                                    Name
+                                    <span class="ml-1 flex-none rounded {% if sort_by == 'name' %}text-gray-900{% else %}text-gray-400 group-hover:text-gray-700{% endif %}">
+                                        {% if sort_by == 'name' %}
+                                            {% if sort_dir == 'asc' %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                            {% else %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {% endif %}
+                                        {% else %}
+                                            <svg class="h-3 w-3 opacity-0 group-hover:opacity-100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                <a href="?sort=code&dir={% if sort_by == 'code' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="group inline-flex items-center hover:text-gray-900">
+                                    Code
+                                    <span class="ml-1 flex-none rounded {% if sort_by == 'code' %}text-gray-900{% else %}text-gray-400 group-hover:text-gray-700{% endif %}">
+                                        {% if sort_by == 'code' %}
+                                            {% if sort_dir == 'asc' %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                            {% else %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {% endif %}
+                                        {% else %}
+                                            <svg class="h-3 w-3 opacity-0 group-hover:opacity-100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                                <a href="?sort=application&dir={% if sort_by == 'application' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="group inline-flex items-center hover:text-gray-900">
+                                    Application
+                                    <span class="ml-1 flex-none rounded {% if sort_by == 'application' %}text-gray-900{% else %}text-gray-400 group-hover:text-gray-700{% endif %}">
+                                        {% if sort_by == 'application' %}
+                                            {% if sort_dir == 'asc' %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                            {% else %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {% endif %}
+                                        {% else %}
+                                            <svg class="h-3 w-3 opacity-0 group-hover:opacity-100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                                <a href="?sort=group&dir={% if sort_by == 'group' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="group inline-flex items-center hover:text-gray-900">
+                                    Group
+                                    <span class="ml-1 flex-none rounded {% if sort_by == 'group' %}text-gray-900{% else %}text-gray-400 group-hover:text-gray-700{% endif %}">
+                                        {% if sort_by == 'group' %}
+                                            {% if sort_dir == 'asc' %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                            {% else %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {% endif %}
+                                        {% else %}
+                                            <svg class="h-3 w-3 opacity-0 group-hover:opacity-100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Replaces</th>
+                            <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                <a href="?sort=projects&dir={% if sort_by == 'projects' and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}" class="group inline-flex items-center hover:text-gray-900">
+                                    Projects
+                                    <span class="ml-1 flex-none rounded {% if sort_by == 'projects' %}text-gray-900{% else %}text-gray-400 group-hover:text-gray-700{% endif %}">
+                                        {% if sort_by == 'projects' %}
+                                            {% if sort_dir == 'asc' %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                            {% else %}
+                                                <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {% endif %}
+                                        {% else %}
+                                            <svg class="h-3 w-3 opacity-0 group-hover:opacity-100" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for model in models %}
                         <tr class="{% if not model.is_active %}bg-gray-100 opacity-75{% else %}hover:bg-gray-50{% endif %} transition-colors duration-150"
                             ondblclick='window.location.href = "{% url 'billing_code_detail' model_id=model.id %}"'>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                {% if model.is_active %}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <svg class="mr-1 h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                    Active
-                                </span>
-                                {% else %}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-300 text-gray-800">
-                                    <svg class="mr-1 h-2.5 w-2.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
-                                    </svg>
-                                    Retired
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                <div class="text-sm font-medium {% if model.is_active %}text-gray-900{% else %}text-gray-500{% endif %}">{{ model.name }}</div>
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                <div class="text-xs font-mono {% if model.is_active %}text-gray-700 bg-gray-50{% else %}text-gray-500 bg-gray-100{% endif %} px-2 py-1 rounded border border-gray-200 inline-block">{{ model.billing_code }}</div>
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                {% if model.application %}
-                                <a href="{% url 'application_detail' model_id=model.application.id %}" class="text-sm text-blue-600 hover:text-blue-900 truncate block max-w-xs" title="{{ model.application.name }}">{{ model.application.name }}</a>
-                                {% else %}
-                                <span class="text-sm text-gray-400">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                {% if model.application_group %}
-                                <a href="{% url 'application_group_detail' model_id=model.application_group.id %}" class="text-sm text-blue-600 hover:text-blue-900 truncate block max-w-xs" title="{{ model.application_group.name }}">{{ model.application_group.name }}</a>
-                                {% else %}
-                                <span class="text-sm text-gray-400">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                {% if model.replaces %}
-                                <a href="{% url 'billing_code_detail' model_id=model.replaces.id %}" class="text-sm text-blue-600 hover:text-blue-900 truncate block max-w-xs" title="{{ model.replaces.name }}">{{ model.replaces.name }}</a>
-                                {% else %}
-                                <span class="text-sm text-gray-400">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-3 py-2">
-                                {% if model.projects.count > 0 %}
-                                <span class="text-xs text-gray-600">{{ model.projects.count }} project{{ model.projects.count|pluralize }}</span>
-                                {% else %}
-                                <span class="text-sm text-gray-400">-</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap text-center">
-                                <div class="flex justify-center space-x-1.5">
+                            <td class="px-2 py-1.5 whitespace-nowrap text-center">
+                                <div class="flex justify-center space-x-1">
                                     <a href="{% url 'billing_code_detail' model_id=model.id %}"
                                        class="text-blue-600 hover:text-blue-900" title="View">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                         </svg>
                                     </a>
                                     <a href="{% url 'billing_code_edit' model_id=model.id %}"
                                        class="text-gray-600 hover:text-gray-900" title="Edit">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
                                     </a>
                                     <button onclick="openDeleteModal('{{ model.id }}', '{{ model.name|escapejs }}')"
                                             class="text-red-600 hover:text-red-900" title="Delete">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
                                     </button>
                                 </div>
+                            </td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                                {% if model.is_active %}
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                                    <svg class="mr-0.5 h-2 w-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Active
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-gray-300 text-gray-800">
+                                    <svg class="mr-0.5 h-2 w-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Retired
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                                <div class="text-sm font-medium {% if model.is_active %}text-gray-900{% else %}text-gray-500{% endif %} truncate max-w-xs" title="{{ model.name }}">{{ model.name }}</div>
+                            </td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                                <div class="text-xs font-mono {% if model.is_active %}text-gray-700 bg-gray-50{% else %}text-gray-500 bg-gray-100{% endif %} px-1.5 py-0.5 rounded border border-gray-200 inline-block truncate max-w-full" title="{{ model.billing_code }}">{{ model.billing_code }}</div>
+                            </td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                                {% if model.application %}
+                                <a href="{% url 'application_detail' model_id=model.application.id %}" class="text-sm text-blue-600 hover:text-blue-900 truncate block" title="{{ model.application.name }}">{{ model.application.name }}</a>
+                                {% else %}
+                                <span class="text-sm text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                                {% if model.application_group %}
+                                <a href="{% url 'application_group_detail' model_id=model.application_group.id %}" class="text-sm text-blue-600 hover:text-blue-900 truncate block" title="{{ model.application_group.name }}">{{ model.application_group.name }}</a>
+                                {% else %}
+                                <span class="text-sm text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-2 py-1.5 whitespace-nowrap">
+                                {% if model.replaces %}
+                                <a href="{% url 'billing_code_detail' model_id=model.replaces.id %}" class="text-sm text-blue-600 hover:text-blue-900 truncate block" title="{{ model.replaces.name }}">{{ model.replaces.name }}</a>
+                                {% else %}
+                                <span class="text-sm text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-2 py-1.5">
+                                {% if model.projects.count > 0 %}
+                                <div class="text-xs text-gray-600">
+                                    {% for project in model.projects.all %}
+                                        <a href="{% url 'project_detail' model_id=project.id %}" class="text-blue-600 hover:text-blue-900 block truncate" title="{{ project.name }}">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <span class="text-sm text-gray-400">-</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}
@@ -202,7 +314,7 @@
             <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                 <div class="flex-1 flex justify-between sm:hidden">
                     {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                    <a href="?page={{ page_obj.previous_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}&sort={{ sort_by }}&dir={{ sort_dir }}"
                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                         Previous
                     </a>
@@ -212,7 +324,7 @@
                     </span>
                     {% endif %}
                     {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                    <a href="?page={{ page_obj.next_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}&sort={{ sort_by }}&dir={{ sort_dir }}"
                        class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                         Next
                     </a>
@@ -237,7 +349,7 @@
                     <div>
                         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                             {% if page_obj.has_previous %}
-                            <a href="?page={{ page_obj.previous_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                            <a href="?page={{ page_obj.previous_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}&sort={{ sort_by }}&dir={{ sort_dir }}"
                                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                 <span class="sr-only">Previous</span>
                                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -258,7 +370,7 @@
                                     {{ num }}
                                 </span>
                                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <a href="?page={{ num }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                                <a href="?page={{ num }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}&sort={{ sort_by }}&dir={{ sort_dir }}"
                                    class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                     {{ num }}
                                 </a>
@@ -266,7 +378,7 @@
                             {% endfor %}
 
                             {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}"
+                            <a href="?page={{ page_obj.next_page_number }}{% if show_inactive %}&show_inactive=true{% endif %}{% if search_query %}&search={{ search_query|urlencode }}{% endif %}&sort={{ sort_by }}&dir={{ sort_dir }}"
                                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
                                 <span class="sr-only">Next</span>
                                 <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -329,6 +441,48 @@
 </div>
 
 <script>
+const STORAGE_KEY = 'billingCodeShowInactive';
+
+// Load preference from local storage on page load
+function loadInactivePreference() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved !== null) {
+        const currentShowInactive = {{ show_inactive|lower }};
+        const savedShowInactive = saved === 'true';
+
+        // If the saved preference differs from the current URL state, redirect
+        if (currentShowInactive !== savedShowInactive) {
+            const url = new URL(window.location);
+            if (savedShowInactive) {
+                url.searchParams.set('show_inactive', 'true');
+            } else {
+                url.searchParams.delete('show_inactive');
+            }
+            window.location.href = url.toString();
+        }
+    }
+}
+
+// Toggle inactive billing codes visibility
+function toggleInactive() {
+    const currentShowInactive = {{ show_inactive|lower }};
+    const newShowInactive = !currentShowInactive;
+
+    // Save to local storage
+    localStorage.setItem(STORAGE_KEY, newShowInactive.toString());
+
+    // Build new URL
+    const url = new URL(window.location);
+    if (newShowInactive) {
+        url.searchParams.set('show_inactive', 'true');
+    } else {
+        url.searchParams.delete('show_inactive');
+    }
+
+    // Redirect
+    window.location.href = url.toString();
+}
+
 function openDeleteModal(id, name) {
     document.getElementById('deleteItemName').textContent = name;
     document.getElementById('deleteLink').href = "{% url 'billing_code_delete' model_id=0 %}".replace('/0/', '/' + id + '/');
@@ -345,5 +499,8 @@ document.addEventListener('keydown', function(event) {
         closeDeleteModal();
     }
 });
+
+// Load preference when page loads
+loadInactivePreference();
 </script>
 {% endblock %}
