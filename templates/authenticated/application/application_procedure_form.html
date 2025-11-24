@@ -1,0 +1,219 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'application_procedure_list' model_id=application.id %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if step %}Edit{% else %}Add{% endif %} Procedure Step</h1>
+                    <p class="mt-1 text-sm text-gray-500">{{ application.acronym|default:application.name }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            {{ form.application }}
+            {{ form.order }}
+            {{ form.step_data }}
+
+            <!-- Basic Information Card -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Step Information</h2>
+                </div>
+                <div class="px-6 py-6 space-y-6">
+                    <!-- Step Name -->
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Step Name <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Step Type -->
+                    <div>
+                        <label for="{{ form.step_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Step Type <span class="text-red-500">*</span>
+                        </label>
+                        {{ form.step_type }}
+                        {% if form.step_type.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.step_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Type-Specific Fields Card -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Step Content</h2>
+                </div>
+                <div class="px-6 py-6 space-y-6">
+                    <!-- Markdown Fields -->
+                    <div id="markdown-fields" class="step-type-fields">
+                        <div>
+                            <label for="{{ form.markdown_content.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.markdown_content.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.markdown_content }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
+                            </p>
+                            {% if form.markdown_content.errors %}
+                                <p class="mt-2 text-sm text-red-600">{{ form.markdown_content.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Code Fields -->
+                    <div id="code-fields" class="step-type-fields" style="display: none;">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="{{ form.code_language.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ form.code_language.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.code_language }}
+                                {% if form.code_language.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.code_language.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.code_content.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ form.code_content.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.code_content }}
+                                {% if form.code_content.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.code_content.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Reference Fields -->
+                    <div id="file-fields" class="step-type-fields" style="display: none;">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="{{ form.file_path.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ form.file_path.label }} <span class="text-red-500">*</span>
+                                </label>
+                                {{ form.file_path }}
+                                {% if form.file_path.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.file_path.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.file_description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    {{ form.file_description.label }}
+                                </label>
+                                {{ form.file_description }}
+                                {% if form.file_description.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.file_description.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checklist Fields -->
+                    <div id="checklist-fields" class="step-type-fields" style="display: none;">
+                        <div>
+                            <label for="{{ form.checklist_items.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                {{ form.checklist_items.label }} <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.checklist_items }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                {{ form.checklist_items.help_text }}
+                            </p>
+                            {% if form.checklist_items.errors %}
+                                <p class="mt-2 text-sm text-red-600">{{ form.checklist_items.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes Card -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div>
+                        <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Notes
+                        </label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center justify-end gap-4">
+                <a href="{% url 'application_procedure_list' model_id=application.id %}"
+                   class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    {% if step %}Update{% else %}Create{% endif %} Step
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stepTypeSelect = document.getElementById('id_step_type');
+            const markdownFields = document.getElementById('markdown-fields');
+            const codeFields = document.getElementById('code-fields');
+            const fileFields = document.getElementById('file-fields');
+            const checklistFields = document.getElementById('checklist-fields');
+
+            function showFieldsForType(type) {
+                // Hide all type-specific fields
+                markdownFields.style.display = 'none';
+                codeFields.style.display = 'none';
+                fileFields.style.display = 'none';
+                checklistFields.style.display = 'none';
+
+                // Show fields for selected type
+                if (type === 'markdown') {
+                    markdownFields.style.display = 'block';
+                } else if (type === 'code') {
+                    codeFields.style.display = 'block';
+                } else if (type === 'file_reference') {
+                    fileFields.style.display = 'block';
+                } else if (type === 'checklist') {
+                    checklistFields.style.display = 'block';
+                }
+            }
+
+            // Show fields for initial value
+            showFieldsForType(stepTypeSelect.value);
+
+            // Update fields when type changes
+            stepTypeSelect.addEventListener('change', function() {
+                showFieldsForType(this.value);
+            });
+        });
+    </script>
+{% endblock %}

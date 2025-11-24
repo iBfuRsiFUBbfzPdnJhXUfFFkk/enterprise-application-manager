@@ -19,7 +19,7 @@ fi
 # Run the development server
 echo "Starting Django development server..."
 echo "Settings: $DJANGO_SETTINGS_MODULE"
-echo "Access the application at: http://127.0.0.1:8000"
+echo "Access the application at: http://127.0.0.1:50478"
 echo ""
 
-.venv/bin/python manage.py runserver
+.venv/bin/python manage.py runserver 50478

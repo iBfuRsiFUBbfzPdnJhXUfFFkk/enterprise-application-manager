@@ -168,6 +168,8 @@
         .prose-sm h2 { font-size: 1.15em; }
         .prose-sm h3 { font-size: 1.05em; }
     </style>
+
+    {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50">
 {% include 'authenticated/base_authenticated_navigation.html' %}

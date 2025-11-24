@@ -1,6 +1,11 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% load static %}
 
+{% block extra_css %}
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
 {% block content %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
@@ -78,7 +83,7 @@
                                 Projects
                             </label>
                             {{ form.projects }}
-                            <p class="mt-1 text-xs text-gray-500">Select multiple projects by holding Ctrl (Cmd on Mac)</p>
+                            <p class="mt-1 text-xs text-gray-500">Type to search and select multiple projects</p>
                             {% if form.projects.errors %}<p class="mt-2 text-sm text-red-600">{{ form.projects.errors.0 }}</p>{% endif %}
                         </div>
                     </div>
@@ -238,5 +243,41 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
             border-color: #3b82f6;
         }
+
+        /* Select2 minimal styling - only essential overrides */
+        .select2-dropdown {
+            z-index: 9999 !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #3b82f6 !important;
+            border-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #3b82f6 !important;
+        }
     </style>
+{% endblock %}
+
+{% block scripts %}
+    <!-- Select2 JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 for projects field
+            $('.select2-projects').select2({
+                placeholder: 'Type to search and select multiple projects',
+                allowClear: true,
+                width: '100%',
+                theme: 'default'
+            });
+        });
+    </script>
 {% endblock %}

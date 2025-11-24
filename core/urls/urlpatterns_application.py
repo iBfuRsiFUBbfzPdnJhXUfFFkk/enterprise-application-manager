@@ -11,6 +11,11 @@ from core.views.application.application_logging_dashboard_view import (
 from core.views.application.application_pipeline_dashboard_view import (
     application_pipeline_dashboard_view,
 )
+from core.views.application.application_procedure_add_view import application_procedure_add_view
+from core.views.application.application_procedure_delete_view import application_procedure_delete_view
+from core.views.application.application_procedure_edit_view import application_procedure_edit_view
+from core.views.application.application_procedure_list_view import application_procedure_list_view
+from core.views.application.application_procedure_reorder_view import application_procedure_reorder_view
 from core.views.application.application_view import application_view
 
 urlpatterns_application: list[URLPattern | URLResolver] = [
@@ -31,5 +36,31 @@ urlpatterns_application: list[URLPattern | URLResolver] = [
         name="application_logging_dashboard",
         route="application/logging-dashboard/",
         view=application_logging_dashboard_view,
+    ),
+    # Procedure management URLs
+    path(
+        name="application_procedure_list",
+        route="application/<int:model_id>/procedure/",
+        view=application_procedure_list_view,
+    ),
+    path(
+        name="application_procedure_add",
+        route="application/<int:model_id>/procedure/add/",
+        view=application_procedure_add_view,
+    ),
+    path(
+        name="application_procedure_edit",
+        route="application/<int:model_id>/procedure/<int:step_id>/edit/",
+        view=application_procedure_edit_view,
+    ),
+    path(
+        name="application_procedure_delete",
+        route="application/<int:model_id>/procedure/<int:step_id>/delete/",
+        view=application_procedure_delete_view,
+    ),
+    path(
+        name="application_procedure_reorder",
+        route="application/<int:model_id>/procedure/reorder/",
+        view=application_procedure_reorder_view,
     ),
 ]
