@@ -4,6 +4,7 @@ from django.http import HttpRequest, HttpResponse
 
 from core.models.application import Application
 from core.models.billing_code import BillingCode
+from core.models.person import Person
 from core.utilities.base_render import base_render
 
 
@@ -15,6 +16,7 @@ def billing_code_view(request: HttpRequest) -> HttpResponse:
     sort_by = request.GET.get('sort', 'name')
     sort_dir = request.GET.get('dir', 'asc')
     application_filter = request.GET.get('application', '')
+    project_manager_filter = request.GET.get('project_manager', '')
 
     # Start with base queryset
     if show_inactive:
@@ -25,6 +27,10 @@ def billing_code_view(request: HttpRequest) -> HttpResponse:
     # Apply application filter if provided
     if application_filter:
         queryset = queryset.filter(application_id=application_filter)
+
+    # Apply project manager filter if provided
+    if project_manager_filter:
+        queryset = queryset.filter(project_manager_id=project_manager_filter)
 
     # Apply search filter if provided
     if search_query:
@@ -70,6 +76,11 @@ def billing_code_view(request: HttpRequest) -> HttpResponse:
         billingcode__isnull=False
     ).distinct().order_by('name')
 
+    # Get project managers that have billing codes
+    project_managers_with_billing_codes = Person.objects.filter(
+        billing_codes_managed__isnull=False
+    ).distinct().order_by('name_last', 'name_first')
+
     context = {
         'models': page_obj,
         'page_obj': page_obj,
@@ -78,7 +89,9 @@ def billing_code_view(request: HttpRequest) -> HttpResponse:
         'sort_by': sort_by,
         'sort_dir': sort_dir,
         'application_filter': application_filter,
+        'project_manager_filter': project_manager_filter,
         'applications_with_billing_codes': applications_with_billing_codes,
+        'project_managers_with_billing_codes': project_managers_with_billing_codes,
     }
 
     return base_render(
