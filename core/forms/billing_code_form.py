@@ -5,6 +5,7 @@ from core.forms.common.base_model_form_meta import BaseModelFormMeta
 from core.forms.common.generic_person_choice_field import generic_person_choice_field
 from core.models.billing_code import BillingCode
 from core.models.project import Project
+from core.models.team import Team
 
 
 class BillingCodeForm(BaseModelForm):
@@ -32,3 +33,8 @@ class BillingCodeForm(BaseModelForm):
             self.fields['replaces'].queryset = queryset
             self.fields['replaces'].label_from_instance = lambda obj: f"{obj.name} - {obj.billing_code} {'(Active)' if obj.is_active else '(Retired)'}"
             self.fields['replaces'].required = False
+
+        # Customize team field display
+        if 'team' in self.fields:
+            self.fields['team'].queryset = Team.objects.all().order_by('name')
+            self.fields['team'].label_from_instance = lambda obj: obj.name

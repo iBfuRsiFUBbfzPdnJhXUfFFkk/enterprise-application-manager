@@ -6,6 +6,7 @@ from django_generic_model_fields.create_generic_varchar import create_generic_va
 from core.models.application import Application
 from core.models.application_group import ApplicationGroup
 from core.models.person import Person
+from core.models.team import Team
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
@@ -17,6 +18,7 @@ class BillingCode(AbstractBaseModel, AbstractComment, AbstractName):
     billing_code = create_generic_varchar()
     is_active = create_generic_boolean(default=True)
     project_manager = create_generic_fk(to=Person, related_name='billing_codes_managed')
+    team = create_generic_fk(to=Team, related_name='billing_codes')
     replaces = create_generic_fk(to='self', related_name='replaced_by_codes')
 
     def clean(self):
