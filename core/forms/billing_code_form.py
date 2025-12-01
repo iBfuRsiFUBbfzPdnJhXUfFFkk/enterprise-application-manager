@@ -2,11 +2,14 @@ from django.forms import SelectMultiple
 
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
+from core.forms.common.generic_person_choice_field import generic_person_choice_field
 from core.models.billing_code import BillingCode
 from core.models.project import Project
 
 
 class BillingCodeForm(BaseModelForm):
+    project_manager = generic_person_choice_field(is_project_manager=True)
+
     class Meta(BaseModelFormMeta):
         model = BillingCode
 
