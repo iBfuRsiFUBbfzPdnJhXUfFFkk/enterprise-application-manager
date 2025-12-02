@@ -69,6 +69,7 @@ class Application(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractCom
     person_product_owner = create_generic_fk(related_name='applications_as_product_owner', to=Person)
     person_project_manager = create_generic_fk(related_name='applications_as_project_manager', to=Person)
     person_scrum_master = create_generic_fk(related_name='applications_as_scrum_master', to=Person)
+    person_smes = create_generic_m2m(related_name='applications_sme_of', to=Person)
     person_stakeholders = create_generic_m2m(related_name='applications_stakeholder_of', to=Person)
     service_providers = create_generic_m2m(related_name='applications_that_use_service_provider', to=ServiceProvider)
     tools = create_generic_m2m(related_name='applications_that_use_tool', to=Tool)
