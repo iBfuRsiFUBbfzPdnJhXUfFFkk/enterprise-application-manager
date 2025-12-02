@@ -287,6 +287,26 @@
             </div>
             {% endif %}
 
+            <!-- Subject Matter Experts (SMEs) -->
+            {% if model.person_smes.exists %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Subject Matter Experts (SMEs)</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="divide-y divide-gray-200">
+                        {% for sme in model.person_smes.all %}
+                        <li class="py-3">
+                            <a href="{% url 'person_detail' model_id=sme.id %}" class="text-blue-600 hover:text-blue-900">
+                                {{ sme.name_last }}, {{ sme.name_first }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Links -->
             {% if model.link_production_server or model.link_gitlab_repository or model.link_teams_channel %}
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
