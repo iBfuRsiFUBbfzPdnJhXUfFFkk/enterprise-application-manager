@@ -24,6 +24,7 @@ class ApplicationForm(BaseModelForm):
     person_product_owner = generic_person_choice_field(is_product_owner=True)
     person_project_manager = generic_person_choice_field(is_project_manager=True)
     person_scrum_master = generic_person_choice_field(is_scrum_master=True)
+    person_smes = generic_person_multiple_choice_field(is_sme=True)
     person_stakeholders = generic_person_multiple_choice_field(is_stakeholder=True)
     service_providers = generic_multiple_choice_field(queryset=ServiceProvider.objects.all())
     tools = generic_multiple_choice_field(queryset=Tool.objects.all())
@@ -39,6 +40,7 @@ class ApplicationForm(BaseModelForm):
             'service_providers',
             'tools',
             'person_developers',
+            'person_smes',
             'person_stakeholders',
         ]
 
