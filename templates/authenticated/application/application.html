@@ -609,8 +609,45 @@
 // View state management
 let currentView = 'list';
 
+// URL Parameter Utilities
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        search: params.get('search') || '',
+        platform: params.get('platform') || '',
+        legacy: params.get('legacy') || '',
+        pipeline: params.get('pipeline') || '',
+        view: params.get('view') || localStorage.getItem('eam_app_view') || 'list'
+    };
+}
+
+function updateUrlParams(params) {
+    const url = new URL(window.location);
+    Object.keys(params).forEach(key => {
+        if (params[key]) {
+            url.searchParams.set(key, params[key]);
+        } else {
+            url.searchParams.delete(key);
+        }
+    });
+    history.replaceState({}, '', url);
+}
+
+function getCurrentFilterState() {
+    return {
+        search: document.getElementById('search-input').value,
+        platform: document.getElementById('platform-filter').value,
+        legacy: document.getElementById('legacy-filter').value,
+        pipeline: document.getElementById('pipeline-filter').value,
+        view: currentView
+    };
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
+    // Get state from URL
+    const urlParams = getUrlParams();
+
     // Populate platform filter
     const platforms = new Set();
     document.querySelectorAll('.app-card, .app-row').forEach(item => {
@@ -626,25 +663,35 @@ document.addEventListener('DOMContentLoaded', function() {
         platformFilter.appendChild(option);
     });
 
-    // Set initial view
-    setView(localStorage.getItem('eam_app_view') || 'list');
+    // Set filter inputs from URL
+    document.getElementById('search-input').value = urlParams.search;
+    document.getElementById('platform-filter').value = urlParams.platform;
+    document.getElementById('legacy-filter').value = urlParams.legacy;
+    document.getElementById('pipeline-filter').value = urlParams.pipeline;
+
+    // Set initial view from URL
+    setView(urlParams.view);
 
     // Setup event listeners
     document.getElementById('search-input').addEventListener('input', function() {
         filterApplications();
         updateExportUrl();
+        updateUrlParams(getCurrentFilterState());
     });
     document.getElementById('platform-filter').addEventListener('change', function() {
         filterApplications();
         updateExportUrl();
+        updateUrlParams(getCurrentFilterState());
     });
     document.getElementById('legacy-filter').addEventListener('change', function() {
         filterApplications();
         updateExportUrl();
+        updateUrlParams(getCurrentFilterState());
     });
     document.getElementById('pipeline-filter').addEventListener('change', function() {
         filterApplications();
         updateExportUrl();
+        updateUrlParams(getCurrentFilterState());
     });
 
     // Initial filter
@@ -655,6 +702,44 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setView(view) {
+    currentView = view;
+    localStorage.setItem('eam_app_view', view);
+
+    // Update URL
+    updateUrlParams(getCurrentFilterState());
+
+    const gridView = document.getElementById('grid-view');
+    const listView = document.getElementById('list-view');
+    const pinnedGridView = document.getElementById('pinned-grid-view');
+    const pinnedListView = document.getElementById('pinned-list-view');
+    const gridBtn = document.getElementById('view-grid');
+    const listBtn = document.getElementById('view-list');
+
+    if (view === 'grid') {
+        gridView.classList.remove('hidden');
+        listView.classList.add('hidden');
+        if (pinnedGridView) pinnedGridView.classList.remove('hidden');
+        if (pinnedListView) pinnedListView.classList.add('hidden');
+        gridBtn.classList.add('text-blue-600');
+        gridBtn.classList.remove('text-gray-400');
+        listBtn.classList.add('text-gray-400');
+        listBtn.classList.remove('text-blue-600');
+    } else {
+        gridView.classList.add('hidden');
+        listView.classList.remove('hidden');
+        if (pinnedGridView) pinnedGridView.classList.add('hidden');
+        if (pinnedListView) pinnedListView.classList.remove('hidden');
+        listBtn.classList.add('text-blue-600');
+        listBtn.classList.remove('text-gray-400');
+        gridBtn.classList.add('text-gray-400');
+        gridBtn.classList.remove('text-blue-600');
+    }
+
+    filterApplications();
+    initializeDragAndDrop();
+}
+
+function setViewWithoutUrlUpdate(view) {
     currentView = view;
     localStorage.setItem('eam_app_view', view);
 
@@ -920,6 +1005,25 @@ async function saveNewPinOrder(container, isGridView) {
         window.location.reload();
     }
 }
+
+// Handle browser back/forward navigation
+window.addEventListener('popstate', function(event) {
+    // Read URL params
+    const urlParams = getUrlParams();
+
+    // Update UI inputs
+    document.getElementById('search-input').value = urlParams.search;
+    document.getElementById('platform-filter').value = urlParams.platform;
+    document.getElementById('legacy-filter').value = urlParams.legacy;
+    document.getElementById('pipeline-filter').value = urlParams.pipeline;
+
+    // Update view without triggering URL update
+    setViewWithoutUrlUpdate(urlParams.view);
+
+    // Apply filters
+    filterApplications();
+    updateExportUrl();
+});
 </script>
 
 <style>
