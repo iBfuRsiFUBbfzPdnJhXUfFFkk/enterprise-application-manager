@@ -606,6 +606,9 @@
 </div>
 
 <script>
+// CSRF Token from Django
+const CSRF_TOKEN = '{{ csrf_token }}';
+
 // View state management
 let currentView = 'list';
 
@@ -869,6 +872,12 @@ function updateExportUrl() {
 
 // Pin functionality
 function getCsrfToken() {
+    // Use the Django template variable first (most reliable)
+    if (CSRF_TOKEN) {
+        return CSRF_TOKEN;
+    }
+
+    // Fallback: try to get from cookie
     const name = 'csrftoken';
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
@@ -877,6 +886,13 @@ function getCsrfToken() {
             return decodeURIComponent(cookie.substring(name.length + 1));
         }
     }
+
+    // Fallback: try to get from hidden input in form
+    const csrfInput = document.querySelector('input[name="csrfmiddlewaretoken"]');
+    if (csrfInput) {
+        return csrfInput.value;
+    }
+
     return null;
 }
 
