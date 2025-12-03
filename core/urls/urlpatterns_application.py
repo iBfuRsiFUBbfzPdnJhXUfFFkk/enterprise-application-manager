@@ -9,6 +9,8 @@ from core.views.application.application_export_docx_view import application_expo
 from core.views.application.application_logging_dashboard_view import (
     application_logging_dashboard_view,
 )
+from core.views.application.application_pin_reorder_view import application_pin_reorder_view
+from core.views.application.application_pin_toggle_view import application_pin_toggle_view
 from core.views.application.application_pipeline_dashboard_view import (
     application_pipeline_dashboard_view,
 )
@@ -63,6 +65,17 @@ urlpatterns_application: list[URLPattern | URLResolver] = [
         name="application_procedure_reorder",
         route="application/<int:model_id>/procedure/reorder/",
         view=application_procedure_reorder_view,
+    ),
+    # Pin management URLs
+    path(
+        name="application_pin_toggle",
+        route="application/pin/toggle/",
+        view=application_pin_toggle_view,
+    ),
+    path(
+        name="application_pin_reorder",
+        route="application/pin/reorder/",
+        view=application_pin_reorder_view,
     ),
     # Export
     path(
