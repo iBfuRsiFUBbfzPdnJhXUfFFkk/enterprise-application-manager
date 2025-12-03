@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.db import models, transaction
 from django.http import HttpRequest, JsonResponse
+from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 
 from core.models.application import Application
@@ -10,6 +11,7 @@ from core.models.application_pin import ApplicationPin
 from core.utilities.get_user_from_request import get_user_from_request
 
 
+@csrf_protect
 @require_POST
 @login_required
 @transaction.atomic

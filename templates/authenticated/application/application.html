@@ -903,11 +903,14 @@ async function togglePin(applicationId, event) {
     }
 
     try {
+        const csrfToken = getCsrfToken();
+        console.log('CSRF Token:', csrfToken); // Debug log
+
         const response = await fetch("{% url 'application_pin_toggle' %}", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken()
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify({ application_id: applicationId })
         });
@@ -917,9 +920,11 @@ async function togglePin(applicationId, event) {
             window.location.reload();  // Reload to show updated sections
         } else {
             console.error('Failed to toggle pin:', data.error);
+            alert('Failed to toggle pin: ' + data.error);
         }
     } catch (error) {
         console.error('Error toggling pin:', error);
+        alert('Error toggling pin. Check console for details.');
     }
 }
 
