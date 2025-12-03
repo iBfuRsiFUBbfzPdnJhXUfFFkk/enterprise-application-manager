@@ -16,7 +16,7 @@ ROLE_MAPPING = {
     'is_product_owner': 'Product Owner',
     'is_project_manager': 'Project Manager',
     'is_scrum_master': 'Scrum Master',
-    'is_sme': 'SME',
+    'is_sme': 'Subject Matter Expert',
     'is_stakeholder': 'Stakeholder',
 }
 

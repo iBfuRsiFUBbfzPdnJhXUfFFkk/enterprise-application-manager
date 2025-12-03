@@ -5,51 +5,71 @@ from django.db import migrations
 
 def create_and_protect_sme_role(apps, schema_editor):
     """
-    Create and mark the SME (Subject Matter Expert) role as protected.
-    This role is critical to the application and must always exist.
+    Create or update the Subject Matter Expert role as protected.
+    Merges any existing 'Subject Matter Expert' role into the protected version.
     """
     Role = apps.get_model('core', 'Role')
+    Person = apps.get_model('core', 'Person')
 
-    # Get or create the SME role
-    sme_role, created = Role.objects.get_or_create(
-        name='SME',
-        defaults={
-            'acronym': None,
-            'aliases_csv': 'Subject Matter Expert',
-            'comment': 'A Subject Matter Expert with specialized knowledge or expertise in the application domain. This is a protected role required by the system.',
-            'is_protected': True,
-        }
-    )
+    # First, check for existing "Subject Matter Expert" role
+    try:
+        old_sme_role = Role.objects.get(name='Subject Matter Expert')
+        # Role already exists - just make it protected and add acronym
+        old_sme_role.acronym = 'SME'
+        old_sme_role.is_protected = True
+        if not old_sme_role.comment:
+            old_sme_role.comment = 'A Subject Matter Expert with specialized knowledge or expertise in the application domain. This is a protected role required by the system.'
+        old_sme_role.save()
+        print("✓ Updated existing 'Subject Matter Expert' role - marked as protected with acronym 'SME'")
+    except Role.DoesNotExist:
+        # Role doesn't exist - create it
+        Role.objects.create(
+            name='Subject Matter Expert',
+            acronym='SME',
+            aliases_csv=None,
+            comment='A Subject Matter Expert with specialized knowledge or expertise in the application domain. This is a protected role required by the system.',
+            is_protected=True,
+        )
+        print("✓ Created 'Subject Matter Expert' role with acronym 'SME' and marked as protected")
 
-    if created:
-        print("✓ Created SME role and marked as protected")
-    else:
-        # Update existing SME role to be protected
-        if not sme_role.is_protected:
-            sme_role.is_protected = True
-            if not sme_role.comment:
-                sme_role.comment = 'A Subject Matter Expert with specialized knowledge or expertise in the application domain. This is a protected role required by the system.'
-            if not sme_role.aliases_csv:
-                sme_role.aliases_csv = 'Subject Matter Expert'
-            sme_role.save()
-            print("✓ Marked existing SME role as protected")
-        else:
-            print("✓ SME role already protected")
+    # Also check if someone created an 'SME' role (from our old migration)
+    # and merge it into 'Subject Matter Expert'
+    try:
+        wrong_sme_role = Role.objects.get(name='SME')
+        # Get the correct role
+        correct_sme_role = Role.objects.get(name='Subject Matter Expert')
+
+        # Transfer all people from wrong role to correct role
+        people_with_wrong_role = Person.objects.filter(roles=wrong_sme_role)
+        count = people_with_wrong_role.count()
+        for person in people_with_wrong_role:
+            # Add correct role
+            person.roles.add(correct_sme_role)
+            # Remove wrong role
+            person.roles.remove(wrong_sme_role)
+
+        # Delete the wrong role
+        wrong_sme_role.delete()
+        print(f"✓ Merged {count} people from 'SME' role to 'Subject Matter Expert' role and deleted 'SME' role")
+    except Role.DoesNotExist:
+        # No wrong 'SME' role exists, nothing to merge
+        pass
 
 
 def unprotect_sme_role(apps, schema_editor):
     """
-    Reverse migration: unprotect the SME role.
+    Reverse migration: unprotect the Subject Matter Expert role.
     """
     Role = apps.get_model('core', 'Role')
 
     try:
-        sme_role = Role.objects.get(name='SME')
+        sme_role = Role.objects.get(name='Subject Matter Expert')
         sme_role.is_protected = False
+        sme_role.acronym = None  # Remove acronym on rollback
         sme_role.save()
-        print("✓ Unprotected SME role")
+        print("✓ Unprotected 'Subject Matter Expert' role")
     except Role.DoesNotExist:
-        print("⚠ SME role does not exist")
+        print("⚠ 'Subject Matter Expert' role does not exist")
 
 
 class Migration(migrations.Migration):
