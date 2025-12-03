@@ -5,6 +5,7 @@ from core.views.application.application_add_view import application_add_view
 from core.views.application.application_delete_view import application_delete_view
 from core.views.application.application_detail_view import application_detail_view
 from core.views.application.application_edit_view import application_edit_view
+from core.views.application.application_export_docx_view import application_export_docx_view
 from core.views.application.application_logging_dashboard_view import (
     application_logging_dashboard_view,
 )
@@ -62,5 +63,11 @@ urlpatterns_application: list[URLPattern | URLResolver] = [
         name="application_procedure_reorder",
         route="application/<int:model_id>/procedure/reorder/",
         view=application_procedure_reorder_view,
+    ),
+    # Export
+    path(
+        name="application_export_docx",
+        route="application/export/",
+        view=application_export_docx_view,
     ),
 ]

@@ -9,13 +9,22 @@
                     <h1 class="text-3xl font-bold text-gray-900">Applications</h1>
                     <p class="mt-1 text-sm text-gray-500">Manage and track your enterprise applications</p>
                 </div>
-                <a href="{% url 'application_new' %}"
-                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    New Application
-                </a>
+                <div class="flex gap-3">
+                    <a id="export-docx-btn" href="{% url 'application_export_docx' %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Export DOCX
+                    </a>
+                    <a href="{% url 'application_new' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Application
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -369,10 +378,22 @@ document.addEventListener('DOMContentLoaded', function() {
     setView(localStorage.getItem('eam_app_view') || 'list');
 
     // Setup event listeners
-    document.getElementById('search-input').addEventListener('input', filterApplications);
-    document.getElementById('platform-filter').addEventListener('change', filterApplications);
-    document.getElementById('legacy-filter').addEventListener('change', filterApplications);
-    document.getElementById('pipeline-filter').addEventListener('change', filterApplications);
+    document.getElementById('search-input').addEventListener('input', function() {
+        filterApplications();
+        updateExportUrl();
+    });
+    document.getElementById('platform-filter').addEventListener('change', function() {
+        filterApplications();
+        updateExportUrl();
+    });
+    document.getElementById('legacy-filter').addEventListener('change', function() {
+        filterApplications();
+        updateExportUrl();
+    });
+    document.getElementById('pipeline-filter').addEventListener('change', function() {
+        filterApplications();
+        updateExportUrl();
+    });
 
     // Initial filter
     filterApplications();
@@ -479,6 +500,25 @@ document.addEventListener('keydown', function(event) {
         closeDeleteModal();
     }
 });
+
+// Update export URL with current filters
+function updateExportUrl() {
+    const searchTerm = document.getElementById('search-input').value;
+    const platformFilter = document.getElementById('platform-filter').value;
+    const legacyFilter = document.getElementById('legacy-filter').value;
+    const pipelineFilter = document.getElementById('pipeline-filter').value;
+
+    const baseUrl = "{% url 'application_export_docx' %}";
+    const params = new URLSearchParams();
+
+    if (searchTerm) params.append('search', searchTerm);
+    if (platformFilter) params.append('platform', platformFilter);
+    if (legacyFilter) params.append('legacy', legacyFilter);
+    if (pipelineFilter) params.append('pipeline', pipelineFilter);
+
+    const exportBtn = document.getElementById('export-docx-btn');
+    exportBtn.href = baseUrl + (params.toString() ? '?' + params.toString() : '');
+}
 </script>
 
 <style>
