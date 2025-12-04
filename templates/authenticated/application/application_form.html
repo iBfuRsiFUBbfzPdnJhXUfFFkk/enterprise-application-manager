@@ -426,6 +426,36 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Associated Links (M2M) -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                </svg>
+                                Reusable Links
+                            </h3>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label for="{{ form.links.id_for_label }}" class="block text-sm font-medium text-gray-700 cursor-help"
+                                           title="Reusable links associated with this application">
+                                        Links
+                                    </label>
+                                    <button type="button" onclick="openLinkModal(handleNewLink)"
+                                            class="inline-flex items-center px-2 py-1 text-xs font-medium text-cyan-600 hover:text-cyan-800 focus:outline-none">
+                                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Create New Link
+                                    </button>
+                                </div>
+                                {{ form.links }}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Type to search, click to select multiple links
+                                </p>
+                                {% if form.links.errors %}<p class="mt-2 text-sm text-red-600">{{ form.links.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -669,5 +699,22 @@
                 });
             });
         });
+
+        // Handle new link creation from modal
+        function handleNewLink(linkData) {
+            // Get the links Select2 field
+            const $linksField = $('.select2-links');
+
+            // Create new option and select it
+            const newOption = new Option(linkData.name, linkData.id, true, true);
+            $linksField.append(newOption);
+
+            // Trigger change to update Select2 UI
+            $linksField.trigger('change');
+
+            console.log('Link created and added:', linkData.name);
+        }
     </script>
+
+    {% include 'authenticated/common/components/link_modal.html' %}
 {% endblock %}

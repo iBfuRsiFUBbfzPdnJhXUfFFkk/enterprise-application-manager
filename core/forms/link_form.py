@@ -1,12 +1,20 @@
 from django import forms
+from django.forms import ModelMultipleChoiceField, SelectMultiple
 
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
+from core.models.application import Application
 from core.models.link import Link
 from core.utilities.generate_short_code import validate_short_code
 
 
 class LinkForm(BaseModelForm):
+    applications = ModelMultipleChoiceField(
+        queryset=Application.objects.all(),
+        required=False,
+        widget=SelectMultiple(attrs={'class': 'select2-applications'})
+    )
+
     class Meta(BaseModelFormMeta):
         model = Link
         fields = ['name', 'url', 'comment', 'short_code', 'is_short_url_active']
@@ -29,6 +37,10 @@ class LinkForm(BaseModelForm):
         # Set initial value to True for new instances
         if not self.instance.pk:
             self.fields['is_short_url_active'].initial = True
+
+        # Populate reverse M2M relationships for editing
+        if self.instance and self.instance.pk:
+            self.fields['applications'].initial = self.instance.applications.all()
 
     def clean_is_short_url_active(self):
         """
@@ -69,3 +81,16 @@ class LinkForm(BaseModelForm):
             raise forms.ValidationError(f'Short code "{short_code}" is already in use.')
 
         return short_code
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        if commit:
+            instance.save()
+            self.save_m2m()
+
+        # Save reverse M2M relationships
+        if self.instance.pk and 'applications' in self.cleaned_data:
+            self.instance.applications.set(self.cleaned_data['applications'])
+
+        return instance

@@ -167,6 +167,41 @@
             </div>
             {% endif %}
 
+            <!-- Applications Using This Link -->
+            {% if link.applications.exists %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Applications</h2>
+                    <p class="mt-1 text-sm text-gray-500">Applications using this link</p>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for app in link.applications.all %}
+                        <a href="{% url 'application_detail' model_id=app.id %}"
+                           class="block p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-md transition-all duration-150">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="text-base font-semibold text-gray-900">{{ app.acronym|default:app.name }}</h3>
+                                    {% if app.acronym and app.name %}
+                                    <p class="text-sm text-gray-500 truncate">{{ app.name }}</p>
+                                    {% endif %}
+                                    {% if app.type_lifecycle %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-2">
+                                        {{ app.type_lifecycle }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <svg class="h-5 w-5 text-blue-500 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Metadata -->
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
