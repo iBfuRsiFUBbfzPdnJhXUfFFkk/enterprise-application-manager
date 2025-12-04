@@ -9,6 +9,7 @@ from core.forms.common.generic_person_choice_field import generic_person_choice_
 from core.forms.common.generic_person_multiple_choice_field import generic_person_multiple_choice_field
 from core.models.application import Application
 from core.models.application_group import ApplicationGroup
+from core.models.link import Link
 from core.models.service_provider import ServiceProvider
 from core.models.tool import Tool
 
@@ -28,6 +29,7 @@ class ApplicationForm(BaseModelForm):
     person_stakeholders = generic_person_multiple_choice_field(is_stakeholder=True)
     service_providers = generic_multiple_choice_field(queryset=ServiceProvider.objects.all())
     tools = generic_multiple_choice_field(queryset=Tool.objects.all())
+    links = generic_multiple_choice_field(queryset=Link.objects.all())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,6 +39,7 @@ class ApplicationForm(BaseModelForm):
             'application_groups',
             'application_upstream_dependencies',
             'application_downstream_dependencies',
+            'links',
             'service_providers',
             'tools',
             'person_developers',
