@@ -182,6 +182,10 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
         table = document.add_table(rows=num_apps + 1, cols=8)
         table.style = 'Light Grid Accent 1'
 
+        # Disable auto-fit to respect manual column widths
+        table.autofit = False
+        table.allow_autofit = False
+
         # Set static column widths (in inches, total ~7.5" for portrait with 0.5" margins)
         column_widths = [
             1.2,   # Application
@@ -193,8 +197,11 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             0.95,  # Prod
             0.95,  # External
         ]
-        for idx, width in enumerate(column_widths):
-            table.columns[idx].width = Inches(width)
+
+        # Set column widths and also set width on every cell to enforce it
+        for row in table.rows:
+            for idx, width in enumerate(column_widths):
+                row.cells[idx].width = Inches(width)
 
         # Build header row
         headers = ['Application', 'Ext', 'Lead Developer', 'Project Manager',
