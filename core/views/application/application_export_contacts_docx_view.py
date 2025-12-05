@@ -64,7 +64,7 @@ def extract_hostname(url: str | None) -> str:
         return url
 
 
-def add_hyperlink_to_cell(cell, url: str | None, font_size: int = 8) -> None:
+def add_hyperlink_to_cell(cell, url: str | None, document: Document, font_size: int = 8) -> None:
     """Add clickable hyperlink to table cell showing only hostname."""
     if not url or url == "—":
         cell.text = "—"
@@ -79,15 +79,24 @@ def add_hyperlink_to_cell(cell, url: str | None, font_size: int = 8) -> None:
     # Get or create paragraph
     paragraph = cell.paragraphs[0]
 
+    # Add relationship for external hyperlink
+    part = paragraph.part
+    r_id = part.relate_to(url, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink', is_external=True)
+
     # Create hyperlink element
     hyperlink = OxmlElement('w:hyperlink')
-    hyperlink.set(qn('r:id'), '')
+    hyperlink.set(qn('r:id'), r_id)
 
     # Create run element
     run_element = OxmlElement('w:r')
 
     # Create run properties
     rPr = OxmlElement('w:rPr')
+
+    # Add hyperlink style
+    rStyle = OxmlElement('w:rStyle')
+    rStyle.set(qn('w:val'), 'Hyperlink')
+    rPr.append(rStyle)
 
     # Style as link (blue, underlined)
     color = OxmlElement('w:color')
@@ -111,9 +120,6 @@ def add_hyperlink_to_cell(cell, url: str | None, font_size: int = 8) -> None:
     run_element.append(text_element)
 
     hyperlink.append(run_element)
-
-    # Add tooltip with full URL
-    hyperlink.set(qn('w:tooltip'), url)
 
     # Add hyperlink to paragraph
     paragraph._p.append(hyperlink)
@@ -231,16 +237,16 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             row.cells[3].text = format_person_contact_with_title(app.person_project_manager)
 
             # Column 4: Dev URL (hyperlink with hostname)
-            add_hyperlink_to_cell(row.cells[4], app.link_development_server)
+            add_hyperlink_to_cell(row.cells[4], app.link_development_server, document)
 
             # Column 5: Stage URL (hyperlink with hostname)
-            add_hyperlink_to_cell(row.cells[5], app.link_staging_server)
+            add_hyperlink_to_cell(row.cells[5], app.link_staging_server, document)
 
             # Column 6: Prod URL (hyperlink with hostname)
-            add_hyperlink_to_cell(row.cells[6], app.link_production_server)
+            add_hyperlink_to_cell(row.cells[6], app.link_production_server, document)
 
             # Column 7: External Prod URL (hyperlink with hostname)
-            add_hyperlink_to_cell(row.cells[7], app.link_production_server_external)
+            add_hyperlink_to_cell(row.cells[7], app.link_production_server_external, document)
 
             # Format data cells (non-URL columns only)
             for col_idx in [0, 2, 3]:  # Skip column 1 (already formatted with alignment)
