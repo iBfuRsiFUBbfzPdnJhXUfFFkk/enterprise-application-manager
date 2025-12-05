@@ -8,7 +8,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Pt, RGBColor
+from docx.shared import Inches, Pt, RGBColor
 
 from core.models.application import Application
 from core.models.person import Person
@@ -176,8 +176,22 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
         table = document.add_table(rows=num_apps + 1, cols=8)
         table.style = 'Light Grid Accent 1'
 
+        # Set static column widths (in inches, total ~7.5" for portrait with 0.5" margins)
+        column_widths = [
+            1.2,   # Application
+            0.5,   # External? (icon)
+            1.5,   # Lead Developer
+            1.5,   # Project Manager
+            0.95,  # Dev
+            0.95,  # Stage
+            0.95,  # Prod
+            0.95,  # External
+        ]
+        for idx, width in enumerate(column_widths):
+            table.columns[idx].width = Inches(width)
+
         # Build header row
-        headers = ['Application', 'External?', 'Lead Developer', 'Project Manager',
+        headers = ['Application', 'Ext', 'Lead Developer', 'Project Manager',
                    'Dev', 'Stage', 'Prod', 'External']
         header_row = table.rows[0]
 
@@ -204,8 +218,11 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             # Column 0: Application name/acronym
             row.cells[0].text = get_name_acronym(acronym=app.acronym, name=app.name)
 
-            # Column 1: External? Yes/No
-            row.cells[1].text = "Yes" if app.is_externally_facing else "No"
+            # Column 1: External? (icon: ✓ for yes, blank for no)
+            row.cells[1].text = "✓" if app.is_externally_facing else ""
+            # Center the icon
+            for paragraph in row.cells[1].paragraphs:
+                paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
             # Column 2: Lead Developer with title
             row.cells[2].text = format_person_contact_with_title(app.person_lead_developer)
@@ -226,10 +243,15 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             add_hyperlink_to_cell(row.cells[7], app.link_production_server_external)
 
             # Format data cells (non-URL columns only)
-            for col_idx in [0, 1, 2, 3]:
+            for col_idx in [0, 2, 3]:  # Skip column 1 (already formatted with alignment)
                 for paragraph in row.cells[col_idx].paragraphs:
                     for run in paragraph.runs:
                         run.font.size = Pt(8)
+
+            # Format External icon column (column 1)
+            for paragraph in row.cells[1].paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(10)  # Slightly larger for visibility
 
             # Apply alternating row colors
             if row_idx % 2 == 0:
