@@ -185,7 +185,7 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
         # Set static column widths (in inches, total ~7.5" for portrait with 0.5" margins)
         column_widths = [
             1.2,   # Application
-            0.5,   # External? (icon)
+            0.31,  # External? (icon)
             1.5,   # Lead Developer
             1.5,   # Project Manager
             0.95,  # Dev
