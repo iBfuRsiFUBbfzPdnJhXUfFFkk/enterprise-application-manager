@@ -20,17 +20,25 @@ from core.views.application.utilities.application_docx_helpers import (
 from core.views.generic.generic_500 import generic_500
 
 
-def format_person_contact_with_title(person: Person | None) -> str:
-    """Format person as 'Last, First (Title)\\nemail' for contact lists."""
+def add_person_contact_to_cell(cell, person: Person | None, document: Document, font_size: int = 8) -> None:
+    """Add formatted person contact to cell with mailto: hyperlink for email."""
     if not person:
-        return "—"
+        cell.text = "—"
+        for paragraph in cell.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(font_size)
+        return
 
     first = person.coerced_name_first or ""
     last = person.coerced_name_last or ""
     email = person.coerced_communication_email or ""
 
     if not first and not last:
-        return "—"
+        cell.text = "—"
+        for paragraph in cell.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(font_size)
+        return
 
     # Get job title
     title = ""
@@ -44,11 +52,71 @@ def format_person_contact_with_title(person: Person | None) -> str:
     else:
         name_line = name
 
-    # Add email on second line
+    # Clear existing content
+    cell.text = ""
+    paragraph = cell.paragraphs[0]
+
+    # Add name and title as regular text
+    run = paragraph.add_run(name_line)
+    run.font.size = Pt(font_size)
+
+    # Add line break
+    paragraph.add_run("\n")
+
+    # Add email as mailto: hyperlink or plain text
     if email:
-        return f"{name_line}\n{email}"
+        # Create mailto: hyperlink
+        mailto_url = f"mailto:{email}"
+
+        # Add relationship for mailto hyperlink
+        part = paragraph.part
+        r_id = part.relate_to(mailto_url, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink', is_external=True)
+
+        # Create hyperlink element
+        hyperlink = OxmlElement('w:hyperlink')
+        hyperlink.set(qn('r:id'), r_id)
+
+        # Create run element
+        run_element = OxmlElement('w:r')
+
+        # Create run properties
+        rPr = OxmlElement('w:rPr')
+
+        # Add hyperlink style
+        rStyle = OxmlElement('w:rStyle')
+        rStyle.set(qn('w:val'), 'Hyperlink')
+        rPr.append(rStyle)
+
+        # Style as link (blue, underlined)
+        color = OxmlElement('w:color')
+        color.set(qn('w:val'), '0563C1')  # Word hyperlink blue
+        rPr.append(color)
+
+        underline = OxmlElement('w:u')
+        underline.set(qn('w:val'), 'single')
+        rPr.append(underline)
+
+        # Set font size
+        sz = OxmlElement('w:sz')
+        sz.set(qn('w:val'), str(font_size * 2))  # Half-points
+        rPr.append(sz)
+
+        run_element.append(rPr)
+
+        # Add email text
+        text_element = OxmlElement('w:t')
+        text_element.text = email
+        run_element.append(text_element)
+
+        hyperlink.append(run_element)
+
+        # Add hyperlink to paragraph
+        paragraph._p.append(hyperlink)
     else:
-        return f"{name_line}\n(No email)"
+        # No email - add plain text
+        run = paragraph.add_run("(No email)")
+        run.font.size = Pt(font_size)
+        run.italic = True
 
 
 def extract_hostname(url: str | None) -> str:
@@ -237,11 +305,11 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             for paragraph in row.cells[1].paragraphs:
                 paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-            # Column 2: Lead Developer with title
-            row.cells[2].text = format_person_contact_with_title(app.person_lead_developer)
+            # Column 2: Lead Developer with title and mailto: email
+            add_person_contact_to_cell(row.cells[2], app.person_lead_developer, document)
 
-            # Column 3: Project Manager with title
-            row.cells[3].text = format_person_contact_with_title(app.person_project_manager)
+            # Column 3: Project Manager with title and mailto: email
+            add_person_contact_to_cell(row.cells[3], app.person_project_manager, document)
 
             # Column 4: Dev URL (hyperlink with hostname)
             add_hyperlink_to_cell(row.cells[4], app.link_development_server, document)
@@ -255,11 +323,10 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             # Column 7: External Prod URL (hyperlink with hostname)
             add_hyperlink_to_cell(row.cells[7], app.link_production_server_external, document)
 
-            # Format data cells (non-URL columns only)
-            for col_idx in [0, 2, 3]:  # Skip column 1 (already formatted with alignment)
-                for paragraph in row.cells[col_idx].paragraphs:
-                    for run in paragraph.runs:
-                        run.font.size = Pt(8)
+            # Format data cells (column 0 only - others already formatted)
+            for paragraph in row.cells[0].paragraphs:
+                for run in paragraph.runs:
+                    run.font.size = Pt(8)
 
             # Format External icon column (column 1)
             for paragraph in row.cells[1].paragraphs:
