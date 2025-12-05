@@ -186,16 +186,16 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
         table.autofit = False
         table.allow_autofit = False
 
-        # Set static column widths (in inches, total ~7.5" for portrait with 0.5" margins)
+        # Set static column widths (in inches, total 7.47" for portrait with 0.5" margins)
         column_widths = [
-            1.2,   # Application
-            0.31,  # External? (icon)
-            1.5,   # Lead Developer
-            1.5,   # Project Manager
-            0.95,  # Dev
-            0.95,  # Stage
-            0.95,  # Prod
-            0.95,  # External
+            1.05,  # Application
+            0.4,   # External? (icon)
+            1.35,  # Lead Developer
+            1.35,  # Project Manager
+            0.83,  # Dev
+            0.83,  # Stage
+            0.83,  # Prod
+            0.83,  # External
         ]
 
         # Set column widths and also set width on every cell to enforce it
