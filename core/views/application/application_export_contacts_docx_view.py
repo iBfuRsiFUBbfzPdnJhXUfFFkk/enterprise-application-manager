@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
 from io import BytesIO
+from urllib.parse import urlparse
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from docx.shared import Pt, RGBColor
 
 from core.models.application import Application
@@ -46,6 +49,74 @@ def format_person_contact_with_title(person: Person | None) -> str:
         return f"{name_line}\n{email}"
     else:
         return f"{name_line}\n(No email)"
+
+
+def extract_hostname(url: str | None) -> str:
+    """Extract hostname from URL for display purposes."""
+    if not url:
+        return "—"
+
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.netloc or parsed.path
+        return hostname if hostname else "—"
+    except Exception:
+        return url
+
+
+def add_hyperlink_to_cell(cell, url: str | None, font_size: int = 8) -> None:
+    """Add clickable hyperlink to table cell showing only hostname."""
+    if not url or url == "—":
+        cell.text = "—"
+        for paragraph in cell.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(font_size)
+        return
+
+    # Clear existing content
+    cell.text = ""
+
+    # Get or create paragraph
+    paragraph = cell.paragraphs[0]
+
+    # Create hyperlink element
+    hyperlink = OxmlElement('w:hyperlink')
+    hyperlink.set(qn('r:id'), '')
+
+    # Create run element
+    run_element = OxmlElement('w:r')
+
+    # Create run properties
+    rPr = OxmlElement('w:rPr')
+
+    # Style as link (blue, underlined)
+    color = OxmlElement('w:color')
+    color.set(qn('w:val'), '0563C1')  # Word hyperlink blue
+    rPr.append(color)
+
+    underline = OxmlElement('w:u')
+    underline.set(qn('w:val'), 'single')
+    rPr.append(underline)
+
+    # Set font size
+    sz = OxmlElement('w:sz')
+    sz.set(qn('w:val'), str(font_size * 2))  # Half-points
+    rPr.append(sz)
+
+    run_element.append(rPr)
+
+    # Add text (hostname only)
+    text_element = OxmlElement('w:t')
+    text_element.text = extract_hostname(url)
+    run_element.append(text_element)
+
+    hyperlink.append(run_element)
+
+    # Add tooltip with full URL
+    hyperlink.set(qn('w:tooltip'), url)
+
+    # Add hyperlink to paragraph
+    paragraph._p.append(hyperlink)
 
 
 def add_contact_list_title_page(document: Document, username: str, count: int) -> None:
@@ -122,9 +193,6 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
                     run.font.size = Pt(9)
 
             # Set header background color (light blue)
-            from docx.oxml import OxmlElement
-            from docx.oxml.ns import qn
-
             shading_elm = OxmlElement('w:shd')
             shading_elm.set(qn('w:fill'), 'C8DCF0')  # RGB(200, 220, 240)
             cell._element.get_or_add_tcPr().append(shading_elm)
@@ -145,30 +213,27 @@ def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
             # Column 3: Project Manager with title
             row.cells[3].text = format_person_contact_with_title(app.person_project_manager)
 
-            # Column 4: Dev URL
-            row.cells[4].text = app.link_development_server or "—"
+            # Column 4: Dev URL (hyperlink with hostname)
+            add_hyperlink_to_cell(row.cells[4], app.link_development_server)
 
-            # Column 5: Stage URL
-            row.cells[5].text = app.link_staging_server or "—"
+            # Column 5: Stage URL (hyperlink with hostname)
+            add_hyperlink_to_cell(row.cells[5], app.link_staging_server)
 
-            # Column 6: Prod URL
-            row.cells[6].text = app.link_production_server or "—"
+            # Column 6: Prod URL (hyperlink with hostname)
+            add_hyperlink_to_cell(row.cells[6], app.link_production_server)
 
-            # Column 7: External Prod URL
-            row.cells[7].text = app.link_production_server_external or "—"
+            # Column 7: External Prod URL (hyperlink with hostname)
+            add_hyperlink_to_cell(row.cells[7], app.link_production_server_external)
 
-            # Format data cells
-            for cell in row.cells:
-                for paragraph in cell.paragraphs:
+            # Format data cells (non-URL columns only)
+            for col_idx in [0, 1, 2, 3]:
+                for paragraph in row.cells[col_idx].paragraphs:
                     for run in paragraph.runs:
                         run.font.size = Pt(8)
 
             # Apply alternating row colors
             if row_idx % 2 == 0:
                 # Even rows: light gray
-                from docx.oxml import OxmlElement
-                from docx.oxml.ns import qn
-
                 for cell in row.cells:
                     shading_elm = OxmlElement('w:shd')
                     shading_elm.set(qn('w:fill'), 'F5F5F5')  # RGB(245, 245, 245)
