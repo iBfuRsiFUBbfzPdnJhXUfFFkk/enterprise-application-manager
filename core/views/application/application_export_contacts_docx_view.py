@@ -11,6 +11,12 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 from core.models.application import Application
+from core.models.common.enums.lifecycle_choices import (
+    LIFECYCLE_ACTIVE,
+    LIFECYCLE_HYPER_CARE,
+    LIFECYCLE_IN_DEPRECATION,
+    LIFECYCLE_LIMITED_SUPPORT,
+)
 from core.models.person import Person
 from core.utilities.get_name_acronym import get_name_acronym
 from core.views.application.utilities.application_docx_helpers import (
@@ -228,8 +234,20 @@ def add_contact_list_title_page(document: Document, username: str, count: int) -
 def application_export_contacts_docx_view(request: HttpRequest) -> HttpResponse:
     """Export application contact list to DOCX for notification purposes."""
     try:
-        # Query applications with optimized select_related
-        applications = Application.objects.all().select_related(
+        # Define allowed lifecycle values for contact list
+        allowed_lifecycle_values = [
+            LIFECYCLE_ACTIVE,
+            LIFECYCLE_HYPER_CARE,
+            LIFECYCLE_LIMITED_SUPPORT,
+            LIFECYCLE_IN_DEPRECATION,
+        ]
+
+        # Query applications with lifecycle filter and exclude EAM
+        applications = Application.objects.filter(
+            type_lifecycle__in=allowed_lifecycle_values
+        ).exclude(
+            acronym='EAM'
+        ).select_related(
             'person_lead_developer',
             'person_lead_developer__job_title',
             'person_project_manager',
