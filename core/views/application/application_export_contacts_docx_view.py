@@ -227,6 +227,18 @@ def add_contact_list_title_page(document: Document, username: str, count: int) -
                 for run in paragraph.runs:
                     run.font.size = Pt(9)
 
+    # Add disclaimer
+    document.add_paragraph()  # Spacing
+    disclaimer = document.add_paragraph()
+    disclaimer_text = (
+        'Note: This document is subject to change as projects and personnel assignments evolve. '
+        f'The information contained herein represents the best available data as of {now.strftime("%Y-%m-%d")}.'
+    )
+    run = disclaimer.add_run(disclaimer_text)
+    run.font.size = Pt(9)
+    run.italic = True
+    disclaimer.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
     document.add_page_break()
 
 
