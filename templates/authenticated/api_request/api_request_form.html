@@ -1,0 +1,147 @@
+{%extends 'authenticated/base_authenticated.html' %}
+{%load static %}
+
+{%block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{%url 'api_request' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{%if form.instance.pk %}Edit{%else %}Create{%endif %} API Request</h1>
+                    <p class="mt-1 text-sm text-gray-500">{%if form.instance.pk %}Update request details{%else %}Add a new API request template{%endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST">
+            {%csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Name <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.name }}
+                            {%if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{%endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.api.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                API <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.api }}
+                            {%if form.api.errors %}<p class="mt-2 text-sm text-red-600">{{ form.api.errors.0 }}</p>{%endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.authentication.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Authentication
+                            </label>
+                            {{ form.authentication }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Comment
+                            </label>
+                            {{ form.comment }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Configuration -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Request Configuration</h2>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.http_method.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                HTTP Method <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.http_method }}
+                        </div>
+                        <div>
+                            <label for="{{ form.default_environment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Default Environment
+                            </label>
+                            {{ form.default_environment }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.url_path.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                URL Path <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.url_path }}
+                            <p class="mt-1 text-xs text-gray-500">Use {parameter} for path parameters (e.g., /users/{id}/posts)</p>
+                        </div>
+                        <div>
+                            <label for="{{ form.content_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Content Type
+                            </label>
+                            {{ form.content_type }}
+                            <p class="mt-1 text-xs text-gray-500">e.g., application/json</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parameters & Body -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Parameters & Body</h2>
+                    </div>
+                    <div class="px-6 py-6 space-y-6">
+                        <div>
+                            <label for="{{ form.path_parameters.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Path Parameters (JSON)
+                            </label>
+                            {{ form.path_parameters }}
+                        </div>
+                        <div>
+                            <label for="{{ form.query_parameters.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Query Parameters (JSON)
+                            </label>
+                            {{ form.query_parameters }}
+                        </div>
+                        <div>
+                            <label for="{{ form.custom_headers.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Custom Headers (JSON)
+                            </label>
+                            {{ form.custom_headers }}
+                        </div>
+                        <div>
+                            <label for="{{ form.request_body.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Request Body
+                            </label>
+                            {{ form.request_body }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
+                        <a href="{%url 'api_request' %}"
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="inline-flex items-center px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700">
+                            {%if form.instance.pk %}Update Request{%else %}Create Request{%endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{%endblock %}
