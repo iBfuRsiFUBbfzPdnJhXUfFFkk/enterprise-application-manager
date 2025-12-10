@@ -14,10 +14,16 @@ def api_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     created_record = api.history.order_by('history_date').first()
     updated_record = api.history.order_by('-history_date').first()
 
+    # Get authentications and requests for this API
+    authentications = api.authentications.all()
+    api_requests = api.requests.all()
+
     context: Mapping[str, Any] = {
         'model': api,
         'created_record': created_record,
         'updated_record': updated_record,
+        'authentications': authentications,
+        'api_requests': api_requests,
     }
     return base_render(
         context=context,

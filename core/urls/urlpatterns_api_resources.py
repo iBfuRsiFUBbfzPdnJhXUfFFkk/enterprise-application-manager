@@ -7,6 +7,11 @@ from core.views.api import (
     api_edit_view,
     api_view,
 )
+from core.views.api_authentication import (
+    api_authentication_add_view,
+    api_authentication_delete_view,
+    api_authentication_edit_view,
+)
 from core.views.api_request import (
     api_request_add_view,
     api_request_delete_view,
@@ -29,6 +34,25 @@ urlpatterns_api_resources.append(
 urlpatterns_api_resources.append(
     path(name='api_delete', route='api/delete/<int:model_id>/', view=api_delete_view)
 )
+
+# APIAuthentication routes
+urlpatterns_api_resources.extend([
+    path(
+        name='api_authentication_new',
+        route='api/<int:api_id>/authentication/new/',
+        view=api_authentication_add_view,
+    ),
+    path(
+        name='api_authentication_edit',
+        route='api/authentication/edit/<int:model_id>/',
+        view=api_authentication_edit_view,
+    ),
+    path(
+        name='api_authentication_delete',
+        route='api/authentication/delete/<int:model_id>/',
+        view=api_authentication_delete_view,
+    ),
+])
 
 # APIRequest routes
 urlpatterns_api_resources.extend(

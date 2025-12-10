@@ -84,6 +84,101 @@
             </div>
         </div>
 
+        <!-- Authentications -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Authentication Configurations</h2>
+                <a href="{%url 'api_authentication_new' api_id=model.id %}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-sky-600 hover:bg-sky-700">
+                    Add Authentication
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Comment</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {%for auth in authentications %}
+                        <tr>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ auth.name }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ auth.auth_type }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">{{ auth.comment|truncatewords:10|default:"—" }}</td>
+                            <td class="px-6 py-4 text-right text-sm space-x-2">
+                                <a href="{%url 'api_authentication_edit' model_id=auth.id %}" class="text-sky-600 hover:text-sky-900">Edit</a>
+                                <a href="{%url 'api_authentication_delete' model_id=auth.id %}" class="text-red-600 hover:text-red-900">Delete</a>
+                            </td>
+                        </tr>
+                        {%empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-8 text-center text-gray-500 text-sm">
+                                No authentication configurations yet. Add one to get started.
+                            </td>
+                        </tr>
+                        {%endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- API Requests -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">API Requests</h2>
+                <a href="{%url 'api_request_new' %}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-sky-600 hover:bg-sky-700">
+                    Create Request
+                </a>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Path</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Environment</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {%for request in api_requests %}
+                        <tr>
+                            <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                                <a href="{%url 'api_request_detail' model_id=request.id %}" class="text-sky-600 hover:text-sky-900">{{ request.name }}</a>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                                    {{ request.http_method }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500 font-mono">{{ request.url_path|truncatechars:50 }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">{{ request.default_environment|default:"—" }}</td>
+                            <td class="px-6 py-4 text-right text-sm space-x-2">
+                                <a href="{%url 'api_request_detail' model_id=request.id %}" class="text-sky-600 hover:text-sky-900">Execute</a>
+                                <a href="{%url 'api_request_edit' model_id=request.id %}" class="text-sky-600 hover:text-sky-900">Edit</a>
+                                <a href="{%url 'api_request_delete' model_id=request.id %}" class="text-red-600 hover:text-red-900">Delete</a>
+                            </td>
+                        </tr>
+                        {%empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500 text-sm">
+                                No API requests yet. Create one to get started.
+                            </td>
+                        </tr>
+                        {%endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Metadata -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">

@@ -14,12 +14,12 @@
                         </svg>
                     </a>
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">{{ service provider.name|default:service provider.name|default:"Service Provider" }}</h1>
-                        <p class="mt-1 text-sm text-gray-500">{{ service provider.name }}</p>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ service_provider.name|default:"Service Provider" }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ service_provider.name }}</p>
                     </div>
                 </div>
                 <div class="flex gap-3">
-                    <a href="{%url 'service_provider_edit' model_id=service provider.id %}"
+                    <a href="{%url 'service_provider_edit' model_id=service_provider.id %}"
                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 transition-colors duration-150">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -50,11 +50,11 @@
                     <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
-                            <dd class="text-lg text-gray-900">{{ service provider_name|default:"-" }}</dd>
+                            <dd class="text-lg text-gray-900">{{ service_provider.name|default:"-" }}</dd>
                         </div>
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">Url</dt>
-                            <dd class="text-lg text-gray-900">{{ service provider_url|default:"-" }}</dd>
+                            <dd class="text-lg text-gray-900">{{ service_provider.url|default:"-" }}</dd>
                         </div>
 
                     </dl>
@@ -62,14 +62,14 @@
             </div>
 
             <!-- Description/Comment Section -->
-            {%if service provider.comment %}
+            {%if service_provider.comment %}
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">Description</h2>
                 </div>
                 <div class="px-6 py-6">
                     <div class="prose max-w-none">
-                        {{ service provider.comment|markdown }}
+                        {{ service_provider.comment|markdown }}
                     </div>
                 </div>
             </div>
@@ -106,7 +106,7 @@
                         {%endif %}
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
-                            <dd class="text-base text-gray-900 font-mono">{{ service provider.id }}</dd>
+                            <dd class="text-base text-gray-900 font-mono">{{ service_provider.id }}</dd>
                         </div>
                     </dl>
                 </div>
@@ -116,8 +116,8 @@
 
     <script>
         function confirmDelete() {
-            if (confirm('Are you sure you want to delete this service provider?\n\nService Provider: {{ service provider.name|escapejs|default:service provider.name|escapejs }}\n\nThis action cannot be undone.')) {
-                window.location.href = "{%url 'service_provider_delete' model_id=service provider.id %}";
+            if (confirm('Are you sure you want to delete this service provider?\n\nService Provider: {{ service_provider.name|escapejs|default:"Service Provider" }}\n\nThis action cannot be undone.')) {
+                window.location.href = "{%url 'service_provider_delete' model_id=service_provider.id %}";
             }
         }
     </script>
