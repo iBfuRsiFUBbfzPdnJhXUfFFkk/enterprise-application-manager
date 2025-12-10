@@ -172,50 +172,9 @@ def add_recommendation_section(document: Document, recommendation: Recommendatio
     """Add a formatted recommendation section to the document."""
     from core.utilities.get_name_acronym import get_name_acronym
 
-    # Metadata table
+    # Metadata table - only show related entities
     table = document.add_table(rows=0, cols=2)
     table.style = "Light Grid Accent 1"
-
-    # Priority (with color coding) - only show if set
-    if recommendation.priority:
-        row = table.add_row()
-        row.cells[0].text = "Priority"
-        priority_cell = row.cells[1]
-        priority_cell.text = recommendation.priority
-
-        # Color-code priority
-        if recommendation.priority == RECOMMENDATION_PRIORITY_HIGH:
-            for run in priority_cell.paragraphs[0].runs:
-                run.font.color.rgb = RGBColor(220, 38, 38)  # Red
-                run.bold = True
-        elif recommendation.priority == RECOMMENDATION_PRIORITY_MEDIUM:
-            for run in priority_cell.paragraphs[0].runs:
-                run.font.color.rgb = RGBColor(234, 179, 8)  # Amber
-        elif recommendation.priority == RECOMMENDATION_PRIORITY_LOW:
-            for run in priority_cell.paragraphs[0].runs:
-                run.font.color.rgb = RGBColor(34, 197, 94)  # Green
-
-    # Status - only show if set
-    if recommendation.status:
-        row = table.add_row()
-        row.cells[0].text = "Status"
-        row.cells[1].text = recommendation.status
-
-    # Dates
-    if recommendation.date_recommended:
-        row = table.add_row()
-        row.cells[0].text = "Date Recommended"
-        row.cells[1].text = recommendation.date_recommended.strftime("%Y-%m-%d")
-
-    if recommendation.date_target_completion:
-        row = table.add_row()
-        row.cells[0].text = "Target Completion"
-        row.cells[1].text = recommendation.date_target_completion.strftime("%Y-%m-%d")
-
-    if recommendation.date_completed:
-        row = table.add_row()
-        row.cells[0].text = "Date Completed"
-        row.cells[1].text = recommendation.date_completed.strftime("%Y-%m-%d")
 
     # Related entities
     if recommendation.application:
