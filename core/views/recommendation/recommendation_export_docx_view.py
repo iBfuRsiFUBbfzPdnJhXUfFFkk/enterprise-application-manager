@@ -37,16 +37,33 @@ def recommendation_export_docx_view(request: HttpRequest) -> HttpResponse:
             .order_by("priority", "-date_recommended")
         )
 
+        # Generate date string for header
+        now = datetime.now(timezone.utc)
+        date_str = now.strftime("%Y-%m-%d %I:%M %p UTC")
+
         # Create document
         document = Document()
-        set_narrow_margins(document)
-        add_header_footer(document, "Recommendations Export")
 
-        # Add each recommendation
+        # Add each recommendation with its own section
         for i, recommendation in enumerate(recommendations):
+            # Create new section for each recommendation (except the first)
+            if i > 0:
+                document.add_section()
+
+            # Set margins for current section
+            set_narrow_margins(document)
+
+            # Get person who recommended (for header)
+            person_name = ""
+            if recommendation.person_recommended_by:
+                person = recommendation.person_recommended_by
+                person_name = person.full_name_for_human if hasattr(person, "full_name_for_human") else str(person)
+
+            # Add header/footer for current section with recommendation-specific info
+            add_header_footer(document, recommendation.name or "Untitled", person_name, date_str)
+
+            # Add recommendation content
             add_recommendation_section(document, recommendation)
-            if i < recommendations.count() - 1:
-                document.add_page_break()
 
         # Generate filename
         now = datetime.now(timezone.utc)

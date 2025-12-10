@@ -22,9 +22,74 @@ def set_narrow_margins(document: Document) -> None:
     _set_narrow_margins(document)
 
 
-def add_header_footer(document: Document, title: str) -> None:
-    """Reuse application helper for header/footer."""
-    _add_header_footer(document, title)
+def add_header_footer(document: Document, title: str, person_name: str, date_str: str) -> None:
+    """Add custom header with person (left), title (center), date (right) and footer with page numbers."""
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+    from docx.shared import Pt, RGBColor
+
+    section = document.sections[0]
+
+    # Add header with three parts
+    header = section.header
+    header_para = header.paragraphs[0]
+
+    # Clear any existing content
+    header_para.clear()
+
+    # Add person name (left)
+    run_left = header_para.add_run(person_name)
+    run_left.font.size = Pt(9)
+    run_left.font.color.rgb = RGBColor(100, 100, 100)
+
+    # Add tab to center
+    header_para.add_run("\t")
+
+    # Add title (center)
+    run_center = header_para.add_run(title)
+    run_center.font.size = Pt(9)
+    run_center.font.color.rgb = RGBColor(100, 100, 100)
+    run_center.bold = True
+
+    # Add tab to right
+    header_para.add_run("\t")
+
+    # Add date (right)
+    run_right = header_para.add_run(date_str)
+    run_right.font.size = Pt(9)
+    run_right.font.color.rgb = RGBColor(100, 100, 100)
+
+    # Set tab stops for left-center-right alignment
+    from docx.shared import Inches
+    from docx.enum.text import WD_TAB_ALIGNMENT
+
+    tab_stops = header_para.paragraph_format.tab_stops
+    tab_stops.add_tab_stop(Inches(3.5), WD_TAB_ALIGNMENT.CENTER)
+    tab_stops.add_tab_stop(Inches(7.0), WD_TAB_ALIGNMENT.RIGHT)
+
+    # Add footer with page numbers
+    footer = section.footer
+    footer_para = footer.paragraphs[0]
+    footer_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = footer_para.add_run()
+    run.font.size = Pt(8)
+    run.font.color.rgb = RGBColor(100, 100, 100)
+
+    # Add field for page number
+    fldChar1 = OxmlElement("w:fldChar")
+    fldChar1.set(qn("w:fldCharType"), "begin")
+
+    instrText = OxmlElement("w:instrText")
+    instrText.set(qn("xml:space"), "preserve")
+    instrText.text = "PAGE"
+
+    fldChar2 = OxmlElement("w:fldChar")
+    fldChar2.set(qn("w:fldCharType"), "end")
+
+    run._r.append(fldChar1)
+    run._r.append(instrText)
+    run._r.append(fldChar2)
 
 
 def add_toc_placeholder(document: Document) -> None:
