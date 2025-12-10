@@ -61,12 +61,13 @@ def add_header_footer(document: Document, title: str, person_name: str, date_str
     run_right.font.color.rgb = RGBColor(100, 100, 100)
 
     # Set tab stops for left-center-right alignment
+    # With 0.5" margins on each side, content area is 7.5" wide (8.5" - 0.5" - 0.5")
     from docx.shared import Inches
     from docx.enum.text import WD_TAB_ALIGNMENT
 
     tab_stops = header_para.paragraph_format.tab_stops
-    tab_stops.add_tab_stop(Inches(3.5), WD_TAB_ALIGNMENT.CENTER)
-    tab_stops.add_tab_stop(Inches(7.0), WD_TAB_ALIGNMENT.RIGHT)
+    tab_stops.add_tab_stop(Inches(3.75), WD_TAB_ALIGNMENT.CENTER)  # Center of content area
+    tab_stops.add_tab_stop(Inches(7.5), WD_TAB_ALIGNMENT.RIGHT)   # Right edge of content area
 
     # Add footer with page numbers
     footer = section.footer
