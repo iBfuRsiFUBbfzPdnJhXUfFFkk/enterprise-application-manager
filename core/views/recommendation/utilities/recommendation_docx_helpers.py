@@ -136,6 +136,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             run = para.add_run(line[3:].strip())
             run.font.size = Pt(font_size + 2)
             run.bold = True
+            para.paragraph_format.space_after = Pt(6)
+            para.paragraph_format.space_before = Pt(6)
             i += 1
             continue
         elif line.startswith('##'):
@@ -143,6 +145,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             run = para.add_run(line[2:].strip())
             run.font.size = Pt(font_size + 3)
             run.bold = True
+            para.paragraph_format.space_after = Pt(6)
+            para.paragraph_format.space_before = Pt(6)
             i += 1
             continue
         elif line.startswith('#'):
@@ -150,6 +154,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             run = para.add_run(line[1:].strip())
             run.font.size = Pt(font_size + 4)
             run.bold = True
+            para.paragraph_format.space_after = Pt(6)
+            para.paragraph_format.space_before = Pt(6)
             i += 1
             continue
 
@@ -157,6 +163,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
         if line.strip().startswith(('- ', '* ', '+ ')):
             para = document.add_paragraph(style='List Bullet')
             add_inline_formatting(para, line.strip()[2:], font_size)
+            para.paragraph_format.space_after = Pt(0)
+            para.paragraph_format.space_before = Pt(0)
             i += 1
             continue
 
@@ -165,6 +173,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
         if match:
             para = document.add_paragraph(style='List Number')
             add_inline_formatting(para, match.group(2), font_size)
+            para.paragraph_format.space_after = Pt(0)
+            para.paragraph_format.space_before = Pt(0)
             i += 1
             continue
 
@@ -182,6 +192,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
                 run.font.size = Pt(font_size - 1)
                 para_format = para.paragraph_format
                 para_format.left_indent = Pt(20)
+                para_format.space_after = Pt(6)
+                para_format.space_before = Pt(6)
                 # Add background shading
                 shading_elm = OxmlElement('w:shd')
                 shading_elm.set(qn('w:fill'), 'F3F4F6')
@@ -195,6 +207,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             add_inline_formatting(para, line.strip()[1:].strip(), font_size)
             para_format = para.paragraph_format
             para_format.left_indent = Pt(20)
+            para_format.space_after = Pt(0)
+            para_format.space_before = Pt(0)
             # Add left border for blockquote
             pPr = para._element.get_or_add_pPr()
             pBdr = OxmlElement('w:pBdr')
@@ -211,6 +225,8 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
         # Handle horizontal rules
         if line.strip() in ('---', '***', '___'):
             para = document.add_paragraph()
+            para.paragraph_format.space_after = Pt(6)
+            para.paragraph_format.space_before = Pt(6)
             pPr = para._element.get_or_add_pPr()
             pBdr = OxmlElement('w:pBdr')
             bottom = OxmlElement('w:bottom')
@@ -243,6 +259,9 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             # Create single paragraph with all accumulated lines
             para = document.add_paragraph()
             add_inline_formatting(para, ' '.join(paragraph_lines), font_size)
+            # Remove extra spacing between paragraphs
+            para.paragraph_format.space_after = Pt(0)
+            para.paragraph_format.space_before = Pt(0)
         else:
             i += 1
 
