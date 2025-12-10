@@ -223,12 +223,28 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             i += 1
             continue
 
-        # Handle regular paragraphs
+        # Handle regular paragraphs (accumulate consecutive non-empty lines)
         if line.strip():
-            para = document.add_paragraph()
-            add_inline_formatting(para, line, font_size)
+            # Collect consecutive non-empty lines into a single paragraph
+            paragraph_lines = [line]
+            i += 1
+            while i < len(lines):
+                next_line = lines[i]
+                # Stop if we hit an empty line or special markdown syntax
+                if not next_line.strip():
+                    break
+                if (next_line.startswith('#') or
+                    next_line.strip().startswith(('- ', '* ', '+ ', '>', '```', '---', '***', '___')) or
+                    re.match(r'^\d+\.\s+', next_line.strip())):
+                    break
+                paragraph_lines.append(next_line)
+                i += 1
 
-        i += 1
+            # Create single paragraph with all accumulated lines
+            para = document.add_paragraph()
+            add_inline_formatting(para, ' '.join(paragraph_lines), font_size)
+        else:
+            i += 1
 
 
 def add_inline_formatting(paragraph, text: str, font_size: int = 9) -> None:
