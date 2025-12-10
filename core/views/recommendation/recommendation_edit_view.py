@@ -23,7 +23,15 @@ def recommendation_edit_view(request: HttpRequest, model_id: int) -> HttpRespons
     else:
         form = RecommendationForm(instance=recommendation)
 
-    context: Mapping[str, Any] = {"form": form}
+    # Get current user's person ID if they have one
+    current_user_person_id = None
+    if hasattr(request.user, 'person') and request.user.person:
+        current_user_person_id = request.user.person.id
+
+    context: Mapping[str, Any] = {
+        "form": form,
+        "current_user_person_id": current_user_person_id,
+    }
     return base_render(
         context=context,
         request=request,

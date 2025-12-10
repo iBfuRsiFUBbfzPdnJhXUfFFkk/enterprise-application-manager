@@ -179,6 +179,38 @@
                 </div>
             </div>
             {% endif %}
+
+            <!-- Related Links Section -->
+            {% if recommendation.links.all %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="space-y-3">
+                        {% for link in recommendation.links.all %}
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            <div class="flex-1">
+                                <div class="font-medium text-gray-900">{{ link.name }}</div>
+                                <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:text-blue-800 break-all">
+                                    {{ link.url }}
+                                    <svg class="inline-block h-3 w-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                </a>
+                                {% if link.comment %}
+                                <p class="text-sm text-gray-600 mt-1">{{ link.comment }}</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

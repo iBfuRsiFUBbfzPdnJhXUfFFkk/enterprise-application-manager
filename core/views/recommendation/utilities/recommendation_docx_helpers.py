@@ -404,3 +404,26 @@ def add_recommendation_section(document: Document, recommendation: Recommendatio
     if recommendation.comment:
         document.add_heading("Notes", level=2)
         add_markdown_content(document, recommendation.comment)
+
+    # Related Links section
+    if recommendation.links.exists():
+        document.add_heading("Related Links", level=2)
+        for link in recommendation.links.all():
+            para = document.add_paragraph(style='List Bullet')
+            # Add link name in bold
+            name_run = para.add_run(link.name)
+            name_run.bold = True
+            name_run.font.size = Pt(9)
+            # Add line break
+            para.add_run('\n')
+            # Add full URL (not short URL)
+            url_run = para.add_run(link.url)
+            url_run.font.size = Pt(9)
+            url_run.font.color.rgb = RGBColor(59, 130, 246)
+            url_run.underline = True
+            # Add comment if exists
+            if link.comment:
+                para.add_run('\n')
+                comment_run = para.add_run(link.comment)
+                comment_run.font.size = Pt(8)
+                comment_run.italic = True

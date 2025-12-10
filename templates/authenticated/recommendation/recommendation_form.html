@@ -42,9 +42,19 @@
                             {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
                         </div>
                         <div>
-                            <label for="{{ form.person_recommended_by.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                Recommended By
-                            </label>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.person_recommended_by.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Recommended By
+                                </label>
+                                {% if current_user_person_id %}
+                                <button type="button" id="select-me-btn" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors duration-150">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    Select Me
+                                </button>
+                                {% endif %}
+                            </div>
                             {{ form.person_recommended_by }}
                             {% if form.person_recommended_by.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_recommended_by.errors.0 }}</p>{% endif %}
                         </div>
@@ -79,6 +89,22 @@
                             {{ form.estimation }}
                             {% if form.estimation.errors %}<p class="mt-2 text-sm text-red-600">{{ form.estimation.errors.0 }}</p>{% endif %}
                         </div>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
+                        <p class="mt-1 text-sm text-gray-500">Add relevant links and references (optional)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.links.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Links
+                        </label>
+                        {{ form.links }}
+                        <p class="mt-1 text-xs text-gray-500">Hold Ctrl (Cmd on Mac) to select multiple links. Full URLs will be included in DOCX export.</p>
+                        {% if form.links.errors %}<p class="mt-2 text-sm text-red-600">{{ form.links.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
 
@@ -338,6 +364,19 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const fields = ['description', 'rationale', 'benefits', 'risks', 'comment'];
+
+        // Handle "Select Me" button
+        {% if current_user_person_id %}
+        const selectMeBtn = document.getElementById('select-me-btn');
+        const personField = document.getElementById('id_person_recommended_by');
+        if (selectMeBtn && personField) {
+            selectMeBtn.addEventListener('click', function() {
+                personField.value = '{{ current_user_person_id }}';
+                // Trigger change event in case there are any listeners
+                personField.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }
+        {% endif %}
 
         // Tab switching functionality
         document.querySelectorAll('.tab-btn').forEach(btn => {

@@ -1,5 +1,6 @@
 from django_generic_model_fields.create_generic_date import create_generic_date
 from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -13,6 +14,7 @@ class Recommendation(AbstractBaseModel, AbstractComment, AbstractName):
     project = create_generic_fk(to="Project", related_name="recommendations")
     estimation = create_generic_fk(to="Estimation", related_name="recommendations")
     person_recommended_by = create_generic_fk(to="Person", related_name="recommendations_made")
+    links = create_generic_m2m(to="Link", related_name="recommendations")
 
     # Core content fields
     description = create_generic_varchar()

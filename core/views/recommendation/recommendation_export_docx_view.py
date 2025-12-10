@@ -34,7 +34,7 @@ def recommendation_export_docx_view(request: HttpRequest) -> HttpResponse:
                 "project",
                 "estimation",
                 "person_recommended_by",
-            ).get(id=selected_ids[0])
+            ).prefetch_related("links").get(id=selected_ids[0])
         except Recommendation.DoesNotExist:
             return generic_500(request=request)
 
