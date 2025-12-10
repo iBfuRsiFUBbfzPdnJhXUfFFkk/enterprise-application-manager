@@ -14,7 +14,8 @@
                 <div class="flex space-x-3">
                     <button id="export-selected-btn"
                             class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled>
+                            disabled
+                            title="Select exactly one recommendation to export">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
@@ -403,7 +404,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Checkbox selection management
     function updateExportButton() {
         const checkedBoxes = document.querySelectorAll('.rec-checkbox:checked');
-        exportBtn.disabled = checkedBoxes.length === 0;
+        const uniqueChecked = new Set(Array.from(checkedBoxes).map(cb => cb.dataset.recId));
+        const count = uniqueChecked.size;
+
+        // Only enable export when exactly one recommendation is selected
+        exportBtn.disabled = count !== 1;
+
+        // Update button text and title based on selection
+        if (count === 0) {
+            exportBtn.title = 'Select exactly one recommendation to export';
+        } else if (count === 1) {
+            exportBtn.title = 'Export selected recommendation to DOCX';
+        } else {
+            exportBtn.title = 'Only one recommendation can be exported at a time';
+        }
     }
 
     // Sync checkboxes between grid and list views
@@ -459,8 +473,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .map(cb => cb.dataset.recId)
             .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
 
-        if (selectedIds.length > 0) {
-            window.location.href = `/authenticated/recommendation/export/docx/?ids=${selectedIds.join(',')}`;
+        // Only export if exactly one recommendation is selected
+        if (selectedIds.length === 1) {
+            window.location.href = `/authenticated/recommendation/export/docx/?ids=${selectedIds[0]}`;
         }
     });
 });

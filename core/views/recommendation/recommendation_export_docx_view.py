@@ -22,20 +22,20 @@ def recommendation_export_docx_view(request: HttpRequest) -> HttpResponse:
         selected_ids = request.GET.get("ids", "").split(",")
         selected_ids = [int(id) for id in selected_ids if id.strip().isdigit()]
 
-        if not selected_ids:
+        # Only allow exporting one recommendation at a time
+        if not selected_ids or len(selected_ids) != 1:
             return generic_500(request=request)
 
-        # Query with optimization
-        recommendations = (
-            Recommendation.objects.filter(id__in=selected_ids)
-            .select_related(
+        # Get the single recommendation
+        try:
+            recommendation = Recommendation.objects.select_related(
                 "application",
                 "project",
                 "estimation",
                 "person_recommended_by",
-            )
-            .order_by("priority", "-date_recommended")
-        )
+            ).get(id=selected_ids[0])
+        except Recommendation.DoesNotExist:
+            return generic_500(request=request)
 
         # Generate date string for header
         now = datetime.now(timezone.utc)
@@ -43,32 +43,25 @@ def recommendation_export_docx_view(request: HttpRequest) -> HttpResponse:
 
         # Create document
         document = Document()
+        set_narrow_margins(document)
 
-        # Add each recommendation with its own section
-        for i, recommendation in enumerate(recommendations):
-            # Create new section for each recommendation (except the first)
-            if i > 0:
-                document.add_section()
+        # Get person who recommended (for header)
+        person_name = ""
+        if recommendation.person_recommended_by:
+            person = recommendation.person_recommended_by
+            person_name = person.full_name_for_human if hasattr(person, "full_name_for_human") else str(person)
 
-            # Set margins for current section
-            set_narrow_margins(document)
+        # Add header/footer with recommendation-specific info
+        add_header_footer(document, recommendation.name or "Untitled", person_name, date_str)
 
-            # Get person who recommended (for header)
-            person_name = ""
-            if recommendation.person_recommended_by:
-                person = recommendation.person_recommended_by
-                person_name = person.full_name_for_human if hasattr(person, "full_name_for_human") else str(person)
+        # Add recommendation content
+        add_recommendation_section(document, recommendation)
 
-            # Add header/footer for current section with recommendation-specific info
-            add_header_footer(document, recommendation.name or "Untitled", person_name, date_str)
-
-            # Add recommendation content
-            add_recommendation_section(document, recommendation)
-
-        # Generate filename
-        now = datetime.now(timezone.utc)
+        # Generate filename using recommendation name
+        safe_name = "".join(c if c.isalnum() or c in (" ", "-", "_") else "" for c in recommendation.name or "recommendation")
+        safe_name = safe_name.replace(" ", "_").lower()
         timestamp = now.strftime("%Y-%m-%d__%I:%M:%p").lower().replace(" ", "")
-        filename = f"recommendations_export__{timestamp}.docx"
+        filename = f"{safe_name}__{timestamp}.docx"
 
         # Save to BytesIO
         file_stream = BytesIO()
