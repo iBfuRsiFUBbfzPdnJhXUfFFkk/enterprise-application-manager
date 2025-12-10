@@ -344,9 +344,6 @@ def add_recommendation_intro(document: Document) -> None:
     intro_run.font.size = Pt(10)
     intro_run.italic = True
 
-    # Add spacing after intro
-    document.add_paragraph()
-
 
 def add_title_page(document: Document, username: str, total_count: int) -> None:
     """Add title page with metadata."""
@@ -411,9 +408,6 @@ def add_recommendation_section(document: Document, recommendation: Recommendatio
             for paragraph in cell.paragraphs:
                 for run in paragraph.runs:
                     run.font.size = Pt(9)
-
-    # Add spacing
-    document.add_paragraph()
 
     # Description section
     if recommendation.description:
