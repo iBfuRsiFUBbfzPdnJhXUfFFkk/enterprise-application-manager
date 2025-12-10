@@ -53,6 +53,8 @@
                                     </svg>
                                     Select Me
                                 </button>
+                                {% else %}
+                                <span class="text-xs text-gray-500 italic">No person mapping for current user</span>
                                 {% endif %}
                             </div>
                             {{ form.person_recommended_by }}
