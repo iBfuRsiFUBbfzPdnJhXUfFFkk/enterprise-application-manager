@@ -4,12 +4,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
 
-from core.models.recommendation import (
-    RECOMMENDATION_PRIORITY_HIGH,
-    RECOMMENDATION_PRIORITY_LOW,
-    RECOMMENDATION_PRIORITY_MEDIUM,
-    Recommendation,
-)
+from core.models.recommendation import Recommendation
 from core.views.application.utilities.application_docx_helpers import (
     add_header_footer as _add_header_footer,
     add_toc_placeholder as _add_toc_placeholder,

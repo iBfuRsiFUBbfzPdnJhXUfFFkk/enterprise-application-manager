@@ -10,6 +10,4 @@ class RecommendationForm(BaseModelForm):
         model = Recommendation
         widgets = {
             "date_recommended": DateInput(attrs={"type": "date"}),
-            "date_target_completion": DateInput(attrs={"type": "date"}),
-            "date_completed": DateInput(attrs={"type": "date"}),
         }
