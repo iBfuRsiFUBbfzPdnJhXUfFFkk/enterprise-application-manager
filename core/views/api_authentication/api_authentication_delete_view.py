@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect
 from core.models.api_authentication import APIAuthentication
-from core.views.generic.generic_delete_view import generic_delete_view
+from core.views.generic.generic_500 import generic_500
 
 
 def api_authentication_delete_view(
@@ -9,13 +10,7 @@ def api_authentication_delete_view(
     try:
         auth = APIAuthentication.objects.get(id=model_id)
         api_id = auth.api.id
+        auth.delete()
+        return redirect(to='api_detail', model_id=api_id)
     except APIAuthentication.DoesNotExist:
-        api_id = None
-
-    return generic_delete_view(
-        model_cls=APIAuthentication,
-        model_id=model_id,
-        request=request,
-        success_route='api_detail',
-        success_route_kwargs={'model_id': api_id} if api_id else {},
-    )
+        return generic_500(request=request)
