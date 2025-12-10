@@ -41,6 +41,7 @@ from core.urls.urlpatterns_project import urlpatterns_project
 from core.urls.urlpatterns_release import urlpatterns_release
 from core.urls.urlpatterns_release_bundle import urlpatterns_release_bundle
 from core.urls.urlpatterns_report import urlpatterns_report
+from core.urls.urlpatterns_recommendation import urlpatterns_recommendation
 from core.urls.urlpatterns_requirement import urlpatterns_requirement
 from core.urls.urlpatterns_risk import urlpatterns_risk
 from core.urls.urlpatterns_role import urlpatterns_role
@@ -111,6 +112,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_release,
     *urlpatterns_release_bundle,
     *urlpatterns_report,
+    *urlpatterns_recommendation,
     *urlpatterns_requirement,
     *urlpatterns_risk,
     *urlpatterns_role,
