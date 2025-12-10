@@ -12,6 +12,7 @@ from core.views.api_request import (
     api_request_delete_view,
     api_request_detail_view,
     api_request_edit_view,
+    api_request_execute_view,
     api_request_view,
 )
 
@@ -52,5 +53,13 @@ urlpatterns_api_resources.append(
         name='api_request_delete',
         route='api-request/delete/<int:model_id>/',
         view=api_request_delete_view,
+    )
+)
+
+urlpatterns_api_resources.append(
+    path(
+        name='api_request_execute',
+        route='api-request/<int:request_id>/execute/',
+        view=api_request_execute_view,
     )
 )

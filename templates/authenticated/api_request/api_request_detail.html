@@ -38,6 +38,90 @@
 
     <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 space-y-6">
+        <!-- Request Executor -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-sky-50 border-b border-sky-200">
+                <h2 class="text-lg font-semibold text-gray-900">Execute Request</h2>
+                <p class="mt-1 text-sm text-gray-600">Test this API request and see the response</p>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                <!-- Environment Selector -->
+                <div>
+                    <label for="environment-select" class="block text-sm font-medium text-gray-700 mb-2">Environment</label>
+                    <select id="environment-select" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                        <option value="Local" {%if model.default_environment == "Local" %}selected{%endif %}>Local</option>
+                        <option value="Development" {%if model.default_environment == "Development" %}selected{%endif %}>Development</option>
+                        <option value="Staging" {%if model.default_environment == "Staging" %}selected{%endif %}>Staging</option>
+                        <option value="Production" {%if model.default_environment == "Production" %}selected{%endif %}>Production</option>
+                        <option value="Production External" {%if model.default_environment == "Production External" %}selected{%endif %}>Production External</option>
+                    </select>
+                </div>
+
+                <!-- Parameters -->
+                <div id="parameters-section">
+                    <h3 class="text-sm font-medium text-gray-700 mb-3">Parameters</h3>
+                    <div class="space-y-3">
+                        <div id="path-params"></div>
+                        <div id="query-params"></div>
+                    </div>
+                </div>
+
+                <!-- Request Body -->
+                {%if model.request_body or model.http_method in "POST,PUT,PATCH" %}
+                <div>
+                    <label for="request-body" class="block text-sm font-medium text-gray-700 mb-2">Request Body</label>
+                    <textarea id="request-body" rows="10" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 font-mono text-sm">{{ model.request_body|default:"" }}</textarea>
+                </div>
+                {%endif %}
+
+                <!-- Execute Button -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="executeRequest()" id="execute-btn" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Execute Request
+                    </button>
+                    <span id="loading-indicator" class="hidden text-sm text-gray-500">
+                        <svg class="animate-spin h-5 w-5 text-sky-600 inline" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Executing...
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Section -->
+        <div id="response-section" class="bg-white shadow-md rounded-lg overflow-hidden hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Response</h2>
+                <span id="response-status" class="text-sm"></span>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                <div id="response-error" class="hidden p-4 bg-red-50 border border-red-200 rounded-md">
+                    <p class="text-sm text-red-800"></p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Status & Timing</h3>
+                    <div class="flex items-center space-x-4">
+                        <span id="response-status-code" class="text-lg font-semibold"></span>
+                        <span id="response-time" class="text-sm text-gray-500"></span>
+                    </div>
+                </div>
+                <div id="response-headers-section">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Response Headers</h3>
+                    <pre id="response-headers" class="bg-gray-50 p-3 rounded text-xs overflow-x-auto"></pre>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Response Body</h3>
+                    <pre id="response-body" class="bg-gray-50 p-3 rounded text-xs overflow-x-auto max-h-96"></pre>
+                </div>
+            </div>
+        </div>
+
         <!-- Basic Information -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -180,4 +264,198 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Parse parameters from the model
+        const pathParameters = {{ model.path_parameters|default:"{}"|safe }};
+        const queryParameters = {{ model.query_parameters|default:"{}"|safe }};
+
+        // Generate parameter inputs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            generateParameterInputs();
+        });
+
+        function generateParameterInputs() {
+            const pathParamsDiv = document.getElementById('path-params');
+            const queryParamsDiv = document.getElementById('query-params');
+
+            // Generate path parameter inputs
+            if (Object.keys(pathParameters).length > 0) {
+                const pathLabel = document.createElement('label');
+                pathLabel.className = 'block text-sm font-medium text-gray-700 mb-2';
+                pathLabel.textContent = 'Path Parameters';
+                pathParamsDiv.appendChild(pathLabel);
+
+                for (const [key, config] of Object.entries(pathParameters)) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mb-2';
+                    inputDiv.innerHTML = `
+                        <label class="block text-xs text-gray-600 mb-1">${key} ${config.description ? '(' + config.description + ')' : ''}</label>
+                        <input type="text"
+                               id="path-param-${key}"
+                               value="${config.default || ''}"
+                               placeholder="${config.type || 'string'}"
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 text-sm">
+                    `;
+                    pathParamsDiv.appendChild(inputDiv);
+                }
+            }
+
+            // Generate query parameter inputs
+            if (Object.keys(queryParameters).length > 0) {
+                const queryLabel = document.createElement('label');
+                queryLabel.className = 'block text-sm font-medium text-gray-700 mb-2 mt-4';
+                queryLabel.textContent = 'Query Parameters';
+                queryParamsDiv.appendChild(queryLabel);
+
+                for (const [key, config] of Object.entries(queryParameters)) {
+                    const inputDiv = document.createElement('div');
+                    inputDiv.className = 'mb-2';
+                    inputDiv.innerHTML = `
+                        <label class="block text-xs text-gray-600 mb-1">${key} ${config.description ? '(' + config.description + ')' : ''}</label>
+                        <input type="text"
+                               id="query-param-${key}"
+                               value="${config.default || ''}"
+                               placeholder="${config.type || 'string'}"
+                               class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 text-sm">
+                    `;
+                    queryParamsDiv.appendChild(inputDiv);
+                }
+            }
+        }
+
+        function collectParameters() {
+            const pathParams = {};
+            const queryParams = {};
+
+            // Collect path parameters
+            for (const key of Object.keys(pathParameters)) {
+                const input = document.getElementById(`path-param-${key}`);
+                if (input) {
+                    pathParams[key] = input.value;
+                }
+            }
+
+            // Collect query parameters
+            for (const key of Object.keys(queryParameters)) {
+                const input = document.getElementById(`query-param-${key}`);
+                if (input) {
+                    queryParams[key] = input.value;
+                }
+            }
+
+            return { pathParams, queryParams };
+        }
+
+        function getCsrfToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function executeRequest() {
+            const environment = document.getElementById('environment-select').value;
+            const { pathParams, queryParams } = collectParameters();
+            const body = document.getElementById('request-body')?.value || '';
+
+            // Show loading
+            document.getElementById('execute-btn').disabled = true;
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            document.getElementById('response-section').classList.add('hidden');
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('environment', environment);
+            formData.append('path_parameters', JSON.stringify(pathParams));
+            formData.append('query_parameters', JSON.stringify(queryParams));
+            formData.append('custom_headers', '{}');
+            formData.append('body', body);
+
+            // Execute request
+            fetch('{%url "api_request_execute" request_id=model.id %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+            })
+            .catch(error => {
+                displayError(error.message || 'Request failed');
+            })
+            .finally(() => {
+                document.getElementById('execute-btn').disabled = false;
+                document.getElementById('loading-indicator').classList.add('hidden');
+            });
+        }
+
+        function displayResponse(data) {
+            const responseSection = document.getElementById('response-section');
+            const errorDiv = document.getElementById('response-error');
+
+            responseSection.classList.remove('hidden');
+
+            if (data.success) {
+                errorDiv.classList.add('hidden');
+
+                // Status code with color
+                const statusCode = data.status_code;
+                const statusColor = statusCode < 300 ? 'text-green-600' : (statusCode < 400 ? 'text-yellow-600' : 'text-red-600');
+                document.getElementById('response-status-code').innerHTML = `<span class="${statusColor}">${statusCode}</span>`;
+
+                // Response time
+                document.getElementById('response-time').textContent = `Response time: ${data.response_time_ms}ms`;
+
+                // Headers
+                document.getElementById('response-headers').textContent = JSON.stringify(data.headers, null, 2);
+
+                // Body (try to format as JSON)
+                let bodyContent = data.body;
+                try {
+                    const jsonBody = JSON.parse(data.body);
+                    bodyContent = JSON.stringify(jsonBody, null, 2);
+                } catch (e) {
+                    // Not JSON, display as-is
+                }
+                document.getElementById('response-body').textContent = bodyContent;
+
+                // Scroll to response
+                responseSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                errorDiv.classList.remove('hidden');
+                errorDiv.querySelector('p').textContent = `Error: ${data.error}`;
+
+                if (data.response_time_ms) {
+                    document.getElementById('response-time').textContent = `Failed after: ${data.response_time_ms}ms`;
+                }
+            }
+
+            // Reload page after short delay to update execution history
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }
+
+        function displayError(message) {
+            const responseSection = document.getElementById('response-section');
+            const errorDiv = document.getElementById('response-error');
+
+            responseSection.classList.remove('hidden');
+            errorDiv.classList.remove('hidden');
+            errorDiv.querySelector('p').textContent = `Error: ${message}`;
+        }
+    </script>
 {%endblock %}
