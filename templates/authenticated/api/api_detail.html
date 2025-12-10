@@ -1,0 +1,112 @@
+{%extends 'authenticated/base_authenticated.html' %}
+{%load markdown_extras %}
+
+{%block content %}
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{%url 'api' %}" class="mr-4 text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ model.name }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">API Details</p>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <a href="{%url 'api_edit' model_id=model.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Edit
+                    </a>
+                    <a href="{%url 'api_delete' model_id=model.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50">
+                        Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 space-y-6">
+        <!-- Basic Information -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Name</h3>
+                    <p class="mt-1 text-sm text-gray-900">{{ model.name|default:"—" }}</p>
+                </div>
+                {%if model.comment %}
+                <div class="md:col-span-2">
+                    <h3 class="text-sm font-medium text-gray-500">Comment</h3>
+                    <div class="mt-1 text-sm text-gray-900 prose prose-sm max-w-none">{{ model.comment|markdown|safe }}</div>
+                </div>
+                {%endif %}
+            </div>
+        </div>
+
+        <!-- Environment URLs -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Environment URLs</h2>
+            </div>
+            <div class="px-6 py-6 space-y-3">
+                {%if model.url_local %}<div><span class="text-sm font-medium text-gray-500">Local:</span> <a href="{{ model.url_local }}" target="_blank" class="text-sm text-sky-600 hover:text-sky-900">{{ model.url_local }}</a></div>{%endif %}
+                {%if model.url_development %}<div><span class="text-sm font-medium text-gray-500">Development:</span> <a href="{{ model.url_development }}" target="_blank" class="text-sm text-sky-600 hover:text-sky-900">{{ model.url_development }}</a></div>{%endif %}
+                {%if model.url_staging %}<div><span class="text-sm font-medium text-gray-500">Staging:</span> <a href="{{ model.url_staging }}" target="_blank" class="text-sm text-sky-600 hover:text-sky-900">{{ model.url_staging }}</a></div>{%endif %}
+                {%if model.url_production %}<div><span class="text-sm font-medium text-gray-500">Production:</span> <a href="{{ model.url_production }}" target="_blank" class="text-sm text-sky-600 hover:text-sky-900">{{ model.url_production }}</a></div>{%endif %}
+                {%if model.url_production_external %}<div><span class="text-sm font-medium text-gray-500">Production External:</span> <a href="{{ model.url_production_external }}" target="_blank" class="text-sm text-sky-600 hover:text-sky-900">{{ model.url_production_external }}</a></div>{%endif %}
+                {%if model.url_documentation %}<div><span class="text-sm font-medium text-gray-500">Documentation:</span> <a href="{{ model.url_documentation }}" target="_blank" class="text-sm text-sky-600 hover:text-sky-900">{{ model.url_documentation }}</a></div>{%endif %}
+            </div>
+        </div>
+
+        <!-- Relationships -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Relationships</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Service Provider</h3>
+                    <p class="mt-1 text-sm text-gray-900">{%if model.service_provider %}<a href="{%url 'service_provider_detail' model_id=model.service_provider.id %}" class="text-sky-600 hover:text-sky-900">{{ model.service_provider.name }}</a>{%else %}—{%endif %}</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Tool</h3>
+                    <p class="mt-1 text-sm text-gray-900">{%if model.tool %}<a href="{%url 'tool_detail' model_id=model.tool.id %}" class="text-sky-600 hover:text-sky-900">{{ model.tool.name }}</a>{%else %}—{%endif %}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">ID</h3>
+                    <p class="mt-1 text-sm text-gray-900">{{ model.id }}</p>
+                </div>
+                {%if created_record %}
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Created</h3>
+                    <p class="mt-1 text-sm text-gray-900">{{ created_record.history_date|date:"Y-m-d H:i:s" }}</p>
+                </div>
+                {%endif %}
+                {%if updated_record %}
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Last Updated</h3>
+                    <p class="mt-1 text-sm text-gray-900">{{ updated_record.history_date|date:"Y-m-d H:i:s" }}</p>
+                </div>
+                {%endif %}
+            </div>
+        </div>
+    </div>
+{%endblock %}

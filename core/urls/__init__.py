@@ -9,6 +9,7 @@ from core.urls.urlpatterns_ai_hallucination import urlpatterns_ai_hallucination
 from core.urls.urlpatterns_ai_use_case import urlpatterns_ai_use_case
 from core.urls.urlpatterns_ai_vendor import urlpatterns_ai_vendor
 from core.urls.urlpatterns_api import urlpatterns_api
+from core.urls.urlpatterns_api_resources import urlpatterns_api_resources
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
 from core.urls.urlpatterns_billing_code import urlpatterns_billing_code
@@ -81,6 +82,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_ai_hallucination,
     *urlpatterns_ai_use_case,
     *urlpatterns_ai_vendor,
+    *urlpatterns_api_resources,
     *urlpatterns_application,
     *urlpatterns_application_group,
     *urlpatterns_billing_code,
