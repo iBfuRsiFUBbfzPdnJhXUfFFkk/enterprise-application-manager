@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block content %}
+<!-- Markdown Parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -87,36 +89,87 @@
                         <p class="mt-1 text-sm text-gray-500">Comprehensive recommendation information</p>
                     </div>
                     <div class="px-6 py-6 space-y-6">
+                        <!-- Description with Preview -->
                         <div>
-                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                Description
-                            </label>
-                            {{ form.description }}
-                            <p class="mt-1 text-xs text-gray-500">What is being recommended?</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Description
+                                </label>
+                                <div class="flex space-x-2">
+                                    <button type="button" class="tab-btn active px-3 py-1 text-xs font-medium rounded" data-field="description" data-tab="edit">Edit</button>
+                                    <button type="button" class="tab-btn px-3 py-1 text-xs font-medium rounded" data-field="description" data-tab="preview">Preview</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-field="description" data-tab="edit">
+                                {{ form.description }}
+                                <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.</p>
+                            </div>
+                            <div class="tab-content hidden" data-field="description" data-tab="preview">
+                                <div class="markdown-preview border border-gray-300 rounded p-4 min-h-[120px] bg-gray-50" id="preview-description"></div>
+                            </div>
                             {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
                         </div>
+
+                        <!-- Rationale with Preview -->
                         <div>
-                            <label for="{{ form.rationale.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                Rationale
-                            </label>
-                            {{ form.rationale }}
-                            <p class="mt-1 text-xs text-gray-500">Why is this being recommended?</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.rationale.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Rationale
+                                </label>
+                                <div class="flex space-x-2">
+                                    <button type="button" class="tab-btn active px-3 py-1 text-xs font-medium rounded" data-field="rationale" data-tab="edit">Edit</button>
+                                    <button type="button" class="tab-btn px-3 py-1 text-xs font-medium rounded" data-field="rationale" data-tab="preview">Preview</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-field="rationale" data-tab="edit">
+                                {{ form.rationale }}
+                                <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.</p>
+                            </div>
+                            <div class="tab-content hidden" data-field="rationale" data-tab="preview">
+                                <div class="markdown-preview border border-gray-300 rounded p-4 min-h-[120px] bg-gray-50" id="preview-rationale"></div>
+                            </div>
                             {% if form.rationale.errors %}<p class="mt-2 text-sm text-red-600">{{ form.rationale.errors.0 }}</p>{% endif %}
                         </div>
+
+                        <!-- Benefits with Preview -->
                         <div>
-                            <label for="{{ form.benefits.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                Expected Benefits
-                            </label>
-                            {{ form.benefits }}
-                            <p class="mt-1 text-xs text-gray-500">What positive outcomes are expected?</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.benefits.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Expected Benefits
+                                </label>
+                                <div class="flex space-x-2">
+                                    <button type="button" class="tab-btn active px-3 py-1 text-xs font-medium rounded" data-field="benefits" data-tab="edit">Edit</button>
+                                    <button type="button" class="tab-btn px-3 py-1 text-xs font-medium rounded" data-field="benefits" data-tab="preview">Preview</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-field="benefits" data-tab="edit">
+                                {{ form.benefits }}
+                                <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.</p>
+                            </div>
+                            <div class="tab-content hidden" data-field="benefits" data-tab="preview">
+                                <div class="markdown-preview border border-gray-300 rounded p-4 min-h-[120px] bg-gray-50" id="preview-benefits"></div>
+                            </div>
                             {% if form.benefits.errors %}<p class="mt-2 text-sm text-red-600">{{ form.benefits.errors.0 }}</p>{% endif %}
                         </div>
+
+                        <!-- Risks with Preview -->
                         <div>
-                            <label for="{{ form.risks.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                Potential Risks
-                            </label>
-                            {{ form.risks }}
-                            <p class="mt-1 text-xs text-gray-500">What challenges or concerns should be considered?</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.risks.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Potential Risks
+                                </label>
+                                <div class="flex space-x-2">
+                                    <button type="button" class="tab-btn active px-3 py-1 text-xs font-medium rounded" data-field="risks" data-tab="edit">Edit</button>
+                                    <button type="button" class="tab-btn px-3 py-1 text-xs font-medium rounded" data-field="risks" data-tab="preview">Preview</button>
+                                </div>
+                            </div>
+                            <div class="tab-content" data-field="risks" data-tab="edit">
+                                {{ form.risks }}
+                                <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.</p>
+                            </div>
+                            <div class="tab-content hidden" data-field="risks" data-tab="preview">
+                                <div class="markdown-preview border border-gray-300 rounded p-4 min-h-[120px] bg-gray-50" id="preview-risks"></div>
+                            </div>
                             {% if form.risks.errors %}<p class="mt-2 text-sm text-red-600">{{ form.risks.errors.0 }}</p>{% endif %}
                         </div>
                     </div>
@@ -146,13 +199,22 @@
                         <p class="mt-1 text-sm text-gray-500">Any other relevant information</p>
                     </div>
                     <div class="px-6 py-6">
-                        <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                            Comment
-                        </label>
-                        {{ form.comment }}
-                        <p class="mt-1 text-xs text-gray-500">
-                            Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
-                        </p>
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Comment
+                            </label>
+                            <div class="flex space-x-2">
+                                <button type="button" class="tab-btn active px-3 py-1 text-xs font-medium rounded" data-field="comment" data-tab="edit">Edit</button>
+                                <button type="button" class="tab-btn px-3 py-1 text-xs font-medium rounded" data-field="comment" data-tab="preview">Preview</button>
+                            </div>
+                        </div>
+                        <div class="tab-content" data-field="comment" data-tab="edit">
+                            {{ form.comment }}
+                            <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, [links](url), lists, etc.</p>
+                        </div>
+                        <div class="tab-content hidden" data-field="comment" data-tab="preview">
+                            <div class="markdown-preview border border-gray-300 rounded p-4 min-h-[120px] bg-gray-50" id="preview-comment"></div>
+                        </div>
                         {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
@@ -235,5 +297,99 @@
             color: #9ca3af;
             opacity: 1;
         }
+
+        /* Tab button styles */
+        .tab-btn {
+            background-color: #e5e7eb;
+            color: #6b7280;
+            transition: all 0.15s ease-in-out;
+        }
+
+        .tab-btn:hover {
+            background-color: #d1d5db;
+        }
+
+        .tab-btn.active {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
+
+        /* Markdown preview styles */
+        .markdown-preview {
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .markdown-preview h1 { font-size: 1.5em; font-weight: bold; margin-top: 0.5em; margin-bottom: 0.5em; }
+        .markdown-preview h2 { font-size: 1.3em; font-weight: bold; margin-top: 0.5em; margin-bottom: 0.5em; }
+        .markdown-preview h3 { font-size: 1.1em; font-weight: bold; margin-top: 0.5em; margin-bottom: 0.5em; }
+        .markdown-preview p { margin-bottom: 0.5em; }
+        .markdown-preview ul, .markdown-preview ol { margin-left: 1.5em; margin-bottom: 0.5em; }
+        .markdown-preview li { margin-bottom: 0.25em; }
+        .markdown-preview code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; }
+        .markdown-preview pre { background-color: #f3f4f6; padding: 0.5rem; border-radius: 0.375rem; overflow-x: auto; margin-bottom: 0.5em; }
+        .markdown-preview pre code { background-color: transparent; padding: 0; }
+        .markdown-preview blockquote { border-left: 4px solid #d1d5db; padding-left: 1rem; margin-left: 0; margin-bottom: 0.5em; color: #6b7280; }
+        .markdown-preview a { color: #3b82f6; text-decoration: underline; }
+        .markdown-preview strong { font-weight: bold; }
+        .markdown-preview em { font-style: italic; }
     </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fields = ['description', 'rationale', 'benefits', 'risks', 'comment'];
+
+        // Tab switching functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const field = this.dataset.field;
+                const tab = this.dataset.tab;
+
+                // Update active button
+                document.querySelectorAll(`.tab-btn[data-field="${field}"]`).forEach(b => {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // Show/hide content
+                document.querySelectorAll(`.tab-content[data-field="${field}"]`).forEach(content => {
+                    if (content.dataset.tab === tab) {
+                        content.classList.remove('hidden');
+                        // Update preview if switching to preview tab
+                        if (tab === 'preview') {
+                            updatePreview(field);
+                        }
+                    } else {
+                        content.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+        // Function to update markdown preview
+        function updatePreview(field) {
+            const textarea = document.getElementById(`id_${field}`);
+            const preview = document.getElementById(`preview-${field}`);
+
+            if (textarea && preview) {
+                const markdownText = textarea.value || '*No content*';
+                preview.innerHTML = marked.parse(markdownText);
+            }
+        }
+
+        // Add input listeners to update preview on type (for real-time preview when switching tabs)
+        fields.forEach(field => {
+            const textarea = document.getElementById(`id_${field}`);
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    // Only update if preview is currently visible
+                    const previewTab = document.querySelector(`.tab-content[data-field="${field}"][data-tab="preview"]`);
+                    if (previewTab && !previewTab.classList.contains('hidden')) {
+                        updatePreview(field);
+                    }
+                });
+            }
+        });
+    });
+    </script>
 {% endblock %}

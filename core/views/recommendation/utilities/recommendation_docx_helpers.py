@@ -1,8 +1,11 @@
+import re
 from datetime import datetime, timezone
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt, RGBColor
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 from core.models.recommendation import Recommendation
 from core.views.application.utilities.application_docx_helpers import (
@@ -116,6 +119,183 @@ def add_toc_placeholder(document: Document) -> None:
     _add_toc_placeholder(document)
 
 
+def add_markdown_content(document: Document, text: str, font_size: int = 9) -> None:
+    """Add markdown-formatted text to the document with proper styling."""
+    if not text or not text.strip():
+        return
+
+    lines = text.split('\n')
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+
+        # Handle headers
+        if line.startswith('###'):
+            para = document.add_paragraph()
+            run = para.add_run(line[3:].strip())
+            run.font.size = Pt(font_size + 2)
+            run.bold = True
+            i += 1
+            continue
+        elif line.startswith('##'):
+            para = document.add_paragraph()
+            run = para.add_run(line[2:].strip())
+            run.font.size = Pt(font_size + 3)
+            run.bold = True
+            i += 1
+            continue
+        elif line.startswith('#'):
+            para = document.add_paragraph()
+            run = para.add_run(line[1:].strip())
+            run.font.size = Pt(font_size + 4)
+            run.bold = True
+            i += 1
+            continue
+
+        # Handle unordered lists
+        if line.strip().startswith(('- ', '* ', '+ ')):
+            para = document.add_paragraph(style='List Bullet')
+            add_inline_formatting(para, line.strip()[2:], font_size)
+            i += 1
+            continue
+
+        # Handle ordered lists
+        match = re.match(r'^(\d+)\.\s+(.*)$', line.strip())
+        if match:
+            para = document.add_paragraph(style='List Number')
+            add_inline_formatting(para, match.group(2), font_size)
+            i += 1
+            continue
+
+        # Handle code blocks
+        if line.strip().startswith('```'):
+            i += 1
+            code_lines = []
+            while i < len(lines) and not lines[i].strip().startswith('```'):
+                code_lines.append(lines[i])
+                i += 1
+            if code_lines:
+                para = document.add_paragraph()
+                run = para.add_run('\n'.join(code_lines))
+                run.font.name = 'Courier New'
+                run.font.size = Pt(font_size - 1)
+                para_format = para.paragraph_format
+                para_format.left_indent = Pt(20)
+                # Add background shading
+                shading_elm = OxmlElement('w:shd')
+                shading_elm.set(qn('w:fill'), 'F3F4F6')
+                para._element.get_or_add_pPr().append(shading_elm)
+            i += 1
+            continue
+
+        # Handle blockquotes
+        if line.strip().startswith('>'):
+            para = document.add_paragraph()
+            add_inline_formatting(para, line.strip()[1:].strip(), font_size)
+            para_format = para.paragraph_format
+            para_format.left_indent = Pt(20)
+            # Add left border for blockquote
+            pPr = para._element.get_or_add_pPr()
+            pBdr = OxmlElement('w:pBdr')
+            left = OxmlElement('w:left')
+            left.set(qn('w:val'), 'single')
+            left.set(qn('w:sz'), '12')
+            left.set(qn('w:space'), '10')
+            left.set(qn('w:color'), 'D1D5DB')
+            pBdr.append(left)
+            pPr.append(pBdr)
+            i += 1
+            continue
+
+        # Handle horizontal rules
+        if line.strip() in ('---', '***', '___'):
+            para = document.add_paragraph()
+            pPr = para._element.get_or_add_pPr()
+            pBdr = OxmlElement('w:pBdr')
+            bottom = OxmlElement('w:bottom')
+            bottom.set(qn('w:val'), 'single')
+            bottom.set(qn('w:sz'), '6')
+            bottom.set(qn('w:space'), '1')
+            bottom.set(qn('w:color'), 'D1D5DB')
+            pBdr.append(bottom)
+            pPr.append(pBdr)
+            i += 1
+            continue
+
+        # Handle regular paragraphs
+        if line.strip():
+            para = document.add_paragraph()
+            add_inline_formatting(para, line, font_size)
+
+        i += 1
+
+
+def add_inline_formatting(paragraph, text: str, font_size: int = 9) -> None:
+    """Add text with inline markdown formatting (bold, italic, code, links) to a paragraph."""
+    # Pattern to match markdown inline elements
+    pattern = re.compile(
+        r'(\*\*\*(.+?)\*\*\*)|'  # Bold + Italic
+        r'(\*\*(.+?)\*\*)|'  # Bold
+        r'(__(.+?)__)|'  # Bold (underscore)
+        r'(\*(.+?)\*)|'  # Italic
+        r'(_(.+?)_)|'  # Italic (underscore)
+        r'(`(.+?)`)|'  # Inline code
+        r'(\[(.+?)\]\((.+?)\))'  # Links
+    )
+
+    last_end = 0
+    for match in pattern.finditer(text):
+        # Add text before match
+        if match.start() > last_end:
+            run = paragraph.add_run(text[last_end:match.start()])
+            run.font.size = Pt(font_size)
+
+        # Determine match type and add formatted run
+        if match.group(1):  # Bold + Italic (***text***)
+            run = paragraph.add_run(match.group(2))
+            run.bold = True
+            run.italic = True
+            run.font.size = Pt(font_size)
+        elif match.group(3):  # Bold (**text**)
+            run = paragraph.add_run(match.group(4))
+            run.bold = True
+            run.font.size = Pt(font_size)
+        elif match.group(5):  # Bold (__text__)
+            run = paragraph.add_run(match.group(6))
+            run.bold = True
+            run.font.size = Pt(font_size)
+        elif match.group(7):  # Italic (*text*)
+            run = paragraph.add_run(match.group(8))
+            run.italic = True
+            run.font.size = Pt(font_size)
+        elif match.group(9):  # Italic (_text_)
+            run = paragraph.add_run(match.group(10))
+            run.italic = True
+            run.font.size = Pt(font_size)
+        elif match.group(11):  # Inline code (`code`)
+            run = paragraph.add_run(match.group(12))
+            run.font.name = 'Courier New'
+            run.font.size = Pt(font_size - 1)
+            # Add background to inline code
+            shading_elm = OxmlElement('w:shd')
+            shading_elm.set(qn('w:fill'), 'F3F4F6')
+            run._element.get_or_add_rPr().append(shading_elm)
+        elif match.group(13):  # Link [text](url)
+            run = paragraph.add_run(match.group(14))
+            run.font.color.rgb = RGBColor(59, 130, 246)
+            run.underline = True
+            run.font.size = Pt(font_size)
+            # Note: actual hyperlink functionality would require more complex DOCX manipulation
+
+        last_end = match.end()
+
+    # Add remaining text
+    if last_end < len(text):
+        run = paragraph.add_run(text[last_end:])
+        run.font.size = Pt(font_size)
+
+
 def add_recommendation_intro(document: Document) -> None:
     """Add introductory paragraph about recommendations."""
     from docx.shared import Pt
@@ -203,34 +383,24 @@ def add_recommendation_section(document: Document, recommendation: Recommendatio
     # Description section
     if recommendation.description:
         document.add_heading("Description", level=2)
-        para = document.add_paragraph(recommendation.description)
-        for run in para.runs:
-            run.font.size = Pt(9)
+        add_markdown_content(document, recommendation.description)
 
     # Rationale section
     if recommendation.rationale:
         document.add_heading("Rationale", level=2)
-        para = document.add_paragraph(recommendation.rationale)
-        for run in para.runs:
-            run.font.size = Pt(9)
+        add_markdown_content(document, recommendation.rationale)
 
     # Expected Benefits section
     if recommendation.benefits:
         document.add_heading("Expected Benefits", level=2)
-        para = document.add_paragraph(recommendation.benefits)
-        for run in para.runs:
-            run.font.size = Pt(9)
+        add_markdown_content(document, recommendation.benefits)
 
     # Potential Risks section
     if recommendation.risks:
         document.add_heading("Potential Risks", level=2)
-        para = document.add_paragraph(recommendation.risks)
-        for run in para.runs:
-            run.font.size = Pt(9)
+        add_markdown_content(document, recommendation.risks)
 
     # Additional Notes section
     if recommendation.comment:
         document.add_heading("Notes", level=2)
-        para = document.add_paragraph(recommendation.comment)
-        for run in para.runs:
-            run.font.size = Pt(9)
+        add_markdown_content(document, recommendation.comment)
