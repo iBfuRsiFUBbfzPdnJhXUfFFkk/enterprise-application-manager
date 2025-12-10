@@ -11,24 +11,13 @@
                     <h1 class="text-3xl font-bold text-gray-900">Recommendations</h1>
                     <p class="mt-1 text-sm text-gray-500">Track technical recommendations and best practices</p>
                 </div>
-                <div class="flex space-x-3">
-                    <button id="export-selected-btn"
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                            disabled
-                            title="Select exactly one recommendation to export">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Export Selected
-                    </button>
-                    <a href="{% url 'recommendation_new' %}"
-                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        New Recommendation
-                    </a>
-                </div>
+                <a href="{% url 'recommendation_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Recommendation
+                </a>
             </div>
         </div>
     </div>
@@ -36,7 +25,7 @@
     <!-- Search and Filter Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="mb-4">
                 <!-- Search -->
                 <div>
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
@@ -50,43 +39,12 @@
                         </svg>
                     </div>
                 </div>
-
-                <!-- Priority Filter -->
-                <div>
-                    <label for="priority-filter" class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-                    <select id="priority-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                        <option value="">All Priorities</option>
-                        <option value="High">High</option>
-                        <option value="Medium">Medium</option>
-                        <option value="Low">Low</option>
-                    </select>
-                </div>
-
-                <!-- Status Filter -->
-                <div>
-                    <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                    <select id="status-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                        <option value="">All Statuses</option>
-                        <option value="Proposed">Proposed</option>
-                        <option value="Under Review">Under Review</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Implemented">Implemented</option>
-                    </select>
-                </div>
             </div>
 
-            <!-- View Toggle, Selection, and Result Count -->
+            <!-- View Toggle and Result Count -->
             <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div class="flex items-center space-x-4">
-                    <div class="text-sm text-gray-600">
-                        Showing <span id="result-count" class="font-semibold text-gray-900">{{ models|length }}</span> recommendation(s)
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <button id="select-all-btn" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Select All</button>
-                        <span class="text-gray-400">|</span>
-                        <button id="deselect-all-btn" class="text-sm text-blue-600 hover:text-blue-800 font-medium">Deselect All</button>
-                    </div>
+                <div class="text-sm text-gray-600">
+                    Showing <span id="result-count" class="font-semibold text-gray-900">{{ models|length }}</span> recommendation(s)
                 </div>
                 <div class="flex items-center space-x-2">
                     <span class="text-sm font-medium text-gray-700">View:</span>
@@ -110,40 +68,14 @@
             <div class="rec-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
                  data-id="{{ model.id }}"
                  data-name="{{ model.name|default:'' }}"
-                 data-description="{{ model.description|default:'' }}"
-                 data-priority="{{ model.priority|default:'' }}"
-                 data-status="{{ model.status|default:'' }}">
+                 data-description="{{ model.description|default:'' }}">
                 <div class="p-6">
-                    <!-- Checkbox and Title -->
-                    <div class="flex items-start space-x-3 mb-4">
-                        <input type="checkbox"
-                               class="rec-checkbox mt-1 h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                               data-rec-id="{{ model.id }}"
-                               onclick="event.stopPropagation()">
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600"
-                                ondblclick="window.location.href='{% url 'recommendation_edit' model_id=model.id %}'">
-                                {{ model.name }}
-                            </h3>
-                        </div>
-                    </div>
-
-                    <!-- Priority and Status Badges -->
-                    <div class="flex items-center space-x-2 mb-4">
-                        {% if model.priority %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                            {% if model.priority == 'High' %}bg-red-100 text-red-800
-                            {% elif model.priority == 'Medium' %}bg-yellow-100 text-yellow-800
-                            {% elif model.priority == 'Low' %}bg-green-100 text-green-800
-                            {% else %}bg-gray-100 text-gray-800{% endif %}">
-                            {{ model.priority }}
-                        </span>
-                        {% endif %}
-                        {% if model.status %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {{ model.status }}
-                        </span>
-                        {% endif %}
+                    <!-- Title -->
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600"
+                            ondblclick="window.location.href='{% url 'recommendation_edit' model_id=model.id %}'">
+                            {{ model.name }}
+                        </h3>
                     </div>
 
                     <!-- Description Preview -->
@@ -173,7 +105,14 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-end">
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-end space-x-3">
+                    <a href="/authenticated/recommendation/export/docx/?ids={{ model.id }}"
+                       class="inline-flex items-center text-sm font-medium text-green-600 hover:text-green-800 transition-colors">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        Print
+                    </a>
                     <a href="{% url 'recommendation_edit' model_id=model.id %}"
                        class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
                         <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,12 +132,7 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
-                                    <input type="checkbox" id="select-all-checkbox-table" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
-                                </th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -209,41 +143,11 @@
                             <tr class="rec-row hover:bg-gray-50 transition-colors duration-150"
                                 data-id="{{ model.id }}"
                                 data-name="{{ model.name|default:'' }}"
-                                data-description="{{ model.description|default:'' }}"
-                                data-priority="{{ model.priority|default:'' }}"
-                                data-status="{{ model.status|default:'' }}">
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    <input type="checkbox"
-                                           class="rec-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                                           data-rec-id="{{ model.id }}"
-                                           onclick="event.stopPropagation()">
-                                </td>
+                                data-description="{{ model.description|default:'' }}">
                                 <td class="px-3 py-3 text-sm font-medium text-gray-900 cursor-pointer hover:text-blue-600"
                                     ondblclick="window.location.href='{% url 'recommendation_edit' model_id=model.id %}'"
                                     style="max-width: 300px;">
                                     <div class="truncate" title="{{ model.name }}">{{ model.name }}</div>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm">
-                                    {% if model.priority %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                        {% if model.priority == 'High' %}bg-red-100 text-red-800
-                                        {% elif model.priority == 'Medium' %}bg-yellow-100 text-yellow-800
-                                        {% elif model.priority == 'Low' %}bg-green-100 text-green-800
-                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                        {{ model.priority }}
-                                    </span>
-                                    {% else %}
-                                    <span class="text-gray-400">-</span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm">
-                                    {% if model.status %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                        {{ model.status }}
-                                    </span>
-                                    {% else %}
-                                    <span class="text-gray-400">-</span>
-                                    {% endif %}
                                 </td>
                                 <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 200px;">
                                     {% if model.application %}
@@ -256,14 +160,24 @@
                                     {% if model.date_recommended %}{{ model.date_recommended }}{% else %}<span class="text-gray-400">-</span>{% endif %}
                                 </td>
                                 <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="{% url 'recommendation_edit' model_id=model.id %}"
-                                       class="inline-flex items-center p-1 text-blue-600 hover:text-blue-800 transition-colors"
-                                       title="Edit"
-                                       onclick="event.stopPropagation()">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </a>
+                                    <div class="flex items-center justify-end space-x-2">
+                                        <a href="/authenticated/recommendation/export/docx/?ids={{ model.id }}"
+                                           class="inline-flex items-center p-1 text-green-600 hover:text-green-800 transition-colors"
+                                           title="Print"
+                                           onclick="event.stopPropagation()">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                            </svg>
+                                        </a>
+                                        <a href="{% url 'recommendation_edit' model_id=model.id %}"
+                                           class="inline-flex items-center p-1 text-blue-600 hover:text-blue-800 transition-colors"
+                                           title="Edit"
+                                           onclick="event.stopPropagation()">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -287,44 +201,30 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search');
-    const priorityFilter = document.getElementById('priority-filter');
-    const statusFilter = document.getElementById('status-filter');
     const gridViewBtn = document.getElementById('grid-view-btn');
     const listViewBtn = document.getElementById('list-view-btn');
     const gridView = document.getElementById('grid-view');
     const listView = document.getElementById('list-view');
     const emptyState = document.getElementById('empty-state');
     const resultCount = document.getElementById('result-count');
-    const exportBtn = document.getElementById('export-selected-btn');
-    const selectAllBtn = document.getElementById('select-all-btn');
-    const deselectAllBtn = document.getElementById('deselect-all-btn');
-    const selectAllCheckboxTable = document.getElementById('select-all-checkbox-table');
 
     // Collect all items
     const allItems = [];
     document.querySelectorAll('.rec-card').forEach((card, index) => {
         const row = document.querySelectorAll('.rec-row')[index];
-        const cardCheckbox = card.querySelector('.rec-checkbox');
-        const rowCheckbox = row ? row.querySelector('.rec-checkbox') : null;
 
         allItems.push({
             card: card,
             row: row,
-            cardCheckbox: cardCheckbox,
-            rowCheckbox: rowCheckbox,
             id: card.dataset.id,
             name: card.dataset.name.toLowerCase(),
-            description: card.dataset.description.toLowerCase(),
-            priority: card.dataset.priority,
-            status: card.dataset.status
+            description: card.dataset.description.toLowerCase()
         });
     });
 
     // Filter function
     function filterItems() {
         const searchTerm = searchInput.value.toLowerCase();
-        const selectedPriority = priorityFilter.value;
-        const selectedStatus = statusFilter.value;
 
         let visibleCount = 0;
 
@@ -333,10 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 item.name.includes(searchTerm) ||
                                 item.description.includes(searchTerm);
 
-            const matchesPriority = !selectedPriority || item.priority === selectedPriority;
-            const matchesStatus = !selectedStatus || item.status === selectedStatus;
-
-            const isVisible = matchesSearch && matchesPriority && matchesStatus;
+            const isVisible = matchesSearch;
 
             if (isVisible) {
                 item.card.classList.remove('hidden');
@@ -371,8 +268,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listeners for filtering
     searchInput.addEventListener('input', filterItems);
-    priorityFilter.addEventListener('change', filterItems);
-    statusFilter.addEventListener('change', filterItems);
 
     // View toggle
     function setView(view) {
@@ -400,84 +295,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore saved view preference
     const savedView = localStorage.getItem('eam_recommendation_view') || 'grid';
     setView(savedView);
-
-    // Checkbox selection management
-    function updateExportButton() {
-        const checkedBoxes = document.querySelectorAll('.rec-checkbox:checked');
-        const uniqueChecked = new Set(Array.from(checkedBoxes).map(cb => cb.dataset.recId));
-        const count = uniqueChecked.size;
-
-        // Only enable export when exactly one recommendation is selected
-        exportBtn.disabled = count !== 1;
-
-        // Update button text and title based on selection
-        if (count === 0) {
-            exportBtn.title = 'Select exactly one recommendation to export';
-        } else if (count === 1) {
-            exportBtn.title = 'Export selected recommendation to DOCX';
-        } else {
-            exportBtn.title = 'Only one recommendation can be exported at a time';
-        }
-    }
-
-    // Sync checkboxes between grid and list views
-    document.querySelectorAll('.rec-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const recId = this.dataset.recId;
-            const isChecked = this.checked;
-
-            // Sync all checkboxes with the same rec-id
-            document.querySelectorAll(`.rec-checkbox[data-rec-id="${recId}"]`).forEach(cb => {
-                cb.checked = isChecked;
-            });
-
-            updateExportButton();
-        });
-    });
-
-    // Select all / Deselect all
-    selectAllBtn.addEventListener('click', function() {
-        document.querySelectorAll('.rec-checkbox').forEach(cb => {
-            const item = allItems.find(i => i.id === cb.dataset.recId);
-            if (item && !item.card.classList.contains('hidden')) {
-                cb.checked = true;
-            }
-        });
-        if (selectAllCheckboxTable) selectAllCheckboxTable.checked = true;
-        updateExportButton();
-    });
-
-    deselectAllBtn.addEventListener('click', function() {
-        document.querySelectorAll('.rec-checkbox').forEach(cb => cb.checked = false);
-        if (selectAllCheckboxTable) selectAllCheckboxTable.checked = false;
-        updateExportButton();
-    });
-
-    // Table header checkbox
-    if (selectAllCheckboxTable) {
-        selectAllCheckboxTable.addEventListener('change', function() {
-            const isChecked = this.checked;
-            document.querySelectorAll('.rec-checkbox').forEach(cb => {
-                const item = allItems.find(i => i.id === cb.dataset.recId);
-                if (item && !item.row.classList.contains('hidden')) {
-                    cb.checked = isChecked;
-                }
-            });
-            updateExportButton();
-        });
-    }
-
-    // Export selected
-    exportBtn.addEventListener('click', function() {
-        const selectedIds = Array.from(document.querySelectorAll('.rec-checkbox:checked'))
-            .map(cb => cb.dataset.recId)
-            .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
-
-        // Only export if exactly one recommendation is selected
-        if (selectedIds.length === 1) {
-            window.location.href = `/authenticated/recommendation/export/docx/?ids=${selectedIds[0]}`;
-        }
-    });
 });
 </script>
 {% endblock %}
