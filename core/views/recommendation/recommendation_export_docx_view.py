@@ -10,8 +10,6 @@ from core.views.generic.generic_500 import generic_500
 from core.views.recommendation.utilities.recommendation_docx_helpers import (
     add_header_footer,
     add_recommendation_section,
-    add_title_page,
-    add_toc_placeholder,
     set_narrow_margins,
 )
 
@@ -43,13 +41,6 @@ def recommendation_export_docx_view(request: HttpRequest) -> HttpResponse:
         document = Document()
         set_narrow_margins(document)
         add_header_footer(document, "Recommendations Export")
-
-        # Add title page
-        username = request.user.get_full_name() or request.user.username
-        add_title_page(document, username, recommendations.count())
-
-        # Add TOC placeholder
-        add_toc_placeholder(document)
 
         # Add each recommendation
         for i, recommendation in enumerate(recommendations):
