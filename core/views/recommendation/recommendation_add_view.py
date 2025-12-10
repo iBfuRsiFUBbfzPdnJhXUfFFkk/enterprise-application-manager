@@ -18,8 +18,8 @@ def recommendation_add_view(request: HttpRequest) -> HttpResponse:
 
     # Get current user's person ID if they have one
     current_user_person_id = None
-    if hasattr(request.user, 'person') and request.user.person:
-        current_user_person_id = request.user.person.id
+    if hasattr(request.user, 'person_mapping') and request.user.person_mapping:
+        current_user_person_id = request.user.person_mapping.id
 
     context: Mapping[str, Any] = {
         "form": form,
