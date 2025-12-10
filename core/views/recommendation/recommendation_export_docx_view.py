@@ -9,6 +9,7 @@ from core.models.recommendation import Recommendation
 from core.views.generic.generic_500 import generic_500
 from core.views.recommendation.utilities.recommendation_docx_helpers import (
     add_header_footer,
+    add_recommendation_intro,
     add_recommendation_section,
     set_narrow_margins,
 )
@@ -51,8 +52,12 @@ def recommendation_export_docx_view(request: HttpRequest) -> HttpResponse:
             person = recommendation.person_recommended_by
             person_name = person.full_name_for_human if hasattr(person, "full_name_for_human") else str(person)
 
-        # Add header/footer with recommendation-specific info
-        add_header_footer(document, recommendation.name or "Untitled", person_name, date_str)
+        # Add header/footer with recommendation-specific info (prefixed with "Recommendation - ")
+        title_with_prefix = f"Recommendation - {recommendation.name or 'Untitled'}"
+        add_header_footer(document, title_with_prefix, person_name, date_str)
+
+        # Add introductory paragraph
+        add_recommendation_intro(document)
 
         # Add recommendation content
         add_recommendation_section(document, recommendation)

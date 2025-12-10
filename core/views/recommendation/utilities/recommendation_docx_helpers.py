@@ -121,6 +121,23 @@ def add_toc_placeholder(document: Document) -> None:
     _add_toc_placeholder(document)
 
 
+def add_recommendation_intro(document: Document) -> None:
+    """Add introductory paragraph about recommendations."""
+    from docx.shared import Pt
+
+    intro_para = document.add_paragraph()
+    intro_run = intro_para.add_run(
+        "This document contains a technical recommendation for improving systems, processes, or practices. "
+        "Recommendations are tracked to ensure continuous improvement and documentation of best practices. "
+        "Each recommendation includes detailed analysis of benefits, risks, and implementation considerations."
+    )
+    intro_run.font.size = Pt(10)
+    intro_run.italic = True
+
+    # Add spacing after intro
+    document.add_paragraph()
+
+
 def add_title_page(document: Document, username: str, total_count: int) -> None:
     """Add title page with metadata."""
     title = document.add_heading("Recommendations Export", level=1)
@@ -154,10 +171,6 @@ def add_title_page(document: Document, username: str, total_count: int) -> None:
 def add_recommendation_section(document: Document, recommendation: Recommendation) -> None:
     """Add a formatted recommendation section to the document."""
     from core.utilities.get_name_acronym import get_name_acronym
-
-    # H1 Heading for recommendation name
-    heading = document.add_heading(recommendation.name or "Untitled Recommendation", level=1)
-    heading.runs[0].font.size = Pt(14)
 
     # Metadata table
     table = document.add_table(rows=0, cols=2)
