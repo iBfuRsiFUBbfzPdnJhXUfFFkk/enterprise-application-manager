@@ -27,47 +27,70 @@ def add_header_footer(document: Document, title: str, person_name: str, date_str
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
-    from docx.shared import Pt, RGBColor
+    from docx.shared import Pt, RGBColor, Inches
+    from docx.table import _Cell
 
     section = document.sections[0]
 
-    # Add header with three parts
+    # Add header with a table for proper three-column layout
     header = section.header
-    header_para = header.paragraphs[0]
 
-    # Clear any existing content
-    header_para.clear()
+    # Clear existing paragraphs
+    for para in header.paragraphs:
+        para.clear()
 
-    # Add person name (left)
-    run_left = header_para.add_run(person_name)
-    run_left.font.size = Pt(9)
-    run_left.font.color.rgb = RGBColor(100, 100, 100)
+    # Create a 1-row, 3-column table in the header
+    table = header.add_table(rows=1, cols=3, width=Inches(7.5))
+    table.autofit = False
 
-    # Add tab to center
-    header_para.add_run("\t")
+    # Set column widths
+    table.columns[0].width = Inches(2.5)  # Left column (person)
+    table.columns[1].width = Inches(2.5)  # Center column (title)
+    table.columns[2].width = Inches(2.5)  # Right column (date)
 
-    # Add title (center)
-    run_center = header_para.add_run(title)
-    run_center.font.size = Pt(9)
-    run_center.font.color.rgb = RGBColor(100, 100, 100)
-    run_center.bold = True
+    # Get cells
+    cells = table.rows[0].cells
 
-    # Add tab to right
-    header_para.add_run("\t")
+    # Left cell - Person name
+    left_para = cells[0].paragraphs[0]
+    left_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    left_run = left_para.add_run(person_name)
+    left_run.font.size = Pt(9)
+    left_run.font.color.rgb = RGBColor(100, 100, 100)
 
-    # Add date (right)
-    run_right = header_para.add_run(date_str)
-    run_right.font.size = Pt(9)
-    run_right.font.color.rgb = RGBColor(100, 100, 100)
+    # Center cell - Title
+    center_para = cells[1].paragraphs[0]
+    center_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    center_run = center_para.add_run(title)
+    center_run.font.size = Pt(9)
+    center_run.font.color.rgb = RGBColor(100, 100, 100)
+    center_run.bold = True
 
-    # Set tab stops for left-center-right alignment
-    # With 0.5" margins on each side, content area is 7.5" wide (8.5" - 0.5" - 0.5")
-    from docx.shared import Inches
-    from docx.enum.text import WD_TAB_ALIGNMENT
+    # Right cell - Date
+    right_para = cells[2].paragraphs[0]
+    right_para.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    right_run = right_para.add_run(date_str)
+    right_run.font.size = Pt(9)
+    right_run.font.color.rgb = RGBColor(100, 100, 100)
 
-    tab_stops = header_para.paragraph_format.tab_stops
-    tab_stops.add_tab_stop(Inches(3.75), WD_TAB_ALIGNMENT.CENTER)  # Center of content area
-    tab_stops.add_tab_stop(Inches(7.5), WD_TAB_ALIGNMENT.RIGHT)   # Right edge of content area
+    # Remove table borders
+    from docx.oxml.shared import OxmlElement, qn
+    tbl = table._element
+    tblPr = tbl.tblPr
+    if tblPr is None:
+        tblPr = OxmlElement('w:tblPr')
+        tbl.insert(0, tblPr)
+
+    # Set borders to none
+    tblBorders = OxmlElement('w:tblBorders')
+    for border_name in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+        border = OxmlElement(f'w:{border_name}')
+        border.set(qn('w:val'), 'none')
+        border.set(qn('w:sz'), '0')
+        border.set(qn('w:space'), '0')
+        border.set(qn('w:color'), 'auto')
+        tblBorders.append(border)
+    tblPr.append(tblBorders)
 
     # Add footer with page numbers
     footer = section.footer
