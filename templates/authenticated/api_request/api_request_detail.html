@@ -74,6 +74,25 @@
                 </div>
                 {%endif %}
 
+                <!-- Request Preview -->
+                <div id="request-preview" class="bg-sky-50 border border-sky-300 rounded-md p-4">
+                    <h3 class="text-sm font-semibold text-sky-900 mb-3">Target API Request Preview</h3>
+                    <div class="space-y-2 text-xs font-mono">
+                        <div><span class="text-gray-600">Method:</span> <span class="text-gray-900 font-semibold">{{ model.http_method }}</span></div>
+                        <div><span class="text-gray-600">Full URL:</span> <span id="preview-url" class="text-blue-600 break-all">Loading...</span></div>
+                        <div class="pt-2 border-t border-sky-200">
+                            <div class="text-gray-600 mb-1">Headers:</div>
+                            <pre id="preview-headers" class="bg-white p-2 rounded text-xs overflow-x-auto">Loading...</pre>
+                        </div>
+                        {%if model.request_body or model.http_method in "POST,PUT,PATCH" %}
+                        <div class="pt-2 border-t border-sky-200">
+                            <div class="text-gray-600 mb-1">Request Body:</div>
+                            <pre id="preview-body" class="bg-white p-2 rounded text-xs overflow-x-auto max-h-48">Loading...</pre>
+                        </div>
+                        {%endif %}
+                    </div>
+                </div>
+
                 <!-- Execute Button -->
                 <div class="flex items-center space-x-3">
                     <button onclick="executeRequest()" id="execute-btn" class="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
@@ -86,7 +105,7 @@
                     <span id="loading-indicator" class="hidden text-sm text-gray-500">
                         <svg class="animate-spin h-5 w-5 text-sky-600 inline" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 74 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Executing...
                     </span>
@@ -269,10 +288,22 @@
         // Parse parameters from the model
         const pathParameters = {{ model.path_parameters|default:"{}"|safe }};
         const queryParameters = {{ model.query_parameters|default:"{}"|safe }};
+        const environmentUrls = {{ environment_urls_json|safe }};
+        const urlPath = "{{ model.url_path }}";
+        const httpMethod = "{{ model.http_method }}";
+        const contentType = "{{ model.content_type|default:'application/json' }}";
 
         // Generate parameter inputs on page load
         document.addEventListener('DOMContentLoaded', function() {
             generateParameterInputs();
+            updateRequestPreview();
+
+            // Update preview when inputs change
+            document.getElementById('environment-select').addEventListener('change', updateRequestPreview);
+            const bodyInput = document.getElementById('request-body');
+            if (bodyInput) {
+                bodyInput.addEventListener('input', updateRequestPreview);
+            }
         });
 
         function generateParameterInputs() {
@@ -298,6 +329,8 @@
                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 text-sm">
                     `;
                     pathParamsDiv.appendChild(inputDiv);
+                    // Add event listener for preview update
+                    document.getElementById(`path-param-${key}`).addEventListener('input', updateRequestPreview);
                 }
             }
 
@@ -320,6 +353,8 @@
                                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 text-sm">
                     `;
                     queryParamsDiv.appendChild(inputDiv);
+                    // Add event listener for preview update
+                    document.getElementById(`query-param-${key}`).addEventListener('input', updateRequestPreview);
                 }
             }
         }
@@ -348,7 +383,7 @@
         }
 
         function getCsrfToken() {
-            const name = 'csrftoken';
+            const name = 'eam_csrftoken';  // Custom CSRF cookie name
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
@@ -363,6 +398,61 @@
             return cookieValue;
         }
 
+        function updateRequestPreview() {
+            const environment = document.getElementById('environment-select').value;
+            const { pathParams, queryParams } = collectParameters();
+            const body = document.getElementById('request-body')?.value || '';
+
+            // Build the full target API URL
+            const baseUrl = environmentUrls[environment] || 'NOT CONFIGURED';
+            let targetPath = urlPath;
+
+            // Replace path parameters in the URL
+            for (const [key, value] of Object.entries(pathParams)) {
+                const pattern = new RegExp(`{${key}}`, 'g');
+                targetPath = targetPath.replace(pattern, value || `{${key}}`);
+            }
+
+            // Build query string
+            let queryString = '';
+            const queryEntries = Object.entries(queryParams).filter(([k, v]) => v);
+            if (queryEntries.length > 0) {
+                queryString = '?' + queryEntries.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+            }
+
+            const fullUrl = baseUrl ? `${baseUrl.replace(/\/$/, '')}/${targetPath.replace(/^\//, '')}${queryString}` : 'BASE URL NOT CONFIGURED';
+
+            // Update URL display
+            document.getElementById('preview-url').textContent = fullUrl;
+
+            // Build target API headers
+            const targetHeaders = {
+                'Content-Type': contentType
+            };
+
+            // Add authentication headers if configured
+            {%if model.authentication %}
+            targetHeaders['Authorization'] = '{{ model.authentication.name }}';
+            {%endif %}
+
+            document.getElementById('preview-headers').textContent = JSON.stringify(targetHeaders, null, 2);
+
+            // Update body preview
+            const bodyElement = document.getElementById('preview-body');
+            if (bodyElement) {
+                if (body) {
+                    try {
+                        const jsonBody = JSON.parse(body);
+                        bodyElement.textContent = JSON.stringify(jsonBody, null, 2);
+                    } catch (e) {
+                        bodyElement.textContent = body;
+                    }
+                } else {
+                    bodyElement.textContent = '(empty)';
+                }
+            }
+        }
+
         function executeRequest() {
             const environment = document.getElementById('environment-select').value;
             const { pathParams, queryParams } = collectParameters();
@@ -373,22 +463,38 @@
             document.getElementById('loading-indicator').classList.remove('hidden');
             document.getElementById('response-section').classList.add('hidden');
 
-            // Prepare form data
-            const formData = new FormData();
-            formData.append('environment', environment);
-            formData.append('path_parameters', JSON.stringify(pathParams));
-            formData.append('query_parameters', JSON.stringify(queryParams));
-            formData.append('custom_headers', '{}');
-            formData.append('body', body);
+            // Prepare request data
+            const csrfToken = getCsrfToken();
 
-            // Execute request
-            fetch('{%url "api_request_execute" request_id=model.id %}', {
+            const requestData = {
+                environment: environment,
+                path_parameters: pathParams,
+                query_parameters: queryParams,
+                custom_headers: {},
+                body: body
+            };
+
+            const requestConfig = {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCsrfToken()
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: formData
-            })
+                body: JSON.stringify(requestData)
+            };
+
+            // Log request details for debugging
+            console.log('=== API Request Execute ===');
+            console.log('URL:', '{%url "api_request_execute" request_id=model.id %}');
+            console.log('CSRF Token:', csrfToken);
+            console.log('Headers:', requestConfig.headers);
+            console.log('Request Body:', requestData);
+            console.log('Request Body (JSON):', requestConfig.body);
+            console.log('========================');
+
+            // Execute request
+            fetch('{%url "api_request_execute" request_id=model.id %}', requestConfig)
             .then(response => response.json())
             .then(data => {
                 displayResponse(data);

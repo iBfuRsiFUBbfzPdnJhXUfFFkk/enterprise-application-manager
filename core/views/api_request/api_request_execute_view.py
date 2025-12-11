@@ -1,7 +1,7 @@
 import json
 import time
 from django.http import HttpRequest, JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
 from core.models.api_request import APIRequest
 from core.models.api_request_execution import APIRequestExecution
 from core.utilities.api_request_executor import (
@@ -13,7 +13,7 @@ from core.utilities.api_request_executor import (
 from core.utilities.get_user_from_request import get_user_from_request
 
 
-@require_http_methods(['POST'])
+@require_POST
 def api_request_execute_view(
     request: HttpRequest, request_id: int
 ) -> JsonResponse:
@@ -21,14 +21,13 @@ def api_request_execute_view(
     try:
         api_request = APIRequest.objects.get(id=request_id)
 
-        # Parse form data
-        environment = request.POST.get(
-            'environment', api_request.default_environment
-        )
-        path_params = json.loads(request.POST.get('path_parameters', '{}'))
-        query_params = json.loads(request.POST.get('query_parameters', '{}'))
-        custom_headers = json.loads(request.POST.get('custom_headers', '{}'))
-        body = request.POST.get('body', api_request.request_body or '')
+        # Parse JSON data
+        data = json.loads(request.body)
+        environment = data.get('environment', api_request.default_environment)
+        path_params = data.get('path_parameters', {})
+        query_params = data.get('query_parameters', {})
+        custom_headers = data.get('custom_headers', {})
+        body = data.get('body', api_request.request_body or '')
 
         # Build the full URL
         base_url = get_base_url_for_environment(api_request.api, environment)
