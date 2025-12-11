@@ -266,6 +266,48 @@ def add_markdown_content(document: Document, text: str, font_size: int = 9) -> N
             i += 1
 
 
+def add_hyperlink(paragraph, url: str, text: str, font_size: int = 9) -> None:
+    """Add a clickable hyperlink to a paragraph."""
+    from docx.oxml.shared import OxmlElement
+    from docx.oxml.ns import qn
+
+    # Create the w:hyperlink tag and add needed values
+    hyperlink = OxmlElement('w:hyperlink')
+    hyperlink.set(qn('w:anchor'), '')
+
+    # Create external relationship
+    part = paragraph.part
+    r_id = part.relate_to(url, 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink', is_external=True)
+    hyperlink.set(qn('r:id'), r_id)
+
+    # Create a new run object with the hyperlink text
+    new_run = OxmlElement('w:r')
+    rPr = OxmlElement('w:rPr')
+
+    # Set the run to be blue and underlined
+    c = OxmlElement('w:color')
+    c.set(qn('w:val'), '0563C1')
+    rPr.append(c)
+
+    u = OxmlElement('w:u')
+    u.set(qn('w:val'), 'single')
+    rPr.append(u)
+
+    # Set font size
+    sz = OxmlElement('w:sz')
+    sz.set(qn('w:val'), str(font_size * 2))  # Word uses half-points
+    rPr.append(sz)
+
+    new_run.append(rPr)
+
+    # Add the text
+    new_run.text = text
+    hyperlink.append(new_run)
+
+    # Add the hyperlink to the paragraph
+    paragraph._p.append(hyperlink)
+
+
 def add_inline_formatting(paragraph, text: str, font_size: int = 9) -> None:
     """Add text with inline markdown formatting (bold, italic, code, links) to a paragraph."""
     # Pattern to match markdown inline elements
@@ -445,11 +487,8 @@ def add_recommendation_section(document: Document, recommendation: Recommendatio
             name_run.font.size = Pt(9)
             # Add line break
             para.add_run('\n')
-            # Add full URL (not short URL)
-            url_run = para.add_run(link.url)
-            url_run.font.size = Pt(9)
-            url_run.font.color.rgb = RGBColor(59, 130, 246)
-            url_run.underline = True
+            # Add full URL as clickable hyperlink
+            add_hyperlink(para, link.url, link.url, font_size=9)
             # Add comment if exists
             if link.comment:
                 para.add_run('\n')
