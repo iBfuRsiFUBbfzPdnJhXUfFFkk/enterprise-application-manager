@@ -337,8 +337,8 @@ def add_recommendation_intro(document: Document) -> None:
 
     intro_para = document.add_paragraph()
     intro_run = intro_para.add_run(
-        "This document contains a technical recommendation for improving systems, processes, or practices. "
-        "Recommendations are tracked to ensure continuous improvement and documentation of best practices. "
+        "This document contains a technical recommendation for improving systems, processes, or practices "
+        "based on the current environment and informed analysis. "
         "Each recommendation includes detailed analysis of benefits, risks, and implementation considerations."
     )
     intro_run.font.size = Pt(10)
