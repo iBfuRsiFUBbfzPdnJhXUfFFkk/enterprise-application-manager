@@ -1,0 +1,298 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Markdown Parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'it_devops_request' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} IT/DevOps Request</h1>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update request details{% else %}Submit a new IT/DevOps request{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Document ID -->
+                {% if form.instance.pk and form.instance.document_id %}
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Document ID:</strong> <span class="font-mono font-bold">{{ form.instance.document_id }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                A unique document ID will be automatically generated when you save this request
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Request title, status, and priority</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Request Title {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}<p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Priority
+                                </label>
+                                {{ form.priority }}
+                                {% if form.priority.errors %}<p class="mt-2 text-sm text-red-600">{{ form.priority.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.reference_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    External Ticket #
+                                </label>
+                                {{ form.reference_number }}
+                                <p class="mt-1 text-xs text-gray-500">External ticketing system reference (optional)</p>
+                                {% if form.reference_number.errors %}<p class="mt-2 text-sm text-red-600">{{ form.reference_number.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- People -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">People</h2>
+                        <p class="mt-1 text-sm text-gray-500">Request requester, assignee, and approver</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.person_requester.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Requester {% if form.person_requester.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {% if current_user_person_id %}
+                                <button type="button" id="select-me-btn-requester" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors duration-150">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    Select Me
+                                </button>
+                                {% endif %}
+                            </div>
+                            {{ form.person_requester }}
+                            {% if form.person_requester.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_requester.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_assignee.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Assignee
+                            </label>
+                            {{ form.person_assignee }}
+                            <p class="mt-1 text-xs text-gray-500">IT staff member assigned to work on this</p>
+                            {% if form.person_assignee.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_assignee.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_approver.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Approver
+                            </label>
+                            {{ form.person_approver }}
+                            <p class="mt-1 text-xs text-gray-500">Person who approved or will approve this request</p>
+                            {% if form.person_approver.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_approver.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Entities -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
+                        <p class="mt-1 text-sm text-gray-500">Link to application or project (optional)</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.application.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Application
+                            </label>
+                            {{ form.application }}
+                            {% if form.application.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Project
+                            </label>
+                            {{ form.project }}
+                            {% if form.project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.project.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Details -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Request Details</h2>
+                        <p class="mt-1 text-sm text-gray-500">Detailed description, justification, and expected outcomes (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6 space-y-6">
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Description
+                            </label>
+                            {{ form.description }}
+                            <p class="mt-1 text-xs text-gray-500">What is being requested? Provide technical details.</p>
+                            {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.justification.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Justification
+                            </label>
+                            {{ form.justification }}
+                            <p class="mt-1 text-xs text-gray-500">Why is this request needed? Business case.</p>
+                            {% if form.justification.errors %}<p class="mt-2 text-sm text-red-600">{{ form.justification.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.expected_outcome.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Expected Outcome
+                            </label>
+                            {{ form.expected_outcome }}
+                            <p class="mt-1 text-xs text-gray-500">What will success look like when completed?</p>
+                            {% if form.expected_outcome.errors %}<p class="mt-2 text-sm text-red-600">{{ form.expected_outcome.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
+                        <p class="mt-1 text-sm text-gray-500">Important dates for this request</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="{{ form.date_requested.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Requested
+                            </label>
+                            {{ form.date_requested }}
+                            {% if form.date_requested.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_requested.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_due.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Due Date
+                            </label>
+                            {{ form.date_due }}
+                            <p class="mt-1 text-xs text-gray-500">When should this be completed? (optional)</p>
+                            {% if form.date_due.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_due.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_completed.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Completed
+                            </label>
+                            {{ form.date_completed }}
+                            <p class="mt-1 text-xs text-gray-500">When was this actually completed? (optional)</p>
+                            {% if form.date_completed.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_completed.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Attachments</h2>
+                        <p class="mt-1 text-sm text-gray-500">Supporting documents for this request</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.attachments.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Documents
+                        </label>
+                        {{ form.attachments }}
+                        <p class="mt-1 text-xs text-gray-500">Select one or more existing documents to attach</p>
+                        {% if form.attachments.errors %}<p class="mt-2 text-sm text-red-600">{{ form.attachments.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
+                        <p class="mt-1 text-sm text-gray-500">Any other relevant information</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Comments
+                        </label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex items-center justify-end space-x-4 pt-6">
+                    <a href="{% url 'it_devops_request' %}"
+                       class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        {% if form.instance.pk %}Update Request{% else %}Create Request{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Select Me button for requester
+    const selectMeBtn = document.getElementById('select-me-btn-requester');
+    if (selectMeBtn) {
+        selectMeBtn.addEventListener('click', function() {
+            const requesterSelect = document.getElementById('{{ form.person_requester.id_for_label }}');
+            if (requesterSelect) {
+                requesterSelect.value = '{{ current_user_person_id }}';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
