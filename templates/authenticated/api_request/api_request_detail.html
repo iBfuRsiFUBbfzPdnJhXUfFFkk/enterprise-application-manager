@@ -67,7 +67,6 @@
                 </div>
 
                 <!-- Content Type & Request Body -->
-                {%if model.http_method in "POST,PUT,PATCH" %}
                 <div>
                     <label for="content-type-select" class="block text-sm font-medium text-gray-700 mb-2">Content Type</label>
                     <select id="content-type-select" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500">
@@ -92,7 +91,6 @@
                     <label for="request-body" class="block text-sm font-medium text-gray-700 mb-2">Request Body</label>
                     <textarea id="request-body" rows="10" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-sky-500 focus:border-sky-500 font-mono text-sm">{{ model.request_body|default:"" }}</textarea>
                 </div>
-                {%endif %}
 
                 <!-- Request Preview -->
                 <div id="request-preview" class="bg-sky-50 border border-sky-300 rounded-md p-4">
@@ -104,12 +102,10 @@
                             <div class="text-gray-600 mb-1">Headers:</div>
                             <pre id="preview-headers" class="bg-white p-2 rounded text-xs overflow-x-auto">Loading...</pre>
                         </div>
-                        {%if model.request_body or model.http_method in "POST,PUT,PATCH" %}
                         <div class="pt-2 border-t border-sky-200">
                             <div class="text-gray-600 mb-1">Request Body:</div>
                             <pre id="preview-body" class="bg-white p-2 rounded text-xs overflow-x-auto max-h-48">Loading...</pre>
                         </div>
-                        {%endif %}
                     </div>
                 </div>
 
