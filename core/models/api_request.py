@@ -40,10 +40,17 @@ class APIRequest(AbstractBaseModel, AbstractComment, AbstractName):
         help_text='JSON object of custom headers',
     )
 
+    form_data = models.JSONField(
+        blank=True,
+        null=True,
+        default=dict,
+        help_text='Form data key-value pairs for x-www-form-urlencoded requests',
+    )
+
     request_body = models.TextField(
         blank=True,
         null=True,
-        help_text='Request body (JSON, XML, or form data)',
+        help_text='Request body (JSON, XML, or raw text)',
     )
 
     content_type = create_generic_varchar()

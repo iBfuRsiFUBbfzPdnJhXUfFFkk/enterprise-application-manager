@@ -27,6 +27,8 @@ def api_request_execute_view(
         path_params = data.get('path_parameters', {})
         query_params = data.get('query_parameters', {})
         custom_headers = data.get('custom_headers', {})
+        content_type = data.get('content_type', api_request.content_type or 'application/json')
+        form_data = data.get('form_data', {})
         body = data.get('body', api_request.request_body or '')
 
         # Build the full URL
@@ -43,8 +45,17 @@ def api_request_execute_view(
         url_path = replace_path_parameters(api_request.url_path, path_params)
         full_url = f"{base_url.rstrip('/')}/{url_path.lstrip('/')}"
 
-        # Prepare headers
+        # Prepare headers with Content-Type
         headers = prepare_headers(api_request, custom_headers)
+        headers['Content-Type'] = content_type
+
+        # Prepare request body based on content type
+        if content_type == 'application/x-www-form-urlencoded':
+            # URL-encode the form data
+            from urllib.parse import urlencode
+            request_body = urlencode(form_data) if form_data else ''
+        else:
+            request_body = body
 
         # Execute the request
         start_time = time.time()
@@ -54,7 +65,7 @@ def api_request_execute_view(
                 url=full_url,
                 headers=headers,
                 params=query_params,
-                data=body if body else None,
+                data=request_body if request_body else None,
             )
             response_time_ms = int((time.time() - start_time) * 1000)
 
@@ -71,7 +82,7 @@ def api_request_execute_view(
                 executed_path_parameters=path_params,
                 executed_query_parameters=query_params,
                 executed_headers=headers,
-                executed_body=body,
+                executed_body=request_body,
                 response_status_code=response.status_code,
                 response_headers=dict(response.headers),
                 response_body=response.text[:100000],  # Limit to 100KB
@@ -106,7 +117,7 @@ def api_request_execute_view(
                 executed_path_parameters=path_params,
                 executed_query_parameters=query_params,
                 executed_headers=headers,
-                executed_body=body,
+                executed_body=request_body,
                 is_error=True,
                 error_message=str(e),
                 response_time_ms=response_time_ms,
