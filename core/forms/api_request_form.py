@@ -26,6 +26,12 @@ class APIRequestForm(BaseModelForm):
                     'placeholder': '{"X-Custom-Header": "value"}',
                 }
             ),
+            'form_data': forms.Textarea(
+                attrs={
+                    'rows': 4,
+                    'placeholder': '{"username": "john", "password": "secret"}',
+                }
+            ),
             'request_body': forms.Textarea(
                 attrs={
                     'rows': 10,

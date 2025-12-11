@@ -90,7 +90,7 @@
                                 Content Type
                             </label>
                             {{ form.content_type }}
-                            <p class="mt-1 text-xs text-gray-500">e.g., application/json</p>
+                            <p class="mt-1 text-xs text-gray-500">application/json, application/x-www-form-urlencoded, text/plain, or application/xml</p>
                         </div>
                     </div>
                 </div>
@@ -120,10 +120,18 @@
                             {{ form.custom_headers }}
                         </div>
                         <div>
+                            <label for="{{ form.form_data.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Form Data (JSON) - for x-www-form-urlencoded
+                            </label>
+                            {{ form.form_data }}
+                            <p class="mt-1 text-xs text-gray-500">Key-value pairs for application/x-www-form-urlencoded requests</p>
+                        </div>
+                        <div>
                             <label for="{{ form.request_body.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                 Request Body
                             </label>
                             {{ form.request_body }}
+                            <p class="mt-1 text-xs text-gray-500">For JSON, XML, or plain text requests</p>
                         </div>
                     </div>
                 </div>
