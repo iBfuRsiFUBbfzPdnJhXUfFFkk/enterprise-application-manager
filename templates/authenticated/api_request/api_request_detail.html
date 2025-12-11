@@ -548,11 +548,6 @@
                     document.getElementById('response-time').textContent = `Failed after: ${data.response_time_ms}ms`;
                 }
             }
-
-            // Reload page after short delay to update execution history
-            setTimeout(() => {
-                location.reload();
-            }, 3000);
         }
 
         function displayError(message) {
