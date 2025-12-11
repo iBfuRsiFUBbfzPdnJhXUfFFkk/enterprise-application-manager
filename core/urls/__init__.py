@@ -27,6 +27,7 @@ from core.urls.urlpatterns_external_blocker import urlpatterns_external_blocker
 from core.urls.urlpatterns_formula import urlpatterns_formula
 from core.urls.urlpatterns_hotfix import urlpatterns_hotfix
 from core.urls.urlpatterns_incident import urlpatterns_incident
+from core.urls.urlpatterns_it_devops_request import urlpatterns_it_devops_request
 from core.urls.urlpatterns_job_level import urlpatterns_job_level
 from core.urls.urlpatterns_job_title import urlpatterns_job_title
 from core.urls.urlpatterns_link import urlpatterns_link
@@ -100,6 +101,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_formula,
     *urlpatterns_hotfix,
     *urlpatterns_incident,
+    *urlpatterns_it_devops_request,
     *urlpatterns_job_level,
     *urlpatterns_job_title,
     *urlpatterns_link,
