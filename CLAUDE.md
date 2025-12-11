@@ -189,6 +189,36 @@ Models inherit from abstract base classes:
 
 All models use `django-simple-history` for historical tracking (creates `Historical*` model variants).
 
+### Form Patterns
+
+**IMPORTANT: Automatic Form Styling**
+
+All forms inherit from `BaseModelForm` which automatically applies Tailwind CSS classes to form widgets. This ensures consistent, visible styling across all forms without manual CSS class definitions.
+
+- **DO NOT** manually add CSS classes to basic form widgets - they are added automatically
+- The `BaseModelForm.__init__()` method applies appropriate Tailwind classes based on widget type:
+  - Text inputs, number inputs, email, URL, date/time inputs: Full-width with border, shadow, and focus states
+  - Textareas: Same styling as text inputs
+  - Select dropdowns: Consistent with text inputs
+  - Checkboxes: Smaller, rounded with blue accent
+  - File inputs: Consistent with text inputs
+- If custom classes are needed, add them to the widget definition - they will not be overridden
+- Forms should inherit from `BaseModelForm` and use `BaseModelFormMeta` as the Meta parent class
+
+Example form structure:
+```python
+from core.forms.common.base_model_form import BaseModelForm
+from core.forms.common.base_model_form_meta import BaseModelFormMeta
+from django.forms import DateInput
+
+class MyModelForm(BaseModelForm):
+    class Meta(BaseModelFormMeta):
+        model = MyModel
+        widgets = {
+            'date_field': DateInput(attrs={'type': 'date'}),  # Classes added automatically
+        }
+```
+
 ### GitLab Integration
 
 The GitLab integration uses the `python-gitlab` library to fetch data from a GitLab instance. Key points:
