@@ -1,10 +1,13 @@
+from django.db import models
 from django.db.models import Model
-
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class AbstractUniformResourceLocator(Model):
-    url: str | None = create_generic_varchar()
+    url: str | None = models.CharField(
+        max_length=2000,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         abstract = True
