@@ -1,0 +1,419 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Competitors</h1>
+                    <p class="mt-1 text-sm text-gray-500">Track competitive companies and market intelligence</p>
+                </div>
+                <a href="{% url 'competitor_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Competitor
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Search -->
+                <div>
+                    <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <input type="text" id="search-input" placeholder="Search by name, acronym, location, or market segment..."
+                               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Toggle and Count -->
+            <div class="mt-4 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    Showing <span id="visible-count" class="font-medium">0</span> of <span id="total-count" class="font-medium">{{ models|length }}</span> competitors
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-700">View:</span>
+                    <button id="view-grid" onclick="setView('grid')"
+                            class="p-2 text-gray-400 hover:text-gray-600 focus:outline-none">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                    </button>
+                    <button id="view-list" onclick="setView('list')"
+                            class="p-2 text-teal-600 hover:text-teal-800 focus:outline-none">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid View -->
+        <div id="grid-view" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for model in models %}
+            <div class="competitor-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
+                 data-name="{{ model.name|lower }}"
+                 data-acronym="{{ model.acronym|default:''|lower }}"
+                 data-market-segment="{{ model.market_segment|default:''|lower }}"
+                 data-location="{{ model.location_city|default:''|lower }} {{ model.location_state_code|default:''|lower }}">
+                <div class="p-6">
+                    <!-- Header -->
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                <svg class="h-6 w-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <h3 class="text-lg font-semibold text-gray-900">{{ model.acronym|default:"—" }}</h3>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-600 line-clamp-2" title="{{ model.name }}">{{ model.name|default:"—" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Metadata -->
+                    <div class="mb-4 space-y-2">
+                        {% if model.market_segment %}
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Market:</span> {{ model.market_segment }}
+                        </div>
+                        {% endif %}
+                        {% if model.location_city or model.location_state_code %}
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Location:</span> {{ model.location_city|default:"" }}{% if model.location_city and model.location_state_code %}, {% endif %}{{ model.location_state_code|default:"" }}
+                        </div>
+                        {% endif %}
+                        {% if model.url %}
+                        <div class="text-sm text-gray-600 truncate">
+                            <a href="{{ model.url }}" target="_blank" class="text-teal-600 hover:text-teal-800">{{ model.url|truncatechars:40 }}</a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Relationships -->
+                    <div class="mb-4 flex flex-wrap gap-2">
+                        {% if model.application_count > 0 %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ model.application_count }} {{ model.application_count|pluralize:"app,apps" }}
+                        </span>
+                        {% endif %}
+                        {% if model.organization_count > 0 %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {{ model.organization_count }} {{ model.organization_count|pluralize:"org,orgs" }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                        <a href="{% url 'competitor_detail' model_id=model.id %}"
+                           class="text-sm font-medium text-teal-600 hover:text-teal-800">
+                            View Details →
+                        </a>
+                        <div class="flex space-x-2">
+                            <a href="{% url 'competitor_edit' model_id=model.id %}"
+                               class="p-1 text-gray-400 hover:text-gray-600"
+                               title="Edit">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </a>
+                            <button onclick="openDeleteModal('{{ model.id }}', '{{ model.name|escapejs }}')"
+                                    class="p-1 text-gray-400 hover:text-red-600"
+                                    title="Delete">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- List View -->
+        <div id="list-view" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market Segment</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Relationships</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for model in models %}
+                        <tr class="competitor-row hover:bg-gray-50 transition-colors duration-150"
+                            data-name="{{ model.name|lower }}"
+                            data-acronym="{{ model.acronym|default:''|lower }}"
+                            data-market-segment="{{ model.market_segment|default:''|lower }}"
+                            data-location="{{ model.location_city|default:''|lower }} {{ model.location_state_code|default:''|lower }}"
+                            ondblclick='window.location.href = "{% url 'competitor_detail' model_id=model.id %}"'>
+                            <td class="px-4 py-3">
+                                <div class="text-sm font-medium text-gray-900">{{ model.name|default:"—" }}</div>
+                                <div class="text-sm text-gray-500">{{ model.acronym|default:"" }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="text-sm text-gray-500">{{ model.market_segment|default:"—" }}</div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="text-sm text-gray-500">
+                                    {% if model.location_city or model.location_state_code %}
+                                        {{ model.location_city|default:"" }}{% if model.location_city and model.location_state_code %}, {% endif %}{{ model.location_state_code|default:"" }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="flex gap-2">
+                                    {% if model.application_count > 0 %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {{ model.application_count }} {{ model.application_count|pluralize:"app,apps" }}
+                                        </span>
+                                    {% endif %}
+                                    {% if model.organization_count > 0 %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            {{ model.organization_count }} {{ model.organization_count|pluralize:"org,orgs" }}
+                                        </span>
+                                    {% endif %}
+                                    {% if model.application_count == 0 and model.organization_count == 0 %}
+                                        <span class="text-sm text-gray-400">—</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-center">
+                                <div class="flex justify-center space-x-2">
+                                    <a href="{% url 'competitor_detail' model_id=model.id %}"
+                                       class="text-blue-600 hover:text-blue-900" title="View">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </a>
+                                    <a href="{% url 'competitor_edit' model_id=model.id %}"
+                                       class="text-gray-600 hover:text-gray-900" title="Edit">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
+                                    </a>
+                                    <button onclick="openDeleteModal('{{ model.id }}', '{{ model.name|escapejs }}')"
+                                            class="text-red-600 hover:text-red-900" title="Delete">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No competitors found</h3>
+            <p class="mt-1 text-sm text-gray-500">Try adjusting your search or create a new competitor</p>
+            <div class="mt-6">
+                <a href="{% url 'competitor_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Competitor
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed z-50 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeDeleteModal()"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Delete Competitor
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">
+                                Are you sure you want to delete <strong id="deleteItemName"></strong>? This action cannot be undone.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <form id="deleteForm" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-150">
+                        Delete
+                    </button>
+                </form>
+                <button type="button" onclick="closeDeleteModal()"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-150">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// View state management
+let currentView = 'list';
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial view
+    setView(localStorage.getItem('eam_competitor_view') || 'list');
+
+    // Setup event listeners
+    document.getElementById('search-input').addEventListener('input', filterCompetitors);
+
+    // Initial filter
+    filterCompetitors();
+});
+
+function setView(view) {
+    currentView = view;
+    localStorage.setItem('eam_competitor_view', view);
+
+    const gridView = document.getElementById('grid-view');
+    const listView = document.getElementById('list-view');
+    const gridBtn = document.getElementById('view-grid');
+    const listBtn = document.getElementById('view-list');
+
+    if (view === 'grid') {
+        gridView.classList.remove('hidden');
+        listView.classList.add('hidden');
+        gridBtn.classList.add('text-teal-600');
+        gridBtn.classList.remove('text-gray-400');
+        listBtn.classList.add('text-gray-400');
+        listBtn.classList.remove('text-teal-600');
+    } else {
+        gridView.classList.add('hidden');
+        listView.classList.remove('hidden');
+        listBtn.classList.add('text-teal-600');
+        listBtn.classList.remove('text-gray-400');
+        gridBtn.classList.add('text-gray-400');
+        gridBtn.classList.remove('text-teal-600');
+    }
+
+    filterCompetitors();
+}
+
+function filterCompetitors() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+    const cards = document.querySelectorAll('.competitor-card');
+    const rows = document.querySelectorAll('.competitor-row');
+    const items = currentView === 'grid' ? cards : rows;
+
+    let visibleCount = 0;
+
+    items.forEach(item => {
+        const name = item.dataset.name || '';
+        const acronym = item.dataset.acronym || '';
+        const marketSegment = item.dataset.marketSegment || '';
+        const location = item.dataset.location || '';
+
+        const matchesSearch = !searchTerm ||
+                             name.includes(searchTerm) ||
+                             acronym.includes(searchTerm) ||
+                             marketSegment.includes(searchTerm) ||
+                             location.includes(searchTerm);
+
+        if (matchesSearch) {
+            item.style.display = '';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+
+    // Update count
+    document.getElementById('visible-count').textContent = visibleCount;
+
+    // Show/hide empty state
+    const emptyState = document.getElementById('empty-state');
+    if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+        document.getElementById('grid-view').classList.add('hidden');
+        document.getElementById('list-view').classList.add('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        if (currentView === 'grid') {
+            document.getElementById('grid-view').classList.remove('hidden');
+        } else {
+            document.getElementById('list-view').classList.remove('hidden');
+        }
+    }
+}
+
+function openDeleteModal(id, name) {
+    document.getElementById('deleteItemName').textContent = name;
+    document.getElementById('deleteForm').action = "{% url 'competitor_delete' model_id=0 %}".replace('/0/', '/' + id + '/');
+    document.getElementById('deleteModal').classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.add('hidden');
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDeleteModal();
+    }
+});
+</script>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+{% endblock %}

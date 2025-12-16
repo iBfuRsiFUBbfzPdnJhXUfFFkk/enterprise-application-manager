@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from core.models.application_pin import ApplicationPin
+from core.models.competitor import Competitor
 from core.models.it_devops_request import ITDevOpsRequest
 from core.models.it_devops_request_update import ITDevOpsRequestUpdate
 
@@ -16,6 +17,42 @@ class ApplicationPinAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('user', 'application', 'order')
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Competitor)
+class CompetitorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'acronym', 'market_segment', 'employee_count_tier', 'revenue_tier')
+    list_filter = ('employee_count_tier', 'revenue_tier', 'market_segment')
+    search_fields = ('name', 'acronym', 'primary_products', 'market_segment', 'location_city', 'location_state_code')
+    ordering = ('name', '-id')
+    readonly_fields = ('created', 'modified')
+    filter_horizontal = ('competing_applications', 'organizations')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'acronym', 'url')
+        }),
+        ('Location', {
+            'fields': ('location_address', 'location_address_continued', 'location_city',
+                      'location_county', 'location_state_code', 'location_postal_code',
+                      'location_latitude', 'location_longitude'),
+            'classes': ('collapse',)
+        }),
+        ('Business Intelligence', {
+            'fields': ('primary_products', 'market_segment', 'employee_count_tier',
+                      'revenue_tier', 'year_founded')
+        }),
+        ('Relationships', {
+            'fields': ('competing_applications', 'organizations')
+        }),
+        ('Additional Information', {
+            'fields': ('comment',)
         }),
         ('Timestamps', {
             'fields': ('created', 'modified'),
