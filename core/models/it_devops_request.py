@@ -44,6 +44,9 @@ class ITDevOpsRequest(AbstractBaseModel, AbstractComment, AbstractName):
     # Attachments
     attachments = create_generic_m2m(to="Document", related_name="it_devops_requests")
 
+    # Links
+    links = create_generic_m2m(to="Link", related_name="it_devops_requests")
+
     def save(self, *args, **kwargs):
         if not self.document_id:
             # Get the highest existing document_id number

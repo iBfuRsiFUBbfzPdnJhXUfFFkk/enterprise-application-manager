@@ -9,6 +9,7 @@ from core.models.it_devops_request import ITDevOpsRequest
 from core.views.generic.generic_500 import generic_500
 from core.views.it_devops_request.utilities.it_devops_request_docx_helpers import (
     add_header_footer,
+    add_links_section,
     add_request_intro,
     add_request_section,
     add_updates_section,
@@ -38,6 +39,7 @@ def it_devops_request_export_docx_view(request: HttpRequest) -> HttpResponse:
                 "person_approver",
             ).prefetch_related(
                 "attachments",
+                "links",
                 "updates__person_author",
             ).get(id=selected_ids[0])
         except ITDevOpsRequest.DoesNotExist:
@@ -66,6 +68,9 @@ def it_devops_request_export_docx_view(request: HttpRequest) -> HttpResponse:
 
         # Add request content
         add_request_section(document, it_devops_request)
+
+        # Add links section
+        add_links_section(document, it_devops_request)
 
         # Add updates timeline
         updates = it_devops_request.updates.all()

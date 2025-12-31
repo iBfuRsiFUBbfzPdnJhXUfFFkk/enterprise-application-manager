@@ -9,6 +9,7 @@ from docx.shared import Pt, RGBColor
 from core.models.it_devops_request import ITDevOpsRequest
 from core.views.recommendation.utilities.recommendation_docx_helpers import (
     add_header_footer as _add_header_footer,
+    add_hyperlink,
     add_markdown_content,
     set_narrow_margins as _set_narrow_margins,
 )
@@ -34,6 +35,35 @@ def add_request_intro(document: Document) -> None:
     )
     intro_run.font.size = Pt(10)
     intro_run.italic = True
+
+
+def add_links_section(document: Document, request: ITDevOpsRequest) -> None:
+    """Add links section to the document with clickable hyperlinks."""
+    if not request.links.exists():
+        return
+
+    document.add_heading("Related Links", level=2)
+
+    for link in request.links.all():
+        para = document.add_paragraph(style='List Bullet')
+
+        # Add link name in bold
+        name_run = para.add_run(link.name)
+        name_run.bold = True
+        name_run.font.size = Pt(9)
+
+        # Add line break
+        para.add_run('\n')
+
+        # Add full URL as clickable hyperlink (using original url, NOT short_code)
+        add_hyperlink(para, link.url, link.url, font_size=9)
+
+        # Add comment if exists
+        if link.comment:
+            para.add_run('\n')
+            comment_run = para.add_run(link.comment)
+            comment_run.font.size = Pt(8)
+            comment_run.italic = True
 
 
 def add_request_section(document: Document, request: ITDevOpsRequest) -> None:

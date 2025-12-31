@@ -4,6 +4,7 @@
 {% block content %}
 <!-- Markdown Parser -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% include 'authenticated/common/components/link_modal.html' %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -235,6 +236,30 @@
                     </div>
                 </div>
 
+                <!-- Links -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
+                        <p class="mt-1 text-sm text-gray-500">Reference links and resources for this request</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="{{ form.links.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Links
+                            </label>
+                            <button type="button" id="open-link-modal-btn" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 transition-colors duration-150">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add New Link
+                            </button>
+                        </div>
+                        {{ form.links }}
+                        <p class="mt-1 text-xs text-gray-500">Hold Ctrl (Cmd on Mac) to select multiple links. Original URLs will be included in DOCX export.</p>
+                        {% if form.links.errors %}<p class="mt-2 text-sm text-red-600">{{ form.links.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
                 <!-- Attachments -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -291,6 +316,33 @@ document.addEventListener('DOMContentLoaded', function() {
             if (requesterSelect) {
                 requesterSelect.value = '{{ current_user_person_id }}';
             }
+        });
+    }
+
+    // Link Modal Integration
+    const openLinkModalBtn = document.getElementById('open-link-modal-btn');
+    if (openLinkModalBtn) {
+        openLinkModalBtn.addEventListener('click', function() {
+            window.openLinkModal(function(newLink) {
+                const linksSelect = document.getElementById('{{ form.links.id_for_label }}');
+                if (linksSelect) {
+                    const option = document.createElement('option');
+                    option.value = newLink.id;
+                    option.text = newLink.name;
+                    option.selected = true;
+                    linksSelect.add(option);
+
+                    // Show success feedback
+                    const label = linksSelect.previousElementSibling;
+                    if (label) {
+                        const originalText = label.innerHTML;
+                        label.innerHTML = '<span class="text-green-600">✓ Link added!</span>';
+                        setTimeout(() => {
+                            label.innerHTML = originalText;
+                        }, 2000);
+                    }
+                }
+            });
         });
     }
 });
