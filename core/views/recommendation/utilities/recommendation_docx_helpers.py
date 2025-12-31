@@ -309,8 +309,8 @@ def add_hyperlink(paragraph, url: str, text: str, font_size: int = 9) -> None:
 
 
 def add_inline_formatting(paragraph, text: str, font_size: int = 9) -> None:
-    """Add text with inline markdown formatting (bold, italic, code, links) to a paragraph."""
-    # Pattern to match markdown inline elements
+    """Add text with inline markdown formatting (bold, italic, code, links, line breaks) to a paragraph."""
+    # Pattern to match markdown inline elements including <br> tags
     pattern = re.compile(
         r'(\*\*\*(.+?)\*\*\*)|'  # Bold + Italic
         r'(\*\*(.+?)\*\*)|'  # Bold
@@ -318,7 +318,8 @@ def add_inline_formatting(paragraph, text: str, font_size: int = 9) -> None:
         r'(\*(.+?)\*)|'  # Italic
         r'(_(.+?)_)|'  # Italic (underscore)
         r'(`(.+?)`)|'  # Inline code
-        r'(\[(.+?)\]\((.+?)\))'  # Links
+        r'(\[(.+?)\]\((.+?)\))|'  # Links
+        r'(<br\s*/?>)'  # Line breaks (HTML br tag)
     )
 
     last_end = 0
@@ -364,6 +365,9 @@ def add_inline_formatting(paragraph, text: str, font_size: int = 9) -> None:
             run.underline = True
             run.font.size = Pt(font_size)
             # Note: actual hyperlink functionality would require more complex DOCX manipulation
+        elif match.group(15):  # Line break <br> or <br/>
+            run = paragraph.add_run('\n')
+            run.font.size = Pt(font_size)
 
         last_end = match.end()
 
