@@ -223,33 +223,22 @@ def format_file_size(size_bytes: int) -> str:
 
 def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.Image]:
     """Convert PDF bytes to a list of PIL images (one per page)."""
-    import platform
-    import tempfile
-
     from django.conf import settings
 
     try:
-        # Determine temp directory based on OS
-        if platform.system() == "Windows":
-            # Windows - use system temp directory
-            tmpdir_parent = None
-        else:
-            # Unix/Mac - use /tmp/claude if it exists, otherwise system temp
-            tmpdir_parent = "/tmp/claude" if os.path.exists("/tmp/claude") else None
-
         # Get poppler path from settings (optional)
         poppler_path = getattr(settings, 'POPPLER_PATH', None)
 
-        with tempfile.TemporaryDirectory(dir=tmpdir_parent) as tmpdir:
-            images = convert_from_bytes(
-                pdf_bytes,
-                dpi=150,
-                fmt="png",
-                output_folder=tmpdir,
-                poppler_path=poppler_path
-            )
-            # Limit number of pages to avoid memory issues
-            return images[:max_pages]
+        # Don't specify output_folder to avoid Windows file locking issues
+        # pdf2image will handle temp files internally
+        images = convert_from_bytes(
+            pdf_bytes,
+            dpi=150,
+            fmt="png",
+            poppler_path=poppler_path
+        )
+        # Limit number of pages to avoid memory issues
+        return images[:max_pages]
     except Exception as e:
         print(f"PDF to image conversion error: {e}")
         import traceback
