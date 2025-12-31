@@ -245,7 +245,6 @@ def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.I
                 pdf_bytes,
                 dpi=150,
                 fmt="png",
-                use_pdftoppm=True,
                 output_folder=tmpdir,
                 poppler_path=poppler_path
             )
