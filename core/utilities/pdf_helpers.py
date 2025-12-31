@@ -31,10 +31,12 @@ def convert_docx_to_pdf(docx_bytes: bytes) -> Optional[bytes]:
             try:
                 applescript = f'''
                 tell application "Microsoft Word"
+                    activate
                     open POSIX file "{docx_path}"
                     set doc to active document
-                    save as doc file name POSIX file "{pdf_path}" file format format PDF
+                    save as doc file name "{pdf_path}" file format format PDF
                     close doc saving no
+                    quit
                 end tell
                 '''
                 result = subprocess.run(
