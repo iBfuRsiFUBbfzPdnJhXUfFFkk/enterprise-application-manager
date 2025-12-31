@@ -21,6 +21,7 @@ from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_integer import create_generic_integer
 from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from core.models.document import Document
 from core.models.link import Link
 from core.models.person import Person
 from core.models.service_provider import ServiceProvider
@@ -75,6 +76,7 @@ class Application(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractCom
     service_providers = create_generic_m2m(related_name='applications_that_use_service_provider', to=ServiceProvider)
     tools = create_generic_m2m(related_name='applications_that_use_tool', to=Tool)
     links = create_generic_m2m(related_name='applications', to=Link)
+    documents = create_generic_m2m(related_name='applications', to=Document)
     centralized_logging_status = create_generic_enum(choices=CENTRALIZED_LOGGING_STATUS_CHOICES)
     pipeline_status = create_generic_enum(choices=PIPELINE_STATUS_CHOICES)
     type_authentication = create_generic_enum(choices=AUTHENTICATION_TYPE_CHOICES)
