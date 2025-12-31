@@ -20,6 +20,8 @@ MAX_IMAGE_HEIGHT = 2000
 
 def convert_docx_to_pdf(docx_bytes: bytes) -> Optional[bytes]:
     """Convert DOCX bytes to PDF bytes. Tries Microsoft Word first, then LibreOffice, then textutil."""
+    import platform
+
     with tempfile.TemporaryDirectory() as tmpdir:
         docx_path = os.path.join(tmpdir, "input.docx")
         pdf_path = os.path.join(tmpdir, "input.pdf")
@@ -27,7 +29,33 @@ def convert_docx_to_pdf(docx_bytes: bytes) -> Optional[bytes]:
         with open(docx_path, "wb") as f:
             f.write(docx_bytes)
 
-        # Try Microsoft Word first (macOS via AppleScript)
+        # Try Microsoft Word first (Windows via COM automation)
+        if platform.system() == "Windows":
+            try:
+                import win32com.client
+                import pythoncom
+
+                pythoncom.CoInitialize()
+                word = None
+                try:
+                    word = win32com.client.Dispatch("Word.Application")
+                    word.Visible = False
+                    doc = word.Documents.Open(os.path.abspath(docx_path))
+                    # wdFormatPDF = 17
+                    doc.SaveAs(os.path.abspath(pdf_path), FileFormat=17)
+                    doc.Close(False)
+                    if os.path.exists(pdf_path):
+                        with open(pdf_path, "rb") as f:
+                            return f.read()
+                finally:
+                    if word:
+                        word.Quit()
+                    pythoncom.CoUninitialize()
+            except Exception as e:
+                print(f"Word COM automation failed: {e}")
+                pass
+
+        # Try Microsoft Word (macOS via AppleScript)
         if os.path.exists("/Applications/Microsoft Word.app"):
             try:
                 applescript = f'''
