@@ -46,31 +46,77 @@
             {% if tasks %}
             <div class="divide-y divide-gray-200">
                 {% for task in tasks %}
-                <a href="{% url 'task_detail' model_id=task.id %}"
-                   class="block px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
-                    <div class="flex items-start">
+                <div class="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                    <div class="flex items-start gap-3">
+                        <!-- Quick Complete Button -->
                         <div class="flex-shrink-0 mt-1">
-                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            {% if task.status != "completed" %}
+                            <form method="POST" action="{% url 'task_complete' model_id=task.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="text-gray-400 hover:text-green-600 transition-colors"
+                                        style="background: none; border: none; padding: 0; cursor: pointer;"
+                                        title="Mark as complete">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </button>
+                            </form>
+                            {% else %}
+                            <svg class="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                        </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 truncate">
-                                {{ task.name|default:"Untitled Task" }}
-                            </p>
-                            {% if task.comment %}
-                            <p class="mt-1 text-sm text-gray-500 line-clamp-2">
-                                {{ task.comment|truncatewords:50 }}
-                            </p>
                             {% endif %}
                         </div>
-                        <div class="ml-3 flex-shrink-0">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
+
+                        <!-- Task Content -->
+                        <div class="flex-1 min-w-0">
+                            <a href="{% url 'task_detail' model_id=task.id %}" class="block">
+                                <p class="text-sm font-medium text-gray-900 truncate {% if task.status == 'completed' %}line-through text-gray-500{% endif %}">
+                                    {{ task.name|default:"Untitled Task" }}
+                                </p>
+
+                                <!-- Priority and Status Badges -->
+                                <div class="flex flex-wrap gap-2 mt-1">
+                                    {% if task.priority %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                                {% if task.priority == 'high' %}bg-red-100 text-red-800
+                                                {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                                {% elif task.priority == 'low' %}bg-green-100 text-green-800
+                                                {% endif %}">
+                                        {{ task.get_priority_display }}
+                                    </span>
+                                    {% endif %}
+
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                                {% if task.status == 'completed' %}bg-green-100 text-green-800
+                                                {% elif task.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                                {% elif task.status == 'in_review' %}bg-purple-100 text-purple-800
+                                                {% elif task.status == 'cancelled' %}bg-gray-100 text-gray-800
+                                                {% else %}bg-gray-100 text-gray-600
+                                                {% endif %}">
+                                        {{ task.get_status_display|default:"To Do" }}
+                                    </span>
+                                </div>
+
+                                {% if task.comment %}
+                                <p class="mt-1 text-sm text-gray-500 line-clamp-2">
+                                    {{ task.comment|truncatewords:50 }}
+                                </p>
+                                {% endif %}
+                            </a>
+                        </div>
+
+                        <!-- Arrow Icon -->
+                        <div class="flex-shrink-0 mt-1">
+                            <a href="{% url 'task_detail' model_id=task.id %}">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
                         </div>
                     </div>
-                </a>
+                </div>
                 {% endfor %}
             </div>
             {% else %}

@@ -39,9 +39,46 @@
                             {{ form.name }}
                             {%if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{%endif %}
                         </div>
+
+                        <div>
+                            <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="{{ form.priority.help_text }}">
+                                Priority
+                            </label>
+                            {{ form.priority }}
+                            {%if form.priority.help_text %}<p class="mt-1 text-xs text-gray-500">{{ form.priority.help_text }}</p>{%endif %}
+                            {%if form.priority.errors %}<p class="mt-2 text-sm text-red-600">{{ form.priority.errors.0 }}</p>{%endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="{{ form.status.help_text }}">
+                                Status
+                            </label>
+                            {{ form.status }}
+                            {%if form.status.help_text %}<p class="mt-1 text-xs text-gray-500">{{ form.status.help_text }}</p>{%endif %}
+                            {%if form.status.errors %}<p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>{%endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.order.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="{{ form.order.help_text }}">
+                                Order
+                            </label>
+                            {{ form.order }}
+                            {%if form.order.help_text %}<p class="mt-1 text-xs text-gray-500">{{ form.order.help_text }}</p>{%endif %}
+                            {%if form.order.errors %}<p class="mt-2 text-sm text-red-600">{{ form.order.errors.0 }}</p>{%endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.date_completed.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="{{ form.date_completed.help_text }}">
+                                Date Completed
+                            </label>
+                            {{ form.date_completed }}
+                            {%if form.date_completed.help_text %}<p class="mt-1 text-xs text-gray-500">{{ form.date_completed.help_text }}</p>{%endif %}
+                            {%if form.date_completed.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_completed.errors.0 }}</p>{%endif %}
+                        </div>
+
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Task details and notes">
-                                Comment 
+                                Comment
                             </label>
                             {{ form.comment }}
                             <p class="mt-1 text-xs text-gray-500">
