@@ -11,6 +11,7 @@ from core.models.person import Person
 from core.models.release import Release
 from core.models.release_bundle import ReleaseBundle
 from core.models.secret import Secret
+from core.models.task import Task
 from core.utilities.base_render import base_render
 
 
@@ -36,8 +37,12 @@ def home_view(request: HttpRequest) -> HttpResponse:
     # Calculate total records
     stats['total_records'] = sum(stats.values())
 
+    # Get the 10 most recent tasks
+    tasks = Task.objects.all()[:10]
+
     context = {
         'stats': stats,
+        'tasks': tasks,
     }
 
     return base_render(

@@ -24,6 +24,77 @@
         </div>
     </div>
 
+    <!-- Tasks Section -->
+    <div class="mb-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-900">Tasks</h2>
+                    <p class="text-sm text-gray-500 mt-1">Quick view of recent tasks</p>
+                </div>
+                <a href="{% url 'task' %}"
+                   class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors duration-150">
+                    View All
+                    <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Tasks List -->
+            {% if tasks %}
+            <div class="divide-y divide-gray-200">
+                {% for task in tasks %}
+                <a href="{% url 'task_detail' model_id=task.id %}"
+                   class="block px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mt-1">
+                            <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {{ task.name|default:"Untitled Task" }}
+                            </p>
+                            {% if task.comment %}
+                            <p class="mt-1 text-sm text-gray-500 line-clamp-2">
+                                {{ task.comment|truncatewords:50 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="ml-3 flex-shrink-0">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No tasks yet</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new task</p>
+                <div class="mt-6">
+                    <a href="{% url 'task' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Task
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Statistics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <!-- Applications -->
@@ -195,4 +266,13 @@
         {% endif %}
     </div>
 </div>
+
+<style>
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
 {% endblock %}
