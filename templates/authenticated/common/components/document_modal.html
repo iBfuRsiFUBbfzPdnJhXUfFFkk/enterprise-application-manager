@@ -1,0 +1,227 @@
+<!-- Reusable Document/Attachment Modal Component -->
+<div id="documentModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-semibold text-gray-900">Add New Attachment</h3>
+            <button type="button" id="closeDocumentModal" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form id="documentModalForm" class="mt-4" enctype="multipart/form-data">
+            <div class="space-y-4">
+                <div>
+                    <label for="document_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Name <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="document_name" name="name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="e.g., Technical Specification">
+                    <p class="mt-1 text-xs text-red-600 hidden" id="document_name_error"></p>
+                </div>
+
+                <div>
+                    <label for="document_file" class="block text-sm font-medium text-gray-700 mb-2">
+                        File <span class="text-red-500">*</span>
+                    </label>
+                    <input type="file" id="document_file" name="file" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="mt-1 text-xs text-gray-500">Maximum file size: 10MB</p>
+                    <p class="mt-1 text-xs text-red-600 hidden" id="document_file_error"></p>
+                </div>
+
+                <div>
+                    <label for="document_version" class="block text-sm font-medium text-gray-700 mb-2">
+                        Version
+                    </label>
+                    <input type="text" id="document_version" name="version"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           placeholder="e.g., 1.0"
+                           value="1.0">
+                    <p class="mt-1 text-xs text-red-600 hidden" id="document_version_error"></p>
+                </div>
+
+                <div>
+                    <label for="document_comment" class="block text-sm font-medium text-gray-700 mb-2">
+                        Comment
+                    </label>
+                    <textarea id="document_comment" name="comment" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Optional description or notes"></textarea>
+                    <p class="mt-1 text-xs text-red-600 hidden" id="document_comment_error"></p>
+                </div>
+
+                <div class="text-xs text-red-600 hidden" id="document_form_error"></div>
+            </div>
+
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="cancelDocumentModal"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="submit" id="saveDocumentModal"
+                        class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                    <span id="saveDocumentText">Upload Attachment</span>
+                    <span id="saveDocumentSpinner" class="hidden">
+                        <svg class="animate-spin h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Uploading...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Reusable Document Modal Functionality
+(function() {
+    const modal = document.getElementById('documentModal');
+    const form = document.getElementById('documentModalForm');
+    const closeButtons = [
+        document.getElementById('closeDocumentModal'),
+        document.getElementById('cancelDocumentModal')
+    ];
+    const saveButton = document.getElementById('saveDocumentModal');
+    const saveText = document.getElementById('saveDocumentText');
+    const saveSpinner = document.getElementById('saveDocumentSpinner');
+
+    // Callback to be set by the page using this modal
+    window.documentModalCallback = null;
+
+    // Open modal function
+    window.openDocumentModal = function(callback) {
+        window.documentModalCallback = callback;
+        modal.classList.remove('hidden');
+        form.reset();
+        clearErrors();
+    };
+
+    // Close modal function
+    function closeDocumentModal() {
+        modal.classList.add('hidden');
+        form.reset();
+        clearErrors();
+        window.documentModalCallback = null;
+    }
+
+    // Clear all error messages
+    function clearErrors() {
+        ['document_name_error', 'document_file_error', 'document_version_error', 'document_comment_error', 'document_form_error'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = '';
+                el.classList.add('hidden');
+            }
+        });
+    }
+
+    // Show error for a field
+    function showError(fieldName, message) {
+        const errorId = 'document_' + fieldName + '_error';
+        const errorEl = document.getElementById(errorId);
+        if (errorEl) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+    }
+
+    // Close button handlers
+    closeButtons.forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', closeDocumentModal);
+        }
+    });
+
+    // Close on outside click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeDocumentModal();
+        }
+    });
+
+    // Form submission
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        clearErrors();
+
+        // Show loading state
+        saveButton.disabled = true;
+        saveText.classList.add('hidden');
+        saveSpinner.classList.remove('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('document_name').value);
+            formData.append('version', document.getElementById('document_version').value);
+            formData.append('comment', document.getElementById('document_comment').value);
+
+            const fileInput = document.getElementById('document_file');
+            if (fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            const response = await fetch('{% url "document_create_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Call the callback with the new document data
+                if (window.documentModalCallback) {
+                    window.documentModalCallback(data.document);
+                }
+                closeDocumentModal();
+            } else {
+                // Show validation errors
+                if (data.errors) {
+                    for (const [field, messages] of Object.entries(data.errors)) {
+                        if (field === '_all' || field === '__all__') {
+                            const formError = document.getElementById('document_form_error');
+                            formError.textContent = messages.join(', ');
+                            formError.classList.remove('hidden');
+                        } else {
+                            showError(field, Array.isArray(messages) ? messages.join(', ') : messages);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error uploading document:', error);
+            const formError = document.getElementById('document_form_error');
+            formError.textContent = 'An error occurred while uploading the document. Please try again.';
+            formError.classList.remove('hidden');
+        } finally {
+            // Reset loading state
+            saveButton.disabled = false;
+            saveText.classList.remove('hidden');
+            saveSpinner.classList.add('hidden');
+        }
+    });
+
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+})();
+</script>

@@ -5,6 +5,7 @@
 <!-- Markdown Parser -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 {% include 'authenticated/common/components/link_modal.html' %}
+{% include 'authenticated/common/components/document_modal.html' %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -267,11 +268,20 @@
                         <p class="mt-1 text-sm text-gray-500">Supporting documents for this request</p>
                     </div>
                     <div class="px-6 py-6">
-                        <label for="{{ form.attachments.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                            Documents
-                        </label>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="{{ form.attachments.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Documents
+                            </label>
+                            <button type="button" id="open-document-modal-btn"
+                                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Upload New
+                            </button>
+                        </div>
                         {{ form.attachments }}
-                        <p class="mt-1 text-xs text-gray-500">Select one or more existing documents to attach</p>
+                        <p class="mt-1 text-xs text-gray-500">Select existing documents or upload new ones</p>
                         {% if form.attachments.errors %}<p class="mt-2 text-sm text-red-600">{{ form.attachments.errors.0 }}</p>{% endif %}
                     </div>
                 </div>
@@ -337,6 +347,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (label) {
                         const originalText = label.innerHTML;
                         label.innerHTML = '<span class="text-green-600">✓ Link added!</span>';
+                        setTimeout(() => {
+                            label.innerHTML = originalText;
+                        }, 2000);
+                    }
+                }
+            });
+        });
+    }
+
+    // Document Modal Integration
+    const openDocumentModalBtn = document.getElementById('open-document-modal-btn');
+    if (openDocumentModalBtn) {
+        openDocumentModalBtn.addEventListener('click', function() {
+            window.openDocumentModal(function(newDocument) {
+                const attachmentsSelect = document.getElementById('{{ form.attachments.id_for_label }}');
+                if (attachmentsSelect) {
+                    const option = document.createElement('option');
+                    option.value = newDocument.id;
+                    option.text = newDocument.name + ' v' + newDocument.version + ' (' + newDocument.blob_filename + ')';
+                    option.selected = true;
+                    attachmentsSelect.add(option);
+
+                    // Show success feedback
+                    const label = document.querySelector('label[for="{{ form.attachments.id_for_label }}"]');
+                    if (label) {
+                        const originalText = label.innerHTML;
+                        label.innerHTML = '<span class="text-green-600">✓ Document uploaded!</span>';
                         setTimeout(() => {
                             label.innerHTML = originalText;
                         }, 2000);
