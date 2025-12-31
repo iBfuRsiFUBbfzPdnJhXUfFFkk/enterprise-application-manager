@@ -8,6 +8,7 @@ from docx import Document
 from core.models.it_devops_request import ITDevOpsRequest
 from core.views.generic.generic_500 import generic_500
 from core.views.it_devops_request.utilities.it_devops_request_docx_helpers import (
+    add_attachments_section,
     add_header_footer,
     add_links_section,
     add_request_intro,
@@ -75,6 +76,9 @@ def it_devops_request_export_docx_view(request: HttpRequest) -> HttpResponse:
         # Add updates timeline
         updates = it_devops_request.updates.all()
         add_updates_section(document, updates)
+
+        # Add attachments section with embedded content
+        add_attachments_section(document, it_devops_request)
 
         # Generate filename using document_id and request name
         safe_name = "".join(

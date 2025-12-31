@@ -223,9 +223,22 @@ def format_file_size(size_bytes: int) -> str:
 
 def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.Image]:
     """Convert PDF bytes to a list of PIL images (one per page)."""
+    import tempfile
+
     try:
-        images = convert_from_bytes(pdf_bytes, dpi=150, fmt="png")
-        # Limit number of pages to avoid memory issues
-        return images[:max_pages]
-    except Exception:
+        # Use /tmp/claude for temp files (sandbox-allowed directory)
+        with tempfile.TemporaryDirectory(dir="/tmp/claude") as tmpdir:
+            images = convert_from_bytes(
+                pdf_bytes,
+                dpi=150,
+                fmt="png",
+                use_pdftoppm=True,
+                output_folder=tmpdir
+            )
+            # Limit number of pages to avoid memory issues
+            return images[:max_pages]
+    except Exception as e:
+        print(f"PDF to image conversion error: {e}")
+        import traceback
+        traceback.print_exc()
         return []
