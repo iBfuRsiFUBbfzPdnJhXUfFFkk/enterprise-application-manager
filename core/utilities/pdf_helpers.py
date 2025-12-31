@@ -226,6 +226,8 @@ def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.I
     import platform
     import tempfile
 
+    from django.conf import settings
+
     try:
         # Determine temp directory based on OS
         if platform.system() == "Windows":
@@ -235,13 +237,17 @@ def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.I
             # Unix/Mac - use /tmp/claude if it exists, otherwise system temp
             tmpdir_parent = "/tmp/claude" if os.path.exists("/tmp/claude") else None
 
+        # Get poppler path from settings (optional)
+        poppler_path = getattr(settings, 'POPPLER_PATH', None)
+
         with tempfile.TemporaryDirectory(dir=tmpdir_parent) as tmpdir:
             images = convert_from_bytes(
                 pdf_bytes,
                 dpi=150,
                 fmt="png",
                 use_pdftoppm=True,
-                output_folder=tmpdir
+                output_folder=tmpdir,
+                poppler_path=poppler_path
             )
             # Limit number of pages to avoid memory issues
             return images[:max_pages]
