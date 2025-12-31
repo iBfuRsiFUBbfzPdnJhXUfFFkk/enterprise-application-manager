@@ -456,6 +456,27 @@
                                 {% if form.links.errors %}<p class="mt-2 text-sm text-red-600">{{ form.links.errors.0 }}</p>{% endif %}
                             </div>
                         </div>
+
+                        <!-- Documents -->
+                        <div class="pt-6 border-t border-gray-200">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-4 flex items-center">
+                                <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Documents
+                            </h3>
+                            <div>
+                                <label for="{{ form.documents.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help"
+                                       title="Documents and files associated with this application">
+                                    Documents
+                                </label>
+                                {{ form.documents }}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Type to search, click to select multiple documents
+                                </p>
+                                {% if form.documents.errors %}<p class="mt-2 text-sm text-red-600">{{ form.documents.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 

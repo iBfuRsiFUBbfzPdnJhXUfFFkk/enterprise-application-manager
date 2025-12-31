@@ -85,6 +85,27 @@
                     </div>
                 </div>
 
+                <!-- Associated Applications -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Associated Applications</h2>
+                        <p class="mt-1 text-sm text-gray-500">Link this document to applications</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div>
+                            <label for="{{ form.applications.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help"
+                                   title="Applications that this document is associated with">
+                                Applications
+                            </label>
+                            {{ form.applications }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Select multiple applications to associate with this document
+                            </p>
+                            {% if form.applications.errors %}<p class="mt-2 text-sm text-red-600">{{ form.applications.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
