@@ -18,28 +18,62 @@ MAX_IMAGE_HEIGHT = 2000
 
 
 def convert_docx_to_pdf(docx_bytes: bytes) -> Optional[bytes]:
-    """Convert DOCX bytes to PDF bytes using LibreOffice command-line."""
-    try:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            docx_path = os.path.join(tmpdir, "input.docx")
-            pdf_path = os.path.join(tmpdir, "input.pdf")
+    """Convert DOCX bytes to PDF bytes. Tries Microsoft Word first, then LibreOffice, then textutil."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        docx_path = os.path.join(tmpdir, "input.docx")
+        pdf_path = os.path.join(tmpdir, "input.pdf")
 
-            with open(docx_path, "wb") as f:
-                f.write(docx_bytes)
+        with open(docx_path, "wb") as f:
+            f.write(docx_bytes)
 
+        # Try Microsoft Word first (macOS via AppleScript)
+        if os.path.exists("/Applications/Microsoft Word.app"):
+            try:
+                applescript = f'''
+                tell application "Microsoft Word"
+                    open POSIX file "{docx_path}"
+                    set doc to active document
+                    save as doc file name POSIX file "{pdf_path}" file format format PDF
+                    close doc saving no
+                end tell
+                '''
+                result = subprocess.run(
+                    ["osascript", "-e", applescript],
+                    capture_output=True,
+                    timeout=30,
+                )
+                if result.returncode == 0 and os.path.exists(pdf_path):
+                    with open(pdf_path, "rb") as f:
+                        return f.read()
+            except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+                pass
+
+        # Try LibreOffice as fallback
+        try:
             result = subprocess.run(
                 ["soffice", "--headless", "--convert-to", "pdf", "--outdir", tmpdir, docx_path],
                 capture_output=True,
                 timeout=30,
             )
-
             if result.returncode == 0 and os.path.exists(pdf_path):
                 with open(pdf_path, "rb") as f:
                     return f.read()
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+            pass
 
-            return None
+        # Try macOS textutil as last resort (built-in, always available on macOS)
+        try:
+            result = subprocess.run(
+                ["textutil", "-convert", "pdf", "-output", pdf_path, docx_path],
+                capture_output=True,
+                timeout=30,
+            )
+            if result.returncode == 0 and os.path.exists(pdf_path):
+                with open(pdf_path, "rb") as f:
+                    return f.read()
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+            pass
 
-    except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
         return None
 
 
