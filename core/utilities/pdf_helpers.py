@@ -90,7 +90,10 @@ def create_text_content_page(text: str, filename: str) -> bytes:
 
     lines = text.split("\n")
     for line in lines:
-        if len(line) > 80:
+        # Empty lines create spacing (like line breaks)
+        if not line.strip():
+            story.append(Spacer(1, 0.1 * inch))
+        elif len(line) > 80:
             wrapped_lines = [line[i : i + 80] for i in range(0, len(line), 80)]
             for wrapped in wrapped_lines:
                 para = Paragraph(f'<font name="Courier" size="8">{wrapped}</font>', styles["Normal"])
