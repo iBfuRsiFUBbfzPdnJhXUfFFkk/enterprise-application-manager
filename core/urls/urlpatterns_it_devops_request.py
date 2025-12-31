@@ -5,6 +5,7 @@ from core.views.it_devops_request.it_devops_request_add_view import it_devops_re
 from core.views.it_devops_request.it_devops_request_detail_view import it_devops_request_detail_view
 from core.views.it_devops_request.it_devops_request_edit_view import it_devops_request_edit_view
 from core.views.it_devops_request.it_devops_request_export_docx_view import it_devops_request_export_docx_view
+from core.views.it_devops_request.it_devops_request_export_pdf_view import it_devops_request_export_pdf_view
 from core.views.it_devops_request.it_devops_request_update_add_ajax_view import it_devops_request_update_add_ajax_view
 from core.views.it_devops_request.it_devops_request_view import it_devops_request_view
 
@@ -27,6 +28,11 @@ urlpatterns_it_devops_request.extend(
             route="it-devops-request/export/docx/",
             view=it_devops_request_export_docx_view,
             name="it_devops_request_export_docx",
+        ),
+        path(
+            route="it-devops-request/export/pdf/",
+            view=it_devops_request_export_pdf_view,
+            name="it_devops_request_export_pdf",
         ),
         path(
             route="it-devops-request/<int:model_id>/update/add/",
