@@ -4,6 +4,7 @@ import tempfile
 from io import BytesIO
 from typing import Optional
 
+from pdf2image import convert_from_bytes
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
 from reportlab.lib.pagesizes import letter
@@ -218,3 +219,13 @@ def format_file_size(size_bytes: int) -> str:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.1f} TB"
+
+
+def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.Image]:
+    """Convert PDF bytes to a list of PIL images (one per page)."""
+    try:
+        images = convert_from_bytes(pdf_bytes, dpi=150, fmt="png")
+        # Limit number of pages to avoid memory issues
+        return images[:max_pages]
+    except Exception:
+        return []

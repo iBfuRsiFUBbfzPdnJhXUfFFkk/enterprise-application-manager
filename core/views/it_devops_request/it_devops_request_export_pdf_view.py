@@ -6,17 +6,10 @@ from django.http import HttpRequest, HttpResponse
 from docx import Document
 
 from core.models.it_devops_request import ITDevOpsRequest
-from core.utilities.pdf_helpers import (
-    MAX_EMBED_SIZE,
-    convert_docx_to_pdf,
-    create_image_content_page,
-    create_text_content_page,
-    create_unsupported_file_page,
-    get_attachment_handler,
-    merge_pdfs,
-)
+from core.utilities.pdf_helpers import convert_docx_to_pdf
 from core.views.generic.generic_500 import generic_500
 from core.views.it_devops_request.utilities.it_devops_request_docx_helpers import (
+    add_attachments_section,
     add_header_footer,
     add_links_section,
     add_request_intro,
@@ -70,11 +63,16 @@ def it_devops_request_export_pdf_view(request: HttpRequest) -> HttpResponse:
         updates = it_devops_request.updates.all()
         add_updates_section(document, updates)
 
+        # Add attachments section with embedded content (text, images, PDFs as images)
+        add_attachments_section(document, it_devops_request)
+
         docx_stream = BytesIO()
         document.save(docx_stream)
 
+        # Convert complete DOCX to PDF
         pdf_bytes = convert_docx_to_pdf(docx_stream.getvalue())
         if not pdf_bytes:
+            # Fallback to DOCX if PDF conversion fails
             safe_name = "".join(
                 c if c.isalnum() or c in (" ", "-", "_") else "" for c in it_devops_request.name or "request"
             )
@@ -90,47 +88,7 @@ def it_devops_request_export_pdf_view(request: HttpRequest) -> HttpResponse:
             response["Content-Disposition"] = f'attachment; filename="{filename}"'
             return response
 
-        pdf_list = [pdf_bytes]
-
-        for attachment in it_devops_request.attachments.all():
-            if attachment.blob_size > MAX_EMBED_SIZE:
-                page = create_unsupported_file_page(
-                    attachment.blob_filename, attachment.blob_size, attachment.blob_content_type, "File too large (>10MB)"
-                )
-                pdf_list.append(page)
-                continue
-
-            handler = get_attachment_handler(attachment.blob_content_type)
-
-            if handler == "text":
-                try:
-                    text = attachment.blob_data.decode("utf-8", errors="ignore")
-                    page = create_text_content_page(text, attachment.blob_filename)
-                    pdf_list.append(page)
-                except Exception:
-                    page = create_unsupported_file_page(
-                        attachment.blob_filename, attachment.blob_size, attachment.blob_content_type, "Text decode error"
-                    )
-                    pdf_list.append(page)
-            elif handler == "image":
-                try:
-                    page = create_image_content_page(attachment.blob_data, attachment.blob_filename)
-                    pdf_list.append(page)
-                except Exception:
-                    page = create_unsupported_file_page(
-                        attachment.blob_filename, attachment.blob_size, attachment.blob_content_type, "Image load error"
-                    )
-                    pdf_list.append(page)
-            elif handler == "pdf":
-                pdf_list.append(attachment.blob_data)
-            else:
-                page = create_unsupported_file_page(
-                    attachment.blob_filename, attachment.blob_size, attachment.blob_content_type
-                )
-                pdf_list.append(page)
-
-        final_pdf = merge_pdfs(pdf_list)
-
+        # Return PDF
         safe_name = "".join(
             c if c.isalnum() or c in (" ", "-", "_") else "" for c in it_devops_request.name or "request"
         )
@@ -138,7 +96,7 @@ def it_devops_request_export_pdf_view(request: HttpRequest) -> HttpResponse:
         timestamp = now.strftime("%Y-%m-%d__%I:%M:%p").lower().replace(" ", "")
         filename = f"{it_devops_request.document_id}_{safe_name}__{timestamp}.pdf"
 
-        response = HttpResponse(final_pdf, content_type="application/pdf")
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 

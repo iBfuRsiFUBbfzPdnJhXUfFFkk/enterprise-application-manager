@@ -1,12 +1,19 @@
 import re
+from io import BytesIO
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-from docx.shared import Pt, RGBColor
+from docx.shared import Inches, Pt, RGBColor
 
 from core.models.it_devops_request import ITDevOpsRequest
+from core.utilities.pdf_helpers import (
+    MAX_EMBED_SIZE,
+    convert_pdf_to_images,
+    format_file_size,
+    get_attachment_handler,
+)
 from core.views.recommendation.utilities.recommendation_docx_helpers import (
     add_header_footer as _add_header_footer,
     add_hyperlink,
@@ -205,14 +212,6 @@ def add_request_section(document: Document, request: ITDevOpsRequest) -> None:
         document.add_heading("Additional Notes", level=2)
         add_markdown_content(document, request.comment)
 
-    # Attachments section
-    if request.attachments.exists():
-        document.add_heading("Attachments", level=2)
-        for attachment in request.attachments.all():
-            para = document.add_paragraph(style="List Bullet")
-            name_run = para.add_run(attachment.name if hasattr(attachment, "name") else str(attachment))
-            name_run.font.size = Pt(9)
-
 
 def add_updates_section(document: Document, updates) -> None:
     """Add updates timeline section to the document."""
@@ -260,3 +259,101 @@ def add_updates_section(document: Document, updates) -> None:
             bottom.set(qn("w:color"), "D1D5DB")
             pBdr.append(bottom)
             pPr.append(pBdr)
+
+
+def add_attachments_section(document: Document, request: ITDevOpsRequest) -> None:
+    """Add attachments section with embedded content (text, images, PDFs as images)."""
+    from PIL import Image
+
+    if not request.attachments.exists():
+        return
+
+    document.add_heading("Attachments", level=2)
+
+    first_attachment = True
+    for attachment in request.attachments.all():
+        # Add page break before each attachment except the first
+        if not first_attachment:
+            document.add_page_break()
+        first_attachment = False
+
+        # Add filename as heading
+        document.add_heading(attachment.blob_filename, level=3)
+
+        # Check file size
+        if attachment.blob_size > MAX_EMBED_SIZE:
+            para = document.add_paragraph()
+            para.add_run(f"File Type: {attachment.blob_content_type}\n").bold = True
+            para.add_run(f"File Size: {format_file_size(attachment.blob_size)}\n\n")
+            para.add_run("This file is too large to embed (>10MB).").italic = True
+            continue
+
+        handler = get_attachment_handler(attachment.blob_content_type)
+
+        if handler == "text":
+            try:
+                text = attachment.blob_data.decode("utf-8", errors="ignore")
+                # Add text content with monospace font
+                lines = text.split("\n")
+                for line in lines:
+                    para = document.add_paragraph()
+                    run = para.add_run(line if line.strip() else " ")
+                    run.font.name = "Courier New"
+                    run.font.size = Pt(8)
+            except Exception:
+                para = document.add_paragraph()
+                para.add_run("Error: Unable to decode text content.").italic = True
+
+        elif handler == "image":
+            try:
+                img = Image.open(BytesIO(attachment.blob_data))
+                # Resize if needed
+                max_width = 6.5
+                max_height = 8.0
+                width_ratio = max_width / (img.width / 96)  # Convert pixels to inches (96 DPI)
+                height_ratio = max_height / (img.height / 96)
+                ratio = min(width_ratio, height_ratio, 1.0)  # Don't upscale
+
+                img_stream = BytesIO()
+                img.save(img_stream, format="PNG")
+                img_stream.seek(0)
+
+                document.add_picture(img_stream, width=Inches(img.width / 96 * ratio))
+            except Exception:
+                para = document.add_paragraph()
+                para.add_run("Error: Unable to load image.").italic = True
+
+        elif handler == "pdf":
+            try:
+                images = convert_pdf_to_images(attachment.blob_data)
+                if images:
+                    for i, img in enumerate(images):
+                        if i > 0:
+                            para = document.add_paragraph()
+                            para.add_run(f"\nPage {i + 1}").bold = True
+
+                        # Resize to fit page
+                        max_width = 6.5
+                        max_height = 8.0
+                        width_ratio = max_width / (img.width / 96)
+                        height_ratio = max_height / (img.height / 96)
+                        ratio = min(width_ratio, height_ratio, 1.0)
+
+                        img_stream = BytesIO()
+                        img.save(img_stream, format="PNG")
+                        img_stream.seek(0)
+
+                        document.add_picture(img_stream, width=Inches(img.width / 96 * ratio))
+                else:
+                    para = document.add_paragraph()
+                    para.add_run("Error: Unable to convert PDF to images.").italic = True
+            except Exception:
+                para = document.add_paragraph()
+                para.add_run("Error: Unable to process PDF.").italic = True
+
+        else:
+            # Unsupported file type - show metadata
+            para = document.add_paragraph()
+            para.add_run(f"File Type: {attachment.blob_content_type}\n").bold = True
+            para.add_run(f"File Size: {format_file_size(attachment.blob_size)}\n\n")
+            para.add_run("This file type cannot be embedded in the document.").italic = True
