@@ -1,0 +1,108 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'bad_interaction' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Bad Interaction</h1>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update bad interaction details{% else %}Record a new bad interaction{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Interaction Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Interaction Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Details about the bad interaction</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.person.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Person {% if form.person.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.person }}
+                            {% if form.person.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.reported_by.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Reported By {% if form.reported_by.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.reported_by }}
+                            {% if form.reported_by.errors %}<p class="mt-2 text-sm text-red-600">{{ form.reported_by.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_occurred.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Occurred {% if form.date_occurred.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.date_occurred }}
+                            {% if form.date_occurred.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_occurred.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.severity.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Severity {% if form.severity.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.severity }}
+                            {% if form.severity.errors %}<p class="mt-2 text-sm text-red-600">{{ form.severity.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Description {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Comment
+                            </label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.evidence.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Evidence File {% if form.evidence.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {% if bad_interaction.evidence_blob_filename %}
+                            <p class="text-sm text-gray-600 mb-2">Current file: {{ bad_interaction.evidence_blob_filename }}</p>
+                            {% endif %}
+                            {{ form.evidence }}
+                            {% if form.evidence.errors %}<p class="mt-2 text-sm text-red-600">{{ form.evidence.errors.0 }}</p>{% endif %}
+                            <p class="mt-1 text-xs text-gray-500">Upload supporting evidence (PDF, image, document)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex items-center justify-end space-x-4">
+                    <a href="{% url 'bad_interaction' %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Save Bad Interaction
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}

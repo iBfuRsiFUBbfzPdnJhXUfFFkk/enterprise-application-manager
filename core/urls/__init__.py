@@ -12,6 +12,7 @@ from core.urls.urlpatterns_api import urlpatterns_api
 from core.urls.urlpatterns_api_resources import urlpatterns_api_resources
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
+from core.urls.urlpatterns_bad_interaction import urlpatterns_bad_interaction
 from core.urls.urlpatterns_billing_code import urlpatterns_billing_code
 from core.urls.urlpatterns_client import urlpatterns_client
 from core.urls.urlpatterns_command import urlpatterns_command
@@ -27,6 +28,7 @@ from core.urls.urlpatterns_estimation import urlpatterns_estimation
 from core.urls.urlpatterns_external_blocker import urlpatterns_external_blocker
 from core.urls.urlpatterns_formula import urlpatterns_formula
 from core.urls.urlpatterns_hotfix import urlpatterns_hotfix
+from core.urls.urlpatterns_hr_incident import urlpatterns_hr_incident
 from core.urls.urlpatterns_incident import urlpatterns_incident
 from core.urls.urlpatterns_it_devops_request import urlpatterns_it_devops_request
 from core.urls.urlpatterns_job_level import urlpatterns_job_level
@@ -87,6 +89,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_api_resources,
     *urlpatterns_application,
     *urlpatterns_application_group,
+    *urlpatterns_bad_interaction,
     *urlpatterns_billing_code,
     *urlpatterns_client,
     *urlpatterns_command,
@@ -102,6 +105,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_external_blocker,
     *urlpatterns_formula,
     *urlpatterns_hotfix,
+    *urlpatterns_hr_incident,
     *urlpatterns_incident,
     *urlpatterns_it_devops_request,
     *urlpatterns_job_level,

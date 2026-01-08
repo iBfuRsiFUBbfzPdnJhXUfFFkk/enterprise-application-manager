@@ -1,0 +1,158 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'hr_incident' %}" class="mr-4 text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ hr_incident.name }}</h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'hr_incident_edit' model_id=hr_incident.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Edit
+                    </a>
+                    <a href="{% url 'hr_incident_delete' model_id=hr_incident.id %}"
+                       onclick="return confirm('Are you sure?')"
+                       class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50">
+                        Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Incident Information</h2>
+            </div>
+            <div class="px-6 py-6">
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    {% if hr_incident.reference_number %}<div><dt class="text-sm font-medium text-gray-500">Reference Number</dt><dd class="mt-1 text-sm text-gray-900">{{ hr_incident.reference_number }}</dd></div>{% endif %}
+                    <div><dt class="text-sm font-medium text-gray-500">Person</dt><dd class="mt-1 text-sm text-gray-900">{{ hr_incident.person }}</dd></div>
+                    <div><dt class="text-sm font-medium text-gray-500">Filed By</dt><dd class="mt-1 text-sm text-gray-900">{{ hr_incident.filed_by }}</dd></div>
+                    <div><dt class="text-sm font-medium text-gray-500">Date Filed</dt><dd class="mt-1 text-sm text-gray-900">{{ hr_incident.date_filed|date:"F d, Y" }}</dd></div>
+                    {% if hr_incident.date_resolved %}<div><dt class="text-sm font-medium text-gray-500">Date Resolved</dt><dd class="mt-1 text-sm text-gray-900">{{ hr_incident.date_resolved|date:"F d, Y" }}</dd></div>{% endif %}
+                    <div><dt class="text-sm font-medium text-gray-500">Status</dt><dd class="mt-1">
+                        {% if hr_incident.status == 'OPEN' %}<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Open</span>
+                        {% elif hr_incident.status == 'IN_REVIEW' %}<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">In Review</span>
+                        {% elif hr_incident.status == 'RESOLVED' %}<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Resolved</span>
+                        {% elif hr_incident.status == 'CLOSED' %}<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Closed</span>{% endif %}
+                    </dd></div>
+                    {% if hr_incident.description %}<div class="md:col-span-2"><dt class="text-sm font-medium text-gray-500">Description</dt><dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ hr_incident.description }}</dd></div>{% endif %}
+                    {% if hr_incident.resolution %}<div class="md:col-span-2"><dt class="text-sm font-medium text-gray-500">Resolution</dt><dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ hr_incident.resolution }}</dd></div>{% endif %}
+                    {% if hr_incident.comment %}<div class="md:col-span-2"><dt class="text-sm font-medium text-gray-500">Comment</dt><dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ hr_incident.comment }}</dd></div>{% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <!-- Updates / Activity Log -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Updates & Activity Log</h2>
+            </div>
+            <div class="px-6 py-6">
+                <!-- Add Update Form -->
+                <form method="post" action="{% url 'hr_incident_add_update' model_id=hr_incident.id %}" enctype="multipart/form-data" class="mb-6 pb-6 border-b border-gray-200">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div>
+                            <label for="{{ update_form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Add Update</label>
+                            {{ update_form.comment }}
+                            {% if update_form.comment.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ update_form.comment.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ update_form.attachment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Attachment (optional)</label>
+                            {{ update_form.attachment }}
+                            {% if update_form.attachment.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ update_form.attachment.errors.0 }}</p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">{{ update_form.attachment.help_text }}</p>
+                        </div>
+                        <div>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add Update
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Updates Timeline -->
+                {% if hr_incident.updates.all %}
+                <div class="space-y-4">
+                    {% for update in hr_incident.updates.all reversed %}
+                    <div class="flex">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ update.created_by.get_full_name|default:update.created_by.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ update.datetime_created|date:"F d, Y g:i A" }}</p>
+                                </div>
+                                {% if update.attachment_blob_data %}
+                                <a href="{% url 'hr_incident_download_update_attachment' update_id=update.id %}"
+                                   class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                    </svg>
+                                    {{ update.attachment_blob_filename }}
+                                </a>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ update.comment }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 text-center py-4">No updates yet. Add the first update above.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if hr_incident.bad_interactions.all %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Linked Bad Interactions</h2>
+            </div>
+            <div class="px-6 py-6">
+                <ul class="divide-y divide-gray-200">
+                    {% for interaction in hr_incident.bad_interactions.all %}
+                    <li class="py-3">
+                        <a href="{% url 'bad_interaction_detail' model_id=interaction.id %}" class="flex items-center justify-between hover:bg-gray-50 px-2 py-1 rounded">
+                            <div>
+                                <p class="text-sm font-medium text-blue-600">{{ interaction.person }} - {{ interaction.date_occurred|date:"M d, Y" }}</p>
+                                <p class="text-xs text-gray-500">Severity: {{ interaction.get_severity_display }}</p>
+                            </div>
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
