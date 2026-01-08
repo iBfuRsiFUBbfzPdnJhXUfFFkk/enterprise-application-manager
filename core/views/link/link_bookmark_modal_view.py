@@ -4,6 +4,7 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 
 from core.models.link import Link
+from core.models.user_bookmark import UserBookmark
 
 
 @csrf_exempt
@@ -17,22 +18,28 @@ def link_bookmark_modal_view(request: HttpRequest) -> JsonResponse:
     try:
         user = request.user
 
-        # Get all links not bookmarked by this user
-        all_links = Link.objects.all().prefetch_related('bookmarked_by')
-        unbookmarked_links = []
+        # Get IDs of links already bookmarked by this user
+        bookmarked_link_ids = UserBookmark.objects.filter(user=user).values_list('link_id', flat=True)
 
-        for link in all_links:
-            if not link.bookmarked_by.filter(id=user.id).exists():
-                unbookmarked_links.append({
-                    'id': link.id,
-                    'name': link.name,
-                    'url': link.url,
-                    'comment': link.comment or ''
-                })
+        # Get all links not bookmarked by this user
+        unbookmarked_links = Link.objects.exclude(id__in=bookmarked_link_ids).values(
+            'id', 'name', 'url', 'comment'
+        )
+
+        # Convert to list of dicts with proper null handling
+        links_list = [
+            {
+                'id': link['id'],
+                'name': link['name'],
+                'url': link['url'],
+                'comment': link['comment'] or ''
+            }
+            for link in unbookmarked_links
+        ]
 
         return JsonResponse({
             'success': True,
-            'links': unbookmarked_links
+            'links': links_list
         })
 
     except Exception as e:

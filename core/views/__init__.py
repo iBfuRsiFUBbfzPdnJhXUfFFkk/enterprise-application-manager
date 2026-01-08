@@ -42,13 +42,32 @@ def home_view(request: HttpRequest) -> HttpResponse:
     # Get the 10 most recent tasks (excluding completed)
     tasks = Task.objects.exclude(status=TASK_STATUS_COMPLETED)[:10]
 
-    # Get user's bookmarked links
-    bookmarked_links = request.user.bookmarked_links.all().order_by('name')[:10]
+    # Get user's bookmark folders and bookmarks organized by folder
+    from core.models.bookmark_folder import BookmarkFolder
+    from core.models.common.enums.bookmark_view_preference_choices import BOOKMARK_VIEW_CARD
+    from core.models.user_bookmark import UserBookmark
+
+    # Get root folders (no parent)
+    root_folders = BookmarkFolder.objects.filter(
+        user=request.user,
+        parent_folder__isnull=True
+    ).prefetch_related('child_folders', 'bookmarks__link').order_by('order', 'name')
+
+    # Get bookmarks not in any folder
+    uncategorized_bookmarks = UserBookmark.objects.filter(
+        user=request.user,
+        folder__isnull=True
+    ).select_related('link').order_by('order', 'id')
+
+    # Get user's view preference
+    view_preference = request.user.bookmark_view_preference or BOOKMARK_VIEW_CARD
 
     context = {
         'stats': stats,
         'tasks': tasks,
-        'bookmarked_links': bookmarked_links,
+        'root_folders': root_folders,
+        'uncategorized_bookmarks': uncategorized_bookmarks,
+        'bookmark_view_preference': view_preference,
     }
 
     return base_render(

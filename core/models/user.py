@@ -1,10 +1,15 @@
 from django.contrib.auth.models import AbstractUser
+from django_generic_model_fields.create_generic_enum import create_generic_enum
+from django_generic_model_fields.create_generic_one_to_one_fk import create_generic_one_to_one_fk
+from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from simple_history.models import HistoricalRecords
 
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_enumeration_attack_uuid import AbstractEnumerationAttackUuid
-from django_generic_model_fields.create_generic_one_to_one_fk import create_generic_one_to_one_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from core.models.common.enums.bookmark_view_preference_choices import (
+    BOOKMARK_VIEW_CARD,
+    BOOKMARK_VIEW_PREFERENCE_CHOICES,
+)
 from core.models.person import Person
 
 
@@ -17,6 +22,9 @@ class User(
     active_directory_security_accounts_manager_account_name: str | None = create_generic_varchar()
     active_directory_security_accounts_manager_account_type: str | None = create_generic_varchar()
     active_directory_security_identifier_sid: str | None = create_generic_varchar()
+    bookmark_view_preference: str = create_generic_enum(
+        choices=BOOKMARK_VIEW_PREFERENCE_CHOICES
+    )
     employee_company: str | None = create_generic_varchar()
     employee_department: str | None = create_generic_varchar()
     employee_number: str | None = create_generic_varchar()

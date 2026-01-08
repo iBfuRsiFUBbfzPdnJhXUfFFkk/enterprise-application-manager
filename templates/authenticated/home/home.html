@@ -24,87 +24,114 @@
         </div>
     </div>
 
-    <!-- Bookmarks Bar -->
-    {% if bookmarked_links %}
+    <!-- Bookmarks Section -->
     <div class="mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-semibold text-gray-900">Bookmarked Links</h2>
-                    <p class="text-sm text-gray-500 mt-1">Quick access to your favorite links</p>
+                    <p class="text-sm text-gray-500 mt-1">Quick access to your favorite links organized in folders</p>
                 </div>
-                <button onclick="openAddBookmarkModal()"
-                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors duration-150">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Add Bookmark
-                </button>
-            </div>
-
-            <!-- Bookmarks Grid -->
-            <div class="px-6 py-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="bookmarks-grid">
-                    {% for link in bookmarked_links %}
-                    <div class="bookmark-item group relative bg-gray-50 hover:bg-blue-50 rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-all duration-150" data-link-id="{{ link.id }}">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1 min-w-0">
-                                <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="block">
-                                    <div class="flex items-center space-x-2 mb-2">
-                                        <svg class="h-5 w-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                                        </svg>
-                                        <h3 class="text-sm font-semibold text-gray-900 truncate" title="{{ link.name }}">{{ link.name }}</h3>
-                                    </div>
-                                    {% if link.comment %}
-                                    <p class="text-xs text-gray-500 line-clamp-2">{{ link.comment|truncatewords:10 }}</p>
-                                    {% endif %}
-                                </a>
-                            </div>
-                            <button onclick="toggleBookmark(event, {{ link.id }})"
-                                    class="bookmark-toggle ml-2 flex-shrink-0 text-yellow-500 hover:text-yellow-600 transition-colors"
-                                    title="Remove bookmark"
-                                    data-link-id="{{ link.id }}"
-                                    data-bookmarked="true">
-                                <svg class="h-5 w-5 fill-current" viewBox="0 0 24 24">
-                                    <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/>
-                                </svg>
-                            </button>
-                        </div>
+                <div class="flex items-center space-x-2">
+                    <!-- View Toggle Buttons -->
+                    <div class="flex border border-gray-300 rounded-lg overflow-hidden">
+                        <button onclick="toggleViewMode('card')"
+                                id="view-card-btn"
+                                class="px-3 py-2 text-sm font-medium transition-colors {% if bookmark_view_preference == 'card' %}bg-blue-600 text-white{% else %}bg-white text-gray-700 hover:bg-gray-50{% endif %}"
+                                title="Card view">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                        </button>
+                        <button onclick="toggleViewMode('list')"
+                                id="view-list-btn"
+                                class="px-3 py-2 text-sm font-medium transition-colors {% if bookmark_view_preference == 'list' %}bg-blue-600 text-white{% else %}bg-white text-gray-700 hover:bg-gray-50{% endif %}"
+                                title="List view">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
                     </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-    {% else %}
-    <!-- Empty State for Bookmarks -->
-    <div class="mb-6">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-900">Bookmarked Links</h2>
-                <p class="text-sm text-gray-500 mt-1">Quick access to your favorite links</p>
-            </div>
-            <div class="px-6 py-12 text-center">
-                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
-                </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No bookmarks yet</h3>
-                <p class="mt-1 text-sm text-gray-500">Start by adding your favorite links to quickly access them</p>
-                <div class="mt-6">
+
+                    <!-- New Folder Button -->
+                    <button onclick="openCreateFolderModal()"
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-colors">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        </svg>
+                        New Folder
+                    </button>
+
+                    <!-- Add Bookmark Button -->
                     <button onclick="openAddBookmarkModal()"
-                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
-                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         Add Bookmark
                     </button>
                 </div>
             </div>
+
+            <!-- Bookmarks Content -->
+            <div class="px-6 py-4">
+                {% if root_folders or uncategorized_bookmarks %}
+                    <!-- Root Folders -->
+                    {% for folder in root_folders %}
+                    {% include 'authenticated/home/partials/bookmark_folder.html' with folder=folder depth=0 %}
+                    {% endfor %}
+
+                    <!-- Uncategorized Bookmarks -->
+                    {% if uncategorized_bookmarks %}
+                    <div class="mb-4">
+                        <h3 class="text-sm font-medium text-gray-700 mb-2">Uncategorized</h3>
+                        <div class="bookmarks-container"
+                             data-view-mode="{{ bookmark_view_preference }}"
+                             data-folder-id="null"
+                             ondragover="handleFolderContentDragOver(event)"
+                             ondrop="handleFolderContentDrop(event)"
+                             ondragleave="handleFolderContentDragLeave(event)">
+                            {% if bookmark_view_preference == 'card' %}
+                            <!-- Card View -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                                {% for bookmark in uncategorized_bookmarks %}
+                                {% include 'authenticated/home/partials/bookmark_card.html' with bookmark=bookmark view_mode='card' %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <!-- List View -->
+                            <div class="space-y-1">
+                                {% for bookmark in uncategorized_bookmarks %}
+                                {% include 'authenticated/home/partials/bookmark_card.html' with bookmark=bookmark view_mode='list' %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <!-- Empty State for Bookmarks -->
+                <div class="py-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No bookmarks yet</h3>
+                    <p class="mt-1 text-sm text-gray-500">Start by adding your favorite links to quickly access them</p>
+                    <div class="mt-6">
+                        <button onclick="openAddBookmarkModal()"
+                                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Bookmark
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-    {% endif %}
 
     <!-- Tasks Section -->
     <div class="mb-6">
@@ -395,6 +422,103 @@
     </div>
 </div>
 
+<!-- Create Folder Modal -->
+<div id="createFolderModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-semibold text-gray-900">Create New Folder</h3>
+            <button type="button" onclick="closeCreateFolderModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form id="create-folder-form" class="mt-4">
+            <div class="mb-4">
+                <label for="folder-name" class="block text-sm font-medium text-gray-700 mb-1">Folder Name *</label>
+                <input type="text" id="folder-name" name="name" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Enter folder name">
+                <div id="error-folder-name" class="hidden text-red-600 text-sm mt-1"></div>
+            </div>
+
+            <div class="mb-4">
+                <label for="parent-folder" class="block text-sm font-medium text-gray-700 mb-1">Parent Folder (optional)</label>
+                <select id="parent-folder" name="parent_folder"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Root (No parent)</option>
+                    <!-- Populated by JavaScript -->
+                </select>
+            </div>
+
+            <div class="mb-4">
+                <label for="folder-color" class="block text-sm font-medium text-gray-700 mb-1">Color (optional)</label>
+                <input type="color" id="folder-color" name="color" value="#3B82F6"
+                       class="h-10 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div id="create-folder-error" class="hidden text-red-600 text-sm mb-4"></div>
+
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeCreateFolderModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="submit" id="create-folder-btn"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium">
+                    Create Folder
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Rename Folder Modal -->
+<div id="renameFolderModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-semibold text-gray-900">Rename Folder</h3>
+            <button type="button" onclick="closeRenameFolderModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form id="rename-folder-form" class="mt-4">
+            <input type="hidden" id="rename-folder-id">
+
+            <div class="mb-4">
+                <label for="rename-folder-name" class="block text-sm font-medium text-gray-700 mb-1">New Folder Name *</label>
+                <input type="text" id="rename-folder-name" name="name" required
+                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                       placeholder="Enter new name">
+                <div id="error-rename-folder-name" class="hidden text-red-600 text-sm mt-1"></div>
+            </div>
+
+            <div class="mb-4">
+                <label for="rename-folder-color" class="block text-sm font-medium text-gray-700 mb-1">Color (optional)</label>
+                <input type="color" id="rename-folder-color" name="color" value="#3B82F6"
+                       class="h-10 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <div id="rename-folder-error" class="hidden text-red-600 text-sm mb-4"></div>
+
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="closeRenameFolderModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="submit" id="rename-folder-btn"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium">
+                    Rename
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Add Bookmark Modal -->
 <div id="addBookmarkModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
@@ -407,7 +531,20 @@
             </button>
         </div>
 
-        <div class="mt-4">
+        <!-- Toggle Buttons -->
+        <div class="mt-4 flex space-x-2 border-b border-gray-200">
+            <button id="browse-tab" onclick="showBrowseTab()"
+                    class="px-4 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none">
+                Browse Existing Links
+            </button>
+            <button id="create-tab" onclick="showCreateTab()"
+                    class="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent focus:outline-none">
+                Create New Link
+            </button>
+        </div>
+
+        <!-- Browse Tab Content -->
+        <div id="browse-content" class="mt-4">
             <div class="mb-4">
                 <input type="text" id="bookmark-search" placeholder="Search links..."
                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -433,7 +570,49 @@
             </div>
         </div>
 
-        <div class="mt-6 flex justify-end">
+        <!-- Create Tab Content -->
+        <div id="create-content" class="mt-4 hidden">
+            <form id="create-link-form" class="space-y-4">
+                <div>
+                    <label for="new-link-name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                    <input type="text" id="new-link-name" name="name" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter link name">
+                    <div id="error-name" class="hidden text-red-600 text-sm mt-1"></div>
+                </div>
+
+                <div>
+                    <label for="new-link-url" class="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+                    <input type="url" id="new-link-url" name="url" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="https://example.com">
+                    <div id="error-url" class="hidden text-red-600 text-sm mt-1"></div>
+                </div>
+
+                <div>
+                    <label for="new-link-comment" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                    <textarea id="new-link-comment" name="comment" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Add a description..."></textarea>
+                    <div id="error-comment" class="hidden text-red-600 text-sm mt-1"></div>
+                </div>
+
+                <div id="create-link-error" class="hidden text-red-600 text-sm"></div>
+
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeAddBookmarkModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" id="create-link-btn"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium">
+                        Create & Bookmark
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-6 flex justify-end" id="browse-close-btn">
             <button type="button" onclick="closeAddBookmarkModal()"
                     class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                 Close
@@ -443,6 +622,755 @@
 </div>
 
 <script>
+// ============================================================
+// FOLDER COLLAPSE/EXPAND FUNCTIONALITY
+// ============================================================
+
+// Load folder collapse states from localStorage on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadFolderStates();
+});
+
+function loadFolderStates() {
+    const folderStates = JSON.parse(localStorage.getItem('folderStates') || '{}');
+
+    document.querySelectorAll('.folder-content').forEach(content => {
+        const folderId = content.dataset.folderId;
+        const isCollapsed = folderStates[folderId] === 'collapsed';
+
+        if (isCollapsed) {
+            content.style.display = 'none';
+            const icon = document.querySelector(`.folder-collapse-icon[data-folder-id="${folderId}"]`);
+            if (icon) {
+                icon.classList.remove('rotate-90');
+            }
+        } else {
+            content.style.display = 'block';
+            const icon = document.querySelector(`.folder-collapse-icon[data-folder-id="${folderId}"]`);
+            if (icon) {
+                icon.classList.add('rotate-90');
+            }
+        }
+    });
+}
+
+function toggleFolderCollapse(folderId) {
+    const content = document.querySelector(`.folder-content[data-folder-id="${folderId}"]`);
+    const icon = document.querySelector(`.folder-collapse-icon[data-folder-id="${folderId}"]`);
+
+    if (!content) return;
+
+    const isCollapsed = content.style.display === 'none';
+
+    if (isCollapsed) {
+        content.style.display = 'block';
+        if (icon) icon.classList.add('rotate-90');
+        saveFolderState(folderId, 'expanded');
+    } else {
+        content.style.display = 'none';
+        if (icon) icon.classList.remove('rotate-90');
+        saveFolderState(folderId, 'collapsed');
+    }
+}
+
+function saveFolderState(folderId, state) {
+    const folderStates = JSON.parse(localStorage.getItem('folderStates') || '{}');
+    folderStates[folderId] = state;
+    localStorage.setItem('folderStates', JSON.stringify(folderStates));
+}
+
+// ============================================================
+// VIEW MODE TOGGLE FUNCTIONALITY
+// ============================================================
+
+async function toggleViewMode(mode) {
+    try {
+        const response = await fetch('/authenticated/bookmark/view-preference/toggle/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ view_mode: mode })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update UI
+            updateViewModeUI(mode);
+        } else {
+            console.error('Failed to toggle view mode:', data.error);
+            alert('Failed to update view preference: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error toggling view mode:', error);
+        alert('Failed to update view preference. Please try again.');
+    }
+}
+
+function updateViewModeUI(mode) {
+    // Update button states
+    const cardBtn = document.getElementById('view-card-btn');
+    const listBtn = document.getElementById('view-list-btn');
+
+    if (mode === 'card') {
+        cardBtn.classList.add('bg-blue-600', 'text-white');
+        cardBtn.classList.remove('bg-white', 'text-gray-700');
+        listBtn.classList.remove('bg-blue-600', 'text-white');
+        listBtn.classList.add('bg-white', 'text-gray-700');
+    } else {
+        listBtn.classList.add('bg-blue-600', 'text-white');
+        listBtn.classList.remove('bg-white', 'text-gray-700');
+        cardBtn.classList.remove('bg-blue-600', 'text-white');
+        cardBtn.classList.add('bg-white', 'text-gray-700');
+    }
+
+    // Reload page to reflect changes
+    location.reload();
+}
+
+// ============================================================
+// CREATE FOLDER FUNCTIONALITY
+// ============================================================
+
+function openCreateFolderModal() {
+    const modal = document.getElementById('createFolderModal');
+    modal.classList.remove('hidden');
+    document.getElementById('folder-name').value = '';
+    document.getElementById('parent-folder').value = '';
+    document.getElementById('error-folder-name').classList.add('hidden');
+    document.getElementById('create-folder-error').classList.add('hidden');
+}
+
+function closeCreateFolderModal() {
+    const modal = document.getElementById('createFolderModal');
+    modal.classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const createFolderForm = document.getElementById('create-folder-form');
+    if (createFolderForm) {
+        createFolderForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('folder-name').value,
+                parent_folder: document.getElementById('parent-folder').value || null,
+                color: document.getElementById('folder-color').value || null,
+                order: 0
+            };
+
+            const submitBtn = document.getElementById('create-folder-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/authenticated/bookmark/folder/create/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeCreateFolderModal();
+                    location.reload();
+                } else {
+                    if (data.errors && data.errors.name) {
+                        document.getElementById('error-folder-name').textContent = data.errors.name.join(', ');
+                        document.getElementById('error-folder-name').classList.remove('hidden');
+                    }
+                    if (data.errors && data.errors._all) {
+                        document.getElementById('create-folder-error').textContent = data.errors._all.join(', ');
+                        document.getElementById('create-folder-error').classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating folder:', error);
+                document.getElementById('create-folder-error').textContent = 'Failed to create folder. Please try again.';
+                document.getElementById('create-folder-error').classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Folder';
+            }
+        });
+    }
+});
+
+// ============================================================
+// RENAME FOLDER FUNCTIONALITY
+// ============================================================
+
+function openRenameFolderModal(folderId, currentName, currentColor) {
+    const modal = document.getElementById('renameFolderModal');
+    modal.classList.remove('hidden');
+    document.getElementById('rename-folder-id').value = folderId;
+    document.getElementById('rename-folder-name').value = currentName;
+    document.getElementById('rename-folder-color').value = currentColor || '#3B82F6';
+    document.getElementById('error-rename-folder-name').classList.add('hidden');
+    document.getElementById('rename-folder-error').classList.add('hidden');
+}
+
+function closeRenameFolderModal() {
+    const modal = document.getElementById('renameFolderModal');
+    modal.classList.add('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const renameFolderForm = document.getElementById('rename-folder-form');
+    if (renameFolderForm) {
+        renameFolderForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const folderId = document.getElementById('rename-folder-id').value;
+            const newName = document.getElementById('rename-folder-name').value;
+            const newColor = document.getElementById('rename-folder-color').value;
+
+            const submitBtn = document.getElementById('rename-folder-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Renaming...';
+
+            try {
+                const response = await fetch(`/authenticated/bookmark/folder/${folderId}/rename/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        name: newName,
+                        color: newColor || null
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeRenameFolderModal();
+                    location.reload();
+                } else {
+                    if (data.errors && data.errors.name) {
+                        document.getElementById('error-rename-folder-name').textContent = data.errors.name.join(', ');
+                        document.getElementById('error-rename-folder-name').classList.remove('hidden');
+                    }
+                    if (data.error) {
+                        document.getElementById('rename-folder-error').textContent = data.error;
+                        document.getElementById('rename-folder-error').classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error renaming folder:', error);
+                document.getElementById('rename-folder-error').textContent = 'Failed to rename folder. Please try again.';
+                document.getElementById('rename-folder-error').classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Rename';
+            }
+        });
+    }
+});
+
+// ============================================================
+// DELETE FOLDER FUNCTIONALITY
+// ============================================================
+
+async function deleteFolder(folderId, folderName) {
+    if (!confirm(`Are you sure you want to delete the folder "${folderName}"? All bookmarks and subfolders will be moved to the parent folder.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/authenticated/bookmark/folder/${folderId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || 'Failed to delete folder. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error deleting folder:', error);
+        alert('Failed to delete folder. Please try again.');
+    }
+}
+
+// ============================================================
+// DRAG AND DROP FUNCTIONALITY
+// ============================================================
+
+let draggedBookmark = null;
+let draggedFolder = null;
+
+// ============================================================
+// FOLDER DRAG AND DROP
+// ============================================================
+
+function handleFolderDragStart(event) {
+    draggedFolder = event.currentTarget;
+    event.currentTarget.classList.add('dragging-folder');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/html', event.currentTarget.innerHTML);
+    event.stopPropagation();  // Prevent bookmark drag from triggering
+}
+
+function handleFolderDragEnd(event) {
+    event.currentTarget.classList.remove('dragging-folder');
+
+    // Remove all drag-over classes
+    document.querySelectorAll('.drag-over-folder-reorder').forEach(el => {
+        el.classList.remove('drag-over-folder-reorder');
+    });
+
+    draggedFolder = null;
+}
+
+function handleFolderOrBookmarkDragOver(event) {
+    if (event.preventDefault) {
+        event.preventDefault();
+    }
+
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'move';
+
+    const target = event.currentTarget;
+
+    // Only show drop indicator if we're dragging a folder and target is different
+    if (draggedFolder && target !== draggedFolder && target.classList.contains('folder-header')) {
+        target.classList.add('drag-over-folder-reorder');
+    } else if (draggedBookmark && target.classList.contains('folder-header')) {
+        target.classList.add('drag-over-folder');
+    }
+
+    return false;
+}
+
+async function handleFolderHeaderDrop(event) {
+    if (event.stopPropagation) {
+        event.stopPropagation();
+    }
+    event.preventDefault();
+
+    const target = event.currentTarget;
+    target.classList.remove('drag-over-folder-reorder');
+    target.classList.remove('drag-over-folder');
+
+    // Handle folder drop - make it a subfolder of the target
+    if (draggedFolder && target !== draggedFolder) {
+        const draggedFolderId = draggedFolder.dataset.folderId;
+        const targetFolderId = target.dataset.folderId;
+
+        // Don't allow dropping into itself
+        if (draggedFolderId === targetFolderId) {
+            alert('Cannot move a folder into itself');
+            return false;
+        }
+
+        try {
+            const response = await fetch('/authenticated/bookmark/folder/reorder/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    folder_id: draggedFolderId,
+                    parent_folder_id: targetFolderId,  // Make it a child of the target folder
+                    target_folder_id: null,  // Append to end
+                    position: 'after'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to move folder: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error moving folder:', error);
+            alert('Failed to move folder. Please try again.');
+        }
+
+        return false;
+    }
+
+    // Handle bookmark drop (bookmark moved to folder)
+    if (draggedBookmark) {
+        const folderHeader = event.currentTarget;
+        folderHeader.classList.remove('drag-over-folder');
+
+        const draggedBookmarkId = draggedBookmark.dataset.bookmarkId;
+        const targetFolderId = folderHeader.dataset.folderId;
+
+        try {
+            const response = await fetch('/authenticated/bookmark/move/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    bookmark_id: draggedBookmarkId,
+                    folder_id: targetFolderId,
+                    target_bookmark_id: null
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to move bookmark: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error moving bookmark:', error);
+            alert('Failed to move bookmark. Please try again.');
+        }
+
+        return false;
+    }
+
+    return false;
+}
+
+// ============================================================
+// BOOKMARK DRAG AND DROP
+// ============================================================
+
+function handleBookmarkDragStart(event) {
+    draggedBookmark = event.currentTarget;
+    event.currentTarget.classList.add('dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/html', event.currentTarget.innerHTML);
+}
+
+function handleBookmarkDragEnd(event) {
+    event.currentTarget.classList.remove('dragging');
+
+    // Remove all drag-over classes
+    document.querySelectorAll('.drag-over').forEach(el => {
+        el.classList.remove('drag-over');
+    });
+
+    draggedBookmark = null;
+}
+
+function handleBookmarkDragOver(event) {
+    if (event.preventDefault) {
+        event.preventDefault();
+    }
+
+    event.dataTransfer.dropEffect = 'move';
+
+    const target = event.currentTarget;
+    if (target !== draggedBookmark && target.classList.contains('bookmark-item')) {
+        target.classList.add('drag-over');
+    }
+
+    return false;
+}
+
+function handleBookmarkDragLeave(event) {
+    event.currentTarget.classList.remove('drag-over');
+}
+
+async function handleBookmarkDrop(event) {
+    if (event.stopPropagation) {
+        event.stopPropagation();
+    }
+    event.preventDefault();
+
+    const target = event.currentTarget;
+    target.classList.remove('drag-over');
+
+    if (!draggedBookmark || target === draggedBookmark) {
+        return false;
+    }
+
+    // Get bookmark IDs
+    const draggedBookmarkId = draggedBookmark.dataset.bookmarkId;
+    const targetBookmarkId = target.dataset.bookmarkId;
+    const targetFolderId = target.dataset.folderId === 'null' ? null : target.dataset.folderId;
+
+    // Determine position (before or after target)
+    const rect = target.getBoundingClientRect();
+    const mouseY = event.clientY;
+    const position = mouseY < rect.top + rect.height / 2 ? 'before' : 'after';
+
+    try {
+        const response = await fetch('/authenticated/bookmark/move/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                bookmark_id: draggedBookmarkId,
+                folder_id: targetFolderId,
+                target_bookmark_id: targetBookmarkId,
+                position: position
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to move bookmark: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error moving bookmark:', error);
+        alert('Failed to move bookmark. Please try again.');
+    }
+
+    return false;
+}
+
+function handleFolderDragOver(event) {
+    if (event.preventDefault) {
+        event.preventDefault();
+    }
+
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'move';
+
+    event.currentTarget.classList.add('drag-over-folder');
+
+    return false;
+}
+
+function handleFolderDragLeave(event) {
+    event.currentTarget.classList.remove('drag-over-folder');
+}
+
+async function handleFolderDrop(event) {
+    if (event.stopPropagation) {
+        event.stopPropagation();
+    }
+    event.preventDefault();
+
+    const folderHeader = event.currentTarget;
+    folderHeader.classList.remove('drag-over-folder');
+
+    if (!draggedBookmark) {
+        return false;
+    }
+
+    const draggedBookmarkId = draggedBookmark.dataset.bookmarkId;
+    const targetFolderId = folderHeader.dataset.folderId;
+
+    try {
+        const response = await fetch('/authenticated/bookmark/move/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                bookmark_id: draggedBookmarkId,
+                folder_id: targetFolderId,
+                target_bookmark_id: null  // Append to end
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to move bookmark: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error moving bookmark:', error);
+        alert('Failed to move bookmark. Please try again.');
+    }
+
+    return false;
+}
+
+function handleFolderContentDragOver(event) {
+    if (event.preventDefault) {
+        event.preventDefault();
+    }
+
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'move';
+
+    const container = event.currentTarget;
+    if (container.classList.contains('bookmarks-container')) {
+        container.classList.add('drag-over-container');
+    }
+
+    return false;
+}
+
+function handleFolderContentDragLeave(event) {
+    const container = event.currentTarget;
+    if (container.classList.contains('bookmarks-container')) {
+        container.classList.remove('drag-over-container');
+    }
+}
+
+async function handleFolderContentDrop(event) {
+    if (event.stopPropagation) {
+        event.stopPropagation();
+    }
+    event.preventDefault();
+
+    const container = event.currentTarget;
+    container.classList.remove('drag-over-container');
+
+    if (!draggedBookmark) {
+        return false;
+    }
+
+    const draggedBookmarkId = draggedBookmark.dataset.bookmarkId;
+    const targetFolderId = container.dataset.folderId === 'null' ? null : container.dataset.folderId;
+
+    try {
+        const response = await fetch('/authenticated/bookmark/move/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                bookmark_id: draggedBookmarkId,
+                folder_id: targetFolderId,
+                target_bookmark_id: null  // Append to end
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Failed to move bookmark: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error moving bookmark:', error);
+        alert('Failed to move bookmark. Please try again.');
+    }
+
+    return false;
+}
+
+// ============================================================
+// BOOKMARK MODAL TAB SWITCHING
+// ============================================================
+
+function showBrowseTab() {
+    document.getElementById('browse-tab').classList.add('text-blue-600', 'border-blue-600');
+    document.getElementById('browse-tab').classList.remove('text-gray-600', 'border-transparent');
+    document.getElementById('create-tab').classList.remove('text-blue-600', 'border-blue-600');
+    document.getElementById('create-tab').classList.add('text-gray-600', 'border-transparent');
+    document.getElementById('browse-content').classList.remove('hidden');
+    document.getElementById('create-content').classList.add('hidden');
+    document.getElementById('browse-close-btn').classList.remove('hidden');
+}
+
+function showCreateTab() {
+    document.getElementById('create-tab').classList.add('text-blue-600', 'border-blue-600');
+    document.getElementById('create-tab').classList.remove('text-gray-600', 'border-transparent');
+    document.getElementById('browse-tab').classList.remove('text-blue-600', 'border-blue-600');
+    document.getElementById('browse-tab').classList.add('text-gray-600', 'border-transparent');
+    document.getElementById('create-content').classList.remove('hidden');
+    document.getElementById('browse-content').classList.add('hidden');
+    document.getElementById('browse-close-btn').classList.add('hidden');
+
+    // Clear form when switching to create tab
+    document.getElementById('create-link-form').reset();
+    clearFormErrors();
+}
+
+function clearFormErrors() {
+    document.getElementById('error-name').classList.add('hidden');
+    document.getElementById('error-url').classList.add('hidden');
+    document.getElementById('error-comment').classList.add('hidden');
+    document.getElementById('create-link-error').classList.add('hidden');
+}
+
+// Create new link form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const createForm = document.getElementById('create-link-form');
+    if (createForm) {
+        createForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearFormErrors();
+
+            const formData = {
+                name: document.getElementById('new-link-name').value,
+                url: document.getElementById('new-link-url').value,
+                comment: document.getElementById('new-link-comment').value
+            };
+
+            const submitBtn = document.getElementById('create-link-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/authenticated/link/create/ajax/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeAddBookmarkModal();
+                    location.reload(); // Reload to show the new bookmark
+                } else {
+                    // Display validation errors
+                    if (data.errors) {
+                        if (data.errors.name) {
+                            document.getElementById('error-name').textContent = data.errors.name.join(', ');
+                            document.getElementById('error-name').classList.remove('hidden');
+                        }
+                        if (data.errors.url) {
+                            document.getElementById('error-url').textContent = data.errors.url.join(', ');
+                            document.getElementById('error-url').classList.remove('hidden');
+                        }
+                        if (data.errors.comment) {
+                            document.getElementById('error-comment').textContent = data.errors.comment.join(', ');
+                            document.getElementById('error-comment').classList.remove('hidden');
+                        }
+                        if (data.errors._all) {
+                            document.getElementById('create-link-error').textContent = data.errors._all.join(', ');
+                            document.getElementById('create-link-error').classList.remove('hidden');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating link:', error);
+                document.getElementById('create-link-error').textContent = 'Failed to create link. Please try again.';
+                document.getElementById('create-link-error').classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create & Bookmark';
+            }
+        });
+    }
+});
+
 // Bookmark toggle functionality
 async function toggleBookmark(event, linkId) {
     event.preventDefault();
@@ -534,6 +1462,8 @@ function closeAddBookmarkModal() {
     const modal = document.getElementById('addBookmarkModal');
     modal.classList.add('hidden');
     document.getElementById('bookmark-search').value = '';
+    // Reset to browse tab
+    showBrowseTab();
 }
 
 function renderBookmarkLinks(links) {
@@ -629,6 +1559,102 @@ function escapeHtml(text) {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+}
+
+/* Folder collapse icon rotation */
+.folder-collapse-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+.rotate-90 {
+    transform: rotate(90deg);
+}
+
+/* Description hidden by default, shown on card hover */
+.description-hidden {
+    display: none;
+}
+
+.bookmark-item:hover .description-hidden {
+    display: block;
+}
+
+/* Compact card styling */
+.bookmark-item {
+    transition: all 0.15s ease-in-out;
+}
+
+/* Folder header transition */
+.folder-header {
+    transition: background-color 0.15s ease-in-out;
+}
+
+/* Drag and drop styles */
+.bookmark-item {
+    cursor: grab;
+}
+
+.bookmark-item:active {
+    cursor: grabbing;
+}
+
+.bookmark-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.bookmark-item.drag-over {
+    border-color: #3b82f6;
+    border-width: 2px;
+    border-style: dashed;
+    background-color: #eff6ff;
+}
+
+.folder-header.drag-over-folder {
+    background-color: #dbeafe;
+    border: 2px dashed #3b82f6;
+}
+
+.bookmarks-container.drag-over-container {
+    background-color: #f0fdf4;
+    border: 2px dashed #10b981;
+    border-radius: 0.5rem;
+    min-height: 60px;
+    padding: 0.5rem;
+}
+
+/* Add drag handle cursor to bookmark items */
+.bookmark-item:hover {
+    cursor: grab;
+}
+
+/* Folder drag and drop styles */
+.folder-header.dragging-folder {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.folder-header.drag-over-folder-reorder {
+    background-color: #dbeafe;
+    border: 2px dashed #3b82f6;
+}
+
+.folder-header.drag-over-folder-reorder::after {
+    content: 'Drop to make subfolder';
+    display: block;
+    text-align: center;
+    color: #1d4ed8;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+}
+
+.folder-header {
+    cursor: grab;
+}
+
+.folder-header:active {
+    cursor: grabbing;
 }
 </style>
 {% endblock %}

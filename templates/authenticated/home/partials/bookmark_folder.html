@@ -1,0 +1,92 @@
+{% load static %}
+<div class="folder-container" data-folder-id="{{ folder.id }}" style="margin-left: {{ depth|default:0|add:0 }}px;">
+    <!-- Folder Header -->
+    <div class="folder-header group flex items-center justify-between px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg mb-2 transition-colors cursor-pointer"
+         draggable="true"
+         data-folder-id="{{ folder.id }}"
+         data-parent-folder-id="{{ folder.parent_folder.id|default:'null' }}"
+         {% if folder.color %}style="border-left: 4px solid {{ folder.color }};"{% endif %}
+         onclick="toggleFolderCollapse({{ folder.id }})"
+         ondragstart="handleFolderDragStart(event)"
+         ondragend="handleFolderDragEnd(event)"
+         ondragover="handleFolderOrBookmarkDragOver(event)"
+         ondrop="handleFolderHeaderDrop(event)"
+         ondragleave="handleFolderDragLeave(event)">
+        <div class="flex items-center space-x-2 flex-1 min-w-0">
+            <!-- Collapse/Expand Arrow -->
+            <svg class="folder-collapse-icon h-4 w-4 text-gray-600 transform transition-transform"
+                 data-folder-id="{{ folder.id }}"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+
+            <!-- Folder Icon with color -->
+            <svg class="h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"
+                 {% if folder.color %}style="color: {{ folder.color }};"{% else %}style="color: #ca8a04;"{% endif %}>
+                <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            </svg>
+
+            <!-- Folder Name -->
+            <span class="text-sm font-semibold text-gray-900 truncate" title="{{ folder.name }}">
+                {{ folder.name }}
+            </span>
+
+            <!-- Bookmark Count -->
+            <span class="text-xs text-gray-500 flex-shrink-0">
+                ({{ folder.bookmarks.count }})
+            </span>
+        </div>
+
+        <!-- Folder Actions (shown on hover) -->
+        <div class="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button onclick="event.stopPropagation(); openRenameFolderModal({{ folder.id }}, '{{ folder.name|escapejs }}', '{{ folder.color|default:"#3B82F6" }}')"
+                    class="p-1 text-gray-600 hover:text-blue-600 transition-colors"
+                    title="Rename folder">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
+            </button>
+            <button onclick="event.stopPropagation(); deleteFolder({{ folder.id }}, '{{ folder.name|escapejs }}')"
+                    class="p-1 text-gray-600 hover:text-red-600 transition-colors"
+                    title="Delete folder">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Folder Content (collapsible) -->
+    <div class="folder-content" data-folder-id="{{ folder.id }}" style="margin-left: 20px;">
+        <!-- Bookmarks in this folder -->
+        {% if folder.bookmarks.all %}
+        <div class="bookmarks-container mb-2"
+             data-view-mode="{{ bookmark_view_preference }}"
+             data-folder-id="{{ folder.id }}"
+             ondragover="handleFolderContentDragOver(event)"
+             ondrop="handleFolderContentDrop(event)"
+             ondragleave="handleFolderContentDragLeave(event)">
+            {% if bookmark_view_preference == 'card' %}
+            <!-- Card View -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+                {% for bookmark in folder.bookmarks.all %}
+                {% include 'authenticated/home/partials/bookmark_card.html' with bookmark=bookmark view_mode='card' %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- List View -->
+            <div class="space-y-1">
+                {% for bookmark in folder.bookmarks.all %}
+                {% include 'authenticated/home/partials/bookmark_card.html' with bookmark=bookmark view_mode='list' %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Child Folders (recursive) -->
+        {% for child_folder in folder.child_folders.all %}
+        {% include 'authenticated/home/partials/bookmark_folder.html' with folder=child_folder depth=depth|default:0|add:20 %}
+        {% endfor %}
+    </div>
+</div>

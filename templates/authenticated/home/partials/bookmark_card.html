@@ -1,0 +1,121 @@
+{% if view_mode == 'list' %}
+<!-- List View - Compact horizontal layout -->
+<div class="bookmark-item group flex items-center justify-between px-3 py-2 bg-white hover:bg-blue-50 rounded border border-gray-200 hover:border-blue-300 transition-all"
+     draggable="true"
+     data-bookmark-id="{{ bookmark.id }}"
+     data-link-id="{{ bookmark.link.id }}"
+     data-folder-id="{{ bookmark.folder.id|default:'null' }}"
+     ondragstart="handleBookmarkDragStart(event)"
+     ondragend="handleBookmarkDragEnd(event)"
+     ondragover="handleBookmarkDragOver(event)"
+     ondrop="handleBookmarkDrop(event)"
+     ondragleave="handleBookmarkDragLeave(event)">
+    <div class="flex items-center space-x-3 flex-1 min-w-0">
+        <!-- Favicon -->
+        <img src="https://www.google.com/s2/favicons?domain={{ bookmark.link.url }}&sz=16"
+             alt="{{ bookmark.link.name }} favicon"
+             class="h-4 w-4 flex-shrink-0"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <!-- Fallback SVG icon (hidden unless favicon fails) -->
+        <svg class="h-4 w-4 text-blue-500 flex-shrink-0" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+        </svg>
+
+        <!-- Link Name and URL -->
+        <div class="flex-1 min-w-0">
+            <a href="{{ bookmark.link.url }}" target="_blank" rel="noopener noreferrer" class="block">
+                <span class="text-sm font-medium text-gray-900 hover:text-blue-600 truncate block" title="{{ bookmark.link.name }}">
+                    {{ bookmark.link.name }}
+                </span>
+                <span class="text-xs text-gray-500 truncate block" title="{{ bookmark.link.url }}">
+                    {{ bookmark.link.url }}
+                </span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center space-x-2 flex-shrink-0">
+        <!-- Description tooltip (if exists) -->
+        {% if bookmark.link.comment %}
+        <div class="relative description-tooltip">
+            <svg class="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help"
+                 fill="currentColor" viewBox="0 0 24 24"
+                 title="{{ bookmark.link.comment }}">
+                <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        {% endif %}
+
+        <!-- Bookmark Toggle -->
+        <button onclick="toggleBookmark(event, {{ bookmark.link.id }})"
+                class="bookmark-toggle text-yellow-500 hover:text-yellow-600 transition-colors"
+                title="Remove bookmark"
+                data-link-id="{{ bookmark.link.id }}"
+                data-bookmarked="true">
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+{% else %}
+<!-- Card View - Compact card layout -->
+<div class="bookmark-item group relative bg-white hover:bg-blue-50 rounded border border-gray-200 hover:border-blue-300 transition-all p-2"
+     draggable="true"
+     data-bookmark-id="{{ bookmark.id }}"
+     data-link-id="{{ bookmark.link.id }}"
+     data-folder-id="{{ bookmark.folder.id|default:'null' }}"
+     ondragstart="handleBookmarkDragStart(event)"
+     ondragend="handleBookmarkDragEnd(event)"
+     ondragover="handleBookmarkDragOver(event)"
+     ondrop="handleBookmarkDrop(event)"
+     ondragleave="handleBookmarkDragLeave(event)">
+    <div class="flex items-start justify-between">
+        <div class="flex-1 min-w-0">
+            <a href="{{ bookmark.link.url }}" target="_blank" rel="noopener noreferrer" class="block">
+                <div class="flex items-center space-x-2 mb-1">
+                    <!-- Favicon -->
+                    <img src="https://www.google.com/s2/favicons?domain={{ bookmark.link.url }}&sz=16"
+                         alt="{{ bookmark.link.name }} favicon"
+                         class="h-4 w-4 flex-shrink-0"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <!-- Fallback SVG icon (hidden unless favicon fails) -->
+                    <svg class="h-4 w-4 text-blue-500 flex-shrink-0" style="display:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                    </svg>
+
+                    <!-- Link Name -->
+                    <h3 class="text-sm font-semibold text-gray-900 truncate" title="{{ bookmark.link.name }}">
+                        {{ bookmark.link.name }}
+                    </h3>
+                </div>
+
+                <!-- URL (smaller) -->
+                <p class="text-xs text-gray-500 truncate mb-1" title="{{ bookmark.link.url }}">
+                    {{ bookmark.link.url }}
+                </p>
+
+                <!-- Description (hidden by default, shown on hover) -->
+                {% if bookmark.link.comment %}
+                <div class="description-hidden">
+                    <p class="text-xs text-gray-600 line-clamp-2">{{ bookmark.link.comment }}</p>
+                </div>
+                {% endif %}
+            </a>
+        </div>
+
+        <!-- Bookmark Toggle Button -->
+        <button onclick="toggleBookmark(event, {{ bookmark.link.id }})"
+                class="bookmark-toggle ml-2 flex-shrink-0 text-yellow-500 hover:text-yellow-600 transition-colors"
+                title="Remove bookmark"
+                data-link-id="{{ bookmark.link.id }}"
+                data-bookmarked="true">
+            <svg class="h-4 w-4 fill-current" viewBox="0 0 24 24">
+                <path d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+{% endif %}

@@ -1,9 +1,13 @@
+import json
+
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
 
+from core.models.bookmark_folder import BookmarkFolder
 from core.models.link import Link
+from core.models.user_bookmark import UserBookmark
 
 
 @csrf_exempt
@@ -12,18 +16,40 @@ from core.models.link import Link
 def link_bookmark_toggle_view(request: HttpRequest, link_id: int) -> JsonResponse:
     """
     AJAX endpoint to toggle bookmark status for a link.
+    Optionally accepts folder_id to specify which folder to add bookmark to.
     Returns JSON with the new bookmark state.
     """
     try:
         link = Link.objects.get(id=link_id)
         user = request.user
 
-        # Toggle bookmark
-        if link.bookmarked_by.filter(id=user.id).exists():
-            link.bookmarked_by.remove(user)
+        # Check if already bookmarked
+        existing = UserBookmark.objects.filter(user=user, link=link).first()
+
+        if existing:
+            # Remove bookmark
+            existing.delete()
             is_bookmarked = False
         else:
-            link.bookmarked_by.add(user)
+            # Add bookmark
+            folder_id = None
+            if request.body:
+                try:
+                    data = json.loads(request.body)
+                    folder_id = data.get('folder_id')
+                except json.JSONDecodeError:
+                    pass
+
+            folder = None
+            if folder_id:
+                folder = BookmarkFolder.objects.get(id=folder_id, user=user)
+
+            UserBookmark.objects.create(
+                user=user,
+                link=link,
+                folder=folder,
+                order=0,
+            )
             is_bookmarked = True
 
         return JsonResponse({

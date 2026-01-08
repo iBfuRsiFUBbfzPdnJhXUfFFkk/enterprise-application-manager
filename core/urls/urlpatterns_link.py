@@ -1,6 +1,14 @@
 from django.urls import URLPattern, URLResolver, path
 
 from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
+from core.views.bookmark_folder import (
+    bookmark_folder_create_ajax_view,
+    bookmark_folder_delete_ajax_view,
+    bookmark_folder_rename_ajax_view,
+    bookmark_folder_reorder_ajax_view,
+    bookmark_move_ajax_view,
+    bookmark_view_preference_toggle_view,
+)
 from core.views.link import (
     link_add_view,
     link_bookmark_modal_view,
@@ -42,4 +50,24 @@ urlpatterns_link.append(
 # Add bookmark modal data endpoint
 urlpatterns_link.append(
     path(name='link_bookmark_modal', route='link/bookmark/modal/', view=link_bookmark_modal_view)
+)
+
+# Bookmark folder endpoints
+urlpatterns_link.append(
+    path(name='bookmark_folder_create', route='bookmark/folder/create/', view=bookmark_folder_create_ajax_view)
+)
+urlpatterns_link.append(
+    path(name='bookmark_folder_delete', route='bookmark/folder/<int:folder_id>/delete/', view=bookmark_folder_delete_ajax_view)
+)
+urlpatterns_link.append(
+    path(name='bookmark_folder_rename', route='bookmark/folder/<int:folder_id>/rename/', view=bookmark_folder_rename_ajax_view)
+)
+urlpatterns_link.append(
+    path(name='bookmark_folder_reorder', route='bookmark/folder/reorder/', view=bookmark_folder_reorder_ajax_view)
+)
+urlpatterns_link.append(
+    path(name='bookmark_move', route='bookmark/move/', view=bookmark_move_ajax_view)
+)
+urlpatterns_link.append(
+    path(name='bookmark_view_preference_toggle', route='bookmark/view-preference/toggle/', view=bookmark_view_preference_toggle_view)
 )
