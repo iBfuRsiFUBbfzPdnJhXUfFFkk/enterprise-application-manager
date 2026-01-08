@@ -12,6 +12,7 @@ from core.models.person import Person
 from core.models.release import Release
 from core.models.release_bundle import ReleaseBundle
 from core.models.secret import Secret
+from core.models.common.enums.task_status_choices import TASK_STATUS_COMPLETED
 from core.models.task import Task
 from core.utilities.base_render import base_render
 
@@ -38,8 +39,8 @@ def home_view(request: HttpRequest) -> HttpResponse:
     # Calculate total records
     stats['total_records'] = sum(stats.values())
 
-    # Get the 10 most recent tasks
-    tasks = Task.objects.all()[:10]
+    # Get the 10 most recent tasks (excluding completed)
+    tasks = Task.objects.exclude(status=TASK_STATUS_COMPLETED)[:10]
 
     # Get user's bookmarked links
     bookmarked_links = request.user.bookmarked_links.all().order_by('name')[:10]
