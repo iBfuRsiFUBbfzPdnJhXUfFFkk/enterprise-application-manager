@@ -14,6 +14,7 @@ from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
 from core.urls.urlpatterns_bad_interaction import urlpatterns_bad_interaction
 from core.urls.urlpatterns_billing_code import urlpatterns_billing_code
+from core.urls.urlpatterns_calendar import urlpatterns_calendar
 from core.urls.urlpatterns_client import urlpatterns_client
 from core.urls.urlpatterns_command import urlpatterns_command
 from core.urls.urlpatterns_competitor import urlpatterns_competitor
@@ -35,6 +36,7 @@ from core.urls.urlpatterns_job_level import urlpatterns_job_level
 from core.urls.urlpatterns_job_title import urlpatterns_job_title
 from core.urls.urlpatterns_link import urlpatterns_link
 from core.urls.urlpatterns_login_credential import urlpatterns_login_credential
+from core.urls.urlpatterns_maintenance_window import urlpatterns_maintenance_window
 from core.urls.urlpatterns_onboard_procedure import urlpatterns_onboard_procedure
 from core.urls.urlpatterns_login import urlpatterns_login
 from core.urls.urlpatterns_logout import urlpatterns_logout
@@ -91,6 +93,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_application_group,
     *urlpatterns_bad_interaction,
     *urlpatterns_billing_code,
+    *urlpatterns_calendar,
     *urlpatterns_client,
     *urlpatterns_command,
     *urlpatterns_competitor,
@@ -112,6 +115,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_job_title,
     *urlpatterns_link,
     *urlpatterns_login_credential,
+    *urlpatterns_maintenance_window,
     *urlpatterns_onboard_procedure,
     *urlpatterns_logout,
     *urlpatterns_organization,

@@ -4,6 +4,7 @@ from core.models.application_pin import ApplicationPin
 from core.models.competitor import Competitor
 from core.models.it_devops_request import ITDevOpsRequest
 from core.models.it_devops_request_update import ITDevOpsRequestUpdate
+from core.models.maintenance_window import MaintenanceWindow
 
 
 @admin.register(ApplicationPin)
@@ -115,6 +116,32 @@ class ITDevOpsRequestUpdateAdmin(admin.ModelAdmin):
         }),
         ('Timestamps', {
             'fields': ('datetime_created', 'created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(MaintenanceWindow)
+class MaintenanceWindowAdmin(admin.ModelAdmin):
+    list_display = ('name', 'date_time_start', 'date_time_end', 'severity', 'status', 'person_contact')
+    list_filter = ('severity', 'status', 'date_time_start')
+    search_fields = ('name', 'description', 'person_contact__full_name')
+    ordering = ('-date_time_start', '-id')
+    readonly_fields = ('created', 'modified')
+    filter_horizontal = ('applications_affected',)
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'description', 'comment')
+        }),
+        ('Schedule', {
+            'fields': ('date_time_start', 'date_time_end', 'severity', 'status')
+        }),
+        ('Related Information', {
+            'fields': ('person_contact', 'person_created_by', 'applications_affected')
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
             'classes': ('collapse',)
         }),
     )
