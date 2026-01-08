@@ -7,6 +7,7 @@ from core.models.application_group import ApplicationGroup
 from core.models.database import Database
 from core.models.dependency import Dependency
 from core.models.document import Document
+from core.models.link import Link
 from core.models.person import Person
 from core.models.release import Release
 from core.models.release_bundle import ReleaseBundle
@@ -40,9 +41,13 @@ def home_view(request: HttpRequest) -> HttpResponse:
     # Get the 10 most recent tasks
     tasks = Task.objects.all()[:10]
 
+    # Get user's bookmarked links
+    bookmarked_links = request.user.bookmarked_links.all().order_by('name')[:10]
+
     context = {
         'stats': stats,
         'tasks': tasks,
+        'bookmarked_links': bookmarked_links,
     }
 
     return base_render(

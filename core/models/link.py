@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -38,6 +40,11 @@ class Link(AbstractBaseModel, AbstractComment, AbstractName, AbstractUniformReso
     is_short_url_active = models.BooleanField(
         default=True,
         help_text='Whether the short URL is active and can be used for redirects',
+    )
+
+    bookmarked_by = create_generic_m2m(
+        to=settings.AUTH_USER_MODEL,
+        related_name='bookmarked_links',
     )
 
     def __str__(self):

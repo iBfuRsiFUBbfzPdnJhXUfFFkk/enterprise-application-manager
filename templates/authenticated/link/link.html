@@ -108,6 +108,16 @@
                             View Details →
                         </a>
                         <div class="flex space-x-2">
+                            <!-- Bookmark Toggle -->
+                            <button onclick="toggleBookmarkOnPage(event, {{ link.id }}, {% if user in link.bookmarked_by.all %}true{% else %}false{% endif %})"
+                                    class="p-1 {% if user in link.bookmarked_by.all %}text-yellow-500{% else %}text-gray-400{% endif %} hover:text-yellow-600"
+                                    title="{% if user in link.bookmarked_by.all %}Remove bookmark{% else %}Add bookmark{% endif %}"
+                                    data-link-id="{{ link.id }}"
+                                    data-bookmarked="{% if user in link.bookmarked_by.all %}true{% else %}false{% endif %}">
+                                <svg class="h-5 w-5 {% if user in link.bookmarked_by.all %}fill-current{% else %}stroke-current{% endif %}" viewBox="0 0 24 24" fill="{% if user in link.bookmarked_by.all %}currentColor{% else %}none{% endif %}" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                </svg>
+                            </button>
                             <a href="{% url 'link_edit' model_id=link.id %}"
                                class="p-1 text-gray-400 hover:text-gray-600"
                                title="Edit">
@@ -189,6 +199,16 @@
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap text-center">
                                 <div class="flex justify-center space-x-2">
+                                    <!-- Bookmark Toggle -->
+                                    <button onclick="toggleBookmarkOnPage(event, {{ link.id }}, {% if user in link.bookmarked_by.all %}true{% else %}false{% endif %})"
+                                            class="{% if user in link.bookmarked_by.all %}text-yellow-500{% else %}text-gray-600{% endif %} hover:text-yellow-600"
+                                            title="{% if user in link.bookmarked_by.all %}Remove bookmark{% else %}Add bookmark{% endif %}"
+                                            data-link-id="{{ link.id }}"
+                                            data-bookmarked="{% if user in link.bookmarked_by.all %}true{% else %}false{% endif %}">
+                                        <svg class="h-5 w-5 {% if user in link.bookmarked_by.all %}fill-current{% else %}stroke-current{% endif %}" viewBox="0 0 24 24" fill="{% if user in link.bookmarked_by.all %}currentColor{% else %}none{% endif %}" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                                        </svg>
+                                    </button>
                                     <a href="{% url 'link_detail' model_id=link.id %}"
                                        class="text-blue-600 hover:text-blue-900" title="View">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,6 +422,67 @@ function copyShortUrlInline(event, shortUrl) {
         console.error('Failed to copy:', err);
         alert('Failed to copy URL. Please copy manually.');
     });
+}
+
+// Bookmark toggle for link list/grid pages
+async function toggleBookmarkOnPage(event, linkId, isCurrentlyBookmarked) {
+    event.stopPropagation();
+
+    const button = event.currentTarget;
+    const svg = button.querySelector('svg');
+
+    try {
+        const response = await fetch(`/authenticated/link/${linkId}/bookmark/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update button state
+            button.dataset.bookmarked = data.is_bookmarked ? 'true' : 'false';
+
+            if (data.is_bookmarked) {
+                // Bookmarked
+                button.classList.remove('text-gray-400', 'text-gray-600');
+                button.classList.add('text-yellow-500');
+                button.title = 'Remove bookmark';
+                svg.classList.add('fill-current');
+                svg.classList.remove('stroke-current');
+                svg.setAttribute('fill', 'currentColor');
+            } else {
+                // Unbookmarked
+                button.classList.remove('text-yellow-500');
+                button.classList.add('text-gray-400');
+                button.title = 'Add bookmark';
+                svg.classList.remove('fill-current');
+                svg.classList.add('stroke-current');
+                svg.setAttribute('fill', 'none');
+            }
+        }
+    } catch (error) {
+        console.error('Error toggling bookmark:', error);
+        alert('Failed to update bookmark. Please try again.');
+    }
+}
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 </script>
 
