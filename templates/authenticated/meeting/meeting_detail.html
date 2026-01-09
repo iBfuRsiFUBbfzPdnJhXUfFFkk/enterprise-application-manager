@@ -1,0 +1,574 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="{% url 'meeting' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ meeting.name }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if meeting.status == 'scheduled' %}bg-blue-100 text-blue-800
+                            {% elif meeting.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                            {% elif meeting.status == 'completed' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ meeting.get_status_display }}
+                        </span>
+                        <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if meeting.meeting_type == 'team' %}bg-purple-100 text-purple-800
+                            {% elif meeting.meeting_type == 'client' %}bg-green-100 text-green-800
+                            {% elif meeting.meeting_type == 'one_on_one' %}bg-indigo-100 text-indigo-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ meeting.get_meeting_type_display }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'meeting_edit' meeting.id %}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit
+                </a>
+                <a href="{% url 'meeting_delete' meeting.id %}"
+                   onclick="return confirm('Are you sure you want to delete this meeting?')"
+                   class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete
+                </a>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="mt-6 border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8">
+                <button onclick="switchTab('overview')" id="tab-overview"
+                        class="tab-button border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Overview
+                </button>
+                <button onclick="switchTab('action-items')" id="tab-action-items"
+                        class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Action Items
+                    <span class="ml-2 py-0.5 px-2 rounded-full text-xs bg-gray-100 text-gray-900">{{ meeting.action_items.count }}</span>
+                </button>
+                <button onclick="switchTab('notes')" id="tab-notes"
+                        class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Notes & Quotes
+                    <span class="ml-2 py-0.5 px-2 rounded-full text-xs bg-gray-100 text-gray-900">{{ meeting.notes.count }}</span>
+                </button>
+                <button onclick="switchTab('minutes')" id="tab-minutes"
+                        class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    Minutes
+                </button>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <!-- Overview Tab -->
+    <div id="content-overview" class="tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Meeting Information -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Meeting Information</h2>
+                </div>
+                <div class="px-6 py-6 space-y-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Organizer</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if meeting.organizer %}{{ meeting.organizer.full_name_for_human }}{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Start Time</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if meeting.datetime_start %}{{ meeting.datetime_start|date:"F d, Y g:i A" }}{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">End Time</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if meeting.datetime_end %}{{ meeting.datetime_end|date:"F d, Y g:i A" }}{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Duration</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if meeting.duration_hours %}{{ meeting.duration_hours }} hours{% else %}-{% endif %}
+                        </dd>
+                    </div>
+                    {% if meeting.is_in_progress %}
+                    <div class="rounded-md bg-yellow-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">Meeting in Progress</h3>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Attendees & Roll Call -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900">Roll Call</h2>
+                        <div class="text-sm text-gray-600">
+                            <span class="font-semibold text-green-600">{{ meeting.actual_attendees.count }}</span> / {{ meeting.attendees.count }} attended
+                        </div>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Mark who actually attended the meeting</p>
+                </div>
+                <div class="px-6 py-6">
+                    {% if meeting.attendees.all %}
+                    <ul class="space-y-2">
+                        {% for attendee in meeting.attendees.all %}
+                        <li class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center text-sm text-gray-900">
+                                <svg class="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                                {{ attendee.full_name_for_human }}
+                            </div>
+                            <form method="POST" action="{% url 'meeting_toggle_attendance' meeting.id attendee.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors
+                                    {% if attendee in meeting.actual_attendees.all %}
+                                        bg-green-100 text-green-800 hover:bg-green-200
+                                    {% else %}
+                                        bg-gray-100 text-gray-700 hover:bg-gray-200
+                                    {% endif %}">
+                                    {% if attendee in meeting.actual_attendees.all %}
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Present
+                                    {% else %}
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Absent
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-sm text-gray-500">No attendees listed</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Location -->
+            {% if meeting.location_address or meeting.virtual_meeting_url %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Location</h2>
+                </div>
+                <div class="px-6 py-6 space-y-4">
+                    {% if meeting.virtual_meeting_url %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Virtual Meeting</dt>
+                        <dd class="mt-1 text-sm">
+                            <a href="{{ meeting.virtual_meeting_url }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">
+                                {{ meeting.virtual_meeting_url }}
+                            </a>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if meeting.location_address %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Physical Location</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ meeting.location_address }}
+                            {% if meeting.location_address_continued %}<br>{{ meeting.location_address_continued }}{% endif %}
+                            {% if meeting.location_city or meeting.location_state_code %}
+                            <br>{{ meeting.location_city }}{% if meeting.location_city and meeting.location_state_code %}, {% endif %}{{ meeting.location_state_code }} {{ meeting.location_postal_code }}
+                            {% endif %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Description & Agenda -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Description & Agenda</h2>
+                </div>
+                <div class="px-6 py-6 space-y-4">
+                    {% if meeting.description %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Description</dt>
+                        <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ meeting.description }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if meeting.agenda %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Agenda</dt>
+                        <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ meeting.agenda }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if not meeting.description and not meeting.agenda %}
+                    <p class="text-sm text-gray-500">No description or agenda</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Entities -->
+            {% if meeting.application or meeting.project %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
+                </div>
+                <div class="px-6 py-6 space-y-4">
+                    {% if meeting.application %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Application</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ meeting.application.name }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if meeting.project %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Project</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ meeting.project.name }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Action Items Tab -->
+    <div id="content-action-items" class="tab-content hidden">
+        <!-- Add Action Item Form -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Add Action Item</h2>
+            </div>
+            <div class="px-6 py-6">
+                <form method="POST" action="{% url 'meeting_add_action_item' meeting.id %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="{{ action_item_form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Name <span class="text-red-500">*</span>
+                            </label>
+                            {{ action_item_form.name }}
+                        </div>
+                        <div>
+                            <label for="{{ action_item_form.assignee.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Assignee
+                            </label>
+                            {{ action_item_form.assignee }}
+                        </div>
+                        <div>
+                            <label for="{{ action_item_form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Priority
+                            </label>
+                            {{ action_item_form.priority }}
+                        </div>
+                        <div>
+                            <label for="{{ action_item_form.due_date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Due Date
+                            </label>
+                            {{ action_item_form.due_date }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ action_item_form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Description
+                            </label>
+                            {{ action_item_form.description }}
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                            Add Action Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Action Items List -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Action Items</h2>
+            </div>
+            {% if meeting.action_items.all %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in meeting.action_items.all %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ item.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if item.assignee %}{{ item.assignee.full_name_for_human }}{% else %}-{% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {% if item.priority == 'high' %}bg-red-100 text-red-800
+                                    {% elif item.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-green-100 text-green-800{% endif %}">
+                                    {{ item.get_priority_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if item.due_date %}{{ item.due_date|date:"M d, Y" }}{% else %}-{% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    {% if item.status == 'open' %}bg-blue-100 text-blue-800
+                                    {% elif item.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                    {% elif item.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ item.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{% url 'meeting_action_item_detail' item.id %}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                                <a href="{% url 'meeting_action_item_edit' item.id %}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="px-6 py-12 text-center">
+                <p class="text-sm text-gray-500">No action items yet. Add one above to get started.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Notes & Quotes Tab -->
+    <div id="content-notes" class="tab-content hidden">
+        <!-- Add Note/Quote Form -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Add Note or Quote</h2>
+                <p class="mt-1 text-sm text-gray-500">Capture important notes or memorable quotes from the meeting</p>
+            </div>
+            <div class="px-6 py-6">
+                <form method="POST" action="{% url 'meeting_add_note' meeting.id %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ note_form.note_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Type <span class="text-red-500">*</span>
+                            </label>
+                            {{ note_form.note_type }}
+                        </div>
+                        <div>
+                            <label for="{{ note_form.person.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Person (for quotes)
+                            </label>
+                            {{ note_form.person }}
+                            <p class="mt-1 text-xs text-gray-500">Required for quotes - who said this?</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ note_form.content.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Content <span class="text-red-500">*</span>
+                            </label>
+                            {{ note_form.content }}
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add Note/Quote
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Notes & Quotes List -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Notes & Quotes</h2>
+            </div>
+            {% if meeting.notes.all %}
+            <div class="divide-y divide-gray-200">
+                {% for note in meeting.notes.all %}
+                <div class="px-6 py-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if note.note_type == 'quote' %}bg-purple-100 text-purple-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ note.get_note_type_display }}
+                                </span>
+                                {% if note.person %}
+                                <span class="ml-2 text-sm text-gray-600">
+                                    <svg class="w-4 h-4 inline-block -mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                    </svg>
+                                    {{ note.person.full_name_for_human }}
+                                </span>
+                                {% endif %}
+                                <span class="ml-2 text-xs text-gray-500">
+                                    {{ note.datetime_created|date:"M d, Y g:i A" }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-900 whitespace-pre-wrap
+                                {% if note.note_type == 'quote' %}italic pl-4 border-l-4 border-purple-300{% endif %}">
+                                {{ note.content }}
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <a href="{% url 'meeting_delete_note' note.id %}"
+                               onclick="return confirm('Are you sure you want to delete this {{ note.note_type }}?')"
+                               class="text-red-600 hover:text-red-900">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No notes or quotes yet</h3>
+                <p class="mt-1 text-sm text-gray-500">Start capturing important moments from this meeting above.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Minutes Tab -->
+    <div id="content-minutes" class="tab-content hidden">
+        <!-- Help Section -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-r-lg">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">What are meeting minutes?</h3>
+                    <div class="mt-2 text-sm text-blue-700">
+                        <p class="mb-2">Meeting minutes are the official written record of what happened during a meeting. They serve as a reference for attendees and inform those who were absent.</p>
+                        <p class="font-semibold mb-1">Good minutes should include:</p>
+                        <ul class="list-disc list-inside space-y-1 ml-2">
+                            <li>Meeting date, time, and location</li>
+                            <li>List of attendees and absentees</li>
+                            <li>Key topics discussed and important points raised</li>
+                            <li>Decisions made and rationale behind them</li>
+                            <li>Action items assigned (also tracked in the Action Items tab)</li>
+                            <li>Important quotes or statements (captured in Notes & Quotes tab)</li>
+                            <li>Next meeting date if scheduled</li>
+                        </ul>
+                        <p class="mt-2 italic">Tip: Keep minutes concise and objective. Focus on decisions and outcomes rather than verbatim conversation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Meeting Minutes</h2>
+                <p class="mt-1 text-sm text-gray-500">Record detailed notes from the meeting</p>
+            </div>
+            <div class="px-6 py-6">
+                <form method="POST" action="{% url 'meeting_update_minutes' meeting.id %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="minutes-textarea" class="block text-sm font-medium text-gray-700 mb-2">
+                            Minutes
+                        </label>
+                        <textarea
+                            id="minutes-textarea"
+                            name="minutes"
+                            rows="12"
+                            placeholder="Enter detailed meeting minutes here...&#10;&#10;Example:&#10;Meeting called to order at [time] by [organizer]&#10;&#10;Attendees: [list]&#10;Absent: [list]&#10;&#10;Agenda Item 1: [topic]&#10;  - Discussion: [summary]&#10;  - Decision: [what was decided]&#10;  - Action: [who does what by when]&#10;&#10;Next meeting: [date/time]&#10;Meeting adjourned at [time]"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >{% if meeting.minutes %}{{ meeting.minutes }}{% endif %}</textarea>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Tip: Use the Notes & Quotes tab for quick notes during the meeting, and compile them here into formal minutes afterwards.
+                        </p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Save Minutes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+    // Hide all tab contents
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Reset all tab buttons
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(button => {
+        button.classList.remove('border-blue-500', 'text-blue-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+
+    // Show selected tab content
+    document.getElementById(`content-${tabName}`).classList.remove('hidden');
+
+    // Highlight selected tab button
+    const activeButton = document.getElementById(`tab-${tabName}`);
+    activeButton.classList.remove('border-transparent', 'text-gray-500');
+    activeButton.classList.add('border-blue-500', 'text-blue-600');
+}
+</script>
+{% endblock %}

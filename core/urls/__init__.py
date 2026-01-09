@@ -37,6 +37,8 @@ from core.urls.urlpatterns_job_title import urlpatterns_job_title
 from core.urls.urlpatterns_link import urlpatterns_link
 from core.urls.urlpatterns_login_credential import urlpatterns_login_credential
 from core.urls.urlpatterns_maintenance_window import urlpatterns_maintenance_window
+from core.urls.urlpatterns_meeting import urlpatterns_meeting
+from core.urls.urlpatterns_meeting_action_item import urlpatterns_meeting_action_item
 from core.urls.urlpatterns_onboard_procedure import urlpatterns_onboard_procedure
 from core.urls.urlpatterns_login import urlpatterns_login
 from core.urls.urlpatterns_logout import urlpatterns_logout
@@ -116,6 +118,8 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_link,
     *urlpatterns_login_credential,
     *urlpatterns_maintenance_window,
+    *urlpatterns_meeting,
+    *urlpatterns_meeting_action_item,
     *urlpatterns_onboard_procedure,
     *urlpatterns_logout,
     *urlpatterns_organization,

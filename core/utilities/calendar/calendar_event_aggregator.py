@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from core.models.it_devops_request import ITDevOpsRequest
 from core.models.maintenance_window import MaintenanceWindow
+from core.models.meeting import Meeting
 from core.models.release_bundle import ReleaseBundle
 from core.models.sprint import Sprint
 
@@ -17,6 +18,7 @@ EVENT_COLORS = {
     'release': '#8B5CF6',      # violet-500
     'sprint': '#10B981',       # emerald-500
     'request': '#F59E0B',      # amber-500
+    'meeting': '#3B82F6',      # blue-500
 }
 
 
@@ -62,6 +64,9 @@ def get_calendar_events(start_date: date, end_date: date, event_types: list[str]
 
     if not event_types or 'request' in event_types:
         events.extend(_get_request_events(start_date, end_date))
+
+    if not event_types or 'meeting' in event_types:
+        events.extend(_get_meeting_events(start_date, end_date))
 
     # Sort by start date
     events.sort(key=lambda e: e.start)
@@ -229,5 +234,40 @@ def _get_request_events(start_date: date, end_date: date) -> list[CalendarEvent]
                 detail_url=reverse('it_devops_request_detail', kwargs={'model_id': req.id}),
                 description=f"Request completed: {req.name}",
             ))
+
+    return events
+
+
+def _get_meeting_events(start_date: date, end_date: date) -> list[CalendarEvent]:
+    """Get meeting events."""
+    meetings: QuerySet[Meeting] = Meeting.objects.filter(
+        Q(datetime_start__gte=start_date, datetime_start__lte=end_date) |
+        Q(datetime_end__gte=start_date, datetime_end__lte=end_date) |
+        Q(datetime_start__lte=start_date, datetime_end__gte=end_date)
+    ).exclude(status='cancelled').select_related('organizer')
+
+    events = []
+    for meeting in meetings:
+        start_dt = meeting.datetime_start if meeting.datetime_start else timezone.now()
+        end_dt = meeting.datetime_end if meeting.datetime_end else start_dt
+
+        # Create description with organizer info
+        description = None
+        if meeting.organizer:
+            description = f"{meeting.get_meeting_type_display()} with {meeting.organizer.full_name_for_human}"
+        elif meeting.meeting_type:
+            description = meeting.get_meeting_type_display()
+
+        events.append(CalendarEvent(
+            id=f"meeting_{meeting.id}",
+            title=meeting.name if meeting.name else 'Meeting',
+            start=start_dt.isoformat(),
+            end=end_dt.isoformat(),
+            all_day=False,
+            color=EVENT_COLORS['meeting'],
+            event_type='meeting',
+            detail_url=reverse('meeting_detail', kwargs={'model_id': meeting.id}),
+            description=description,
+        ))
 
     return events

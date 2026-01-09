@@ -6,7 +6,7 @@ const calendarState = {
     currentView: 'month',
     currentDate: new Date(),
     events: [],
-    activeFilters: ['maintenance', 'release', 'sprint', 'request']
+    activeFilters: ['maintenance', 'release', 'sprint', 'request', 'meeting']
 };
 
 // Initialize calendar on page load

@@ -1,0 +1,193 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Meetings</h1>
+                    <p class="mt-1 text-sm text-gray-500">Track meetings, attendees, and action items</p>
+                </div>
+                <a href="{% url 'meeting_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-1 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Meeting
+                </a>
+            </div>
+
+            <!-- Filters -->
+            <div class="mt-4 flex flex-wrap gap-3">
+                <select id="statusFilter" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                    <option value="">All Statuses</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+
+                <select id="typeFilter" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                    <option value="">All Types</option>
+                    <option value="team">Team Meeting</option>
+                    <option value="client">Client/Stakeholder</option>
+                    <option value="one_on_one">One-on-One</option>
+                    <option value="general">General</option>
+                </select>
+
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="myMeetingsFilter" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-gray-700">My Meetings</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            {% if models %}
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Meeting
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Type
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Organizer
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Start Time
+                        </th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Duration
+                        </th>
+                        <th scope="col" class="relative px-6 py-3">
+                            <span class="sr-only">Actions</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for meeting in models %}
+                    <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{% url 'meeting_detail' meeting.id %}'">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ meeting.name }}</div>
+                            {% if meeting.description %}
+                            <div class="text-sm text-gray-500 truncate max-w-xs">{{ meeting.description|truncatewords:10 }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                {% if meeting.meeting_type == 'team' %}bg-purple-100 text-purple-800
+                                {% elif meeting.meeting_type == 'client' %}bg-green-100 text-green-800
+                                {% elif meeting.meeting_type == 'one_on_one' %}bg-indigo-100 text-indigo-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ meeting.get_meeting_type_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                {% if meeting.status == 'scheduled' %}bg-blue-100 text-blue-800
+                                {% elif meeting.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                {% elif meeting.status == 'completed' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ meeting.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if meeting.organizer %}{{ meeting.organizer.full_name }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if meeting.datetime_start %}{{ meeting.datetime_start|date:"M d, Y g:i A" }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if meeting.duration_hours %}{{ meeting.duration_hours }}h{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{% url 'meeting_detail' meeting.id %}"
+                               class="text-blue-600 hover:text-blue-900 mr-3"
+                               onclick="event.stopPropagation()">
+                                View
+                            </a>
+                            <a href="{% url 'meeting_edit' meeting.id %}"
+                               class="text-indigo-600 hover:text-indigo-900"
+                               onclick="event.stopPropagation()">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No meetings</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new meeting.</p>
+                <div class="mt-6">
+                    <a href="{% url 'meeting_new' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <svg class="w-5 h-5 mr-1 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Meeting
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter functionality
+const statusFilter = document.getElementById('statusFilter');
+const typeFilter = document.getElementById('typeFilter');
+const myMeetingsFilter = document.getElementById('myMeetingsFilter');
+
+function applyFilters() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (statusFilter.value) {
+        params.set('status', statusFilter.value);
+    } else {
+        params.delete('status');
+    }
+
+    if (typeFilter.value) {
+        params.set('type', typeFilter.value);
+    } else {
+        params.delete('type');
+    }
+
+    if (myMeetingsFilter.checked) {
+        params.set('my_meetings', 'true');
+    } else {
+        params.delete('my_meetings');
+    }
+
+    window.location.search = params.toString();
+}
+
+// Set initial filter values from URL
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('status')) statusFilter.value = urlParams.get('status');
+if (urlParams.get('type')) typeFilter.value = urlParams.get('type');
+if (urlParams.get('my_meetings') === 'true') myMeetingsFilter.checked = true;
+
+// Add event listeners
+statusFilter.addEventListener('change', applyFilters);
+typeFilter.addEventListener('change', applyFilters);
+myMeetingsFilter.addEventListener('change', applyFilters);
+</script>
+{% endblock %}

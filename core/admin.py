@@ -5,6 +5,9 @@ from core.models.competitor import Competitor
 from core.models.it_devops_request import ITDevOpsRequest
 from core.models.it_devops_request_update import ITDevOpsRequestUpdate
 from core.models.maintenance_window import MaintenanceWindow
+from core.models.meeting import Meeting
+from core.models.meeting_action_item import MeetingActionItem
+from core.models.meeting_note import MeetingNote
 
 
 @admin.register(ApplicationPin)
@@ -145,3 +148,96 @@ class MaintenanceWindowAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(Meeting)
+class MeetingAdmin(admin.ModelAdmin):
+    list_display = ('name', 'meeting_type', 'status', 'organizer', 'datetime_start', 'duration_hours')
+    list_filter = ('status', 'meeting_type', 'datetime_start')
+    search_fields = ('name', 'description', 'agenda', 'organizer__name_first', 'organizer__name_last')
+    ordering = ('-datetime_start', '-id')
+    readonly_fields = ('duration_hours', 'is_in_progress', 'created', 'modified')
+    filter_horizontal = ('attendees',)
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'meeting_type', 'status', 'organizer')
+        }),
+        ('Schedule', {
+            'fields': ('datetime_start', 'datetime_end', 'duration_hours', 'is_in_progress')
+        }),
+        ('Attendees', {
+            'fields': ('attendees',)
+        }),
+        ('Location', {
+            'fields': ('location_address', 'location_address_continued', 'location_city',
+                      'location_county', 'location_state_code', 'location_postal_code',
+                      'virtual_meeting_url'),
+            'classes': ('collapse',)
+        }),
+        ('Content', {
+            'fields': ('description', 'agenda', 'minutes')
+        }),
+        ('Related Entities', {
+            'fields': ('application', 'project')
+        }),
+        ('Additional Information', {
+            'fields': ('comment',)
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(MeetingActionItem)
+class MeetingActionItemAdmin(admin.ModelAdmin):
+    list_display = ('name', 'meeting', 'assignee', 'status', 'priority', 'due_date')
+    list_filter = ('status', 'priority', 'due_date')
+    search_fields = ('name', 'description', 'meeting__name', 'assignee__name_first', 'assignee__name_last')
+    ordering = ('status', '-priority', 'due_date', '-id')
+    readonly_fields = ('created', 'modified')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'meeting', 'assignee')
+        }),
+        ('Status & Priority', {
+            'fields': ('status', 'priority', 'due_date', 'date_completed')
+        }),
+        ('Details', {
+            'fields': ('description', 'comment')
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(MeetingNote)
+class MeetingNoteAdmin(admin.ModelAdmin):
+    list_display = ('meeting', 'note_type', 'person', 'datetime_created', 'content_preview')
+    list_filter = ('note_type', 'datetime_created')
+    search_fields = ('content', 'meeting__name', 'person__name_first', 'person__name_last')
+    ordering = ('-datetime_created', '-id')
+    readonly_fields = ('datetime_created', 'created', 'modified')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('meeting', 'note_type', 'person')
+        }),
+        ('Content', {
+            'fields': ('content',)
+        }),
+        ('Timestamps', {
+            'fields': ('datetime_created', 'created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def content_preview(self, obj):
+        return obj.content[:75] + '...' if len(obj.content) > 75 else obj.content
+
+    content_preview.short_description = 'Content Preview'

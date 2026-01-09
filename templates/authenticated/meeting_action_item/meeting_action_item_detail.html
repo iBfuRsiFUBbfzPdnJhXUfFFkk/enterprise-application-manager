@@ -1,0 +1,126 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="{% url 'meeting_action_item' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ action_item.name }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if action_item.status == 'open' %}bg-blue-100 text-blue-800
+                            {% elif action_item.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                            {% elif action_item.status == 'completed' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ action_item.get_status_display }}
+                        </span>
+                        <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                            {% if action_item.priority == 'high' %}bg-red-100 text-red-800
+                            {% elif action_item.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-green-100 text-green-800{% endif %}">
+                            {{ action_item.get_priority_display }} Priority
+                        </span>
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'meeting_action_item_edit' action_item.id %}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit
+                </a>
+                <a href="{% url 'meeting_action_item_delete' action_item.id %}"
+                   onclick="return confirm('Are you sure you want to delete this action item?')"
+                   class="inline-flex items-center px-4 py-2 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Delete
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Action Item Information -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Action Item Information</h2>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Meeting</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if action_item.meeting %}
+                        <a href="{% url 'meeting_detail' action_item.meeting.id %}" class="text-blue-600 hover:text-blue-800 underline">
+                            {{ action_item.meeting.name }}
+                        </a>
+                        {% else %}-{% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Assignee</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if action_item.assignee %}{{ action_item.assignee.full_name }}{% else %}-{% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ action_item.get_status_display }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Priority</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ action_item.get_priority_display }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Due Date</dt>
+                    <dd class="mt-1 text-sm text-gray-900">
+                        {% if action_item.due_date %}{{ action_item.due_date|date:"F d, Y" }}{% else %}-{% endif %}
+                    </dd>
+                </div>
+                {% if action_item.date_completed %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Date Completed</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ action_item.date_completed|date:"F d, Y" }}</dd>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Description & Comments -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Details</h2>
+            </div>
+            <div class="px-6 py-6 space-y-4">
+                {% if action_item.description %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Description</dt>
+                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ action_item.description }}</dd>
+                </div>
+                {% endif %}
+                {% if action_item.comment %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Comment</dt>
+                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{{ action_item.comment }}</dd>
+                </div>
+                {% endif %}
+                {% if not action_item.description and not action_item.comment %}
+                <p class="text-sm text-gray-500">No additional details provided</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

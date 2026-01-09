@@ -1,0 +1,173 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Meeting Action Items</h1>
+                    <p class="mt-1 text-sm text-gray-500">Track action items across all meetings</p>
+                </div>
+                <a href="{% url 'meeting_action_item_new' %}"
+                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-1 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Action Item
+                </a>
+            </div>
+
+            <!-- Filters -->
+            <div class="mt-4 flex flex-wrap gap-3">
+                <select id="statusFilter" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                    <option value="">All Statuses</option>
+                    <option value="open">Open</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="blocked">Blocked</option>
+                </select>
+
+                <select id="priorityFilter" class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                    <option value="">All Priorities</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="myItemsFilter" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="ml-2 text-sm text-gray-700">My Items</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            {% if models %}
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Meeting</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assignee</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for action_item in models %}
+                    <tr class="hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{% url 'meeting_action_item_detail' action_item.id %}'">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ action_item.name }}</div>
+                            {% if action_item.description %}
+                            <div class="text-sm text-gray-500 truncate max-w-xs">{{ action_item.description|truncatewords:8 }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if action_item.meeting %}
+                            <a href="{% url 'meeting_detail' action_item.meeting.id %}" class="text-blue-600 hover:text-blue-900" onclick="event.stopPropagation()">
+                                {{ action_item.meeting.name }}
+                            </a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {% if action_item.assignee %}{{ action_item.assignee.full_name }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                {% if action_item.priority == 'high' %}bg-red-100 text-red-800
+                                {% elif action_item.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ action_item.get_priority_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {% if action_item.due_date %}{{ action_item.due_date|date:"M d, Y" }}{% else %}-{% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                {% if action_item.status == 'open' %}bg-blue-100 text-blue-800
+                                {% elif action_item.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                {% elif action_item.status == 'completed' %}bg-green-100 text-green-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ action_item.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{% url 'meeting_action_item_detail' action_item.id %}" class="text-blue-600 hover:text-blue-900 mr-3" onclick="event.stopPropagation()">View</a>
+                            <a href="{% url 'meeting_action_item_edit' action_item.id %}" class="text-indigo-600 hover:text-indigo-900" onclick="event.stopPropagation()">Edit</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No action items</h3>
+                <p class="mt-1 text-sm text-gray-500">Get started by creating a new action item.</p>
+                <div class="mt-6">
+                    <a href="{% url 'meeting_action_item_new' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                        <svg class="w-5 h-5 mr-1 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Action Item
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter functionality
+const statusFilter = document.getElementById('statusFilter');
+const priorityFilter = document.getElementById('priorityFilter');
+const myItemsFilter = document.getElementById('myItemsFilter');
+
+function applyFilters() {
+    const params = new URLSearchParams(window.location.search);
+
+    if (statusFilter.value) {
+        params.set('status', statusFilter.value);
+    } else {
+        params.delete('status');
+    }
+
+    if (priorityFilter.value) {
+        params.set('priority', priorityFilter.value);
+    } else {
+        params.delete('priority');
+    }
+
+    if (myItemsFilter.checked) {
+        params.set('my_items', 'true');
+    } else {
+        params.delete('my_items');
+    }
+
+    window.location.search = params.toString();
+}
+
+// Set initial filter values from URL
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('status')) statusFilter.value = urlParams.get('status');
+if (urlParams.get('priority')) priorityFilter.value = urlParams.get('priority');
+if (urlParams.get('my_items') === 'true') myItemsFilter.checked = true;
+
+// Add event listeners
+statusFilter.addEventListener('change', applyFilters);
+priorityFilter.addEventListener('change', applyFilters);
+myItemsFilter.addEventListener('change', applyFilters);
+</script>
+{% endblock %}

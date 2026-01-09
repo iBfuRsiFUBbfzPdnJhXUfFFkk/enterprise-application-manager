@@ -1,0 +1,250 @@
+{% extends 'authenticated/base_authenticated.html' %}
+
+{% block content %}
+<!-- Header -->
+<div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex items-center">
+            <a href="{% url 'meeting' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">
+                    {% if form.instance.pk %}Edit Meeting{% else %}Create Meeting{% endif %}
+                </h1>
+                {% if form.instance.pk %}
+                <p class="mt-1 text-sm text-gray-500">Update meeting details</p>
+                {% else %}
+                <p class="mt-1 text-sm text-gray-500">Schedule a new meeting</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Form -->
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Basic Information -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Meeting Name {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.meeting_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Meeting Type {% if form.meeting_type.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ form.meeting_type }}
+                    {% if form.meeting_type.errors %}<p class="mt-2 text-sm text-red-600">{{ form.meeting_type.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Status {% if form.status.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="{{ form.organizer.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Organizer {% if form.organizer.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ form.organizer }}
+                    {% if form.organizer.errors %}<p class="mt-2 text-sm text-red-600">{{ form.organizer.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Schedule</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.datetime_start.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Start Date & Time {% if form.datetime_start.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ form.datetime_start }}
+                    {% if form.datetime_start.errors %}<p class="mt-2 text-sm text-red-600">{{ form.datetime_start.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.datetime_end.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        End Date & Time {% if form.datetime_end.field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {{ form.datetime_end }}
+                    {% if form.datetime_end.errors %}<p class="mt-2 text-sm text-red-600">{{ form.datetime_end.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendees -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Attendees</h2>
+            </div>
+            <div class="px-6 py-6">
+                <label for="{{ form.attendees.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Attendees {% if form.attendees.field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+                <p class="text-sm text-gray-500 mb-3">Select all people attending this meeting</p>
+                {{ form.attendees }}
+                {% if form.attendees.errors %}<p class="mt-2 text-sm text-red-600">{{ form.attendees.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+
+        <!-- Location -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Location</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="md:col-span-2">
+                    <label for="{{ form.virtual_meeting_url.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Virtual Meeting URL
+                    </label>
+                    {{ form.virtual_meeting_url }}
+                    {% if form.virtual_meeting_url.errors %}<p class="mt-2 text-sm text-red-600">{{ form.virtual_meeting_url.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="{{ form.location_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Address
+                    </label>
+                    {{ form.location_address }}
+                    {% if form.location_address.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_address.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="{{ form.location_address_continued.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Address Line 2
+                    </label>
+                    {{ form.location_address_continued }}
+                    {% if form.location_address_continued.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_address_continued.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.location_city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        City
+                    </label>
+                    {{ form.location_city }}
+                    {% if form.location_city.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_city.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.location_county.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        County
+                    </label>
+                    {{ form.location_county }}
+                    {% if form.location_county.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_county.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.location_state_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        State
+                    </label>
+                    {{ form.location_state_code }}
+                    {% if form.location_state_code.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_state_code.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.location_postal_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Postal Code
+                    </label>
+                    {{ form.location_postal_code }}
+                    {% if form.location_postal_code.errors %}<p class="mt-2 text-sm text-red-600">{{ form.location_postal_code.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Content</h2>
+            </div>
+            <div class="px-6 py-6 space-y-6">
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.agenda.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Agenda
+                    </label>
+                    {{ form.agenda }}
+                    {% if form.agenda.errors %}<p class="mt-2 text-sm text-red-600">{{ form.agenda.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Entities -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
+            </div>
+            <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="{{ form.application.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Application
+                    </label>
+                    {{ form.application }}
+                    {% if form.application.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application.errors.0 }}</p>{% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Project
+                    </label>
+                    {{ form.project }}
+                    {% if form.project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.project.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Additional Information</h2>
+            </div>
+            <div class="px-6 py-6">
+                <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    Comment
+                </label>
+                {{ form.comment }}
+                {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{% url 'meeting' %}"
+               class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors">
+                {% if form.instance.pk %}Update Meeting{% else %}Create Meeting{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
