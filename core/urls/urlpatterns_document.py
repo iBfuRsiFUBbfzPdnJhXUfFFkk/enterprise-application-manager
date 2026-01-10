@@ -5,6 +5,7 @@ from core.views.document.document_add_view import document_add_view
 from core.views.document.document_create_ajax_view import document_create_ajax_view
 from core.views.document.document_detail_view import document_detail_view
 from core.views.document.document_edit_view import document_edit_view
+from core.views.document.document_file_view import document_file_view
 from core.views.document.document_view import document_view
 
 urlpatterns_document: list[URLPattern | URLResolver] = create_generic_urlpatterns(
@@ -22,4 +23,9 @@ urlpatterns_document.append(
 # Add AJAX create view
 urlpatterns_document.append(
     path(name='document_create_ajax', route='document/create/ajax/', view=document_create_ajax_view)
+)
+
+# Add file view for authenticated file downloads
+urlpatterns_document.append(
+    path(name='document_file', route='document/file/<int:model_id>/', view=document_file_view)
 )

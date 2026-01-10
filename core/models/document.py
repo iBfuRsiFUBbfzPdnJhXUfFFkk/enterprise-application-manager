@@ -36,7 +36,9 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
     def get_file_url(self):
         """Get download URL for file (handles both storage types)."""
         if self.file:
-            return self.file.url
+            # Return authenticated Django view URL instead of direct S3 URL
+            from django.urls import reverse
+            return reverse('document_file', kwargs={'model_id': self.pk})
         elif self.blob_data:
             # Legacy blob download view
             from django.urls import reverse
