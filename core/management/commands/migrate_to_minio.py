@@ -118,8 +118,13 @@ class Command(BaseCommand):
                 continue
             try:
                 model = apps.get_model(app_label, model_class_name)
-                # Verify model has required fields
-                if hasattr(model, 'blob_data') and hasattr(model, 'migrated_to_minio'):
+                # Verify model has required fields (any blob field variant)
+                has_blob_field = (
+                    hasattr(model, 'blob_data') or
+                    hasattr(model, 'evidence_blob_data') or
+                    hasattr(model, 'attachment_blob_data')
+                )
+                if has_blob_field and hasattr(model, 'migrated_to_minio'):
                     models.append(model)
             except LookupError:
                 pass
@@ -136,16 +141,54 @@ class Command(BaseCommand):
             return 'attachment_file'
         return None
 
+    def _get_blob_field_name(self, model):
+        """Get the name of the blob data field for this model."""
+        if hasattr(model, 'blob_data'):
+            return 'blob_data'
+        elif hasattr(model, 'evidence_blob_data'):
+            return 'evidence_blob_data'
+        elif hasattr(model, 'attachment_blob_data'):
+            return 'attachment_blob_data'
+        return None
+
+    def _get_blob_filename_field_name(self, model):
+        """Get the name of the blob filename field for this model."""
+        if hasattr(model, 'blob_filename'):
+            return 'blob_filename'
+        elif hasattr(model, 'evidence_blob_filename'):
+            return 'evidence_blob_filename'
+        elif hasattr(model, 'attachment_blob_filename'):
+            return 'attachment_blob_filename'
+        return None
+
+    def _get_blob_size_field_name(self, model):
+        """Get the name of the blob size field for this model."""
+        if hasattr(model, 'blob_size'):
+            return 'blob_size'
+        elif hasattr(model, 'evidence_blob_size'):
+            return 'evidence_blob_size'
+        elif hasattr(model, 'attachment_blob_size'):
+            return 'attachment_blob_size'
+        return None
+
     def _migrate_model(self, model):
         """Migrate blob data to MinIO for a specific model."""
         model_name = model.__name__
         self.stdout.write(f'\nProcessing {model_name}...')
 
+        # Get the blob field name for this model
+        blob_field_name = self._get_blob_field_name(model)
+        if not blob_field_name:
+            self.stdout.write(self.style.WARNING(f'  No blob field found for {model_name}'))
+            return
+
         # Get records that need migration
-        queryset = model.objects.filter(
-            migrated_to_minio=False,
-            blob_data__isnull=False
-        ).exclude(blob_data=b'')
+        filter_kwargs = {
+            'migrated_to_minio': False,
+            f'{blob_field_name}__isnull': False
+        }
+        exclude_kwargs = {blob_field_name: b''}
+        queryset = model.objects.filter(**filter_kwargs).exclude(**exclude_kwargs)
 
         total_count = queryset.count()
 
@@ -169,16 +212,24 @@ class Command(BaseCommand):
     def _process_batch(self, batch, model, model_name, processed, total):
         """Process a batch of records."""
         file_field_name = self._get_file_field_name(model)
+        blob_field_name = self._get_blob_field_name(model)
+        blob_filename_field_name = self._get_blob_filename_field_name(model)
+        blob_size_field_name = self._get_blob_size_field_name(model)
 
         for obj in batch:
             try:
                 with transaction.atomic():
+                    # Get blob data
+                    blob_data = getattr(obj, blob_field_name)
+                    blob_filename = getattr(obj, blob_filename_field_name)
+                    blob_size = getattr(obj, blob_size_field_name, 0)
+
                     # Create ContentFile from blob data
-                    content = ContentFile(obj.blob_data)
+                    content = ContentFile(blob_data)
 
                     # Save to FileField
                     file_field = getattr(obj, file_field_name)
-                    file_field.save(obj.blob_filename, content, save=False)
+                    file_field.save(blob_filename, content, save=False)
 
                     # Mark as migrated
                     obj.migrated_to_minio = True
@@ -186,7 +237,7 @@ class Command(BaseCommand):
 
                     # Update stats
                     self.stats['migrated'] += 1
-                    self.stats['total_size'] += obj.blob_size or 0
+                    self.stats['total_size'] += blob_size or 0
 
                     # Progress indicator (every 10 files)
                     if self.stats['migrated'] % 10 == 0:
@@ -194,7 +245,7 @@ class Command(BaseCommand):
                         self.stdout.write(
                             f'  Progress: {progress:.1f}% '
                             f'({processed + self.stats["migrated"]}/{total}) - '
-                            f'Latest: {obj.blob_filename}'
+                            f'Latest: {blob_filename}'
                         )
 
             except Exception as e:
@@ -205,7 +256,14 @@ class Command(BaseCommand):
 
     def _display_dry_run_info(self, queryset, model_name):
         """Display information about what would be migrated."""
-        total_size = sum(obj.blob_size or 0 for obj in queryset)
+        if queryset.count() == 0:
+            return
+
+        model = queryset.model
+        blob_filename_field_name = self._get_blob_filename_field_name(model)
+        blob_size_field_name = self._get_blob_size_field_name(model)
+
+        total_size = sum(getattr(obj, blob_size_field_name, 0) or 0 for obj in queryset)
 
         self.stdout.write(f'  Would migrate {queryset.count()} records')
         self.stdout.write(f'  Total size: {self._format_bytes(total_size)}')
@@ -213,8 +271,10 @@ class Command(BaseCommand):
         # Show first 5 examples
         self.stdout.write(f'\n  Examples:')
         for obj in queryset[:5]:
-            size_str = self._format_bytes(obj.blob_size or 0)
-            self.stdout.write(f'    - ID {obj.pk}: {obj.blob_filename} ({size_str})')
+            blob_filename = getattr(obj, blob_filename_field_name, 'unknown')
+            blob_size = getattr(obj, blob_size_field_name, 0) or 0
+            size_str = self._format_bytes(blob_size)
+            self.stdout.write(f'    - ID {obj.pk}: {blob_filename} ({size_str})')
 
         if queryset.count() > 5:
             self.stdout.write(f'    ... and {queryset.count() - 5} more')
@@ -227,6 +287,8 @@ class Command(BaseCommand):
         self.stdout.write(f'\nVerifying {model_name}...')
 
         file_field_name = self._get_file_field_name(model)
+        blob_field_name = self._get_blob_field_name(model)
+        blob_size_field_name = self._get_blob_size_field_name(model)
 
         # Get migrated records
         migrated = model.objects.filter(migrated_to_minio=True)
@@ -258,16 +320,19 @@ class Command(BaseCommand):
             if file_field:
                 passed['count'] += 1
 
+                # Get blob size for this object
+                blob_size = getattr(obj, blob_size_field_name, None)
+
                 # Level 2: Size verification
                 try:
-                    if file_field.size == obj.blob_size:
+                    if file_field.size == blob_size:
                         passed['size'] += 1
                     else:
                         failed['size'] += 1
                         self.stdout.write(
                             self.style.WARNING(
                                 f'  Size mismatch for ID {obj.pk}: '
-                                f'MinIO={file_field.size} vs blob={obj.blob_size}'
+                                f'MinIO={file_field.size} vs blob={blob_size}'
                             )
                         )
                 except Exception as e:
@@ -277,9 +342,10 @@ class Command(BaseCommand):
                     )
 
                 # Level 3: Checksum verification (if blob still exists)
-                if obj.blob_data:
+                blob_data = getattr(obj, blob_field_name, None)
+                if blob_data:
                     try:
-                        blob_md5 = hashlib.md5(obj.blob_data).hexdigest()
+                        blob_md5 = hashlib.md5(blob_data).hexdigest()
                         file_field.open('rb')
                         minio_md5 = hashlib.md5(file_field.read()).hexdigest()
                         file_field.close()
