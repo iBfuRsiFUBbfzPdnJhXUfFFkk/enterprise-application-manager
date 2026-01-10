@@ -47,3 +47,11 @@ $BackupIncludeMinio = $true
 # Migration Settings
 $MigrationBatchSize = 100
 $MigrationVerifyChecksum = $true
+
+# SSL/OpenSSL Settings
+# Path to OpenSSL executable (leave as "openssl" to use PATH, or specify full path)
+# Common locations:
+#   - C:\Program Files\OpenSSL-Win64\bin\openssl.exe
+#   - C:\Program Files\Git\usr\bin\openssl.exe (if using Git for Windows)
+#   - C:\ProgramData\chocolatey\bin\openssl.exe (if installed via Chocolatey)
+$OpensslPath = "openssl"  # Uses PATH by default

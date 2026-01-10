@@ -1117,19 +1117,35 @@ function Invoke-GenerateSslCertificate {
     }
     Write-Host ""
 
-    # Check if OpenSSL is available
-    $OpensslPath = (Get-Command openssl -ErrorAction SilentlyContinue).Source
-    if (-not $OpensslPath) {
-        Write-Host "ERROR: OpenSSL not found in PATH" -ForegroundColor Red
+    # Check if OpenSSL is available using configured path
+    $OpensslExe = $OpensslPath
+    if (-not $OpensslExe) {
+        $OpensslExe = "openssl"
+    }
+
+    # Test if OpenSSL is accessible
+    $OpensslTest = Get-Command $OpensslExe -ErrorAction SilentlyContinue
+    if (-not $OpensslTest) {
+        Write-Host "ERROR: OpenSSL not found" -ForegroundColor Red
         Write-Host ""
-        Write-Host "Please install OpenSSL:" -ForegroundColor Yellow
+        Write-Host "Configured path: $OpensslExe" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Please install OpenSSL or update the OpensslPath in manage.config.ps1:" -ForegroundColor Yellow
         Write-Host "  Option 1: Install via Chocolatey:"
         Write-Host "    choco install openssl"
         Write-Host "  Option 2: Install via Git for Windows (includes OpenSSL)"
+        Write-Host "    Usually at: C:\Program Files\Git\usr\bin\openssl.exe"
         Write-Host "  Option 3: Download from: https://slproweb.com/products/Win32OpenSSL.html"
+        Write-Host "    Usually at: C:\Program Files\OpenSSL-Win64\bin\openssl.exe"
+        Write-Host ""
+        Write-Host "Then update manage.config.ps1:" -ForegroundColor Yellow
+        Write-Host '    $OpensslPath = "C:\Path\To\openssl.exe"'
         Write-Host ""
         return 1
     }
+
+    Write-Host "Using OpenSSL: $($OpensslTest.Source)" -ForegroundColor Gray
+    Write-Host ""
 
     # Create OpenSSL configuration file
     $OpensslConf = @"
@@ -1174,7 +1190,7 @@ IP.2 = ::1
     Print-Info "Generating private key..."
     $PrivKeyPath = Join-Path $CertsDir "privkey.pem"
     try {
-        & openssl genrsa -out $PrivKeyPath 2048 2>&1 | Out-Null
+        & $OpensslExe genrsa -out $PrivKeyPath 2048 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to generate private key (exit code: $LASTEXITCODE)"
         }
@@ -1189,7 +1205,7 @@ IP.2 = ::1
     Print-Info "Generating certificate signing request..."
     $CsrPath = Join-Path $CertsDir "cert.csr"
     try {
-        & openssl req -new -key $PrivKeyPath -out $CsrPath -config $OpensslConfPath 2>&1 | Out-Null
+        & $OpensslExe req -new -key $PrivKeyPath -out $CsrPath -config $OpensslConfPath 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to generate CSR (exit code: $LASTEXITCODE)"
         }
@@ -1204,7 +1220,7 @@ IP.2 = ::1
     Print-Info "Generating self-signed certificate (valid for 365 days)..."
     $CertPath = Join-Path $CertsDir "fullchain.pem"
     try {
-        & openssl x509 -req -days 365 -in $CsrPath -signkey $PrivKeyPath -out $CertPath -extensions v3_req -extfile $OpensslConfPath 2>&1 | Out-Null
+        & $OpensslExe x509 -req -days 365 -in $CsrPath -signkey $PrivKeyPath -out $CertPath -extensions v3_req -extfile $OpensslConfPath 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to sign certificate (exit code: $LASTEXITCODE)"
         }
@@ -1308,18 +1324,27 @@ function Show-SslManagement {
                 Print-Info "SSL Certificate Information:"
                 Write-Host ""
 
+                # Get OpenSSL executable path
+                $OpensslExe = if ($OpensslPath) { $OpensslPath } else { "openssl" }
+                $OpensslTest = Get-Command $OpensslExe -ErrorAction SilentlyContinue
+
                 $certPath = Join-Path $ProjectRoot "certs\fullchain.pem"
                 if (Test-Path $certPath) {
-                    Write-Host "=== Certificate Details ==="
-                    openssl x509 -in $certPath -noout -text | Select-String -Pattern "Subject:"
-                    Write-Host ""
-                    Write-Host "=== Valid Dates ==="
-                    openssl x509 -in $certPath -noout -dates
-                    Write-Host ""
-                    Print-Info "Certificate includes:"
-                    Write-Host "  - localhost"
-                    Write-Host "  - $hostname.local (network access)"
-                    Write-Host "  - Local IP addresses"
+                    if ($OpensslTest) {
+                        Write-Host "=== Certificate Details ==="
+                        & $OpensslExe x509 -in $certPath -noout -text | Select-String -Pattern "Subject:"
+                        Write-Host ""
+                        Write-Host "=== Valid Dates ==="
+                        & $OpensslExe x509 -in $certPath -noout -dates
+                        Write-Host ""
+                        Print-Info "Certificate includes:"
+                        Write-Host "  - localhost"
+                        Write-Host "  - $hostname.local (network access)"
+                        Write-Host "  - Local IP addresses"
+                    } else {
+                        Print-Error "OpenSSL not found. Cannot read certificate details."
+                        Print-Info "Update OpensslPath in manage.config.ps1"
+                    }
                 } else {
                     Print-Error "Certificate not found. Run option 1 to generate."
                 }
