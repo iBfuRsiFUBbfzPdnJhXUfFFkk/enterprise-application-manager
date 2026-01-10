@@ -563,11 +563,17 @@ minio_management() {
             print_header
             print_info "Creating MinIO bucket..."
             echo ""
-            if [ -f "./minio-create-bucket" ]; then
-                ./minio-create-bucket
+
+            # Use Django management command to create bucket
+            if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py check_minio_bucket --create-if-missing; then
+                echo ""
+                print_success "MinIO bucket created/verified successfully!"
             else
-                print_error "minio-create-bucket script not found"
+                echo ""
+                print_error "Failed to create MinIO bucket"
+                print_info "Make sure MinIO container is running and credentials are correct"
             fi
+
             echo ""
             read -p "Press Enter to continue..."
             ;;

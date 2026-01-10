@@ -616,12 +616,18 @@ function Show-MinioManagement {
                 Print-Info "Creating MinIO bucket..."
                 Write-Host ""
 
-                $bucketScript = Join-Path $ProjectRoot "minio-create-bucket"
-                if (Test-Path $bucketScript) {
-                    & $bucketScript
+                # Use Django management command to create bucket
+                docker-compose -f $composeFile exec web python manage.py check_minio_bucket --create-if-missing
+
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host ""
+                    Print-Success "MinIO bucket created/verified successfully!"
                 } else {
-                    Print-Error "minio-create-bucket script not found"
+                    Write-Host ""
+                    Print-Error "Failed to create MinIO bucket"
+                    Print-Info "Make sure MinIO container is running and credentials are correct"
                 }
+
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }
