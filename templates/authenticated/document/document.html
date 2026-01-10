@@ -133,6 +133,34 @@
                             {{ model.comment|truncatechars:100 }}
                         </div>
                         {% endif %}
+
+                        <!-- Usage Indicators -->
+                        {% with app_count=model.applications.count bad_int_count=model.bad_interactions.count bad_upd_count=model.bad_interaction_updates.count hr_upd_count=model.hr_incident_updates.count %}
+                        {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
+                        <div class="flex items-center flex-wrap gap-1.5 text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200">
+                            {% if app_count > 0 %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                                {{ app_count }} app{{ app_count|pluralize }}
+                            </span>
+                            {% endif %}
+                            {% if bad_int_count > 0 %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">
+                                {{ bad_int_count }} interaction{{ bad_int_count|pluralize }}
+                            </span>
+                            {% endif %}
+                            {% if bad_upd_count > 0 %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-700">
+                                {{ bad_upd_count }} BI update{{ bad_upd_count|pluralize }}
+                            </span>
+                            {% endif %}
+                            {% if hr_upd_count > 0 %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-50 text-green-700">
+                                {{ hr_upd_count }} HR update{{ hr_upd_count|pluralize }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endwith %}
                     </div>
                 </div>
 
@@ -163,6 +191,7 @@
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used In</th>
                                 <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -223,6 +252,36 @@
                                     {% else %}
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
+                                </td>
+                                <td class="px-3 py-3 text-sm text-gray-500">
+                                    {% with app_count=model.applications.count bad_int_count=model.bad_interactions.count bad_upd_count=model.bad_interaction_updates.count hr_upd_count=model.hr_incident_updates.count %}
+                                    {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
+                                    <div class="flex flex-wrap gap-1">
+                                        {% if app_count > 0 %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700">
+                                            {{ app_count }} app{{ app_count|pluralize }}
+                                        </span>
+                                        {% endif %}
+                                        {% if bad_int_count > 0 %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-orange-50 text-orange-700">
+                                            {{ bad_int_count }} int{{ bad_int_count|pluralize }}
+                                        </span>
+                                        {% endif %}
+                                        {% if bad_upd_count > 0 %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-purple-50 text-purple-700">
+                                            {{ bad_upd_count }} BI{{ bad_upd_count|pluralize }}
+                                        </span>
+                                        {% endif %}
+                                        {% if hr_upd_count > 0 %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700">
+                                            {{ hr_upd_count }} HR{{ hr_upd_count|pluralize }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <span class="text-gray-400">-</span>
+                                    {% endif %}
+                                    {% endwith %}
                                 </td>
                                 <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{% url 'document_edit' model_id=model.id %}"

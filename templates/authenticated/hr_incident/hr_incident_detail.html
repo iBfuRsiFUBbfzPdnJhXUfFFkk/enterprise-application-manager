@@ -119,6 +119,18 @@
                                 {% endif %}
                             </div>
                             <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ update.comment }}</p>
+                            {% if update.documents.exists %}
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                {% for document in update.documents.all %}
+                                <a href="{% url 'document_edit' model_id=document.id %}" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    {{ document.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}

@@ -117,6 +117,49 @@
         </div>
         {% endif %}
 
+        <!-- Linked Documents -->
+        {% if bad_interaction.documents.exists %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Linked Documents</h2>
+            </div>
+            <div class="px-6 py-6">
+                <ul class="divide-y divide-gray-200">
+                    {% for document in bad_interaction.documents.all %}
+                    <li class="py-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <svg class="h-8 w-8 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ document.name }}{% if document.version %} v{{ document.version }}{% endif %}</p>
+                                    {% if document.has_file %}
+                                    <p class="text-xs text-gray-500">{{ document.get_filename }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                {% if document.has_file %}
+                                <a href="{{ document.get_file_url }}" download class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Download
+                                </a>
+                                {% endif %}
+                                <a href="{% url 'document_edit' model_id=document.id %}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Updates / Activity Log -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -182,6 +225,18 @@
                                 {% endif %}
                             </div>
                             <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ update.comment }}</p>
+                            {% if update.documents.exists %}
+                            <div class="mt-2 flex flex-wrap gap-2">
+                                {% for document in update.documents.all %}
+                                <a href="{% url 'document_edit' model_id=document.id %}" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    {{ document.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}

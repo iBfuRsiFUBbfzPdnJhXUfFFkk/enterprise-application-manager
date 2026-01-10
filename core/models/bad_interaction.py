@@ -5,11 +5,13 @@ from django_generic_model_fields.create_generic_date import create_generic_date
 from django_generic_model_fields.create_generic_enum import create_generic_enum
 from django_generic_model_fields.create_generic_fk import create_generic_fk
 from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.enums.bad_interaction_severity_choices import BAD_INTERACTION_SEVERITY_CHOICES
+from core.models.document import Document
 
 
 class BadInteraction(AbstractBaseModel, AbstractComment):
@@ -35,6 +37,9 @@ class BadInteraction(AbstractBaseModel, AbstractComment):
 
     # Migration tracking flag
     migrated_to_minio = create_generic_boolean(default=False)
+
+    # Many-to-many relationship to manually link documents
+    documents = create_generic_m2m(related_name='bad_interactions', to=Document)
 
     @property
     def has_evidence(self):
