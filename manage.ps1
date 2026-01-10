@@ -277,6 +277,7 @@ function Show-Logs {
     Write-Host "  6) MinIO logs (last $LogTailLines lines)"
     Write-Host "  7) nginx logs (last $LogTailLines lines)"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -337,6 +338,11 @@ function Show-Logs {
                 Read-Host "Press Enter to continue"
             }
             '0' { return }
+            { $_ -in 'q', 'Q' } {
+                Clear-Host
+                Print-Success "Goodbye!"
+                exit 0
+            }
             default {
                 Print-Error "Invalid option"
                 Start-Sleep -Seconds 1
@@ -363,6 +369,7 @@ function Show-ShellAccess {
     Write-Host "  2) Container bash shell (web)"
     Write-Host "  3) Container shell (minio)"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -399,6 +406,11 @@ function Show-ShellAccess {
                 Read-Host "Press Enter to continue"
             }
             '0' { return }
+            { $_ -in 'q', 'Q' } {
+                Clear-Host
+                Print-Success "Goodbye!"
+                exit 0
+            }
             default {
                 Print-Error "Invalid option"
                 Start-Sleep -Seconds 1
@@ -428,6 +440,7 @@ function Show-DatabaseManagement {
     Write-Host "  5) Show migrations status"
     Write-Host "  6) Backup database"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -552,6 +565,11 @@ function Show-DatabaseManagement {
                 Read-Host "Press Enter to continue"
             }
             '0' { return }
+            { $_ -in 'q', 'Q' } {
+                Clear-Host
+                Print-Success "Goodbye!"
+                exit 0
+            }
             default {
                 Print-Error "Invalid option"
                 Start-Sleep -Seconds 1
@@ -580,6 +598,7 @@ function Show-MinioManagement {
     Write-Host "  4) Migrate files to MinIO"
     Write-Host "  5) Verify MinIO connection"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -702,6 +721,11 @@ function Show-MinioManagement {
                 Read-Host "Press Enter to continue"
             }
             '0' { return }
+            { $_ -in 'q', 'Q' } {
+                Clear-Host
+                Print-Success "Goodbye!"
+                exit 0
+            }
             default {
                 Print-Error "Invalid option"
                 Start-Sleep -Seconds 1
@@ -730,6 +754,7 @@ function Show-DjangoCommands {
     Write-Host "  4) Custom manage.py command"
     Write-Host "  5) Check for issues"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -823,6 +848,11 @@ function Show-DjangoCommands {
                 Read-Host "Press Enter to continue"
             }
             '0' { return }
+            { $_ -in 'q', 'Q' } {
+                Clear-Host
+                Print-Success "Goodbye!"
+                exit 0
+            }
             default {
                 Print-Error "Invalid option"
                 Start-Sleep -Seconds 1
@@ -845,6 +875,7 @@ function Show-DevelopmentTools {
     Write-Host "  5) Fix line endings"
     Write-Host "  6) Initialize environment configuration"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -859,6 +890,11 @@ function Show-DevelopmentTools {
         '5' { Fix-LineEndings }
         '6' { Initialize-EnvironmentConfig }
         '0' { return }
+        { $_ -in 'q', 'Q' } {
+            Clear-Host
+            Print-Success "Goodbye!"
+            exit 0
+        }
         default { Print-Error "Invalid option" }
     }
 }
@@ -880,6 +916,7 @@ function Show-RebuildContainers {
     Write-Host "  2) Force rebuild (--no-cache, fresh build)"
     Write-Host "  3) Force rebuild + remove old images"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -891,6 +928,11 @@ function Show-RebuildContainers {
         '2' { Invoke-RebuildForce -RemoveImages $false }
         '3' { Invoke-RebuildForce -RemoveImages $true }
         '0' { return }
+        { $_ -in 'q', 'Q' } {
+            Clear-Host
+            Print-Success "Goodbye!"
+            exit 0
+        }
         default {
             Print-Error "Invalid option"
             Start-Sleep -Seconds 1
@@ -1083,6 +1125,7 @@ function Show-SslManagement {
     Write-Host "  2) View certificate info"
     Write-Host "  3) Regenerate and restart nginx"
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -1182,6 +1225,11 @@ function Show-SslManagement {
                 Read-Host "Press Enter to continue"
             }
             '0' { return }
+            { $_ -in 'q', 'Q' } {
+                Clear-Host
+                Print-Success "Goodbye!"
+                exit 0
+            }
             default {
                 Print-Error "Invalid option"
                 Start-Sleep -Seconds 1
@@ -1309,7 +1357,12 @@ function Initialize-EnvironmentConfig {
         Print-Info "Reading existing .env file..."
         Get-Content $envPath | ForEach-Object {
             if ($_ -match '^([A-Z_][A-Z0-9_]*)=(.*)$') {
-                $existingValues[$matches[1]] = $matches[2]
+                $value = $matches[2]
+                # Strip surrounding quotes if present
+                if ($value -match '^"(.*)"$') {
+                    $value = $matches[1]
+                }
+                $existingValues[$matches[1]] = $value
             }
         }
         Write-Host ""
@@ -1479,6 +1532,7 @@ function Show-OpenBrowser {
     Write-Host "  4) https://${hostname}.local:$WebPort (network .local domain)"
     Write-Host ""
     Write-Host "  0) Back"
+    Write-Host "  q) Exit script"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
 
@@ -1493,6 +1547,11 @@ function Show-OpenBrowser {
         '3' { $url = "https://${networkIP}:$WebPort" }
         '4' { $url = "https://${hostname}.local:$WebPort" }
         '0' { return }
+        { $_ -in 'q', 'Q' } {
+            Clear-Host
+            Print-Success "Goodbye!"
+            exit 0
+        }
         default {
             Print-Error "Invalid option"
             Start-Sleep -Seconds 1

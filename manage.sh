@@ -257,6 +257,7 @@ view_logs() {
     echo "  6) MinIO logs (last ${LOG_TAIL_LINES} lines)"
     echo "  7) nginx logs (last ${LOG_TAIL_LINES} lines)"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s log_choice
@@ -314,6 +315,11 @@ view_logs() {
             read -p "Press Enter to continue..."
             ;;
         0) return ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
+            ;;
         *)
             print_error "Invalid option"
             sleep 1
@@ -337,6 +343,7 @@ shell_access() {
     echo "  2) Container bash shell (web)"
     echo "  3) Container shell (minio)"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s shell_choice
@@ -370,6 +377,11 @@ shell_access() {
             read -p "Press Enter to continue..."
             ;;
         0) return ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
+            ;;
         *)
             print_error "Invalid option"
             sleep 1
@@ -396,6 +408,7 @@ database_management() {
     echo "  5) Show migrations status"
     echo "  6) Backup database"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s db_choice
@@ -506,6 +519,11 @@ database_management() {
             read -p "Press Enter to continue..."
             ;;
         0) return ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
+            ;;
         *)
             print_error "Invalid option"
             sleep 1
@@ -531,6 +549,7 @@ minio_management() {
     echo "  4) Migrate files to MinIO"
     echo "  5) Verify MinIO connection"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s minio_choice
@@ -635,6 +654,11 @@ minio_management() {
             read -p "Press Enter to continue..."
             ;;
         0) return ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
+            ;;
         *)
             print_error "Invalid option"
             sleep 1
@@ -660,6 +684,7 @@ django_commands() {
     echo "  4) Custom manage.py command"
     echo "  5) Check for issues"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s django_choice
@@ -750,6 +775,11 @@ django_commands() {
             read -p "Press Enter to continue..."
             ;;
         0) return ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
+            ;;
         *)
             print_error "Invalid option"
             sleep 1
@@ -769,6 +799,7 @@ development_tools() {
     echo "  5) Fix line endings"
     echo "  6) Initialize environment configuration"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s dev_choice
@@ -782,6 +813,11 @@ development_tools() {
         5) fix_line_endings ;;
         6) initialize_environment_config ;;
         0) return ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
+            ;;
         *) print_error "Invalid option" ;;
     esac
 }
@@ -803,6 +839,7 @@ rebuild_containers() {
     echo "  2) Force rebuild (--no-cache, fresh build)"
     echo "  3) Force rebuild + remove old images"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s rebuild_choice
@@ -820,6 +857,11 @@ rebuild_containers() {
             ;;
         0)
             return
+            ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
             ;;
         *)
             print_error "Invalid option"
@@ -993,6 +1035,7 @@ ssl_management() {
     echo "  3) Regenerate and restart nginx"
     echo "  4) Trust SSL certificate (macOS)"
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s ssl_choice
@@ -1123,6 +1166,11 @@ ssl_management() {
             ;;
         0)
             return
+            ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
             ;;
         *)
             print_error "Invalid option"
@@ -1393,6 +1441,7 @@ open_browser() {
     echo "  4) https://${HOSTNAME}.local:${WEB_PORT} (network .local domain)"
     echo ""
     echo "  0) Back"
+    echo "  q) Exit script"
     echo ""
     echo -n "Enter choice: "
     read -n 1 -s browser_choice
@@ -1415,6 +1464,11 @@ open_browser() {
             ;;
         0)
             return
+            ;;
+        q|Q)
+            clear
+            print_success "Goodbye!"
+            exit 0
             ;;
         *)
             print_error "Invalid option"
