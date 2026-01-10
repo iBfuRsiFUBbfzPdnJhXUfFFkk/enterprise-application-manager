@@ -32,6 +32,7 @@ services:
       - .:/app                    # Bind mount for hot reload
       - /app/.venv                # Exclude venv from container
       - /app/.git                 # Exclude .git to reduce watches
+      - /app/node_modules         # Exclude node_modules (built in container)
       - ./data/db.sqlite3:/app/db.sqlite3  # Database persistence
     expose:
       - "8000"
