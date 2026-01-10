@@ -1020,6 +1020,123 @@ view_environment() {
     read -p "Press Enter to continue..."
 }
 
+# Generate SSL certificate
+generate_ssl_certificate() {
+    local CERTS_DIR="${PROJECT_ROOT}/certs"
+
+    print_header
+    print_info "Generating SSL certificate..."
+    echo ""
+
+    # Create certs directory if it doesn't exist
+    mkdir -p "$CERTS_DIR"
+
+    # Get hostname and IP address
+    local HOSTNAME=$(hostname -s | tr '[:upper:]' '[:lower:]')
+    local LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "")
+
+    echo "Detected system:"
+    echo "  Hostname: ${HOSTNAME}"
+    if [ -n "$LOCAL_IP" ]; then
+        echo "  Local IP: ${LOCAL_IP}"
+    fi
+    echo ""
+
+    # Create OpenSSL configuration file with Subject Alternative Names
+    cat > "${CERTS_DIR}/openssl.cnf" <<EOF
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+req_extensions = v3_req
+
+[dn]
+C=US
+ST=Development
+L=Local
+O=Enterprise Application Manager
+OU=Development
+CN=localhost
+
+[v3_req]
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+DNS.2 = ${HOSTNAME}
+DNS.3 = ${HOSTNAME}.local
+DNS.4 = *.${HOSTNAME}.local
+IP.1 = 127.0.0.1
+IP.2 = ::1
+EOF
+
+    # Add local IP if detected
+    if [ -n "$LOCAL_IP" ]; then
+        echo "IP.3 = ${LOCAL_IP}" >> "${CERTS_DIR}/openssl.cnf"
+    fi
+
+    # Generate private key
+    print_info "Generating private key..."
+    if ! openssl genrsa -out "${CERTS_DIR}/privkey.pem" 2048 2>&1 | grep -v "^Generating"; then
+        print_error "Failed to generate private key"
+        return 1
+    fi
+
+    # Generate certificate signing request
+    print_info "Generating certificate signing request..."
+    if ! openssl req -new -key "${CERTS_DIR}/privkey.pem" \
+        -out "${CERTS_DIR}/cert.csr" \
+        -config "${CERTS_DIR}/openssl.cnf" 2>&1 | grep -v "^..*"; then
+        print_error "Failed to generate certificate signing request"
+        return 1
+    fi
+
+    # Generate self-signed certificate (valid for 365 days)
+    print_info "Generating self-signed certificate (valid for 365 days)..."
+    if ! openssl x509 -req -days 365 \
+        -in "${CERTS_DIR}/cert.csr" \
+        -signkey "${CERTS_DIR}/privkey.pem" \
+        -out "${CERTS_DIR}/fullchain.pem" \
+        -extensions v3_req \
+        -extfile "${CERTS_DIR}/openssl.cnf" 2>&1 | grep -v "^..*"; then
+        print_error "Failed to generate self-signed certificate"
+        rm -f "${CERTS_DIR}/cert.csr"
+        return 1
+    fi
+
+    # Clean up CSR
+    rm -f "${CERTS_DIR}/cert.csr"
+
+    # Set permissions
+    chmod 600 "${CERTS_DIR}/privkey.pem" 2>/dev/null || true
+    chmod 644 "${CERTS_DIR}/fullchain.pem" 2>/dev/null || true
+
+    echo ""
+    print_success "SSL certificate generated successfully!"
+    echo ""
+    echo "Certificate files:"
+    echo "  Private key: ${CERTS_DIR}/privkey.pem"
+    echo "  Certificate: ${CERTS_DIR}/fullchain.pem"
+    echo ""
+    echo "Certificate includes:"
+    echo "  - localhost"
+    echo "  - 127.0.0.1"
+    echo "  - ${HOSTNAME}"
+    echo "  - ${HOSTNAME}.local"
+    if [ -n "$LOCAL_IP" ]; then
+        echo "  - ${LOCAL_IP}"
+    fi
+    echo ""
+    print_warning "Note: This is a self-signed certificate for development only."
+    echo "      Browsers will show a security warning. Click 'Advanced' and 'Proceed'."
+    echo ""
+
+    return 0
+}
+
 # SSL management
 ssl_management() {
     clear
@@ -1046,21 +1163,7 @@ ssl_management() {
     case $ssl_choice in
         1)
             clear
-            print_header
-            print_info "Generating SSL certificate..."
-            echo ""
-            if [ -f "./generate-ssl-cert.sh" ]; then
-                ./generate-ssl-cert.sh
-                if [ $? -eq 0 ]; then
-                    echo ""
-                    print_success "Certificate generation completed!"
-                else
-                    echo ""
-                    print_error "Certificate generation failed with exit code: $?"
-                fi
-            else
-                print_error "generate-ssl-cert.sh not found"
-            fi
+            generate_ssl_certificate
             echo ""
             read -p "Press Enter to continue..."
             ;;
@@ -1092,36 +1195,32 @@ ssl_management() {
             print_info "Regenerating SSL certificate and restarting nginx..."
             echo ""
 
-            if [ -f "./generate-ssl-cert.sh" ]; then
-                ./generate-ssl-cert.sh
-                cert_exit=$?
+            generate_ssl_certificate
+            cert_exit=$?
 
-                if [ $cert_exit -eq 0 ]; then
-                    echo ""
-                    print_info "Restarting nginx container..."
+            if [ $cert_exit -eq 0 ]; then
+                echo ""
+                print_info "Restarting nginx container..."
 
-                    if check_docker; then
-                        docker-compose -f "$DOCKER_COMPOSE_FILE" restart nginx
-                        if [ $? -eq 0 ]; then
-                            echo ""
-                            print_success "SSL certificate regenerated and nginx restarted!"
-                            echo ""
-                            print_info "Access your application at:"
-                            echo "  - https://localhost:${WEB_PORT}"
-                            echo "  - https://${HOSTNAME}.local:${WEB_PORT} (network)"
-                        else
-                            echo ""
-                            print_error "Failed to restart nginx"
-                        fi
+                if check_docker; then
+                    docker-compose -f "$DOCKER_COMPOSE_FILE" restart nginx
+                    if [ $? -eq 0 ]; then
+                        echo ""
+                        print_success "SSL certificate regenerated and nginx restarted!"
+                        echo ""
+                        print_info "Access your application at:"
+                        echo "  - https://localhost:${WEB_PORT}"
+                        echo "  - https://${HOSTNAME}.local:${WEB_PORT} (network)"
                     else
-                        print_error "Docker is not running"
+                        echo ""
+                        print_error "Failed to restart nginx"
                     fi
                 else
-                    echo ""
-                    print_error "Certificate generation failed with exit code: $cert_exit"
+                    print_error "Docker is not running"
                 fi
             else
-                print_error "generate-ssl-cert.sh not found"
+                echo ""
+                print_error "Certificate generation failed"
             fi
             echo ""
             read -p "Press Enter to continue..."

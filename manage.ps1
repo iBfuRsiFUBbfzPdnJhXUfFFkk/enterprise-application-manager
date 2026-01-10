@@ -1087,6 +1087,166 @@ function Invoke-RebuildForce {
     Read-Host "Press Enter to continue"
 }
 
+# Generate SSL certificate
+function Invoke-GenerateSslCertificate {
+    $CertsDir = Join-Path $ProjectRoot "certs"
+
+    Print-Header
+    Print-Info "Generating SSL certificate..."
+    Write-Host ""
+
+    # Create certs directory if it doesn't exist
+    if (-not (Test-Path $CertsDir)) {
+        New-Item -ItemType Directory -Path $CertsDir | Out-Null
+    }
+
+    # Get hostname and IP address
+    $Hostname = $env:COMPUTERNAME.ToLower()
+    try {
+        $LocalIP = (Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias "Ethernet*", "Wi-Fi*" -ErrorAction SilentlyContinue |
+                    Where-Object { $_.IPAddress -notlike "169.254.*" -and $_.IPAddress -ne "127.0.0.1" } |
+                    Select-Object -First 1).IPAddress
+    } catch {
+        $LocalIP = $null
+    }
+
+    Write-Host "Detected system:"
+    Write-Host "  Hostname: $Hostname"
+    if ($LocalIP) {
+        Write-Host "  Local IP: $LocalIP"
+    }
+    Write-Host ""
+
+    # Check if OpenSSL is available
+    $OpensslPath = (Get-Command openssl -ErrorAction SilentlyContinue).Source
+    if (-not $OpensslPath) {
+        Write-Host "ERROR: OpenSSL not found in PATH" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Please install OpenSSL:" -ForegroundColor Yellow
+        Write-Host "  Option 1: Install via Chocolatey:"
+        Write-Host "    choco install openssl"
+        Write-Host "  Option 2: Install via Git for Windows (includes OpenSSL)"
+        Write-Host "  Option 3: Download from: https://slproweb.com/products/Win32OpenSSL.html"
+        Write-Host ""
+        return 1
+    }
+
+    # Create OpenSSL configuration file
+    $OpensslConf = @"
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+req_extensions = v3_req
+
+[dn]
+C=US
+ST=Development
+L=Local
+O=Enterprise Application Manager
+OU=Development
+CN=localhost
+
+[v3_req]
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = localhost
+DNS.2 = $Hostname
+DNS.3 = $Hostname.local
+DNS.4 = *.$Hostname.local
+IP.1 = 127.0.0.1
+IP.2 = ::1
+"@
+
+    # Add local IP if detected
+    if ($LocalIP) {
+        $OpensslConf += "`nIP.3 = $LocalIP"
+    }
+
+    $OpensslConfPath = Join-Path $CertsDir "openssl.cnf"
+    $OpensslConf | Out-File -FilePath $OpensslConfPath -Encoding ASCII
+
+    # Generate private key
+    Print-Info "Generating private key..."
+    $PrivKeyPath = Join-Path $CertsDir "privkey.pem"
+    try {
+        & openssl genrsa -out $PrivKeyPath 2048 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to generate private key (exit code: $LASTEXITCODE)"
+        }
+    } catch {
+        Write-Host ""
+        Print-Error "Failed to generate private key"
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        return 1
+    }
+
+    # Generate certificate signing request
+    Print-Info "Generating certificate signing request..."
+    $CsrPath = Join-Path $CertsDir "cert.csr"
+    try {
+        & openssl req -new -key $PrivKeyPath -out $CsrPath -config $OpensslConfPath 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to generate CSR (exit code: $LASTEXITCODE)"
+        }
+    } catch {
+        Write-Host ""
+        Print-Error "Failed to generate certificate signing request"
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        return 1
+    }
+
+    # Generate self-signed certificate (valid for 365 days)
+    Print-Info "Generating self-signed certificate (valid for 365 days)..."
+    $CertPath = Join-Path $CertsDir "fullchain.pem"
+    try {
+        & openssl x509 -req -days 365 -in $CsrPath -signkey $PrivKeyPath -out $CertPath -extensions v3_req -extfile $OpensslConfPath 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to sign certificate (exit code: $LASTEXITCODE)"
+        }
+    } catch {
+        Write-Host ""
+        Print-Error "Failed to generate self-signed certificate"
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        # Clean up CSR if it exists
+        if (Test-Path $CsrPath) {
+            Remove-Item $CsrPath -ErrorAction SilentlyContinue
+        }
+        return 1
+    }
+
+    # Clean up CSR
+    if (Test-Path $CsrPath) {
+        Remove-Item $CsrPath -ErrorAction SilentlyContinue
+    }
+
+    Write-Host ""
+    Print-Success "SSL certificate generated successfully!"
+    Write-Host ""
+    Write-Host "Certificate files:"
+    Write-Host "  Private key: $PrivKeyPath"
+    Write-Host "  Certificate: $CertPath"
+    Write-Host ""
+    Write-Host "Certificate includes:"
+    Write-Host "  - localhost"
+    Write-Host "  - 127.0.0.1"
+    Write-Host "  - $Hostname"
+    Write-Host "  - $Hostname.local"
+    if ($LocalIP) {
+        Write-Host "  - $LocalIP"
+    }
+    Write-Host ""
+    Print-Warning "Note: This is a self-signed certificate for development only."
+    Write-Host "      Browsers will show a security warning. Click 'Advanced' and 'Proceed'."
+    Write-Host ""
+
+    return 0
+}
+
 # View environment
 function Show-Environment {
     Clear-Host
@@ -1138,23 +1298,7 @@ function Show-SslManagement {
         switch ($sslChoice) {
             '1' {
                 Clear-Host
-                Print-Header
-                Print-Info "Generating SSL certificate..."
-                Write-Host ""
-
-                $sslScript = Join-Path $ProjectRoot "generate-ssl-cert.ps1"
-                if (Test-Path $sslScript) {
-                    & $sslScript
-                    if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
-                        Write-Host ""
-                        Print-Success "Certificate generation completed!"
-                    } else {
-                        Write-Host ""
-                        Print-Error "Certificate generation failed with exit code: $LASTEXITCODE"
-                    }
-                } else {
-                    Print-Error "generate-ssl-cert.ps1 not found"
-                }
+                Invoke-GenerateSslCertificate
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }
@@ -1188,38 +1332,33 @@ function Show-SslManagement {
                 Print-Info "Regenerating SSL certificate and restarting nginx..."
                 Write-Host ""
 
-                $sslScript = Join-Path $ProjectRoot "generate-ssl-cert.ps1"
-                if (Test-Path $sslScript) {
-                    & $sslScript
+                $certResult = Invoke-GenerateSslCertificate
 
-                    if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
-                        Write-Host ""
-                        Print-Info "Restarting nginx container..."
+                if ($certResult -eq 0) {
+                    Write-Host ""
+                    Print-Info "Restarting nginx container..."
 
-                        if (Test-Docker) {
-                            $composeFile = Join-Path $ProjectRoot $DockerComposeFile
-                            docker-compose -f $composeFile restart nginx
+                    if (Test-Docker) {
+                        $composeFile = Join-Path $ProjectRoot $DockerComposeFile
+                        docker-compose -f $composeFile restart nginx
 
-                            if ($LASTEXITCODE -eq 0) {
-                                Write-Host ""
-                                Print-Success "SSL certificate regenerated and nginx restarted!"
-                                Write-Host ""
-                                Print-Info "Access your application at:"
-                                Write-Host "  - https://localhost:$WebPort"
-                                Write-Host "  - https://$hostname.local:$WebPort (network)"
-                            } else {
-                                Write-Host ""
-                                Print-Error "Failed to restart nginx"
-                            }
+                        if ($LASTEXITCODE -eq 0) {
+                            Write-Host ""
+                            Print-Success "SSL certificate regenerated and nginx restarted!"
+                            Write-Host ""
+                            Print-Info "Access your application at:"
+                            Write-Host "  - https://localhost:$WebPort"
+                            Write-Host "  - https://$hostname.local:$WebPort (network)"
                         } else {
-                            Print-Error "Docker is not running"
+                            Write-Host ""
+                            Print-Error "Failed to restart nginx"
                         }
                     } else {
-                        Write-Host ""
-                        Print-Error "Certificate generation failed with exit code: $LASTEXITCODE"
+                        Print-Error "Docker is not running"
                     }
                 } else {
-                    Print-Error "generate-ssl-cert.ps1 not found"
+                    Write-Host ""
+                    Print-Error "Certificate generation failed"
                 }
                 Write-Host ""
                 Read-Host "Press Enter to continue"
