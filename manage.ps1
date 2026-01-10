@@ -1257,7 +1257,11 @@ IP.2 = ::1
     }
     Write-Host ""
     Print-Warning "Note: This is a self-signed certificate for development only."
-    Write-Host "      Browsers will show a security warning. Click 'Advanced' and 'Proceed'."
+    Write-Host "      Browsers will show a security warning until you trust the certificate."
+    Write-Host ""
+    Print-Info "To trust this certificate (remove browser warnings):"
+    Write-Host "  - Use SSL Management menu option 4 (Current User - no admin required)"
+    Write-Host "  - Or manually: certmgr.msc -> Trusted Root Certification Authorities"
     Write-Host ""
 
     return 0
@@ -1300,6 +1304,7 @@ function Show-SslManagement {
     Write-Host "  1) Generate SSL certificate"
     Write-Host "  2) View certificate info"
     Write-Host "  3) Regenerate and restart nginx"
+    Write-Host "  4) Trust certificate (Current User - no admin required)"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -1385,6 +1390,69 @@ function Show-SslManagement {
                     Write-Host ""
                     Print-Error "Certificate generation failed"
                 }
+                Write-Host ""
+                Read-Host "Press Enter to continue"
+            }
+            '4' {
+                Clear-Host
+                Print-Header
+                Print-Info "Trust SSL certificate in Current User store (no admin required)"
+                Write-Host ""
+
+                $certPath = Join-Path $ProjectRoot "certs\fullchain.pem"
+                if (-not (Test-Path $certPath)) {
+                    Print-Error "Certificate not found. Generate it first (option 1)."
+                    Write-Host ""
+                    Read-Host "Press Enter to continue"
+                    return
+                }
+
+                Print-Info "Installing certificate to Current User Trusted Root store..."
+                Write-Host ""
+                Print-Warning "This will trust the certificate for:"
+                Write-Host "  - Chrome, Edge, and other Chromium-based browsers"
+                Write-Host "  - Windows applications that use the Windows certificate store"
+                Write-Host ""
+                Print-Warning "Note: Firefox uses its own certificate store and requires separate setup."
+                Write-Host ""
+
+                $confirm = Read-Host "Continue? (y/N)"
+                if ($confirm -notmatch '^[Yy]$') {
+                    Print-Info "Operation cancelled"
+                    Write-Host ""
+                    Read-Host "Press Enter to continue"
+                    return
+                }
+
+                try {
+                    # Import certificate to Current User Trusted Root store
+                    $cert = Import-Certificate -FilePath $certPath -CertStoreLocation Cert:\CurrentUser\Root -ErrorAction Stop
+
+                    Write-Host ""
+                    Print-Success "Certificate installed successfully to Current User store!"
+                    Write-Host ""
+                    Print-Info "Certificate details:"
+                    Write-Host "  Subject: $($cert.Subject)"
+                    Write-Host "  Thumbprint: $($cert.Thumbprint)"
+                    Write-Host "  Valid until: $($cert.NotAfter)"
+                    Write-Host ""
+                    Print-Warning "You may need to restart your browser for changes to take effect"
+                    Write-Host ""
+                    Print-Info "To remove this certificate later, open certmgr.msc and navigate to:"
+                    Write-Host "  Trusted Root Certification Authorities -> Certificates"
+                    Write-Host "  Find the certificate with subject: $($cert.Subject)"
+                } catch {
+                    Write-Host ""
+                    Print-Error "Failed to install certificate"
+                    Write-Host $_.Exception.Message -ForegroundColor Red
+                    Write-Host ""
+                    Print-Info "You can also install manually:"
+                    Write-Host "  1. Double-click: $certPath"
+                    Write-Host "  2. Click 'Install Certificate'"
+                    Write-Host "  3. Select 'Current User'"
+                    Write-Host "  4. Choose 'Trusted Root Certification Authorities'"
+                }
+
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }
