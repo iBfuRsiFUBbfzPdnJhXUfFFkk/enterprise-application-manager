@@ -67,6 +67,38 @@ Available Django settings modules (set via `DJANGO_SETTINGS_MODULE`):
 
 ## Common Commands
 
+### Interactive Management Scripts
+
+The application includes interactive management scripts for both Unix/macOS and Windows:
+
+- **manage.sh** - Bash script for Unix/macOS environments
+- **manage.ps1** - PowerShell script for Windows environments
+
+**IMPORTANT:** These scripts must be kept in sync. When adding features or commands to `manage.sh`, the same functionality must be implemented in `manage.ps1` using Windows-specific PowerShell syntax.
+
+**Key considerations:**
+- **manage.ps1** requires UTF-8 with BOM encoding to properly display Unicode characters (✓, ✗, ⚠, ℹ)
+- Both scripts provide the same interactive menus and functionality
+- Script structure should remain parallel between Unix and Windows versions
+
+**Usage:**
+```bash
+# Unix/macOS
+./manage.sh
+
+# Windows PowerShell
+.\manage.ps1
+```
+
+The scripts provide interactive menus for:
+- Starting/stopping/restarting the application
+- Viewing logs
+- Shell access (Django shell, container bash)
+- Database management (migrations, backup, reset)
+- MinIO management
+- Django commands (tests, collectstatic, custom commands)
+- Development tools (rebuild containers, SSL management, environment variables)
+
 ### Running the Development Server
 
 **Start all services:**
