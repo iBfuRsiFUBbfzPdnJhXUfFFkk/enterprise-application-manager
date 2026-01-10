@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib.admin import site
 from django.contrib.auth.decorators import login_required
 from django.urls import URLPattern, URLResolver, path, include
@@ -167,3 +169,7 @@ urlpatterns: list[URLPattern | URLResolver] = [
     path(name="link_short_redirect", route='-/<str:short_code>/', view=link_short_redirect_view),
     path(name="authenticated", route='authenticated/', view=include(arg=urlpatterns_authenticated)),
 ]
+
+# Serve static files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

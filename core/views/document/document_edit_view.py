@@ -17,15 +17,7 @@ def document_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES, instance=document)
         if form.is_valid():
-            doc = form.save(commit=False)
-            # Handle file upload (only if a new file is uploaded)
-            if 'blob_data' in request.FILES:
-                uploaded_file = request.FILES['blob_data']
-                doc.blob_data = uploaded_file.read()
-                doc.blob_filename = uploaded_file.name
-                doc.blob_size = uploaded_file.size
-                doc.blob_content_type = uploaded_file.content_type
-            doc.save()
+            form.save()
             return redirect(to='document')
     else:
         form = DocumentForm(instance=document)

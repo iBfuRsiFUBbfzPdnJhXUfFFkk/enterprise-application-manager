@@ -777,7 +777,43 @@ rebuild_containers() {
         return 1
     fi
 
-    print_warning "This will rebuild all containers from scratch."
+    echo "Rebuild options:"
+    echo ""
+    echo "  1) Quick rebuild (uses cache)"
+    echo "  2) Force rebuild (--no-cache, fresh build)"
+    echo "  3) Force rebuild + remove old images"
+    echo "  0) Back"
+    echo ""
+    echo -n "Enter choice: "
+    read -n 1 -s rebuild_choice
+    echo ""
+
+    case $rebuild_choice in
+        1)
+            rebuild_quick
+            ;;
+        2)
+            rebuild_force false
+            ;;
+        3)
+            rebuild_force true
+            ;;
+        0)
+            return
+            ;;
+        *)
+            print_error "Invalid option"
+            sleep 1
+            ;;
+    esac
+}
+
+# Quick rebuild (uses cache)
+rebuild_quick() {
+    clear
+    print_header
+
+    print_warning "This will rebuild containers using cached layers."
     echo ""
     read -p "Continue? (y/N): " confirm
 
@@ -794,15 +830,17 @@ rebuild_containers() {
     cd "$PROJECT_ROOT"
 
     # Stop containers
-    print_info "Stopping containers..."
+    print_info "Step 1/3: Stopping containers..."
     docker-compose -f "$DOCKER_COMPOSE_FILE" down
 
     echo ""
-    print_info "Building containers..."
+    print_info "Step 2/3: Building containers..."
     echo ""
 
     # Rebuild and start
     if docker-compose -f "$DOCKER_COMPOSE_FILE" up -d --build; then
+        echo ""
+        print_info "Step 3/3: Starting services..."
         echo ""
         print_success "Containers rebuilt and started successfully!"
         echo ""
@@ -816,6 +854,85 @@ rebuild_containers() {
     else
         echo ""
         print_error "Failed to rebuild containers"
+        return 1
+    fi
+
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+# Force rebuild (--no-cache)
+rebuild_force() {
+    local remove_images=$1
+    clear
+    print_header
+
+    print_warning "This will force rebuild ALL containers from scratch (--no-cache)."
+    if [ "$remove_images" = true ]; then
+        print_warning "Old images will also be removed to free disk space."
+    fi
+    echo ""
+    read -p "Continue? (y/N): " confirm
+
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        print_info "Rebuild cancelled"
+        echo ""
+        read -p "Press Enter to continue..."
+        return 0
+    fi
+
+    print_info "Force rebuilding containers..."
+    echo ""
+
+    cd "$PROJECT_ROOT"
+
+    # Stop containers
+    print_info "Step 1/4: Stopping containers..."
+    if [ "$remove_images" = true ]; then
+        docker-compose -f "$DOCKER_COMPOSE_FILE" down --rmi local
+        print_success "Containers stopped and old images removed"
+    else
+        docker-compose -f "$DOCKER_COMPOSE_FILE" down
+        print_success "Containers stopped"
+    fi
+
+    echo ""
+    print_info "Step 2/4: Force rebuilding images (--no-cache)..."
+    echo ""
+
+    # Build with no cache
+    if docker-compose -f "$DOCKER_COMPOSE_FILE" build --no-cache; then
+        echo ""
+        print_success "Images rebuilt successfully!"
+    else
+        echo ""
+        print_error "Failed to rebuild images"
+        echo ""
+        read -p "Press Enter to continue..."
+        return 1
+    fi
+
+    echo ""
+    print_info "Step 3/4: Starting containers..."
+    echo ""
+
+    # Start containers
+    if docker-compose -f "$DOCKER_COMPOSE_FILE" up -d; then
+        echo ""
+        print_info "Step 4/4: Verifying services..."
+        echo ""
+        print_success "All containers started successfully!"
+        echo ""
+        print_info "Services running:"
+        echo "  • Web application: https://localhost:${WEB_PORT}"
+        echo "  • MinIO console: ${MINIO_CONSOLE_URL}"
+        echo ""
+
+        # Show container status
+        docker-compose -f "$DOCKER_COMPOSE_FILE" ps
+    else
+        echo ""
+        print_error "Failed to start containers"
         return 1
     fi
 

@@ -1,9 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
 from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
 from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -19,14 +17,14 @@ class UserPasskey(AbstractBaseModel):
     name: str = create_generic_varchar()
     credential_id: str = models.TextField(unique=True)
     public_key: str = models.TextField()
-    sign_count: int = create_generic_integer()
+    sign_count: int = models.IntegerField(default=0)
     aaguid: str | None = create_generic_varchar()
     credential_type: str = create_generic_varchar()
     transports: str | None = create_generic_varchar()
-    backup_eligible: bool = create_generic_boolean()
-    backup_state: bool = create_generic_boolean()
-    user_verified: bool = create_generic_boolean()
-    created_at = create_generic_datetime()
+    backup_eligible: bool = create_generic_boolean(default=False)
+    backup_state: bool = create_generic_boolean(default=False)
+    user_verified: bool = create_generic_boolean(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
     last_used_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

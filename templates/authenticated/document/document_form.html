@@ -46,21 +46,14 @@
                             {{ form.version }}
                             {% if form.version.errors %}<p class="mt-2 text-sm text-red-600">{{ form.version.errors.0 }}</p>{% endif %}
                         </div>
-                        <div>
-                            <label for="{{ form.blob_filename.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The actual filename of the uploaded file">
-                                Filename
+                        <div class="md:col-span-2">
+                            <label for="{{ form.file.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Upload a file to attach to this document">
+                                Upload File {% if form.file.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
-                            {{ form.blob_filename }}
-                            {% if form.blob_filename.errors %}<p class="mt-2 text-sm text-red-600">{{ form.blob_filename.errors.0 }}</p>{% endif %}
-                        </div>
-                        <div>
-                            <label for="{{ form.blob_data.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Upload a file to attach to this document">
-                                Upload File {% if form.blob_data.field.required %}<span class="text-red-500">*</span>{% endif %}
-                            </label>
-                            {{ form.blob_data }}
-                            {% if form.instance.pk and form.instance.blob_filename %}
+                            {{ form.file }}
+                            {% if form.instance.pk and form.instance.file %}
                                 <p class="mt-1 text-xs text-gray-500">
-                                    Current file: <span class="font-semibold">{{ form.instance.blob_filename }}</span> ({{ form.instance.blob_size|filesizeformat }})
+                                    Current file: <span class="font-semibold">{{ form.instance.get_filename }}</span> ({{ form.instance.get_file_size|filesizeformat }})
                                 </p>
                             {% endif %}
                             <p class="mt-1 text-xs text-gray-500">
@@ -70,7 +63,7 @@
                                     Select a file to upload.
                                 {% endif %}
                             </p>
-                            {% if form.blob_data.errors %}<p class="mt-2 text-sm text-red-600">{{ form.blob_data.errors.0 }}</p>{% endif %}
+                            {% if form.file.errors %}<p class="mt-2 text-sm text-red-600">{{ form.file.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Notes or description of this document">

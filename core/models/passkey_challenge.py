@@ -31,9 +31,9 @@ class PasskeyChallenge(AbstractBaseModel):
         to='core.User', on_delete=models.CASCADE, related_name='passkey_challenges', null=True, blank=True
     )
     session_key: str | None = create_generic_varchar()
-    created_at = create_generic_datetime()
+    created_at = models.DateTimeField(default=timezone.now)
     expires_at = models.DateTimeField()
-    used: bool = create_generic_boolean()
+    used: bool = create_generic_boolean(default=False)
 
     def save(self, *args, **kwargs):
         """Set expiration to 5 minutes from creation if not already set."""

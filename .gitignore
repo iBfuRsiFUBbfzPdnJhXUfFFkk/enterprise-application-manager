@@ -69,5 +69,12 @@ logs/
 htmlcov/
 .pytest_cache/
 
+# Node.js
+node_modules/
+package-lock.json
+
+# Compiled CSS
+static/css/tailwind.css
+
 # Misc
 **/qodana.sarif.json

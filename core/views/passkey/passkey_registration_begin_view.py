@@ -10,6 +10,7 @@ from webauthn.helpers.structs import (
     AuthenticatorSelectionCriteria,
     UserVerificationRequirement,
 )
+from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 
 from core.models.passkey_challenge import CHALLENGE_TYPE_REGISTRATION, PasskeyChallenge
 from core.models.user_passkey import UserPasskey
@@ -26,10 +27,15 @@ def passkey_registration_begin_view(request: HttpRequest) -> JsonResponse:
         data = json.loads(request.body)
         passkey_name = data.get('name', 'Unnamed Passkey')
 
+        # Ensure session is created
+        if not request.session.session_key:
+            request.session.create()
+
         # Get list of existing credentials to exclude
         existing_passkeys = UserPasskey.objects.filter(user=request.user)
         exclude_credentials = [
-            {'id': passkey.credential_id, 'type': 'public-key'} for passkey in existing_passkeys
+            {'id': base64url_to_bytes(passkey.credential_id), 'type': 'public-key'}
+            for passkey in existing_passkeys
         ]
 
         # Generate registration options
@@ -48,20 +54,21 @@ def passkey_registration_begin_view(request: HttpRequest) -> JsonResponse:
             attestation=settings.WEBAUTHN_ATTESTATION,
         )
 
-        # Store challenge in database
+        # Store challenge in database (as base64url string)
+        challenge_b64 = bytes_to_base64url(options.challenge)
         challenge = PasskeyChallenge.objects.create(
             challenge_type=CHALLENGE_TYPE_REGISTRATION,
-            challenge=options.challenge.decode('utf-8'),
+            challenge=challenge_b64,
             user=request.user,
             session_key=request.session.session_key,
         )
 
         # Convert options to JSON-serializable format
         options_json = {
-            'challenge': options.challenge.decode('utf-8'),
+            'challenge': challenge_b64,
             'rp': {'name': options.rp.name, 'id': options.rp.id},
             'user': {
-                'id': options.user.id.decode('utf-8'),
+                'id': bytes_to_base64url(options.user.id),
                 'name': options.user.name,
                 'displayName': options.user.display_name,
             },
@@ -70,7 +77,7 @@ def passkey_registration_begin_view(request: HttpRequest) -> JsonResponse:
             ],
             'timeout': options.timeout,
             'excludeCredentials': [
-                {'id': cred.id.decode('utf-8'), 'type': cred.type, 'transports': cred.transports or []}
+                {'id': bytes_to_base64url(cred.id), 'type': cred.type, 'transports': cred.transports or []}
                 for cred in (options.exclude_credentials or [])
             ],
             'authenticatorSelection': {
@@ -84,4 +91,6 @@ def passkey_registration_begin_view(request: HttpRequest) -> JsonResponse:
         return JsonResponse({'success': True, 'options': options_json, 'challenge_id': str(challenge.uuid)})
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

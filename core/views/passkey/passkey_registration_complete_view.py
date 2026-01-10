@@ -1,4 +1,3 @@
-import base64
 import json
 
 from django.conf import settings
@@ -6,7 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, JsonResponse
 from django.views.decorators.http import require_http_methods
 from webauthn import verify_registration_response
-from webauthn.helpers.structs import RegistrationCredential
+from webauthn.helpers.structs import (
+    RegistrationCredential,
+    AuthenticatorAttestationResponse,
+)
+from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 
 from core.models.passkey_challenge import CHALLENGE_TYPE_REGISTRATION, PasskeyChallenge
 from core.models.user_passkey import UserPasskey
@@ -28,10 +31,10 @@ def passkey_registration_complete_view(request: HttpRequest) -> JsonResponse:
         raw_id = data['rawId']
         response_data = data['response']
 
-        # Find and validate challenge
-        challenge_b64 = base64.b64decode(response_data['clientDataJSON'])
-        challenge_json = json.loads(challenge_b64)
-        challenge_str = challenge_json['challenge']
+        # Decode clientDataJSON to extract challenge
+        client_data_json = base64url_to_bytes(response_data['clientDataJSON'])
+        client_data = json.loads(client_data_json.decode('utf-8'))
+        challenge_str = client_data['challenge']
 
         # Get challenge from database
         try:
@@ -48,20 +51,22 @@ def passkey_registration_complete_view(request: HttpRequest) -> JsonResponse:
             return JsonResponse({'success': False, 'error': 'Challenge has expired'}, status=400)
 
         # Create RegistrationCredential object for verification
+        attestation_response = AuthenticatorAttestationResponse(
+            client_data_json=base64url_to_bytes(response_data['clientDataJSON']),
+            attestation_object=base64url_to_bytes(response_data['attestationObject']),
+        )
+
         credential = RegistrationCredential(
             id=credential_id,
-            raw_id=base64.urlsafe_b64decode(raw_id + '=='),
-            response={
-                'client_data_json': base64.urlsafe_b64decode(response_data['clientDataJSON'] + '=='),
-                'attestation_object': base64.urlsafe_b64decode(response_data['attestationObject'] + '=='),
-            },
+            raw_id=base64url_to_bytes(raw_id),
+            response=attestation_response,
             type=data['type'],
         )
 
         # Verify the registration response
         verification = verify_registration_response(
             credential=credential,
-            expected_challenge=challenge.challenge.encode('utf-8'),
+            expected_challenge=base64url_to_bytes(challenge.challenge),
             expected_rp_id=settings.WEBAUTHN_RP_ID,
             expected_origin=settings.WEBAUTHN_ORIGIN,
         )
@@ -70,13 +75,13 @@ def passkey_registration_complete_view(request: HttpRequest) -> JsonResponse:
         passkey = UserPasskey.objects.create(
             user=request.user,
             name=passkey_name,
-            credential_id=base64.b64encode(verification.credential_id).decode('utf-8'),
-            public_key=base64.b64encode(verification.credential_public_key).decode('utf-8'),
+            credential_id=bytes_to_base64url(verification.credential_id),
+            public_key=bytes_to_base64url(verification.credential_public_key),
             sign_count=verification.sign_count,
             aaguid=str(verification.aaguid) if verification.aaguid else '',
             credential_type='public-key',
             transports=json.dumps(data.get('transports', [])),
-            backup_eligible=verification.credential_backup_eligible,
+            backup_eligible=verification.credential_backed_up,
             backup_state=verification.credential_backed_up,
             user_verified=verification.user_verified,
         )
@@ -88,6 +93,10 @@ def passkey_registration_complete_view(request: HttpRequest) -> JsonResponse:
         return JsonResponse({'success': True, 'passkey_name': passkey.name, 'passkey_id': str(passkey.uuid)})
 
     except KeyError as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': f'Missing required field: {e}'}, status=400)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

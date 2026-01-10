@@ -8,34 +8,38 @@ Enterprise Application Manager is a Django-based web application designed to hel
 
 ## Development Environment Setup
 
-### Virtual Environment
+### Migrating from Virtual Environment to Docker Compose
 
-Activate the Python virtual environment:
-```bash
-bash .venv/bin/activate
-```
+If you're migrating from the old virtual environment setup to Docker Compose:
 
-Deactivate when done:
-```bash
-deactivate
-```
+1. **Move the database file:**
+   ```bash
+   mkdir -p data
+   mv db.sqlite3 data/db.sqlite3
+   ```
 
-### Environment Configuration
+2. **Remove the virtual environment (optional):**
+   ```bash
+   rm -rf .venv
+   ```
 
-Set the Django settings environment before running commands:
-```bash
-export DJANGO_SETTINGS_MODULE="core.settings.local"
-```
+3. **Start Docker Compose:**
+   ```bash
+   docker compose up
+   ```
 
-Available settings modules:
-- `core.settings.local` - Local development
-- `core.settings.development` - Development environment
-- `core.settings.staging` - Staging environment
-- `core.settings.production` - Production environment
+### Docker Compose
+
+The application runs using Docker Compose with three services:
+- **web** - Django application (Python 3.13)
+- **minio** - S3-compatible object storage for media files
+- **nginx** - Reverse proxy with SSL termination (HTTPS on port 50478)
 
 ### Required Environment Variables
 
 Create a `.env` file in the root directory with these variables (see `.documentation/environment-setup.md` for details):
+
+**Django Configuration:**
 - `DJANGO_SECRET_KEY` - Django secret key
 - `DEBUG` - Debug mode (True/False)
 - `ALLOWED_HOSTS` - JSON array of allowed hosts
@@ -43,87 +47,168 @@ Create a `.env` file in the root directory with these variables (see `.documenta
 - `SHOULD_USE_LDAP` - Enable LDAP authentication (True/False, defaults to False)
 - LDAP configuration (`AUTH_LDAP_*` variables) if using LDAP
 - Email configuration (`EMAIL_*` variables)
+- `CSRF_TRUSTED_ORIGINS_EXTRA` - Additional CSRF trusted origins (optional)
+
+**MinIO Configuration:**
+- `MINIO_ROOT_USER` - MinIO admin username
+- `MINIO_ROOT_PASSWORD` - MinIO admin password
+- `MINIO_ACCESS_KEY` - Application access key
+- `MINIO_SECRET_KEY` - Application secret key
+- `MINIO_BUCKET_NAME` - Bucket name (defaults to 'enterprise-app-media')
+- `MINIO_ENDPOINT` - MinIO endpoint (defaults to 'minio:9000')
+- `MINIO_USE_SSL` - Use SSL for MinIO (defaults to false)
+- `USE_MINIO` - Enable MinIO storage backend (defaults to true)
+
+Available Django settings modules (set via `DJANGO_SETTINGS_MODULE`):
+- `core.settings.local` - Local development (default in docker-compose.yml)
+- `core.settings.development` - Development environment
+- `core.settings.staging` - Staging environment
+- `core.settings.production` - Production environment
 
 ## Common Commands
 
 ### Running the Development Server
 
-**Quick Start (Recommended):**
-
-Unix/Linux/Mac:
+**Start all services:**
 ```bash
-./run_dev.sh
+docker compose up
 ```
 
-Windows:
+**Start in detached mode (background):**
 ```bash
-run_dev.bat
+docker compose up -d
 ```
 
-**Manual Method:**
-
-Set environment and run:
+**Stop all services:**
 ```bash
-export DJANGO_SETTINGS_MODULE="core.settings.local"
-.venv/bin/python manage.py runserver
+docker compose down
 ```
+
+**Rebuild and restart (after dependency changes):**
+```bash
+docker compose up --build
+```
+
+**View logs:**
+```bash
+docker compose logs -f web
+```
+
+**Access points:**
+- Django Application (HTTPS): https://localhost:50478
+- MinIO Console: http://localhost:9005
+- MinIO S3 API: http://localhost:9004
 
 ### Database Operations
 
 Run migrations:
 ```bash
-.venv/bin/python manage.py migrate
+docker compose exec web python manage.py migrate
 ```
 
 Create new migrations:
 ```bash
-.venv/bin/python manage.py makemigrations
+docker compose exec web python manage.py makemigrations
 ```
 
 Dump database to JSON:
 ```bash
-.venv/bin/python manage.py dumpdata --indent=2 > data.json
+docker compose exec web python manage.py dumpdata --indent=2 > data.json
 ```
 
 Load database from JSON:
 ```bash
-.venv/bin/python manage.py loaddata data.json
+docker compose exec web python manage.py loaddata data.json
 ```
+
+**Note:** The database file is persisted at `./data/db.sqlite3` on the host machine.
 
 ### Package Management
 
-Freeze requirements:
+**Adding Python dependencies:**
+1. Add the package to `requirements.txt`
+2. Rebuild the Docker image:
+   ```bash
+   docker compose up --build
+   ```
+
+**Adding Node.js dependencies (for Tailwind CSS):**
+1. Add the package to `package.json`
+2. Rebuild the Docker image:
+   ```bash
+   docker compose up --build
+   ```
+
+**Freeze current Python packages (if needed):**
 ```bash
-.venv/bin/python -m pip freeze > requirements.txt
+docker compose exec web pip freeze > requirements.txt
 ```
 
-Install requirements:
-
-**Unix/Linux/Mac (with LDAP support):**
-```bash
-.venv/bin/python -m pip install -r requirements.txt
-```
-
-**Windows (without LDAP support):**
-```bash
-.venv/bin/python -m pip install -r requirements-windows.txt
-```
-
-**Note:** The `requirements-windows.txt` file excludes LDAP packages (`django-auth-ldap` and `python-ldap`) which can be difficult to install on Windows. When using this file, ensure `SHOULD_USE_LDAP=False` in your `.env` file (this is the default).
+**Note:** The Docker image includes full LDAP support. Python dependencies are installed during the Docker build process from `requirements.txt`.
 
 ### Testing
 
 Run a specific test:
 ```bash
-.venv/bin/python manage.py test <app_name>.tests.<test_file>.<TestClass>.<test_method>
+docker compose exec web python manage.py test <app_name>.tests.<test_file>.<TestClass>.<test_method>
 ```
 
 Run all tests for an app:
 ```bash
-.venv/bin/python manage.py test <app_name>
+docker compose exec web python manage.py test <app_name>
+```
+
+### Docker Management
+
+**Access Django shell:**
+```bash
+docker compose exec web python manage.py shell
+```
+
+**Access container bash:**
+```bash
+docker compose exec web bash
+```
+
+**Rebuild Tailwind CSS:**
+```bash
+docker compose exec web npm run build:css
+```
+
+**Collect static files:**
+```bash
+docker compose exec web python manage.py collectstatic --noinput
 ```
 
 ## Architecture
+
+### Container Architecture
+
+The application runs in a Docker Compose environment with three interconnected services:
+
+**1. web (Django Application)**
+- Based on Python 3.13 slim image
+- Includes Node.js 20.x for Tailwind CSS compilation
+- Automatically runs `collectstatic` on startup via `docker-entrypoint.sh`
+- Hot-reload enabled with volume mounts
+- Exposes port 8000 internally (proxied by nginx)
+- Persistent database at `./data/db.sqlite3`
+
+**2. minio (S3-Compatible Object Storage)**
+- MinIO server for media file storage
+- Console UI available at http://localhost:9005
+- S3 API available at http://localhost:9004
+- Data persisted at `./data/minio`
+- Health checks ensure service availability before Django starts
+
+**3. nginx (Reverse Proxy)**
+- Alpine-based nginx for SSL termination
+- HTTPS available at https://localhost:50478
+- SSL certificates expected in `./certs` directory
+- Serves static files from `./staticfiles`
+- Proxies requests to Django web service
+
+All services communicate via the `enterprise-network` bridge network.
 
 ### Django Apps Structure
 
@@ -262,6 +347,7 @@ All views require login via `@login_required` decorator or URL-level wrapping.
 
 ## Key Dependencies
 
+**Python/Django:**
 - **Django 5.1.7** - Web framework
 - **python-gitlab 5.6.0** - GitLab API client
 - **django-simple-history 3.8.0** - Model history tracking
@@ -269,7 +355,16 @@ All views require login via `@login_required` decorator or URL-level wrapping.
 - **django-generic-model-fields 2.0.0** - Generic model field helpers
 - **django-environ 0.12.0** - Environment variable management
 - **django-hijack 3.7.1** - User impersonation for admin
+- **django-storages[s3]** - MinIO/S3 storage backend
+- **boto3** - AWS SDK for MinIO integration
 - **humanize 4.12.1** - Human-readable formatting
+
+**Node.js:**
+- **Tailwind CSS** - Utility-first CSS framework
+
+**Infrastructure (Docker):**
+- **MinIO** - S3-compatible object storage
+- **nginx** - Reverse proxy with SSL termination
 
 ## Additional Documentation
 

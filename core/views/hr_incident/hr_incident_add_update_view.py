@@ -14,15 +14,6 @@ def hr_incident_add_update_view(request: HttpRequest, model_id: int) -> HttpResp
             update = form.save(commit=False)
             update.hr_incident = hr_incident
             update.created_by = request.user
-
-            # Handle file upload
-            if 'attachment' in request.FILES:
-                uploaded_file = request.FILES['attachment']
-                update.attachment_blob_data = uploaded_file.read()
-                update.attachment_blob_filename = uploaded_file.name
-                update.attachment_blob_size = uploaded_file.size
-                update.attachment_blob_content_type = uploaded_file.content_type
-
             update.save()
             return redirect('hr_incident_detail', model_id=model_id)
 

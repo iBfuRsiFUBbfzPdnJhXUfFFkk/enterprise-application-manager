@@ -4,6 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 
 from core.forms.user_profile_form import UserProfileForm
+from core.models.user_passkey import UserPasskey
 from core.utilities.base_render import base_render
 
 
@@ -26,9 +27,13 @@ def profile_view(request: HttpRequest) -> HttpResponse:
     else:
         form = UserProfileForm(instance=user)
 
+    # Get user's passkeys for security settings section
+    passkeys = UserPasskey.objects.filter(user=user).order_by('-created_at')
+
     context = {
         'form': form,
         'user': user,
+        'passkeys': passkeys,
     }
 
     return base_render(

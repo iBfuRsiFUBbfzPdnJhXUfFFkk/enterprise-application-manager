@@ -18,24 +18,7 @@ def document_create_ajax_view(request: HttpRequest) -> JsonResponse:
         form = DocumentForm(request.POST, request.FILES)
 
         if form.is_valid():
-            document = form.save(commit=False)
-
-            # Handle file upload
-            if 'file' in request.FILES:
-                uploaded_file = request.FILES['file']
-                document.blob_data = uploaded_file.read()
-                document.blob_filename = uploaded_file.name
-                document.blob_size = uploaded_file.size
-                document.blob_content_type = uploaded_file.content_type or 'application/octet-stream'
-            elif 'blob_data' in request.FILES:
-                # Alternative field name for compatibility
-                uploaded_file = request.FILES['blob_data']
-                document.blob_data = uploaded_file.read()
-                document.blob_filename = uploaded_file.name
-                document.blob_size = uploaded_file.size
-                document.blob_content_type = uploaded_file.content_type or 'application/octet-stream'
-
-            document.save()
+            document = form.save()
 
             return JsonResponse({
                 'success': True,
@@ -44,8 +27,8 @@ def document_create_ajax_view(request: HttpRequest) -> JsonResponse:
                     'name': document.name,
                     'version': document.version or '',
                     'comment': document.comment or '',
-                    'blob_filename': document.blob_filename or '',
-                    'blob_size': document.blob_size or 0,
+                    'filename': document.get_filename() or '',
+                    'file_size': document.get_file_size() or 0,
                 }
             })
         else:

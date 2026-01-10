@@ -14,15 +14,7 @@ def bad_interaction_edit_view(request: HttpRequest, model_id: int) -> HttpRespon
     if request.method == 'POST':
         form = BadInteractionForm(request.POST, request.FILES, instance=bad_interaction)
         if form.is_valid():
-            bad_interaction = form.save(commit=False)
-            # Handle file upload
-            if 'evidence' in request.FILES:
-                uploaded_file = request.FILES['evidence']
-                bad_interaction.evidence_blob_data = uploaded_file.read()
-                bad_interaction.evidence_blob_filename = uploaded_file.name
-                bad_interaction.evidence_blob_size = uploaded_file.size
-                bad_interaction.evidence_blob_content_type = uploaded_file.content_type
-            bad_interaction.save()
+            form.save()
             return redirect(to='bad_interaction')
     else:
         form = BadInteractionForm(instance=bad_interaction)
