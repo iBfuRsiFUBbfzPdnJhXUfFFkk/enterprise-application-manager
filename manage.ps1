@@ -843,7 +843,7 @@ function Show-DevelopmentTools {
     Write-Host "  3) SSL certificate management"
     Write-Host "  4) Docker status"
     Write-Host "  5) Fix line endings"
-    Write-Host "  6) Initialize MinIO configuration"
+    Write-Host "  6) Initialize environment configuration"
     Write-Host "  0) Back"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
@@ -857,7 +857,7 @@ function Show-DevelopmentTools {
         '3' { Show-SslManagement }
         '4' { Show-DockerStatus }
         '5' { Fix-LineEndings }
-        '6' { Initialize-MinioConfig }
+        '6' { Initialize-EnvironmentConfig }
         '0' { return }
         default { Print-Error "Invalid option" }
     }
@@ -1267,77 +1267,165 @@ function Fix-LineEndings {
     Read-Host "Press Enter to continue"
 }
 
-# Initialize MinIO configuration
-function Initialize-MinioConfig {
+# Initialize environment configuration
+function Initialize-EnvironmentConfig {
     Clear-Host
     Print-Header
-    Print-Info "Initialize MinIO Configuration in .env"
+    Print-Info "Initialize Environment Configuration (.env)"
     Write-Host ""
 
     $envPath = Join-Path $ProjectRoot $EnvFile
+    $existingValues = @{}
 
-    # Check if .env exists
-    if (-not (Test-Path $envPath)) {
-        Print-Warning ".env file not found. Creating new file..."
-        New-Item -ItemType File -Path $envPath -Force | Out-Null
-    }
-
-    # Check if MinIO config already exists
-    $envContent = Get-Content $envPath -Raw -ErrorAction SilentlyContinue
-    if ($envContent -match "MINIO_ROOT_USER") {
-        Print-Warning "MinIO configuration already exists in .env"
+    # Read existing .env file if it exists
+    if (Test-Path $envPath) {
+        Print-Info "Reading existing .env file..."
+        Get-Content $envPath | ForEach-Object {
+            if ($_ -match '^([A-Z_][A-Z0-9_]*)=(.*)$') {
+                $existingValues[$matches[1]] = $matches[2]
+            }
+        }
         Write-Host ""
-        $overwrite = Read-Host "Overwrite with new random credentials? (y/N)"
+        Print-Warning "Existing .env file will be backed up and replaced with normalized version"
+        Write-Host ""
+        $confirm = Read-Host "Continue? (y/N)"
 
-        if ($overwrite -notmatch '^[Yy]$') {
+        if ($confirm -notmatch '^[Yy]$') {
             Print-Info "Operation cancelled"
             Write-Host ""
             Read-Host "Press Enter to continue"
             return
         }
 
-        # Remove existing MinIO section
-        $envContent = $envContent -replace '(?ms)^# MinIO Object Storage.*?(?=^#|\z)', ''
-        $envContent = $envContent.Trim()
-        Set-Content -Path $envPath -Value $envContent -NoNewline
+        # Backup existing .env
+        $backupPath = "$envPath.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+        Copy-Item $envPath $backupPath
+        Print-Info "Backed up to: $backupPath"
     }
 
-    # Generate random credentials
-    $randomSuffix = -join ((48..57) + (97..102) | Get-Random -Count 16 | ForEach-Object {[char]$_})
-    $minioUser = "admin-$randomSuffix"
-
-    # Generate random password (base64-like)
-    $bytes = New-Object byte[] 32
-    [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($bytes)
-    $minioPassword = [Convert]::ToBase64String($bytes).Replace('+', 'x').Replace('/', 'y')
-
-    Print-Info "Generating random credentials..."
+    Print-Info "Generating random secrets..."
     Write-Host ""
 
-    # MinIO configuration block
-    $minioConfig = @"
+    # Generate random values for secrets
+    $djangoSecret = if ($existingValues.ContainsKey("DJANGO_SECRET_KEY")) {
+        $existingValues["DJANGO_SECRET_KEY"]
+    } else {
+        -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 50 | ForEach-Object {[char]$_})
+    }
+
+    $encryptionSecret = if ($existingValues.ContainsKey("ENCRYPTION_SECRET")) {
+        $existingValues["ENCRYPTION_SECRET"]
+    } else {
+        $bytes = New-Object byte[] 32
+        [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($bytes)
+        [Convert]::ToBase64String($bytes)
+    }
+
+    $minioSuffix = -join ((48..57) + (97..102) | Get-Random -Count 8 | ForEach-Object {[char]$_})
+    $minioUser = if ($existingValues.ContainsKey("MINIO_ROOT_USER")) {
+        $existingValues["MINIO_ROOT_USER"]
+    } else {
+        "admin-$minioSuffix"
+    }
+
+    $bytes = New-Object byte[] 32
+    [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($bytes)
+    $minioPassword = if ($existingValues.ContainsKey("MINIO_ROOT_PASSWORD")) {
+        $existingValues["MINIO_ROOT_PASSWORD"]
+    } else {
+        [Convert]::ToBase64String($bytes).Replace('+', 'x').Replace('/', 'y')
+    }
+
+    # Get hostname for network access
+    $hostname = $env:COMPUTERNAME.ToLower()
+
+    # Build .env content with all sections
+    $envContent = @"
+# Django Settings
+# IMPORTANT: In .env files, escape `$ with `$`$ and % with %%
+# Example: "my-key`$123" becomes "my-key`$`$123"
+DJANGO_SECRET_KEY="$djangoSecret"
+DEBUG=$($existingValues["DEBUG"] ?? "True")
+
+# Allowed Hosts - Add your hostname/domain for network access
+# JSON array format - add your machine's hostname.local for mDNS access
+# Example: ["127.0.0.1","0.0.0.0","localhost","$hostname.local"]
+ALLOWED_HOSTS=$($existingValues["ALLOWED_HOSTS"] ?? '["127.0.0.1","0.0.0.0","localhost"]')
+
+# Database (SQLite)
+# Currently using db.sqlite3 in project root (data/db.sqlite3 in Docker)
+
+# LDAP Configuration (if enabled)
+SHOULD_USE_LDAP=$($existingValues["SHOULD_USE_LDAP"] ?? "False")
+AUTH_LDAP_SERVER_URI="$($existingValues["AUTH_LDAP_SERVER_URI"] ?? "ldap://ldap.example.com")"
+AUTH_LDAP_BIND_DN="$($existingValues["AUTH_LDAP_BIND_DN"] ?? "domain\username")"
+AUTH_LDAP_BIND_PASSWORD="$($existingValues["AUTH_LDAP_BIND_PASSWORD"] ?? "password")"
+AUTH_LDAP_SEARCH_BASE="$($existingValues["AUTH_LDAP_SEARCH_BASE"] ?? "dc=example,dc=com")"
+AUTH_LDAP_SEARCH_FILTER="$($existingValues["AUTH_LDAP_SEARCH_FILTER"] ?? "(sAMAccountName=%(user)s)")"
+AUTH_LDAP_USER_ATTR_MAP=$($existingValues["AUTH_LDAP_USER_ATTR_MAP"] ?? '{"first_name": "givenName", "last_name": "sn", "email": "mail"}')
+
+# Email Configuration
+EMAIL_HOST="$($existingValues["EMAIL_HOST"] ?? "localhost")"
+EMAIL_PORT=$($existingValues["EMAIL_PORT"] ?? "25")
+EMAIL_USE_TLS=$($existingValues["EMAIL_USE_TLS"] ?? "False")
+EMAIL_USE_SSL=$($existingValues["EMAIL_USE_SSL"] ?? "False")
+EMAIL_FROM="$($existingValues["EMAIL_FROM"] ?? "noreply@example.com")"
+
+# Encryption
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+ENCRYPTION_SECRET="$encryptionSecret"
 
 # MinIO Object Storage
 MINIO_ROOT_USER=$minioUser
 MINIO_ROOT_PASSWORD=$minioPassword
-MINIO_ENDPOINT=minio:9000
+MINIO_ENDPOINT=$($existingValues["MINIO_ENDPOINT"] ?? "minio:9000")
 MINIO_ACCESS_KEY=$minioUser
 MINIO_SECRET_KEY=$minioPassword
-MINIO_BUCKET_NAME=enterprise-app-media
-MINIO_USE_SSL=false
-USE_MINIO=true
+MINIO_BUCKET_NAME=$($existingValues["MINIO_BUCKET_NAME"] ?? "enterprise-app-media")
+MINIO_USE_SSL=$($existingValues["MINIO_USE_SSL"] ?? "false")
+USE_MINIO=$($existingValues["USE_MINIO"] ?? "true")
+
+# Public domain for file URLs (used to generate accessible URLs for MinIO files)
+# Set this to your machine's hostname and port for network access
+# Auto-detected: $hostname.local:50478
+PUBLIC_DOMAIN=$($existingValues["PUBLIC_DOMAIN"] ?? "$hostname.local:50478")
+
+# CSRF Trusted Origins (for HTTPS network access)
+# Required when accessing via HTTPS with custom hostname/port
+# Comma-separated list of full URLs including protocol, hostname, and port
+# Example: https://$hostname.local:50478
+CSRF_TRUSTED_ORIGINS_EXTRA=$($existingValues["CSRF_TRUSTED_ORIGINS_EXTRA"] ?? "")
+
+# Poppler (PDF processing) - Only needed on Windows
+POPPLER_PATH=$($existingValues["POPPLER_PATH"] ?? "")
+
+# WebAuthn / Passkey Configuration
+WEBAUTHN_ENABLED=$($existingValues["WEBAUTHN_ENABLED"] ?? "True")
+WEBAUTHN_RP_NAME="$($existingValues["WEBAUTHN_RP_NAME"] ?? "Enterprise Application Manager")"
+WEBAUTHN_RP_ID=$($existingValues["WEBAUTHN_RP_ID"] ?? "localhost")
+WEBAUTHN_ORIGIN=$($existingValues["WEBAUTHN_ORIGIN"] ?? "http://localhost:8000")
 "@
 
-    # Append to .env file
-    Add-Content -Path $envPath -Value $minioConfig
+    # Write to .env file
+    Set-Content -Path $envPath -Value $envContent -NoNewline
 
-    Print-Success "MinIO configuration added to .env!"
+    Print-Success "Environment configuration initialized!"
     Write-Host ""
-    Print-Info "Generated credentials:"
-    Write-Host "  User: $minioUser"
-    Write-Host "  Password: $minioPassword"
+    Print-Info "Generated new secrets:"
+    if (-not $existingValues.ContainsKey("DJANGO_SECRET_KEY")) {
+        Write-Host "  Django Secret: $djangoSecret"
+    }
+    if (-not $existingValues.ContainsKey("ENCRYPTION_SECRET")) {
+        Write-Host "  Encryption Secret: $encryptionSecret"
+    }
+    if (-not $existingValues.ContainsKey("MINIO_ROOT_USER")) {
+        Write-Host "  MinIO User: $minioUser"
+        Write-Host "  MinIO Password: $minioPassword"
+    }
     Write-Host ""
-    Print-Warning "Save these credentials securely!"
+    Print-Info "Existing values were preserved"
+    Write-Host ""
+    Print-Warning "Review $envPath and update values as needed"
     Write-Host ""
     Print-Info "Restart Docker to apply changes:"
     Write-Host "  docker compose down"

@@ -767,7 +767,7 @@ development_tools() {
     echo "  3) SSL certificate management"
     echo "  4) Docker status"
     echo "  5) Fix line endings"
-    echo "  6) Initialize MinIO configuration"
+    echo "  6) Initialize environment configuration"
     echo "  0) Back"
     echo ""
     echo -n "Enter choice: "
@@ -780,7 +780,7 @@ development_tools() {
         3) ssl_management ;;
         4) docker_status ;;
         5) fix_line_endings ;;
-        6) initialize_minio_config ;;
+        6) initialize_environment_config ;;
         0) return ;;
         *) print_error "Invalid option" ;;
     esac
@@ -1198,69 +1198,135 @@ fix_line_endings() {
     read -p "Press Enter to continue..."
 }
 
-# Initialize MinIO configuration
-initialize_minio_config() {
+# Initialize environment configuration
+initialize_environment_config() {
     clear
     print_header
-    print_info "Initialize MinIO Configuration in .env"
+    print_info "Initialize Environment Configuration (.env)"
     echo ""
 
     local env_path="${PROJECT_ROOT}/${ENV_FILE}"
+    declare -A existing_values
 
-    # Check if .env exists
-    if [ ! -f "$env_path" ]; then
-        print_warning ".env file not found. Creating new file..."
-        touch "$env_path"
-    fi
-
-    # Check if MinIO config already exists
-    if grep -q "MINIO_ROOT_USER" "$env_path" 2>/dev/null; then
-        print_warning "MinIO configuration already exists in .env"
+    # Read existing .env file if it exists
+    if [ -f "$env_path" ]; then
+        print_info "Reading existing .env file..."
+        while IFS='=' read -r key value; do
+            if [[ "$key" =~ ^[A-Z_][A-Z0-9_]*$ ]]; then
+                existing_values["$key"]="$value"
+            fi
+        done < "$env_path"
         echo ""
-        read -p "Overwrite with new random credentials? (y/N): " overwrite
+        print_warning "Existing .env file will be backed up and replaced with normalized version"
+        echo ""
+        read -p "Continue? (y/N): " confirm
 
-        if [[ ! "$overwrite" =~ ^[Yy]$ ]]; then
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
             print_info "Operation cancelled"
             echo ""
             read -p "Press Enter to continue..."
             return
         fi
 
-        # Remove existing MinIO section
-        sed -i.bak '/^# MinIO Object Storage/,/^USE_MINIO=/d' "$env_path"
+        # Backup existing .env
+        local backup_path="${env_path}.backup-$(date +%Y%m%d-%H%M%S)"
+        cp "$env_path" "$backup_path"
+        print_info "Backed up to: $backup_path"
     fi
 
-    # Generate random credentials
-    local random_suffix=$(openssl rand -hex 8)
-    local minio_user="admin-${random_suffix}"
-
-    # Generate random password (base64-like)
-    local minio_password=$(openssl rand -base64 32 | tr '+/' 'xy')
-
-    print_info "Generating random credentials..."
+    print_info "Generating random secrets..."
     echo ""
 
-    # MinIO configuration block
-    cat >> "$env_path" << EOF
+    # Generate random values for secrets
+    local django_secret="${existing_values[DJANGO_SECRET_KEY]:-$(openssl rand -base64 50 | tr -d '\n' | tr '+/' 'Az')}"
+    local encryption_secret="${existing_values[ENCRYPTION_SECRET]:-$(openssl rand -base64 32 | tr -d '\n')}"
+    local minio_suffix=$(openssl rand -hex 8)
+    local minio_user="${existing_values[MINIO_ROOT_USER]:-admin-${minio_suffix}}"
+    local minio_password="${existing_values[MINIO_ROOT_PASSWORD]:-$(openssl rand -base64 32 | tr '+/' 'xy')}"
+
+    # Get hostname for network access
+    local hostname=$(hostname -s | tr '[:upper:]' '[:lower:]')
+
+    # Build .env content with all sections
+    cat > "$env_path" << EOF
+# Django Settings
+# IMPORTANT: In .env files, escape \$ with \$\$ and % with %%
+# Example: "my-key\$123" becomes "my-key\$\$123"
+DJANGO_SECRET_KEY="${django_secret}"
+DEBUG=${existing_values[DEBUG]:-True}
+
+# Allowed Hosts - Add your hostname/domain for network access
+# JSON array format - add your machine's hostname.local for mDNS access
+# Example: ["127.0.0.1","0.0.0.0","localhost","${hostname}.local"]
+ALLOWED_HOSTS=${existing_values[ALLOWED_HOSTS]:-["127.0.0.1","0.0.0.0","localhost"]}
+
+# Database (SQLite)
+# Currently using db.sqlite3 in project root (data/db.sqlite3 in Docker)
+
+# LDAP Configuration (if enabled)
+SHOULD_USE_LDAP=${existing_values[SHOULD_USE_LDAP]:-False}
+AUTH_LDAP_SERVER_URI="${existing_values[AUTH_LDAP_SERVER_URI]:-ldap://ldap.example.com}"
+AUTH_LDAP_BIND_DN="${existing_values[AUTH_LDAP_BIND_DN]:-domain\\username}"
+AUTH_LDAP_BIND_PASSWORD="${existing_values[AUTH_LDAP_BIND_PASSWORD]:-password}"
+AUTH_LDAP_SEARCH_BASE="${existing_values[AUTH_LDAP_SEARCH_BASE]:-dc=example,dc=com}"
+AUTH_LDAP_SEARCH_FILTER="${existing_values[AUTH_LDAP_SEARCH_FILTER]:-(sAMAccountName=%(user)s)}"
+AUTH_LDAP_USER_ATTR_MAP=${existing_values[AUTH_LDAP_USER_ATTR_MAP]:-{\"first_name\": \"givenName\", \"last_name\": \"sn\", \"email\": \"mail\"}}
+
+# Email Configuration
+EMAIL_HOST="${existing_values[EMAIL_HOST]:-localhost}"
+EMAIL_PORT=${existing_values[EMAIL_PORT]:-25}
+EMAIL_USE_TLS=${existing_values[EMAIL_USE_TLS]:-False}
+EMAIL_USE_SSL=${existing_values[EMAIL_USE_SSL]:-False}
+EMAIL_FROM="${existing_values[EMAIL_FROM]:-noreply@example.com}"
+
+# Encryption
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+ENCRYPTION_SECRET="${encryption_secret}"
 
 # MinIO Object Storage
 MINIO_ROOT_USER=${minio_user}
 MINIO_ROOT_PASSWORD=${minio_password}
-MINIO_ENDPOINT=minio:9000
+MINIO_ENDPOINT=${existing_values[MINIO_ENDPOINT]:-minio:9000}
 MINIO_ACCESS_KEY=${minio_user}
 MINIO_SECRET_KEY=${minio_password}
-MINIO_BUCKET_NAME=enterprise-app-media
-MINIO_USE_SSL=false
-USE_MINIO=true
+MINIO_BUCKET_NAME=${existing_values[MINIO_BUCKET_NAME]:-enterprise-app-media}
+MINIO_USE_SSL=${existing_values[MINIO_USE_SSL]:-false}
+USE_MINIO=${existing_values[USE_MINIO]:-true}
+
+# Public domain for file URLs (used to generate accessible URLs for MinIO files)
+# Set this to your machine's hostname and port for network access
+# Auto-detected: ${hostname}.local:50478
+PUBLIC_DOMAIN=${existing_values[PUBLIC_DOMAIN]:-${hostname}.local:50478}
+
+# CSRF Trusted Origins (for HTTPS network access)
+# Required when accessing via HTTPS with custom hostname/port
+# Comma-separated list of full URLs including protocol, hostname, and port
+# Example: https://${hostname}.local:50478
+CSRF_TRUSTED_ORIGINS_EXTRA=${existing_values[CSRF_TRUSTED_ORIGINS_EXTRA]:-}
+
+# Poppler (PDF processing) - Only needed on Windows
+POPPLER_PATH=${existing_values[POPPLER_PATH]:-}
+
+# WebAuthn / Passkey Configuration
+WEBAUTHN_ENABLED=${existing_values[WEBAUTHN_ENABLED]:-True}
+WEBAUTHN_RP_NAME="${existing_values[WEBAUTHN_RP_NAME]:-Enterprise Application Manager}"
+WEBAUTHN_RP_ID=${existing_values[WEBAUTHN_RP_ID]:-localhost}
+WEBAUTHN_ORIGIN=${existing_values[WEBAUTHN_ORIGIN]:-http://localhost:8000}
 EOF
 
-    print_success "MinIO configuration added to .env!"
+    print_success "Environment configuration initialized!"
     echo ""
-    print_info "Generated credentials:"
-    echo "  User: ${minio_user}"
-    echo "  Password: ${minio_password}"
+    print_info "Generated new secrets:"
+    [ -z "${existing_values[DJANGO_SECRET_KEY]}" ] && echo "  Django Secret: ${django_secret}"
+    [ -z "${existing_values[ENCRYPTION_SECRET]}" ] && echo "  Encryption Secret: ${encryption_secret}"
+    if [ -z "${existing_values[MINIO_ROOT_USER]}" ]; then
+        echo "  MinIO User: ${minio_user}"
+        echo "  MinIO Password: ${minio_password}"
+    fi
     echo ""
-    print_warning "Save these credentials securely!"
+    print_info "Existing values were preserved"
+    echo ""
+    print_warning "Review $env_path and update values as needed"
     echo ""
     print_info "Restart Docker to apply changes:"
     echo "  docker compose down"
