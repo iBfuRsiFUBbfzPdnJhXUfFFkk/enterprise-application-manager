@@ -691,6 +691,7 @@ django_commands() {
     echo "  5) Create new app"
     echo "  6) Custom manage.py command"
     echo "  7) Check for issues"
+    echo "  8) Migrate files to documents"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -824,6 +825,28 @@ django_commands() {
             print_info "Checking for issues..."
             echo ""
             docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py check
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        8)
+            clear
+            print_header
+            print_info "Migrate files to documents..."
+            echo ""
+            print_warning "This creates Document records from existing file attachments and links them via M2M."
+            echo ""
+            read -p "Run with --dry-run to preview? (y/n): " dry_run_choice
+            echo ""
+
+            if [[ "$dry_run_choice" =~ ^[Yy]$ ]]; then
+                print_info "Running in dry-run mode..."
+                echo ""
+                docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_files_to_documents --dry-run
+            else
+                print_info "Running migration..."
+                echo ""
+                docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_files_to_documents
+            fi
             echo ""
             read -p "Press Enter to continue..."
             ;;
