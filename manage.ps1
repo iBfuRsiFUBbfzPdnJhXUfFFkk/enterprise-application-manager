@@ -1,4 +1,4 @@
-# Enterprise Application Manager - Interactive Management Script (PowerShell)
+﻿# Enterprise Application Manager - Interactive Management Script (PowerShell)
 # A general-purpose interactive shell for managing the application
 
 # Get the directory where this script is located

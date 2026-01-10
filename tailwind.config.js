@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './templates/**/*.html',
+    './static/**/*.js',
     './core/**/*.py',
     './git_lab/**/*.py',
     './scrum/**/*.py',

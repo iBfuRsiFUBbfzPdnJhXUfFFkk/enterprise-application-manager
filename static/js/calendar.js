@@ -220,14 +220,17 @@ function renderMonthView() {
         currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    let html = '<div class="grid grid-cols-7 gap-1">';
+    let html = '<div>';
 
-    // Header
+    // Header - separate grid for day names
+    html += '<div class="grid grid-cols-7 gap-1 mb-1">';
     ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
         html += `<div class="text-center font-semibold text-gray-700 py-2 text-sm">${day}</div>`;
     });
+    html += '</div>';
 
-    // Days
+    // Calendar body - separate grid for day cells
+    html += '<div class="grid grid-cols-7 gap-1">';
     days.forEach(day => {
         const isCurrentMonth = day.getMonth() === month;
         const isToday = isDateToday(day);
@@ -249,6 +252,7 @@ function renderMonthView() {
 
         html += '</div>';
     });
+    html += '</div>';
 
     html += '</div>';
     container.innerHTML = html;
