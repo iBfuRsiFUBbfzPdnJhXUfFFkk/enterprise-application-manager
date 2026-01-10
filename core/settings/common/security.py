@@ -18,6 +18,10 @@ csrf_extra = env(default='', var='CSRF_TRUSTED_ORIGINS_EXTRA')
 if csrf_extra:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_extra.split(',') if origin.strip()])
 
+# Security headers
+# X-Frame-Options: Allow same-origin framing (needed for PDF preview iframes)
+X_FRAME_OPTIONS = 'SAMEORIGIN'  # Default is 'DENY'
+
 # Session and cookie settings
 # Use unique cookie names to avoid conflicts when running multiple Django apps on localhost
 SESSION_COOKIE_NAME: str = 'eam_sessionid'  # Default is 'sessionid'

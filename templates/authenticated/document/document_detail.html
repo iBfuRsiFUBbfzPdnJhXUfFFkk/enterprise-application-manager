@@ -1,0 +1,352 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load templatetags_markdown %}
+{% load humanize %}
+
+{% block content %}
+    <!-- Header Section with Back Button and Actions -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'document' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ model.name }}</h1>
+                        {% if model.version %}
+                        <p class="mt-1 text-sm text-gray-500">Version {{ model.version }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    {% if model.has_file %}
+                    <a href="{{ model.get_file_url }}" download="{{ model.get_filename }}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Download
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'document_edit' model_id=model.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="space-y-6">
+
+            <!-- Document Information -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Document Information</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
+                            <dd class="text-lg text-gray-900">{{ model.name }}</dd>
+                        </div>
+                        {% if model.version %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Version</dt>
+                            <dd class="text-lg text-gray-900">{{ model.version }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if model.has_file %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Filename</dt>
+                            <dd class="text-base text-gray-900 font-mono">{{ model.get_filename }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">File Size</dt>
+                            <dd class="text-base text-gray-900">{{ model.get_file_size|filesizeformat }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if mime_type %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">File Type</dt>
+                            <dd class="text-base text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    {{ mime_type }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- File Preview Section -->
+            {% if model.has_file and file_type %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">File Preview</h2>
+                </div>
+                <div class="px-6 py-6">
+                    {% if file_type == 'image' %}
+                        <!-- Image Preview -->
+                        <div class="flex justify-center bg-gray-100 rounded-lg p-4">
+                            <img src="{{ model.get_file_url }}"
+                                 alt="{{ model.name }}"
+                                 class="max-w-full h-auto max-h-96 rounded shadow-lg"
+                                 loading="lazy">
+                        </div>
+
+                    {% elif file_type == 'pdf' %}
+                        <!-- PDF Preview using iframe -->
+                        <div class="border border-gray-200 rounded-lg overflow-hidden" style="height: 600px;">
+                            <iframe
+                                src="{{ model.get_file_url }}"
+                                class="w-full h-full"
+                                title="{{ model.name }} PDF Preview">
+                            </iframe>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500 text-center">
+                            If the PDF doesn't display, <a href="{{ model.get_file_url }}" download="{{ model.get_filename }}" class="text-blue-600 hover:text-blue-800">download it here</a>.
+                        </p>
+
+                    {% elif file_type == 'text' %}
+                        <!-- Text File Preview -->
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <p class="text-sm text-gray-600 mb-3">
+                                Text preview - <a href="{{ model.get_file_url }}" download="{{ model.get_filename }}" class="text-blue-600 hover:text-blue-800">Download full file</a>
+                            </p>
+                            <div class="bg-white rounded border border-gray-300 p-4 max-h-96 overflow-auto">
+                                <pre class="text-sm text-gray-900 whitespace-pre-wrap font-mono">{{ text_content|default:"Unable to load text content. Please download the file." }}</pre>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <!-- Unsupported File Type -->
+                        <div class="text-center py-8">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-500">Preview not available for this file type.</p>
+                            <a href="{{ model.get_file_url }}" download="{{ model.get_filename }}"
+                               class="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Download File
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Associated Applications -->
+            {% if applications %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Associated Applications</h2>
+                    <p class="mt-1 text-sm text-gray-500">Applications linked to this document</p>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="divide-y divide-gray-200">
+                        {% for application in applications %}
+                        <li class="py-3">
+                            <a href="{% url 'application_detail' model_id=application.id %}"
+                               class="flex items-center justify-between hover:bg-gray-50 -mx-2 px-2 py-2 rounded transition-colors">
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ application.acronym|default:application.name }}
+                                        </p>
+                                        {% if application.acronym and application.name != application.acronym %}
+                                        <p class="text-xs text-gray-500">{{ application.name }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bad Interactions -->
+            {% if bad_interactions %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Bad Interactions</h2>
+                    <p class="mt-1 text-sm text-gray-500">Bad interactions linked to this document</p>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="divide-y divide-gray-200">
+                        {% for interaction in bad_interactions %}
+                        <li class="py-3">
+                            <a href="{% url 'bad_interaction_detail' model_id=interaction.id %}"
+                               class="flex items-center justify-between hover:bg-gray-50 -mx-2 px-2 py-2 rounded transition-colors">
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-orange-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ interaction.person }} - {{ interaction.date_occurred|date:"M d, Y" }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">Severity: {{ interaction.severity }}</p>
+                                    </div>
+                                </div>
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Bad Interaction Updates -->
+            {% if bad_interaction_updates %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Bad Interaction Updates</h2>
+                    <p class="mt-1 text-sm text-gray-500">Updates to bad interactions linked to this document</p>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="divide-y divide-gray-200">
+                        {% for update in bad_interaction_updates %}
+                        <li class="py-3">
+                            <div class="flex items-start">
+                                <svg class="h-5 w-5 text-purple-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        Update on {{ update.bad_interaction }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        By {{ update.created_by }} on {{ update.datetime_created|date:"M d, Y g:i A" }}
+                                    </p>
+                                    {% if update.comment %}
+                                    <p class="mt-2 text-sm text-gray-700">{{ update.comment|truncatewords:20 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- HR Incident Updates -->
+            {% if hr_incident_updates %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">HR Incident Updates</h2>
+                    <p class="mt-1 text-sm text-gray-500">HR incident updates linked to this document</p>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="divide-y divide-gray-200">
+                        {% for update in hr_incident_updates %}
+                        <li class="py-3">
+                            <div class="flex items-start">
+                                <svg class="h-5 w-5 text-green-500 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        Update on {{ update.hr_incident }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        By {{ update.created_by }} on {{ update.datetime_created|date:"M d, Y g:i A" }}
+                                    </p>
+                                    {% if update.comment %}
+                                    <p class="mt-2 text-sm text-gray-700">{{ update.comment|truncatewords:20 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Comment Section -->
+            {% if model.comment %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Description</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose max-w-none">
+                        {{ model.comment|markdown }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if created_record %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
+                                {% if created_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if updated_record %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
+                                {% if updated_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
+                            <dd class="text-base text-gray-900 font-mono">{{ model.id }}</dd>
+                        </div>
+                        {% if model.migrated_to_minio %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Storage</dt>
+                            <dd class="text-base text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    MinIO Object Storage
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

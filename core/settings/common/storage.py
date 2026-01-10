@@ -17,11 +17,19 @@ if USE_MINIO:
     AWS_SECRET_ACCESS_KEY = env.str('MINIO_SECRET_KEY')
     AWS_STORAGE_BUCKET_NAME = env.str('MINIO_BUCKET_NAME', default='enterprise-app-media')
 
-    # MinIO endpoint (internal Docker service name or external URL)
+    # MinIO endpoint (internal Docker service name for S3 operations)
     MINIO_ENDPOINT = env.str('MINIO_ENDPOINT', default='minio:9000')
     AWS_S3_ENDPOINT_URL = f"http://{MINIO_ENDPOINT}"
 
-    # SSL configuration
+    # Public domain for file URLs (nginx proxies /media/ to MinIO)
+    # This allows files to be served over HTTPS through nginx
+    PUBLIC_DOMAIN = env.str('PUBLIC_DOMAIN', default='localhost:50478')
+    AWS_S3_CUSTOM_DOMAIN = f'{PUBLIC_DOMAIN}/media'
+
+    # Force HTTPS for generated URLs (with full protocol syntax)
+    AWS_S3_URL_PROTOCOL = 'https://'
+
+    # SSL configuration for S3 API operations (not URL generation)
     AWS_S3_USE_SSL = env.bool('MINIO_USE_SSL', default=False)
 
     # MinIO/S3 settings
@@ -29,8 +37,9 @@ if USE_MINIO:
     AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False  # Don't overwrite files with same name
     AWS_DEFAULT_ACL = None  # Use bucket's default ACL
-    AWS_QUERYSTRING_AUTH = True  # Generate signed URLs
+    AWS_QUERYSTRING_AUTH = False  # Disable signed URLs (using nginx proxy instead)
     AWS_QUERYSTRING_EXPIRE = 3600  # Signed URLs expire after 1 hour
+    AWS_LOCATION = ''  # No prefix for file paths (files stored at bucket root)
 
     # Django 4.2+ STORAGES setting (replaces DEFAULT_FILE_STORAGE)
     STORAGES = {

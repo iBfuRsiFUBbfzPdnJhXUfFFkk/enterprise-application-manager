@@ -44,6 +44,7 @@ services:
       - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME:-enterprise-app-media}
       - MINIO_USE_SSL=${MINIO_USE_SSL:-false}
       - USE_MINIO=${USE_MINIO:-true}
+      - PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-localhost:50478}
       # CSRF for HTTPS
       - CSRF_TRUSTED_ORIGINS_EXTRA=${CSRF_TRUSTED_ORIGINS_EXTRA:-}
       # Pass through all .env variables
