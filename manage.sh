@@ -680,9 +680,11 @@ django_commands() {
     echo "Django commands:"
     echo "  1) Run tests"
     echo "  2) Collect static files"
-    echo "  3) Create new app"
-    echo "  4) Custom manage.py command"
-    echo "  5) Check for issues"
+    echo "  3) Rebuild Tailwind CSS"
+    echo "  4) Rebuild Tailwind CSS and collect static"
+    echo "  5) Create new app"
+    echo "  6) Custom manage.py command"
+    echo "  7) Check for issues"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -723,6 +725,51 @@ django_commands() {
         3)
             clear
             print_header
+            print_info "Rebuilding Tailwind CSS..."
+            echo ""
+            if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web npm run build:css; then
+                echo ""
+                print_success "Tailwind CSS rebuilt successfully!"
+                echo ""
+                print_info "Tailwind CSS output: static/css/tailwind.css"
+            else
+                echo ""
+                print_error "Failed to rebuild Tailwind CSS"
+            fi
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        4)
+            clear
+            print_header
+            print_info "Rebuilding Tailwind CSS and collecting static files..."
+            echo ""
+
+            print_info "Step 1/2: Building Tailwind CSS..."
+            if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web npm run build:css; then
+                echo ""
+                print_success "Tailwind CSS built successfully!"
+                echo ""
+                print_info "Step 2/2: Collecting static files..."
+                if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py collectstatic --noinput; then
+                    echo ""
+                    print_success "All static files ready!"
+                    echo ""
+                    print_info "Files collected to: staticfiles/"
+                else
+                    echo ""
+                    print_error "Failed to collect static files"
+                fi
+            else
+                echo ""
+                print_error "Failed to build Tailwind CSS"
+            fi
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        5)
+            clear
+            print_header
             print_info "Creating new Django app..."
             echo ""
             echo -n "Enter app name: "
@@ -748,7 +795,7 @@ django_commands() {
             echo ""
             read -p "Press Enter to continue..."
             ;;
-        4)
+        6)
             clear
             print_header
             print_info "Custom Django command..."
@@ -765,7 +812,7 @@ django_commands() {
             echo ""
             read -p "Press Enter to continue..."
             ;;
-        5)
+        7)
             clear
             print_header
             print_info "Checking for issues..."

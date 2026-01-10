@@ -750,9 +750,11 @@ function Show-DjangoCommands {
     Write-Host "Django commands:"
     Write-Host "  1) Run tests"
     Write-Host "  2) Collect static files"
-    Write-Host "  3) Create new app"
-    Write-Host "  4) Custom manage.py command"
-    Write-Host "  5) Check for issues"
+    Write-Host "  3) Rebuild Tailwind CSS"
+    Write-Host "  4) Rebuild Tailwind CSS and collect static"
+    Write-Host "  5) Create new app"
+    Write-Host "  6) Custom manage.py command"
+    Write-Host "  7) Check for issues"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -796,6 +798,57 @@ function Show-DjangoCommands {
             '3' {
                 Clear-Host
                 Print-Header
+                Print-Info "Rebuilding Tailwind CSS..."
+                Write-Host ""
+                docker-compose -f $composeFile exec web npm run build:css
+
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host ""
+                    Print-Success "Tailwind CSS rebuilt successfully!"
+                    Write-Host ""
+                    Print-Info "Tailwind CSS output: static/css/tailwind.css"
+                } else {
+                    Write-Host ""
+                    Print-Error "Failed to rebuild Tailwind CSS"
+                }
+                Write-Host ""
+                Read-Host "Press Enter to continue"
+            }
+            '4' {
+                Clear-Host
+                Print-Header
+                Print-Info "Rebuilding Tailwind CSS and collecting static files..."
+                Write-Host ""
+
+                Print-Info "Step 1/2: Building Tailwind CSS..."
+                docker-compose -f $composeFile exec web npm run build:css
+
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Host ""
+                    Print-Success "Tailwind CSS built successfully!"
+                    Write-Host ""
+                    Print-Info "Step 2/2: Collecting static files..."
+                    docker-compose -f $composeFile exec web python manage.py collectstatic --noinput
+
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host ""
+                        Print-Success "All static files ready!"
+                        Write-Host ""
+                        Print-Info "Files collected to: staticfiles/"
+                    } else {
+                        Write-Host ""
+                        Print-Error "Failed to collect static files"
+                    }
+                } else {
+                    Write-Host ""
+                    Print-Error "Failed to build Tailwind CSS"
+                }
+                Write-Host ""
+                Read-Host "Press Enter to continue"
+            }
+            '5' {
+                Clear-Host
+                Print-Header
                 Print-Info "Creating new Django app..."
                 Write-Host ""
                 $appName = Read-Host "Enter app name"
@@ -822,7 +875,7 @@ function Show-DjangoCommands {
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }
-            '4' {
+            '6' {
                 Clear-Host
                 Print-Header
                 Print-Info "Custom Django command..."
@@ -838,7 +891,7 @@ function Show-DjangoCommands {
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }
-            '5' {
+            '7' {
                 Clear-Host
                 Print-Header
                 Print-Info "Checking for issues..."
