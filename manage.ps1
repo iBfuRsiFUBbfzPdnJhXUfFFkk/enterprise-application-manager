@@ -842,6 +842,7 @@ function Show-DevelopmentTools {
     Write-Host "  2) View environment variables"
     Write-Host "  3) SSL certificate management"
     Write-Host "  4) Docker status"
+    Write-Host "  5) Fix line endings"
     Write-Host "  0) Back"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
@@ -854,6 +855,7 @@ function Show-DevelopmentTools {
         '2' { Show-Environment }
         '3' { Show-SslManagement }
         '4' { Show-DockerStatus }
+        '5' { Fix-LineEndings }
         '0' { return }
         default { Print-Error "Invalid option" }
     }
@@ -1203,6 +1205,63 @@ function Show-DockerStatus {
     }
     Write-Host ""
 
+    Read-Host "Press Enter to continue"
+}
+
+# Fix line endings
+function Fix-LineEndings {
+    Clear-Host
+    Print-Header
+    Print-Info "Fix Line Endings for Docker Compatibility"
+    Write-Host ""
+    Print-Warning "This will renormalize all files according to .gitattributes"
+    Write-Host ""
+    Write-Host "Line ending rules:"
+    Write-Host "  • Shell scripts (.sh) -> LF (Unix)"
+    Write-Host "  • Docker files -> LF (Unix)"
+    Write-Host "  • PowerShell scripts (.ps1) -> CRLF (Windows)"
+    Write-Host ""
+    $confirm = Read-Host "Continue? (y/N)"
+
+    if ($confirm -notmatch '^[Yy]$') {
+        Print-Info "Operation cancelled"
+        Write-Host ""
+        Read-Host "Press Enter to continue"
+        return
+    }
+
+    Write-Host ""
+    Print-Info "Step 1/3: Removing files from git index..."
+    git rm --cached -r . 2>&1 | Out-Null
+
+    Print-Info "Step 2/3: Resetting git index..."
+    git reset --hard 2>&1 | Out-Null
+
+    Print-Info "Step 3/3: Renormalizing line endings..."
+    git add --renormalize . 2>&1 | Out-Null
+
+    Write-Host ""
+    Print-Success "Line endings fixed!"
+    Write-Host ""
+
+    # Check if there are any changes
+    $status = git status --porcelain
+    if ($status) {
+        Print-Warning "The following files were normalized:"
+        Write-Host ""
+        git status --short
+        Write-Host ""
+        Print-Info "You should commit these changes with:"
+        Write-Host "  git commit -m 'chore: normalize line endings'"
+    } else {
+        Print-Success "No files needed normalization."
+    }
+
+    Write-Host ""
+    Print-Info "Rebuild Docker containers to apply changes:"
+    Write-Host "  docker compose down"
+    Write-Host "  docker compose up --build"
+    Write-Host ""
     Read-Host "Press Enter to continue"
 }
 

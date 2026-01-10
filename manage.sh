@@ -766,6 +766,7 @@ development_tools() {
     echo "  2) View environment variables"
     echo "  3) SSL certificate management"
     echo "  4) Docker status"
+    echo "  5) Fix line endings"
     echo "  0) Back"
     echo ""
     echo -n "Enter choice: "
@@ -777,6 +778,7 @@ development_tools() {
         2) view_environment ;;
         3) ssl_management ;;
         4) docker_status ;;
+        5) fix_line_endings ;;
         0) return ;;
         *) print_error "Invalid option" ;;
     esac
@@ -1135,6 +1137,62 @@ docker_status() {
     docker stats --no-stream $(docker-compose -f "$DOCKER_COMPOSE_FILE" ps -q) 2>/dev/null || print_warning "No running containers"
     echo ""
 
+    read -p "Press Enter to continue..."
+}
+
+# Fix line endings
+fix_line_endings() {
+    clear
+    print_header
+    print_info "Fix Line Endings for Docker Compatibility"
+    echo ""
+    print_warning "This will renormalize all files according to .gitattributes"
+    echo ""
+    echo "Line ending rules:"
+    echo "  • Shell scripts (.sh) -> LF (Unix)"
+    echo "  • Docker files -> LF (Unix)"
+    echo "  • PowerShell scripts (.ps1) -> CRLF (Windows)"
+    echo ""
+    read -p "Continue? (y/N): " confirm
+
+    if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+        print_info "Operation cancelled"
+        echo ""
+        read -p "Press Enter to continue..."
+        return
+    fi
+
+    echo ""
+    print_info "Step 1/3: Removing files from git index..."
+    git rm --cached -r . >/dev/null 2>&1
+
+    print_info "Step 2/3: Resetting git index..."
+    git reset --hard >/dev/null 2>&1
+
+    print_info "Step 3/3: Renormalizing line endings..."
+    git add --renormalize . >/dev/null 2>&1
+
+    echo ""
+    print_success "Line endings fixed!"
+    echo ""
+
+    # Check if there are any changes
+    if [ -n "$(git status --porcelain)" ]; then
+        print_warning "The following files were normalized:"
+        echo ""
+        git status --short
+        echo ""
+        print_info "You should commit these changes with:"
+        echo "  git commit -m 'chore: normalize line endings'"
+    else
+        print_success "No files needed normalization."
+    fi
+
+    echo ""
+    print_info "Rebuild Docker containers to apply changes:"
+    echo "  docker compose down"
+    echo "  docker compose up --build"
+    echo ""
     read -p "Press Enter to continue..."
 }
 
