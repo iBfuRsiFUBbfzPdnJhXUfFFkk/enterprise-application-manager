@@ -1102,6 +1102,13 @@ function Show-SslManagement {
                 $sslScript = Join-Path $ProjectRoot "generate-ssl-cert.ps1"
                 if (Test-Path $sslScript) {
                     & $sslScript
+                    if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
+                        Write-Host ""
+                        Print-Success "Certificate generation completed!"
+                    } else {
+                        Write-Host ""
+                        Print-Error "Certificate generation failed with exit code: $LASTEXITCODE"
+                    }
                 } else {
                     Print-Error "generate-ssl-cert.ps1 not found"
                 }
@@ -1141,20 +1148,32 @@ function Show-SslManagement {
                 $sslScript = Join-Path $ProjectRoot "generate-ssl-cert.ps1"
                 if (Test-Path $sslScript) {
                     & $sslScript
-                    Write-Host ""
-                    Print-Info "Restarting nginx container..."
 
-                    if (Test-Docker) {
-                        $composeFile = Join-Path $ProjectRoot $DockerComposeFile
-                        docker-compose -f $composeFile restart nginx
+                    if ($LASTEXITCODE -eq 0 -or $null -eq $LASTEXITCODE) {
                         Write-Host ""
-                        Print-Success "SSL certificate regenerated and nginx restarted!"
-                        Write-Host ""
-                        Print-Info "Access your application at:"
-                        Write-Host "  - https://localhost:$WebPort"
-                        Write-Host "  - https://$hostname.local:$WebPort (network)"
+                        Print-Info "Restarting nginx container..."
+
+                        if (Test-Docker) {
+                            $composeFile = Join-Path $ProjectRoot $DockerComposeFile
+                            docker-compose -f $composeFile restart nginx
+
+                            if ($LASTEXITCODE -eq 0) {
+                                Write-Host ""
+                                Print-Success "SSL certificate regenerated and nginx restarted!"
+                                Write-Host ""
+                                Print-Info "Access your application at:"
+                                Write-Host "  - https://localhost:$WebPort"
+                                Write-Host "  - https://$hostname.local:$WebPort (network)"
+                            } else {
+                                Write-Host ""
+                                Print-Error "Failed to restart nginx"
+                            }
+                        } else {
+                            Print-Error "Docker is not running"
+                        }
                     } else {
-                        Print-Error "Docker is not running"
+                        Write-Host ""
+                        Print-Error "Certificate generation failed with exit code: $LASTEXITCODE"
                     }
                 } else {
                     Print-Error "generate-ssl-cert.ps1 not found"

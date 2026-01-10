@@ -1008,6 +1008,13 @@ ssl_management() {
             echo ""
             if [ -f "./generate-ssl-cert.sh" ]; then
                 ./generate-ssl-cert.sh
+                if [ $? -eq 0 ]; then
+                    echo ""
+                    print_success "Certificate generation completed!"
+                else
+                    echo ""
+                    print_error "Certificate generation failed with exit code: $?"
+                fi
             else
                 print_error "generate-ssl-cert.sh not found"
             fi
@@ -1044,19 +1051,31 @@ ssl_management() {
 
             if [ -f "./generate-ssl-cert.sh" ]; then
                 ./generate-ssl-cert.sh
-                echo ""
-                print_info "Restarting nginx container..."
+                cert_exit=$?
 
-                if check_docker; then
-                    docker-compose -f "$DOCKER_COMPOSE_FILE" restart nginx
+                if [ $cert_exit -eq 0 ]; then
                     echo ""
-                    print_success "SSL certificate regenerated and nginx restarted!"
-                    echo ""
-                    print_info "Access your application at:"
-                    echo "  - https://localhost:${WEB_PORT}"
-                    echo "  - https://${HOSTNAME}.local:${WEB_PORT} (network)"
+                    print_info "Restarting nginx container..."
+
+                    if check_docker; then
+                        docker-compose -f "$DOCKER_COMPOSE_FILE" restart nginx
+                        if [ $? -eq 0 ]; then
+                            echo ""
+                            print_success "SSL certificate regenerated and nginx restarted!"
+                            echo ""
+                            print_info "Access your application at:"
+                            echo "  - https://localhost:${WEB_PORT}"
+                            echo "  - https://${HOSTNAME}.local:${WEB_PORT} (network)"
+                        else
+                            echo ""
+                            print_error "Failed to restart nginx"
+                        fi
+                    else
+                        print_error "Docker is not running"
+                    fi
                 else
-                    print_error "Docker is not running"
+                    echo ""
+                    print_error "Certificate generation failed with exit code: $cert_exit"
                 fi
             else
                 print_error "generate-ssl-cert.sh not found"
