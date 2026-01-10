@@ -1672,8 +1672,9 @@ function Initialize-EnvironmentConfig {
         Get-Content $envPath | ForEach-Object {
             if ($_ -match '^([A-Z_][A-Z0-9_]*)=(.*)$') {
                 $value = $matches[2]
-                # Strip surrounding quotes if present
-                if ($value -match '^"(.*)"$') {
+                # Strip ALL surrounding quotes (both single and double) to prevent double-quoting
+                # Loop to remove multiple layers of quotes
+                while ($value -match '^"(.*)"$' -or $value -match "^'(.*)'$") {
                     $value = $matches[1]
                 }
                 $existingValues[$matches[1]] = $value

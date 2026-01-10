@@ -1456,6 +1456,11 @@ initialize_environment_config() {
         local default="$2"
         if [ -f "$temp_env" ]; then
             local value=$(grep "^${key}=" "$temp_env" 2>/dev/null | cut -d'=' -f2-)
+            # Strip ALL surrounding quotes (both single and double) to prevent double-quoting
+            # Loop to remove multiple layers of quotes
+            while [[ $value =~ ^\"(.*)\"$ ]] || [[ $value =~ ^\'(.*)\'$ ]]; do
+                value="${BASH_REMATCH[1]}"
+            done
             echo "${value:-$default}"
         else
             echo "$default"
