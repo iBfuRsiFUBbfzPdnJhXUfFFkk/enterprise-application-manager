@@ -680,7 +680,7 @@ django_commands() {
     echo "Django commands:"
     echo "  1) Run tests"
     echo "  2) Collect static files"
-    echo "  3) Rebuild Tailwind CSS"
+    echo "  3) Rebuild Tailwind CSS (in container - auto-builds on startup)"
     echo "  4) Rebuild Tailwind CSS and collect static"
     echo "  5) Create new app"
     echo "  6) Custom manage.py command"

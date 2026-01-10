@@ -750,7 +750,7 @@ function Show-DjangoCommands {
     Write-Host "Django commands:"
     Write-Host "  1) Run tests"
     Write-Host "  2) Collect static files"
-    Write-Host "  3) Rebuild Tailwind CSS"
+    Write-Host "  3) Rebuild Tailwind CSS (in container - auto-builds on startup)"
     Write-Host "  4) Rebuild Tailwind CSS and collect static"
     Write-Host "  5) Create new app"
     Write-Host "  6) Custom manage.py command"
