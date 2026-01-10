@@ -24,7 +24,6 @@ $MinioConsoleUrl = "http://localhost:9005"
 
 # File Paths
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$VenvDir = ".venv"
 $StaticDir = "static"
 $StaticfilesDir = "staticfiles"
 $MediaDir = "media"

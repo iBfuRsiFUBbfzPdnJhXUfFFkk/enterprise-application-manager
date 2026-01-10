@@ -25,7 +25,6 @@ MINIO_CONSOLE_URL="http://localhost:9005"
 
 # File Paths
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-VENV_DIR=".venv"
 STATIC_DIR="static"
 STATICFILES_DIR="staticfiles"
 MEDIA_DIR="media"
