@@ -109,12 +109,12 @@
                         </a>
                         <div class="flex space-x-2">
                             <!-- Bookmark Toggle -->
-                            <button onclick="toggleBookmarkOnPage(event, {{ link.id }}, {% if user in link.bookmarked_by.all %}true{% else %}false{% endif %})"
-                                    class="p-1 {% if user in link.bookmarked_by.all %}text-yellow-500{% else %}text-gray-400{% endif %} hover:text-yellow-600"
-                                    title="{% if user in link.bookmarked_by.all %}Remove bookmark{% else %}Add bookmark{% endif %}"
+                            <button onclick="toggleBookmarkOnPage(event, {{ link.id }}, {% if link.is_bookmarked_by_current_user %}true{% else %}false{% endif %})"
+                                    class="p-1 {% if link.is_bookmarked_by_current_user %}text-yellow-500{% else %}text-gray-400{% endif %} hover:text-yellow-600"
+                                    title="{% if link.is_bookmarked_by_current_user %}Remove bookmark{% else %}Add bookmark{% endif %}"
                                     data-link-id="{{ link.id }}"
-                                    data-bookmarked="{% if user in link.bookmarked_by.all %}true{% else %}false{% endif %}">
-                                <svg class="h-5 w-5 {% if user in link.bookmarked_by.all %}fill-current{% else %}stroke-current{% endif %}" viewBox="0 0 24 24" fill="{% if user in link.bookmarked_by.all %}currentColor{% else %}none{% endif %}" stroke="currentColor">
+                                    data-bookmarked="{% if link.is_bookmarked_by_current_user %}true{% else %}false{% endif %}">
+                                <svg class="h-5 w-5 {% if link.is_bookmarked_by_current_user %}fill-current{% else %}stroke-current{% endif %}" viewBox="0 0 24 24" fill="{% if link.is_bookmarked_by_current_user %}currentColor{% else %}none{% endif %}" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
                                 </svg>
                             </button>
@@ -200,12 +200,12 @@
                             <td class="px-4 py-3 whitespace-nowrap text-center">
                                 <div class="flex justify-center space-x-2">
                                     <!-- Bookmark Toggle -->
-                                    <button onclick="toggleBookmarkOnPage(event, {{ link.id }}, {% if user in link.bookmarked_by.all %}true{% else %}false{% endif %})"
-                                            class="{% if user in link.bookmarked_by.all %}text-yellow-500{% else %}text-gray-600{% endif %} hover:text-yellow-600"
-                                            title="{% if user in link.bookmarked_by.all %}Remove bookmark{% else %}Add bookmark{% endif %}"
+                                    <button onclick="toggleBookmarkOnPage(event, {{ link.id }}, {% if link.is_bookmarked_by_current_user %}true{% else %}false{% endif %})"
+                                            class="{% if link.is_bookmarked_by_current_user %}text-yellow-500{% else %}text-gray-600{% endif %} hover:text-yellow-600"
+                                            title="{% if link.is_bookmarked_by_current_user %}Remove bookmark{% else %}Add bookmark{% endif %}"
                                             data-link-id="{{ link.id }}"
-                                            data-bookmarked="{% if user in link.bookmarked_by.all %}true{% else %}false{% endif %}">
-                                        <svg class="h-5 w-5 {% if user in link.bookmarked_by.all %}fill-current{% else %}stroke-current{% endif %}" viewBox="0 0 24 24" fill="{% if user in link.bookmarked_by.all %}currentColor{% else %}none{% endif %}" stroke="currentColor">
+                                            data-bookmarked="{% if link.is_bookmarked_by_current_user %}true{% else %}false{% endif %}">
+                                        <svg class="h-5 w-5 {% if link.is_bookmarked_by_current_user %}fill-current{% else %}stroke-current{% endif %}" viewBox="0 0 24 24" fill="{% if link.is_bookmarked_by_current_user %}currentColor{% else %}none{% endif %}" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
                                         </svg>
                                     </button>

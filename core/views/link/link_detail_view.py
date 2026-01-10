@@ -7,9 +7,9 @@ from core.views.generic.generic_500 import generic_500
 
 def link_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     try:
-        link = Link.objects.prefetch_related('bookmarked_by').get(id=model_id)
+        link = Link.objects.prefetch_related('user_bookmarks').get(id=model_id)
         historical_records = link.history.all()
-        is_bookmarked = link.bookmarked_by.filter(id=request.user.id).exists()
+        is_bookmarked = link.user_bookmarks.filter(user=request.user).exists()
     except Link.DoesNotExist:
         return generic_500(request=request)
 
