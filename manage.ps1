@@ -128,6 +128,26 @@ function Start-Application {
     Push-Location $ProjectRoot
 
     try {
+        # Ensure data directory exists
+        $dataDir = Join-Path $ProjectRoot "data"
+        if (-not (Test-Path $dataDir)) {
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            Print-Info "Created data directory"
+        }
+
+        # Ensure db.sqlite3 is a file, not a directory
+        $dbPath = Join-Path $ProjectRoot $DbFile
+        if (Test-Path $dbPath -PathType Container) {
+            Print-Warning "Database path exists as directory. Removing..."
+            Remove-Item $dbPath -Force -Recurse
+        }
+
+        # Create empty database file if it doesn't exist
+        if (-not (Test-Path $dbPath)) {
+            New-Item -ItemType File -Path $dbPath -Force | Out-Null
+            Print-Info "Created empty database file"
+        }
+
         # Start docker-compose
         $composeFile = Join-Path $ProjectRoot $DockerComposeFile
         docker-compose -f $composeFile up -d

@@ -125,6 +125,22 @@ start_application() {
     # Change to project directory
     cd "$PROJECT_ROOT"
 
+    # Ensure data directory exists
+    mkdir -p data
+
+    # Ensure db.sqlite3 is a file, not a directory
+    if [ -d "$DB_FILE" ]; then
+        print_warning "Database path exists as directory. Removing..."
+        rm -rf "$DB_FILE"
+    fi
+
+    # Create empty database file if it doesn't exist
+    if [ ! -f "$DB_FILE" ]; then
+        touch "$DB_FILE"
+        print_info "Created empty database file"
+        echo ""
+    fi
+
     # Start docker-compose
     if docker-compose -f "$DOCKER_COMPOSE_FILE" up -d; then
         echo ""
