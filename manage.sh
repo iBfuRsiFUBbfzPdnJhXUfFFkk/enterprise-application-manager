@@ -1206,22 +1206,33 @@ initialize_environment_config() {
     echo ""
 
     local env_path="${PROJECT_ROOT}/${ENV_FILE}"
-    declare -A existing_values
+    local temp_env=""
+
+    # Helper function to get existing value from .env file
+    get_env_value() {
+        local key="$1"
+        local default="$2"
+        if [ -f "$temp_env" ]; then
+            local value=$(grep "^${key}=" "$temp_env" 2>/dev/null | cut -d'=' -f2-)
+            echo "${value:-$default}"
+        else
+            echo "$default"
+        fi
+    }
 
     # Read existing .env file if it exists
     if [ -f "$env_path" ]; then
         print_info "Reading existing .env file..."
-        while IFS='=' read -r key value; do
-            if [[ "$key" =~ ^[A-Z_][A-Z0-9_]*$ ]]; then
-                existing_values["$key"]="$value"
-            fi
-        done < "$env_path"
+        # Create temporary copy for reading
+        temp_env="${env_path}.tmp"
+        cp "$env_path" "$temp_env"
         echo ""
         print_warning "Existing .env file will be backed up and replaced with normalized version"
         echo ""
         read -p "Continue? (y/N): " confirm
 
         if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            [ -f "$temp_env" ] && rm -f "$temp_env"
             print_info "Operation cancelled"
             echo ""
             read -p "Press Enter to continue..."
@@ -1238,11 +1249,18 @@ initialize_environment_config() {
     echo ""
 
     # Generate random values for secrets
-    local django_secret="${existing_values[DJANGO_SECRET_KEY]:-$(openssl rand -base64 50 | tr -d '\n' | tr '+/' 'Az')}"
-    local encryption_secret="${existing_values[ENCRYPTION_SECRET]:-$(openssl rand -base64 32 | tr -d '\n')}"
+    local existing_django=$(get_env_value "DJANGO_SECRET_KEY" "")
+    local django_secret="${existing_django:-$(openssl rand -base64 50 | tr -d '\n' | tr '+/' 'Az')}"
+
+    local existing_encryption=$(get_env_value "ENCRYPTION_SECRET" "")
+    local encryption_secret="${existing_encryption:-$(openssl rand -base64 32 | tr -d '\n')}"
+
     local minio_suffix=$(openssl rand -hex 8)
-    local minio_user="${existing_values[MINIO_ROOT_USER]:-admin-${minio_suffix}}"
-    local minio_password="${existing_values[MINIO_ROOT_PASSWORD]:-$(openssl rand -base64 32 | tr '+/' 'xy')}"
+    local existing_minio_user=$(get_env_value "MINIO_ROOT_USER" "")
+    local minio_user="${existing_minio_user:-admin-${minio_suffix}}"
+
+    local existing_minio_pass=$(get_env_value "MINIO_ROOT_PASSWORD" "")
+    local minio_password="${existing_minio_pass:-$(openssl rand -base64 32 | tr '+/' 'xy')}"
 
     # Get hostname for network access
     local hostname=$(hostname -s | tr '[:upper:]' '[:lower:]')
@@ -1253,31 +1271,31 @@ initialize_environment_config() {
 # IMPORTANT: In .env files, escape \$ with \$\$ and % with %%
 # Example: "my-key\$123" becomes "my-key\$\$123"
 DJANGO_SECRET_KEY="${django_secret}"
-DEBUG=${existing_values[DEBUG]:-True}
+DEBUG=$(get_env_value "DEBUG" "True")
 
 # Allowed Hosts - Add your hostname/domain for network access
 # JSON array format - add your machine's hostname.local for mDNS access
 # Example: ["127.0.0.1","0.0.0.0","localhost","${hostname}.local"]
-ALLOWED_HOSTS=${existing_values[ALLOWED_HOSTS]:-["127.0.0.1","0.0.0.0","localhost"]}
+ALLOWED_HOSTS=$(get_env_value "ALLOWED_HOSTS" '["127.0.0.1","0.0.0.0","localhost"]')
 
 # Database (SQLite)
 # Currently using db.sqlite3 in project root (data/db.sqlite3 in Docker)
 
 # LDAP Configuration (if enabled)
-SHOULD_USE_LDAP=${existing_values[SHOULD_USE_LDAP]:-False}
-AUTH_LDAP_SERVER_URI="${existing_values[AUTH_LDAP_SERVER_URI]:-ldap://ldap.example.com}"
-AUTH_LDAP_BIND_DN="${existing_values[AUTH_LDAP_BIND_DN]:-domain\\username}"
-AUTH_LDAP_BIND_PASSWORD="${existing_values[AUTH_LDAP_BIND_PASSWORD]:-password}"
-AUTH_LDAP_SEARCH_BASE="${existing_values[AUTH_LDAP_SEARCH_BASE]:-dc=example,dc=com}"
-AUTH_LDAP_SEARCH_FILTER="${existing_values[AUTH_LDAP_SEARCH_FILTER]:-(sAMAccountName=%(user)s)}"
-AUTH_LDAP_USER_ATTR_MAP=${existing_values[AUTH_LDAP_USER_ATTR_MAP]:-{\"first_name\": \"givenName\", \"last_name\": \"sn\", \"email\": \"mail\"}}
+SHOULD_USE_LDAP=$(get_env_value "SHOULD_USE_LDAP" "False")
+AUTH_LDAP_SERVER_URI="$(get_env_value "AUTH_LDAP_SERVER_URI" "ldap://ldap.example.com")"
+AUTH_LDAP_BIND_DN="$(get_env_value "AUTH_LDAP_BIND_DN" "domain\\\\username")"
+AUTH_LDAP_BIND_PASSWORD="$(get_env_value "AUTH_LDAP_BIND_PASSWORD" "password")"
+AUTH_LDAP_SEARCH_BASE="$(get_env_value "AUTH_LDAP_SEARCH_BASE" "dc=example,dc=com")"
+AUTH_LDAP_SEARCH_FILTER="$(get_env_value "AUTH_LDAP_SEARCH_FILTER" "(sAMAccountName=%(user)s)")"
+AUTH_LDAP_USER_ATTR_MAP=$(get_env_value "AUTH_LDAP_USER_ATTR_MAP" '{"first_name": "givenName", "last_name": "sn", "email": "mail"}')
 
 # Email Configuration
-EMAIL_HOST="${existing_values[EMAIL_HOST]:-localhost}"
-EMAIL_PORT=${existing_values[EMAIL_PORT]:-25}
-EMAIL_USE_TLS=${existing_values[EMAIL_USE_TLS]:-False}
-EMAIL_USE_SSL=${existing_values[EMAIL_USE_SSL]:-False}
-EMAIL_FROM="${existing_values[EMAIL_FROM]:-noreply@example.com}"
+EMAIL_HOST="$(get_env_value "EMAIL_HOST" "localhost")"
+EMAIL_PORT=$(get_env_value "EMAIL_PORT" "25")
+EMAIL_USE_TLS=$(get_env_value "EMAIL_USE_TLS" "False")
+EMAIL_USE_SSL=$(get_env_value "EMAIL_USE_SSL" "False")
+EMAIL_FROM="$(get_env_value "EMAIL_FROM" "noreply@example.com")"
 
 # Encryption
 # Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
@@ -1286,40 +1304,43 @@ ENCRYPTION_SECRET="${encryption_secret}"
 # MinIO Object Storage
 MINIO_ROOT_USER=${minio_user}
 MINIO_ROOT_PASSWORD=${minio_password}
-MINIO_ENDPOINT=${existing_values[MINIO_ENDPOINT]:-minio:9000}
+MINIO_ENDPOINT=$(get_env_value "MINIO_ENDPOINT" "minio:9000")
 MINIO_ACCESS_KEY=${minio_user}
 MINIO_SECRET_KEY=${minio_password}
-MINIO_BUCKET_NAME=${existing_values[MINIO_BUCKET_NAME]:-enterprise-app-media}
-MINIO_USE_SSL=${existing_values[MINIO_USE_SSL]:-false}
-USE_MINIO=${existing_values[USE_MINIO]:-true}
+MINIO_BUCKET_NAME=$(get_env_value "MINIO_BUCKET_NAME" "enterprise-app-media")
+MINIO_USE_SSL=$(get_env_value "MINIO_USE_SSL" "false")
+USE_MINIO=$(get_env_value "USE_MINIO" "true")
 
 # Public domain for file URLs (used to generate accessible URLs for MinIO files)
 # Set this to your machine's hostname and port for network access
 # Auto-detected: ${hostname}.local:50478
-PUBLIC_DOMAIN=${existing_values[PUBLIC_DOMAIN]:-${hostname}.local:50478}
+PUBLIC_DOMAIN=$(get_env_value "PUBLIC_DOMAIN" "${hostname}.local:50478")
 
 # CSRF Trusted Origins (for HTTPS network access)
 # Required when accessing via HTTPS with custom hostname/port
 # Comma-separated list of full URLs including protocol, hostname, and port
 # Example: https://${hostname}.local:50478
-CSRF_TRUSTED_ORIGINS_EXTRA=${existing_values[CSRF_TRUSTED_ORIGINS_EXTRA]:-}
+CSRF_TRUSTED_ORIGINS_EXTRA=$(get_env_value "CSRF_TRUSTED_ORIGINS_EXTRA" "")
 
 # Poppler (PDF processing) - Only needed on Windows
-POPPLER_PATH=${existing_values[POPPLER_PATH]:-}
+POPPLER_PATH=$(get_env_value "POPPLER_PATH" "")
 
 # WebAuthn / Passkey Configuration
-WEBAUTHN_ENABLED=${existing_values[WEBAUTHN_ENABLED]:-True}
-WEBAUTHN_RP_NAME="${existing_values[WEBAUTHN_RP_NAME]:-Enterprise Application Manager}"
-WEBAUTHN_RP_ID=${existing_values[WEBAUTHN_RP_ID]:-localhost}
-WEBAUTHN_ORIGIN=${existing_values[WEBAUTHN_ORIGIN]:-http://localhost:8000}
+WEBAUTHN_ENABLED=$(get_env_value "WEBAUTHN_ENABLED" "True")
+WEBAUTHN_RP_NAME="$(get_env_value "WEBAUTHN_RP_NAME" "Enterprise Application Manager")"
+WEBAUTHN_RP_ID=$(get_env_value "WEBAUTHN_RP_ID" "localhost")
+WEBAUTHN_ORIGIN=$(get_env_value "WEBAUTHN_ORIGIN" "http://localhost:8000")
 EOF
+
+    # Clean up temp file
+    [ -f "$temp_env" ] && rm -f "$temp_env"
 
     print_success "Environment configuration initialized!"
     echo ""
     print_info "Generated new secrets:"
-    [ -z "${existing_values[DJANGO_SECRET_KEY]}" ] && echo "  Django Secret: ${django_secret}"
-    [ -z "${existing_values[ENCRYPTION_SECRET]}" ] && echo "  Encryption Secret: ${encryption_secret}"
-    if [ -z "${existing_values[MINIO_ROOT_USER]}" ]; then
+    [ -z "$existing_django" ] && echo "  Django Secret: ${django_secret}"
+    [ -z "$existing_encryption" ] && echo "  Encryption Secret: ${encryption_secret}"
+    if [ -z "$existing_minio_user" ]; then
         echo "  MinIO User: ${minio_user}"
         echo "  MinIO Password: ${minio_password}"
     fi

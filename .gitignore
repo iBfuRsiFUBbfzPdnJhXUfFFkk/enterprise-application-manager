@@ -32,6 +32,8 @@
 **/*.env
 .env.local
 .env.*.local
+.env.backup-*
+.env.tmp
 
 # Management scripts
 manage.config.sh

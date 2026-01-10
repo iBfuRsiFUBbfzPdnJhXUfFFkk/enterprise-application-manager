@@ -1277,6 +1277,14 @@ function Initialize-EnvironmentConfig {
     $envPath = Join-Path $ProjectRoot $EnvFile
     $existingValues = @{}
 
+    # Helper function to get existing value with default
+    function Get-EnvValue($key, $default) {
+        if ($existingValues.ContainsKey($key) -and $existingValues[$key]) {
+            return $existingValues[$key]
+        }
+        return $default
+    }
+
     # Read existing .env file if it exists
     if (Test-Path $envPath) {
         Print-Info "Reading existing .env file..."
@@ -1345,31 +1353,31 @@ function Initialize-EnvironmentConfig {
 # IMPORTANT: In .env files, escape `$ with `$`$ and % with %%
 # Example: "my-key`$123" becomes "my-key`$`$123"
 DJANGO_SECRET_KEY="$djangoSecret"
-DEBUG=$($existingValues["DEBUG"] ?? "True")
+DEBUG=$(Get-EnvValue "DEBUG" "True")
 
 # Allowed Hosts - Add your hostname/domain for network access
 # JSON array format - add your machine's hostname.local for mDNS access
 # Example: ["127.0.0.1","0.0.0.0","localhost","$hostname.local"]
-ALLOWED_HOSTS=$($existingValues["ALLOWED_HOSTS"] ?? '["127.0.0.1","0.0.0.0","localhost"]')
+ALLOWED_HOSTS=$(Get-EnvValue "ALLOWED_HOSTS" '["127.0.0.1","0.0.0.0","localhost"]')
 
 # Database (SQLite)
 # Currently using db.sqlite3 in project root (data/db.sqlite3 in Docker)
 
 # LDAP Configuration (if enabled)
-SHOULD_USE_LDAP=$($existingValues["SHOULD_USE_LDAP"] ?? "False")
-AUTH_LDAP_SERVER_URI="$($existingValues["AUTH_LDAP_SERVER_URI"] ?? "ldap://ldap.example.com")"
-AUTH_LDAP_BIND_DN="$($existingValues["AUTH_LDAP_BIND_DN"] ?? "domain\username")"
-AUTH_LDAP_BIND_PASSWORD="$($existingValues["AUTH_LDAP_BIND_PASSWORD"] ?? "password")"
-AUTH_LDAP_SEARCH_BASE="$($existingValues["AUTH_LDAP_SEARCH_BASE"] ?? "dc=example,dc=com")"
-AUTH_LDAP_SEARCH_FILTER="$($existingValues["AUTH_LDAP_SEARCH_FILTER"] ?? "(sAMAccountName=%(user)s)")"
-AUTH_LDAP_USER_ATTR_MAP=$($existingValues["AUTH_LDAP_USER_ATTR_MAP"] ?? '{"first_name": "givenName", "last_name": "sn", "email": "mail"}')
+SHOULD_USE_LDAP=$(Get-EnvValue "SHOULD_USE_LDAP" "False")
+AUTH_LDAP_SERVER_URI="$(Get-EnvValue "AUTH_LDAP_SERVER_URI" "ldap://ldap.example.com")"
+AUTH_LDAP_BIND_DN="$(Get-EnvValue "AUTH_LDAP_BIND_DN" "domain\username")"
+AUTH_LDAP_BIND_PASSWORD="$(Get-EnvValue "AUTH_LDAP_BIND_PASSWORD" "password")"
+AUTH_LDAP_SEARCH_BASE="$(Get-EnvValue "AUTH_LDAP_SEARCH_BASE" "dc=example,dc=com")"
+AUTH_LDAP_SEARCH_FILTER="$(Get-EnvValue "AUTH_LDAP_SEARCH_FILTER" "(sAMAccountName=%(user)s)")"
+AUTH_LDAP_USER_ATTR_MAP=$(Get-EnvValue "AUTH_LDAP_USER_ATTR_MAP" '{"first_name": "givenName", "last_name": "sn", "email": "mail"}')
 
 # Email Configuration
-EMAIL_HOST="$($existingValues["EMAIL_HOST"] ?? "localhost")"
-EMAIL_PORT=$($existingValues["EMAIL_PORT"] ?? "25")
-EMAIL_USE_TLS=$($existingValues["EMAIL_USE_TLS"] ?? "False")
-EMAIL_USE_SSL=$($existingValues["EMAIL_USE_SSL"] ?? "False")
-EMAIL_FROM="$($existingValues["EMAIL_FROM"] ?? "noreply@example.com")"
+EMAIL_HOST="$(Get-EnvValue "EMAIL_HOST" "localhost")"
+EMAIL_PORT=$(Get-EnvValue "EMAIL_PORT" "25")
+EMAIL_USE_TLS=$(Get-EnvValue "EMAIL_USE_TLS" "False")
+EMAIL_USE_SSL=$(Get-EnvValue "EMAIL_USE_SSL" "False")
+EMAIL_FROM="$(Get-EnvValue "EMAIL_FROM" "noreply@example.com")"
 
 # Encryption
 # Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
@@ -1378,32 +1386,32 @@ ENCRYPTION_SECRET="$encryptionSecret"
 # MinIO Object Storage
 MINIO_ROOT_USER=$minioUser
 MINIO_ROOT_PASSWORD=$minioPassword
-MINIO_ENDPOINT=$($existingValues["MINIO_ENDPOINT"] ?? "minio:9000")
+MINIO_ENDPOINT=$(Get-EnvValue "MINIO_ENDPOINT" "minio:9000")
 MINIO_ACCESS_KEY=$minioUser
 MINIO_SECRET_KEY=$minioPassword
-MINIO_BUCKET_NAME=$($existingValues["MINIO_BUCKET_NAME"] ?? "enterprise-app-media")
-MINIO_USE_SSL=$($existingValues["MINIO_USE_SSL"] ?? "false")
-USE_MINIO=$($existingValues["USE_MINIO"] ?? "true")
+MINIO_BUCKET_NAME=$(Get-EnvValue "MINIO_BUCKET_NAME" "enterprise-app-media")
+MINIO_USE_SSL=$(Get-EnvValue "MINIO_USE_SSL" "false")
+USE_MINIO=$(Get-EnvValue "USE_MINIO" "true")
 
 # Public domain for file URLs (used to generate accessible URLs for MinIO files)
 # Set this to your machine's hostname and port for network access
 # Auto-detected: $hostname.local:50478
-PUBLIC_DOMAIN=$($existingValues["PUBLIC_DOMAIN"] ?? "$hostname.local:50478")
+PUBLIC_DOMAIN=$(Get-EnvValue "PUBLIC_DOMAIN" "$hostname.local:50478")
 
 # CSRF Trusted Origins (for HTTPS network access)
 # Required when accessing via HTTPS with custom hostname/port
 # Comma-separated list of full URLs including protocol, hostname, and port
 # Example: https://$hostname.local:50478
-CSRF_TRUSTED_ORIGINS_EXTRA=$($existingValues["CSRF_TRUSTED_ORIGINS_EXTRA"] ?? "")
+CSRF_TRUSTED_ORIGINS_EXTRA=$(Get-EnvValue "CSRF_TRUSTED_ORIGINS_EXTRA" "")
 
 # Poppler (PDF processing) - Only needed on Windows
-POPPLER_PATH=$($existingValues["POPPLER_PATH"] ?? "")
+POPPLER_PATH=$(Get-EnvValue "POPPLER_PATH" "")
 
 # WebAuthn / Passkey Configuration
-WEBAUTHN_ENABLED=$($existingValues["WEBAUTHN_ENABLED"] ?? "True")
-WEBAUTHN_RP_NAME="$($existingValues["WEBAUTHN_RP_NAME"] ?? "Enterprise Application Manager")"
-WEBAUTHN_RP_ID=$($existingValues["WEBAUTHN_RP_ID"] ?? "localhost")
-WEBAUTHN_ORIGIN=$($existingValues["WEBAUTHN_ORIGIN"] ?? "http://localhost:8000")
+WEBAUTHN_ENABLED=$(Get-EnvValue "WEBAUTHN_ENABLED" "True")
+WEBAUTHN_RP_NAME="$(Get-EnvValue "WEBAUTHN_RP_NAME" "Enterprise Application Manager")"
+WEBAUTHN_RP_ID=$(Get-EnvValue "WEBAUTHN_RP_ID" "localhost")
+WEBAUTHN_ORIGIN=$(Get-EnvValue "WEBAUTHN_ORIGIN" "http://localhost:8000")
 "@
 
     # Write to .env file
