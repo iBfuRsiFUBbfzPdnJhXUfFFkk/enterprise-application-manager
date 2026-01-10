@@ -546,8 +546,7 @@ minio_management() {
     echo "  1) Create bucket"
     echo "  2) Show credentials"
     echo "  3) Open MinIO console in browser"
-    echo "  4) Migrate files to MinIO"
-    echo "  5) Verify MinIO connection"
+    echo "  4) Verify MinIO connection"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -612,41 +611,6 @@ minio_management() {
         4)
             clear
             print_header
-            print_info "Migrating files to MinIO..."
-            echo ""
-            echo "Migration options:"
-            echo "  1) Dry run (preview changes)"
-            echo "  2) Migrate all files"
-            echo "  3) Verify migration"
-            echo "  0) Cancel"
-            echo ""
-            echo -n "Enter choice: "
-            read -n 1 -s migrate_choice
-            echo ""
-
-            case $migrate_choice in
-                1)
-                    print_info "Running dry run..."
-                    docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_to_minio --dry-run
-                    ;;
-                2)
-                    print_info "Migrating files..."
-                    docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_to_minio
-                    ;;
-                3)
-                    print_info "Verifying migration..."
-                    docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_to_minio --verify
-                    ;;
-                0)
-                    print_info "Migration cancelled"
-                    ;;
-            esac
-            echo ""
-            read -p "Press Enter to continue..."
-            ;;
-        5)
-            clear
-            print_header
             print_info "Verifying MinIO connection..."
             echo ""
             if docker ps --format '{{.Names}}' | grep -q "$MINIO_CONTAINER"; then
@@ -691,7 +655,6 @@ django_commands() {
     echo "  5) Create new app"
     echo "  6) Custom manage.py command"
     echo "  7) Check for issues"
-    echo "  8) Migrate files to documents"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -825,28 +788,6 @@ django_commands() {
             print_info "Checking for issues..."
             echo ""
             docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py check
-            echo ""
-            read -p "Press Enter to continue..."
-            ;;
-        8)
-            clear
-            print_header
-            print_info "Migrate files to documents..."
-            echo ""
-            print_warning "This creates Document records from existing file attachments and links them via M2M."
-            echo ""
-            read -p "Run with --dry-run to preview? (y/n): " dry_run_choice
-            echo ""
-
-            if [[ "$dry_run_choice" =~ ^[Yy]$ ]]; then
-                print_info "Running in dry-run mode..."
-                echo ""
-                docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_files_to_documents --dry-run
-            else
-                print_info "Running migration..."
-                echo ""
-                docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate_files_to_documents
-            fi
             echo ""
             read -p "Press Enter to continue..."
             ;;

@@ -595,8 +595,7 @@ function Show-MinioManagement {
     Write-Host "  1) Create bucket"
     Write-Host "  2) Show credentials"
     Write-Host "  3) Open MinIO console in browser"
-    Write-Host "  4) Migrate files to MinIO"
-    Write-Host "  5) Verify MinIO connection"
+    Write-Host "  4) Verify MinIO connection"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -676,42 +675,6 @@ function Show-MinioManagement {
             '4' {
                 Clear-Host
                 Print-Header
-                Print-Info "Migrating files to MinIO..."
-                Write-Host ""
-                Write-Host "Migration options:"
-                Write-Host "  1) Dry run (preview changes)"
-                Write-Host "  2) Migrate all files"
-                Write-Host "  3) Verify migration"
-                Write-Host "  0) Cancel"
-                Write-Host ""
-                Write-Host -NoNewline "Enter choice: "
-
-                $migrateChoice = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown").Character
-                Write-Host ""
-
-                switch ($migrateChoice) {
-                    '1' {
-                        Print-Info "Running dry run..."
-                        docker-compose -f $composeFile exec web python manage.py migrate_to_minio --dry-run
-                    }
-                    '2' {
-                        Print-Info "Migrating files..."
-                        docker-compose -f $composeFile exec web python manage.py migrate_to_minio
-                    }
-                    '3' {
-                        Print-Info "Verifying migration..."
-                        docker-compose -f $composeFile exec web python manage.py migrate_to_minio --verify
-                    }
-                    '0' {
-                        Print-Info "Migration cancelled"
-                    }
-                }
-                Write-Host ""
-                Read-Host "Press Enter to continue"
-            }
-            '5' {
-                Clear-Host
-                Print-Header
                 Print-Info "Verifying MinIO connection..."
                 Write-Host ""
 
@@ -761,7 +724,6 @@ function Show-DjangoCommands {
     Write-Host "  5) Create new app"
     Write-Host "  6) Custom manage.py command"
     Write-Host "  7) Check for issues"
-    Write-Host "  8) Migrate files to documents"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -904,28 +866,6 @@ function Show-DjangoCommands {
                 Print-Info "Checking for issues..."
                 Write-Host ""
                 docker-compose -f $composeFile exec web python manage.py check
-                Write-Host ""
-                Read-Host "Press Enter to continue"
-            }
-            '8' {
-                Clear-Host
-                Print-Header
-                Print-Info "Migrate files to documents..."
-                Write-Host ""
-                Print-Warning "This creates Document records from existing file attachments and links them via M2M."
-                Write-Host ""
-                $dryRunChoice = Read-Host "Run with --dry-run to preview? (y/n)"
-                Write-Host ""
-
-                if ($dryRunChoice -match '^[Yy]$') {
-                    Print-Info "Running in dry-run mode..."
-                    Write-Host ""
-                    docker-compose -f $composeFile exec web python manage.py migrate_files_to_documents --dry-run
-                } else {
-                    Print-Info "Running migration..."
-                    Write-Host ""
-                    docker-compose -f $composeFile exec web python manage.py migrate_files_to_documents
-                }
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }

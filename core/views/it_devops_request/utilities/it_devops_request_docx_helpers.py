@@ -263,6 +263,7 @@ def add_updates_section(document: Document, updates) -> None:
 
 def add_attachments_section(document: Document, request: ITDevOpsRequest) -> None:
     """Add attachments section with embedded content (text, images, PDFs as images)."""
+    import mimetypes
     from PIL import Image
 
     if not request.attachments.exists():
@@ -272,27 +273,45 @@ def add_attachments_section(document: Document, request: ITDevOpsRequest) -> Non
 
     first_attachment = True
     for attachment in request.attachments.all():
+        # Skip if no file attached
+        if not attachment.file:
+            continue
+
         # Add page break before each attachment except the first
         if not first_attachment:
             document.add_page_break()
         first_attachment = False
 
+        # Get file info from MinIO
+        filename = attachment.get_filename()
+        file_size = attachment.get_file_size()
+
+        # Guess content type from filename
+        content_type, _ = mimetypes.guess_type(filename) if filename else (None, None)
+        if not content_type:
+            content_type = 'application/octet-stream'
+
         # Add filename as heading
-        document.add_heading(attachment.blob_filename, level=3)
+        document.add_heading(filename or "Untitled", level=3)
 
         # Check file size
-        if attachment.blob_size > MAX_EMBED_SIZE:
+        if file_size and file_size > MAX_EMBED_SIZE:
             para = document.add_paragraph()
-            para.add_run(f"File Type: {attachment.blob_content_type}\n").bold = True
-            para.add_run(f"File Size: {format_file_size(attachment.blob_size)}\n\n")
+            para.add_run(f"File Type: {content_type}\n").bold = True
+            para.add_run(f"File Size: {format_file_size(file_size)}\n\n")
             para.add_run("This file is too large to embed (>10MB).").italic = True
             continue
 
-        handler = get_attachment_handler(attachment.blob_content_type)
+        handler = get_attachment_handler(content_type)
 
         if handler == "text":
             try:
-                text = attachment.blob_data.decode("utf-8", errors="ignore")
+                # Read file from MinIO
+                attachment.file.open('rb')
+                file_data = attachment.file.read()
+                attachment.file.close()
+
+                text = file_data.decode("utf-8", errors="ignore")
                 # Add text content with monospace font
                 lines = text.split("\n")
                 for line in lines:
@@ -306,7 +325,12 @@ def add_attachments_section(document: Document, request: ITDevOpsRequest) -> Non
 
         elif handler == "image":
             try:
-                img = Image.open(BytesIO(attachment.blob_data))
+                # Read file from MinIO
+                attachment.file.open('rb')
+                file_data = attachment.file.read()
+                attachment.file.close()
+
+                img = Image.open(BytesIO(file_data))
                 # Resize if needed
                 max_width = 6.5
                 max_height = 8.0
@@ -325,7 +349,12 @@ def add_attachments_section(document: Document, request: ITDevOpsRequest) -> Non
 
         elif handler == "pdf":
             try:
-                images = convert_pdf_to_images(attachment.blob_data)
+                # Read file from MinIO
+                attachment.file.open('rb')
+                file_data = attachment.file.read()
+                attachment.file.close()
+
+                images = convert_pdf_to_images(file_data)
                 if images:
                     for i, img in enumerate(images):
                         if i > 0:
@@ -354,6 +383,7 @@ def add_attachments_section(document: Document, request: ITDevOpsRequest) -> Non
         else:
             # Unsupported file type - show metadata
             para = document.add_paragraph()
-            para.add_run(f"File Type: {attachment.blob_content_type}\n").bold = True
-            para.add_run(f"File Size: {format_file_size(attachment.blob_size)}\n\n")
+            para.add_run(f"File Type: {content_type}\n").bold = True
+            if file_size:
+                para.add_run(f"File Size: {format_file_size(file_size)}\n\n")
             para.add_run("This file type cannot be embedded in the document.").italic = True

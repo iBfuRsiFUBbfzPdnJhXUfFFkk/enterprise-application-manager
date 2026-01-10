@@ -6,7 +6,6 @@ from core.views.hr_incident import (
     hr_incident_add_view,
     hr_incident_delete_view,
     hr_incident_detail_view,
-    hr_incident_download_update_attachment_view,
     hr_incident_edit_view,
     hr_incident_view,
 )
@@ -31,8 +30,4 @@ urlpatterns_hr_incident.append(
 # Add update views
 urlpatterns_hr_incident.append(
     path(name='hr_incident_add_update', route='hr-incident/<int:model_id>/add-update/', view=hr_incident_add_update_view)
-)
-
-urlpatterns_hr_incident.append(
-    path(name='hr_incident_download_update_attachment', route='hr-incident/update/<int:update_id>/download-attachment/', view=hr_incident_download_update_attachment_view)
 )

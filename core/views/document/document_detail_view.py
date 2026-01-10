@@ -23,9 +23,9 @@ def document_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
 
     if document.has_file:
         filename = document.get_filename()
-        mime_type = document.blob_content_type if document.blob_content_type else None
 
-        if not mime_type and filename:
+        # Guess MIME type from filename
+        if filename:
             mime_type, _ = mimetypes.guess_type(filename)
 
         # Categorize for template
