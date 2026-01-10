@@ -251,19 +251,12 @@ def format_file_size(size_bytes: int) -> str:
 
 def convert_pdf_to_images(pdf_bytes: bytes, max_pages: int = 50) -> list[Image.Image]:
     """Convert PDF bytes to a list of PIL images (one per page)."""
-    from django.conf import settings
-
     try:
-        # Get poppler path from settings (optional)
-        poppler_path = getattr(settings, 'POPPLER_PATH', None)
-
-        # Don't specify output_folder to avoid Windows file locking issues
-        # pdf2image will handle temp files internally
+        # pdf2image will use poppler from system PATH
         images = convert_from_bytes(
             pdf_bytes,
             dpi=150,
-            fmt="png",
-            poppler_path=poppler_path
+            fmt="png"
         )
         # Limit number of pages to avoid memory issues
         return images[:max_pages]

@@ -1791,9 +1791,6 @@ PUBLIC_DOMAIN=$(Get-EnvValue "PUBLIC_DOMAIN" "$hostname.local:50478")
 # Example: https://$hostname.local:50478
 CSRF_TRUSTED_ORIGINS_EXTRA=$(Get-EnvValue "CSRF_TRUSTED_ORIGINS_EXTRA" "")
 
-# Poppler (PDF processing) - Only needed on Windows
-POPPLER_PATH=$(Get-EnvValue "POPPLER_PATH" "")
-
 # WebAuthn / Passkey Configuration
 WEBAUTHN_ENABLED=$(Get-EnvValue "WEBAUTHN_ENABLED" "True")
 WEBAUTHN_RP_NAME="$(Get-EnvValue "WEBAUTHN_RP_NAME" "Enterprise Application Manager")"

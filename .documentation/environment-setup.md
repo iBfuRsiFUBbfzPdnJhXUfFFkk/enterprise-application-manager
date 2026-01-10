@@ -26,7 +26,6 @@ EMAIL_PORT=25
 EMAIL_USE_SSL=False
 EMAIL_USE_TLS=False
 ENCRYPTION_SECRET="******"
-POPPLER_PATH="C:/Program Files/poppler/bin"
 SHOULD_USE_LDAP=False
 ```
 
@@ -42,10 +41,6 @@ SHOULD_USE_LDAP=False
 - **DEBUG** - Enable debug mode (default: False)
 - **ALLOWED_HOSTS** - JSON array of allowed hosts (default: ["localhost", "127.0.0.1"])
 - **SHOULD_USE_LDAP** - Enable LDAP authentication (default: False)
-- **POPPLER_PATH** - Path to poppler bin directory for PDF to image conversion (optional)
-  - Windows: Set to the bin directory, e.g., `C:/Program Files/poppler/bin`
-  - Unix/Mac: Leave empty to use system PATH
-  - Download poppler for Windows: https://github.com/oschwartz10612/poppler-windows/releases/
 
 #### LDAP Variables (if SHOULD_USE_LDAP=True)
 
