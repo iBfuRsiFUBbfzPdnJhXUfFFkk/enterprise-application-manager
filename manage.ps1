@@ -843,6 +843,7 @@ function Show-DevelopmentTools {
     Write-Host "  3) SSL certificate management"
     Write-Host "  4) Docker status"
     Write-Host "  5) Fix line endings"
+    Write-Host "  6) Initialize MinIO configuration"
     Write-Host "  0) Back"
     Write-Host ""
     Write-Host -NoNewline "Enter choice: "
@@ -856,6 +857,7 @@ function Show-DevelopmentTools {
         '3' { Show-SslManagement }
         '4' { Show-DockerStatus }
         '5' { Fix-LineEndings }
+        '6' { Initialize-MinioConfig }
         '0' { return }
         default { Print-Error "Invalid option" }
     }
@@ -1261,6 +1263,85 @@ function Fix-LineEndings {
     Print-Info "Rebuild Docker containers to apply changes:"
     Write-Host "  docker compose down"
     Write-Host "  docker compose up --build"
+    Write-Host ""
+    Read-Host "Press Enter to continue"
+}
+
+# Initialize MinIO configuration
+function Initialize-MinioConfig {
+    Clear-Host
+    Print-Header
+    Print-Info "Initialize MinIO Configuration in .env"
+    Write-Host ""
+
+    $envPath = Join-Path $ProjectRoot $EnvFile
+
+    # Check if .env exists
+    if (-not (Test-Path $envPath)) {
+        Print-Warning ".env file not found. Creating new file..."
+        New-Item -ItemType File -Path $envPath -Force | Out-Null
+    }
+
+    # Check if MinIO config already exists
+    $envContent = Get-Content $envPath -Raw -ErrorAction SilentlyContinue
+    if ($envContent -match "MINIO_ROOT_USER") {
+        Print-Warning "MinIO configuration already exists in .env"
+        Write-Host ""
+        $overwrite = Read-Host "Overwrite with new random credentials? (y/N)"
+
+        if ($overwrite -notmatch '^[Yy]$') {
+            Print-Info "Operation cancelled"
+            Write-Host ""
+            Read-Host "Press Enter to continue"
+            return
+        }
+
+        # Remove existing MinIO section
+        $envContent = $envContent -replace '(?ms)^# MinIO Object Storage.*?(?=^#|\z)', ''
+        $envContent = $envContent.Trim()
+        Set-Content -Path $envPath -Value $envContent -NoNewline
+    }
+
+    # Generate random credentials
+    $randomSuffix = -join ((48..57) + (97..102) | Get-Random -Count 16 | ForEach-Object {[char]$_})
+    $minioUser = "admin-$randomSuffix"
+
+    # Generate random password (base64-like)
+    $bytes = New-Object byte[] 32
+    [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($bytes)
+    $minioPassword = [Convert]::ToBase64String($bytes).Replace('+', 'x').Replace('/', 'y')
+
+    Print-Info "Generating random credentials..."
+    Write-Host ""
+
+    # MinIO configuration block
+    $minioConfig = @"
+
+# MinIO Object Storage
+MINIO_ROOT_USER=$minioUser
+MINIO_ROOT_PASSWORD=$minioPassword
+MINIO_ENDPOINT=minio:9000
+MINIO_ACCESS_KEY=$minioUser
+MINIO_SECRET_KEY=$minioPassword
+MINIO_BUCKET_NAME=enterprise-app-media
+MINIO_USE_SSL=false
+USE_MINIO=true
+"@
+
+    # Append to .env file
+    Add-Content -Path $envPath -Value $minioConfig
+
+    Print-Success "MinIO configuration added to .env!"
+    Write-Host ""
+    Print-Info "Generated credentials:"
+    Write-Host "  User: $minioUser"
+    Write-Host "  Password: $minioPassword"
+    Write-Host ""
+    Print-Warning "Save these credentials securely!"
+    Write-Host ""
+    Print-Info "Restart Docker to apply changes:"
+    Write-Host "  docker compose down"
+    Write-Host "  docker compose up -d"
     Write-Host ""
     Read-Host "Press Enter to continue"
 }

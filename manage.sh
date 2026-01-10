@@ -767,6 +767,7 @@ development_tools() {
     echo "  3) SSL certificate management"
     echo "  4) Docker status"
     echo "  5) Fix line endings"
+    echo "  6) Initialize MinIO configuration"
     echo "  0) Back"
     echo ""
     echo -n "Enter choice: "
@@ -779,6 +780,7 @@ development_tools() {
         3) ssl_management ;;
         4) docker_status ;;
         5) fix_line_endings ;;
+        6) initialize_minio_config ;;
         0) return ;;
         *) print_error "Invalid option" ;;
     esac
@@ -1192,6 +1194,77 @@ fix_line_endings() {
     print_info "Rebuild Docker containers to apply changes:"
     echo "  docker compose down"
     echo "  docker compose up --build"
+    echo ""
+    read -p "Press Enter to continue..."
+}
+
+# Initialize MinIO configuration
+initialize_minio_config() {
+    clear
+    print_header
+    print_info "Initialize MinIO Configuration in .env"
+    echo ""
+
+    local env_path="${PROJECT_ROOT}/${ENV_FILE}"
+
+    # Check if .env exists
+    if [ ! -f "$env_path" ]; then
+        print_warning ".env file not found. Creating new file..."
+        touch "$env_path"
+    fi
+
+    # Check if MinIO config already exists
+    if grep -q "MINIO_ROOT_USER" "$env_path" 2>/dev/null; then
+        print_warning "MinIO configuration already exists in .env"
+        echo ""
+        read -p "Overwrite with new random credentials? (y/N): " overwrite
+
+        if [[ ! "$overwrite" =~ ^[Yy]$ ]]; then
+            print_info "Operation cancelled"
+            echo ""
+            read -p "Press Enter to continue..."
+            return
+        fi
+
+        # Remove existing MinIO section
+        sed -i.bak '/^# MinIO Object Storage/,/^USE_MINIO=/d' "$env_path"
+    fi
+
+    # Generate random credentials
+    local random_suffix=$(openssl rand -hex 8)
+    local minio_user="admin-${random_suffix}"
+
+    # Generate random password (base64-like)
+    local minio_password=$(openssl rand -base64 32 | tr '+/' 'xy')
+
+    print_info "Generating random credentials..."
+    echo ""
+
+    # MinIO configuration block
+    cat >> "$env_path" << EOF
+
+# MinIO Object Storage
+MINIO_ROOT_USER=${minio_user}
+MINIO_ROOT_PASSWORD=${minio_password}
+MINIO_ENDPOINT=minio:9000
+MINIO_ACCESS_KEY=${minio_user}
+MINIO_SECRET_KEY=${minio_password}
+MINIO_BUCKET_NAME=enterprise-app-media
+MINIO_USE_SSL=false
+USE_MINIO=true
+EOF
+
+    print_success "MinIO configuration added to .env!"
+    echo ""
+    print_info "Generated credentials:"
+    echo "  User: ${minio_user}"
+    echo "  Password: ${minio_password}"
+    echo ""
+    print_warning "Save these credentials securely!"
+    echo ""
+    print_info "Restart Docker to apply changes:"
+    echo "  docker compose down"
+    echo "  docker compose up -d"
     echo ""
     read -p "Press Enter to continue..."
 }
