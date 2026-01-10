@@ -1,12 +1,66 @@
-**/.idea/
-**/.venv/
-**/data.json
-**/__pycache__/*
-**/*.DS_Store
-**/.documentation/*
-**/.git/*
-**/.gitignore
-**/*.sqlite3
-**/docker-compose.yml
-**/*.md
-**/*.env
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.venv
+venv
+env
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+.documentation/
+.planning/
+
+# Data (don't copy to image, use volumes)
+db.sqlite3
+data/
+media/
+staticfiles/
+backups/
+
+# Certificates
+certs/
+*.pem
+*.key
+*.csr
+
+# Environment
+.env
+.env.*
+manage.config.sh
+manage.config.ps1
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Docker
+docker-compose.yml
+docker-compose.override.yml

@@ -42,6 +42,10 @@ from core.urls.urlpatterns_meeting_action_item import urlpatterns_meeting_action
 from core.urls.urlpatterns_onboard_procedure import urlpatterns_onboard_procedure
 from core.urls.urlpatterns_login import urlpatterns_login
 from core.urls.urlpatterns_logout import urlpatterns_logout
+from core.urls.urlpatterns_passkey import (
+    urlpatterns_passkey_authenticated,
+    urlpatterns_passkey_public,
+)
 from core.urls.urlpatterns_organization import urlpatterns_organization
 from core.urls.urlpatterns_person import urlpatterns_person
 from core.urls.urlpatterns_policy import urlpatterns_policy
@@ -122,6 +126,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_meeting_action_item,
     *urlpatterns_onboard_procedure,
     *urlpatterns_logout,
+    *urlpatterns_passkey_authenticated,
     *urlpatterns_organization,
     *urlpatterns_person,
     *urlpatterns_policy,
@@ -157,6 +162,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
 urlpatterns: list[URLPattern | URLResolver] = [
     path(name="index", route="", view=login_required(function=home_view)),
     *urlpatterns_login,
+    *urlpatterns_passkey_public,
     # Public short URL redirect (no authentication required)
     path(name="link_short_redirect", route='-/<str:short_code>/', view=link_short_redirect_view),
     path(name="authenticated", route='authenticated/', view=include(arg=urlpatterns_authenticated)),

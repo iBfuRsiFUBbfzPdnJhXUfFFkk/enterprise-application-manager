@@ -5,11 +5,69 @@
 !**/.idea/runConfigurations/
 **/*.iml
 
-**/*.sqlite3
-**/*.env
-**/data.json
+# Python
 **/__pycache__/
 **/*.pyc
 **/*.pyo
+**/*.pyd
+.Python
+**/*.so
+**/*.egg
+**/*.egg-info
+**/dist/
+**/build/
+**/.venv/
+**/venv/
+**/env/
+
+# Django
+**/*.sqlite3
+**/*.db
+**/data.json
+**/media/
+**/staticfiles/
+**/local_settings.py
+
+# Environment
+**/*.env
+.env.local
+.env.*.local
+
+# Management scripts
+manage.config.sh
+manage.config.ps1
+
+# Docker
+docker-compose.override.yml
+
+# SSL Certificates
+certs/
+**/*.pem
+**/*.key
+**/*.csr
+
+# Data directories
+data/
+backups/
+
+# Logs
+logs/
+**/*.log
+
+# OS
 **/*.DS_Store
+**/Thumbs.db
+
+# IDE
+.vscode/
+**/*.swp
+**/*.swo
+*~
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Misc
 **/qodana.sarif.json

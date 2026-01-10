@@ -20,6 +20,10 @@ from core.settings.common.security import *
 from core.settings.common.templates import *
 # noinspection PyUnresolvedReferences
 from core.settings.common.urls_and_directories import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.storage import *
+# noinspection PyUnresolvedReferences
+from core.settings.common.webauthn import *
 
 # https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 WSGI_APPLICATION = 'core.wsgi.application'

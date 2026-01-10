@@ -14,4 +14,5 @@ INSTALLED_APPS = [
     'hijack',
     'hijack.contrib.admin',
     'django.contrib.humanize',
+    'storages',  # Django-storages for S3/MinIO support
 ]

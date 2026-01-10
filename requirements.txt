@@ -1,8 +1,11 @@
 asgiref==3.8.1
 certifi==2025.1.31
-cffi==1.17.1
+asn1crypto==1.5.1
+cbor2==5.8.0
+cffi==2.0.0
 charset-normalizer==3.4.1
-cryptography==44.0.1
+cryptography==46.0.3
+pyOpenSSL==25.3.0
 Django==5.1.7
 django-auth-ldap==5.1.0
 django-environ==0.12.0
@@ -36,3 +39,9 @@ six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.15.0
 urllib3==2.3.0
+webauthn==2.7.0
+boto3==1.35.94
+botocore==1.35.99
+django-storages==1.14.4
+jmespath==1.0.1
+s3transfer==0.10.4
