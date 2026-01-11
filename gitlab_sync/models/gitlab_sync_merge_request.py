@@ -45,6 +45,8 @@ class GitLabSyncMergeRequest(
     Improved implementation with enhanced pipeline and code review tracking.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     assignees = create_generic_m2m(
         related_name="merge_requests_assigned",
         to="gitlab_sync.GitLabSyncUser",

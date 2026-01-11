@@ -14,6 +14,8 @@ class ApplicationPin(AbstractBaseModel):
     and reorder them via drag-and-drop functionality.
     """
 
+    _disable_history = True  # User preference/UI state - low business value for audit trail
+
     application = create_generic_fk(
         related_name='pins',
         to=Application,

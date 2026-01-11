@@ -36,6 +36,8 @@ class GitLabSyncProject(
     Improved implementation with enhanced repository tracking capabilities.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     application = create_generic_fk(
         related_name="gitlab_sync_projects",
         to="core.Application",

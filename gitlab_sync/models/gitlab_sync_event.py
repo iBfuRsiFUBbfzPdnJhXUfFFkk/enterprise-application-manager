@@ -19,6 +19,8 @@ class GitLabSyncEvent(
     Events track user activity like pushes, issues, merge requests, comments, etc.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     gitlab_id: int | None = create_generic_integer()
     project = create_generic_fk(
         related_name="events",

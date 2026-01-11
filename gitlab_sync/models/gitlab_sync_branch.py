@@ -17,6 +17,8 @@ class GitLabSyncBranch(
     New entity for tracking branches and their status.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     project = create_generic_fk(
         related_name="branches",
         to="gitlab_sync.GitLabSyncProject",

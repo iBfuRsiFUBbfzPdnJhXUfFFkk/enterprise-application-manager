@@ -28,6 +28,8 @@ class GitLabSyncJob(
     New entity for tracking individual build/test/deploy jobs.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     pipeline = create_generic_fk(
         related_name="jobs",
         to="gitlab_sync.GitLabSyncPipeline",

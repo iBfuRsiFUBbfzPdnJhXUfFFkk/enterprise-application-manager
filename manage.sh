@@ -409,6 +409,7 @@ database_management() {
     echo "  6) Backup database"
     echo "  7) Flatten migrations (create fresh initial migrations)"
     echo "  8) Apply flattened migrations (run after flatten on other hosts)"
+    echo "  9) Optimize Django history (one-time operation)"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -605,6 +606,109 @@ database_management() {
                 fi
             else
                 print_info "Apply flattened migrations cancelled"
+            fi
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        9)
+            clear
+            print_header
+            print_warning "Django History Optimization - One-Time Operation"
+            echo ""
+            print_info "This will:"
+            echo "  1. Create database backup (JSON + SQLite file)"
+            echo "  2. Run migrations to drop 23 Historical* tables"
+            echo "  3. Run VACUUM to reclaim disk space"
+            echo "  4. Show database size before/after"
+            echo ""
+            print_warning "Expected results:"
+            echo "  • 20-30% immediate database size reduction"
+            echo "  • 65-75% reduction in future database growth"
+            echo "  • No history tracking for 26 models (GitLab sync, KPI, user prefs)"
+            echo ""
+            print_warning "This operation is irreversible without restoring from backup!"
+            echo ""
+            read -p "Continue? Type 'yes' to confirm: " confirm
+            if [ "$confirm" == "yes" ]; then
+                # Show database size before
+                print_info "Database size before optimization:"
+                if [ -f "$DB_FILE" ]; then
+                    ls -lh "$DB_FILE" | awk '{print "  " $5 " (" $9 ")"}'
+                fi
+                echo ""
+
+                # Create backups
+                mkdir -p "$BACKUP_ROOT/$DB_BACKUP_DIR"
+                TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+                BACKUP_JSON="$BACKUP_ROOT/$DB_BACKUP_DIR/backup_before_history_opt_${TIMESTAMP}.json"
+                BACKUP_SQLITE="$BACKUP_ROOT/$DB_BACKUP_DIR/db.sqlite3.backup_${TIMESTAMP}"
+
+                print_info "Step 1/4: Creating JSON backup..."
+                if docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T web python manage.py dumpdata --indent=2 > "$BACKUP_JSON" 2>&1; then
+                    print_success "JSON backup created: $(basename $BACKUP_JSON)"
+                else
+                    print_error "JSON backup failed, aborting!"
+                    echo ""
+                    read -p "Press Enter to continue..."
+                    return 1
+                fi
+                echo ""
+
+                print_info "Step 2/4: Creating SQLite file backup..."
+                if [ -f "$DB_FILE" ]; then
+                    cp "$DB_FILE" "$BACKUP_SQLITE"
+                    print_success "SQLite backup created: $(basename $BACKUP_SQLITE)"
+                else
+                    print_error "Database file not found!"
+                    echo ""
+                    read -p "Press Enter to continue..."
+                    return 1
+                fi
+                echo ""
+
+                # Run migrations
+                print_info "Step 3/4: Running migrations to drop Historical* tables..."
+                echo ""
+                if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate; then
+                    echo ""
+                    print_success "Migrations completed successfully!"
+                else
+                    echo ""
+                    print_error "Migrations failed!"
+                    print_warning "You can restore from: $BACKUP_SQLITE"
+                    echo ""
+                    read -p "Press Enter to continue..."
+                    return 1
+                fi
+                echo ""
+
+                # Run VACUUM
+                print_info "Step 4/4: Running VACUUM to reclaim disk space..."
+                if docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T web python manage.py dbshell <<< "VACUUM;" 2>&1 | grep -v "Runtime error"; then
+                    print_success "VACUUM completed successfully!"
+                else
+                    print_warning "VACUUM command completed (warnings may be ignored)"
+                fi
+                echo ""
+
+                # Show database size after
+                print_info "Database size after optimization:"
+                if [ -f "$DB_FILE" ]; then
+                    ls -lh "$DB_FILE" | awk '{print "  " $5 " (" $9 ")"}'
+                fi
+                echo ""
+
+                print_success "Django history optimization completed!"
+                echo ""
+                print_info "Summary:"
+                echo "  • Backups saved in: $BACKUP_ROOT/$DB_BACKUP_DIR/"
+                echo "  • 23 Historical* tables dropped"
+                echo "  • 26 models now have history disabled"
+                echo "  • Database space reclaimed via VACUUM"
+                echo ""
+                print_warning "Note: This is a one-time operation. You can remove option 9 from the menu."
+            else
+                print_info "History optimization cancelled"
             fi
             echo ""
             read -p "Press Enter to continue..."

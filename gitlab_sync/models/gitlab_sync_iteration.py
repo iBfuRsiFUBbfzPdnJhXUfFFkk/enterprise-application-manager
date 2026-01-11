@@ -23,6 +23,8 @@ class GitLabSyncIteration(
     Iterations are used for agile planning and tracking work over time periods.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     group = create_generic_fk(
         related_name="iterations",
         to="gitlab_sync.GitLabSyncGroup",

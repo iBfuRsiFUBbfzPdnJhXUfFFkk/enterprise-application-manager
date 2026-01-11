@@ -31,6 +31,8 @@ class GitLabSyncGroup(
     Improved implementation with better error handling and validation.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     full_name: str | None = create_generic_varchar()
     full_path: str | None = create_generic_varchar()
     visibility: str | None = create_generic_varchar()

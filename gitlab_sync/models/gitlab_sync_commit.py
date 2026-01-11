@@ -25,6 +25,8 @@ class GitLabSyncCommit(
     New entity for tracking individual commits and code changes.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     sha: str | None = create_generic_varchar()
     short_id: str | None = create_generic_varchar()
     author = create_generic_fk(

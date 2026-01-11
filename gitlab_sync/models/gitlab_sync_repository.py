@@ -12,6 +12,8 @@ class GitLabSyncRepository(AbstractBaseModel):
     New entity for tracking repository-specific data from GitLab EE 17.11.6.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     project = create_generic_fk(
         related_name="repositories",
         to="gitlab_sync.GitLabSyncProject",

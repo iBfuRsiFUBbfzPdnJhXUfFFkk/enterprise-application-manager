@@ -23,6 +23,8 @@ class GitLabSyncMilestone(
     Milestones are used to track issues and merge requests over a period of time.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     project = create_generic_fk(
         related_name="milestones",
         to="gitlab_sync.GitLabSyncProject",

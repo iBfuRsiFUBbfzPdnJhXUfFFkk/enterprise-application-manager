@@ -40,6 +40,8 @@ class GitLabSyncEpic(
     Only available in GitLab Enterprise Edition.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     group = create_generic_fk(
         related_name="epics",
         to="gitlab_sync.GitLabSyncGroup",

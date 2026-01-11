@@ -25,6 +25,8 @@ class PasskeyChallenge(AbstractBaseModel):
     Challenges expire after 5 minutes for security.
     """
 
+    _disable_history = True  # Temporary data, expires in 5 minutes
+
     challenge_type: str = create_generic_enum(choices=CHALLENGE_TYPE_CHOICES)
     challenge: str = models.TextField()
     user = models.ForeignKey(

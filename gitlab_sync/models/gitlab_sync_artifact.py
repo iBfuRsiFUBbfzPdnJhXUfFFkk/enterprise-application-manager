@@ -14,6 +14,8 @@ class GitLabSyncArtifact(AbstractBaseModel):
     New entity for tracking build outputs and artifacts.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     job = create_generic_fk(
         related_name="artifacts",
         to="gitlab_sync.GitLabSyncJob",

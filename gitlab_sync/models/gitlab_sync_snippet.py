@@ -21,6 +21,8 @@ class GitLabSyncSnippet(
     Snippets are small pieces of code or text stored in GitLab.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     project = create_generic_fk(
         related_name="snippets",
         to="gitlab_sync.GitLabSyncProject",

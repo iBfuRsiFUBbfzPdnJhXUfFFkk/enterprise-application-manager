@@ -29,6 +29,8 @@ class GitLabSyncSecurityReport(
     - Coverage Fuzzing
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     project = create_generic_fk(
         related_name="security_reports",
         to="gitlab_sync.GitLabSyncProject",

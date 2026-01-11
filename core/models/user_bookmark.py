@@ -12,6 +12,8 @@ class UserBookmark(AbstractBaseModel):
     Allows bookmarks to be organized into folders.
     """
 
+    _disable_history = True  # User preference/UI state - low business value for audit trail
+
     user = create_generic_fk(
         to=settings.AUTH_USER_MODEL,
         related_name='user_bookmarks',

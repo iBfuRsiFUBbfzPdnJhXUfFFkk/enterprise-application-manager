@@ -31,6 +31,8 @@ class GitLabSyncUser(
     Improved implementation with additional user metadata tracking.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     expires_at: datetime | None = create_generic_datetime()
     last_synced_at: datetime | None = create_generic_datetime()
     locked: bool | None = create_generic_boolean()

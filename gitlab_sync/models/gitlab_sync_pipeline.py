@@ -27,6 +27,8 @@ class GitLabSyncPipeline(
     New entity for tracking pipeline executions and build status.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     project = create_generic_fk(
         related_name="pipelines",
         to="gitlab_sync.GitLabSyncProject",

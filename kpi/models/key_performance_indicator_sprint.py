@@ -26,6 +26,8 @@ class KeyPerformanceIndicatorSprint(
     AbstractComment,
     AbstractScrumCapacityBase,
 ):
+    _disable_history = True  # Cached/computed data - history exists in source models (sprints, issues)
+
     cached_capacity_adjusted: int | None = create_generic_integer()
     cached_capacity_base_velocity: float | None = create_generic_decimal()
     cached_capacity_per_day: float | None = create_generic_decimal()

@@ -24,6 +24,8 @@ class GitLabSyncJobTracker(AbstractBaseModel):
     and check back later without using Celery or external task queues.
     """
 
+    _disable_history = True  # Synced from GitLab - authoritative history exists in external system
+
     job_type: str | None = create_generic_enum(choices=GITLAB_SYNC_JOB_TYPE_CHOICES)
     status: str | None = create_generic_enum(choices=GITLAB_SYNC_JOB_STATUS_CHOICES)
     progress_percent: int | None = create_generic_integer()

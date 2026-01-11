@@ -10,6 +10,8 @@ from django_generic_model_fields.create_generic_varchar import (
 
 
 class APIRequestExecution(AbstractBaseModel):
+    _disable_history = True  # High-volume operational log with large JSON payloads
+
     api_request = create_generic_fk(to='APIRequest', related_name='executions')
     executed_by = create_generic_fk(to='Person', related_name='api_executions')
     executed_at = models.DateTimeField(auto_now_add=True)

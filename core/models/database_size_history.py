@@ -7,6 +7,8 @@ from django_generic_model_fields.create_generic_integer import create_generic_in
 class DatabaseSizeHistory(AbstractBaseModel):
     """Tracks historical database table sizes for trend analysis."""
 
+    _disable_history = True  # Already a history tracking model, meta-history not needed
+
     table_name = create_generic_varchar()
     size_bytes = models.BigIntegerField(help_text="Size of table data in bytes")
     index_size_bytes = models.BigIntegerField(
