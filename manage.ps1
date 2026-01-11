@@ -232,7 +232,9 @@ function Restart-Application {
 
     try {
         $composeFile = Join-Path $ProjectRoot $DockerComposeFile
-        docker-compose -f $composeFile restart
+        # Restart docker-compose (using down/up to recreate containers and pick up volume changes)
+        docker-compose -f $composeFile down
+        docker-compose -f $composeFile up -d
 
         if ($LASTEXITCODE -eq 0) {
             Write-Host ""

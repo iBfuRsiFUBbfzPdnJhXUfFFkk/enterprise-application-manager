@@ -215,8 +215,8 @@ restart_application() {
     # Change to project directory
     cd "$PROJECT_ROOT"
 
-    # Restart docker-compose
-    if docker-compose -f "$DOCKER_COMPOSE_FILE" restart; then
+    # Restart docker-compose (using down/up to recreate containers and pick up volume changes)
+    if docker-compose -f "$DOCKER_COMPOSE_FILE" down && docker-compose -f "$DOCKER_COMPOSE_FILE" up -d; then
         echo ""
         print_success "Application restarted successfully!"
         echo ""

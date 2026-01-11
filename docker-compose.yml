@@ -29,11 +29,11 @@ services:
     container_name: enterprise-app-web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
+      - ./data/db.sqlite3:/app/db.sqlite3  # Database persistence (must be before .:/app)
       - .:/app                    # Bind mount for hot reload
       - /app/.venv                # Exclude venv from container
       - /app/.git                 # Exclude .git to reduce watches
       - /app/node_modules         # Exclude node_modules (built in container)
-      - ./data/db.sqlite3:/app/db.sqlite3  # Database persistence
     expose:
       - "8000"
     environment:
