@@ -731,9 +731,10 @@ function Show-DatabaseManagement {
                     # Create JSON backup if requested
                     if ($jsonBackupChoice -match '^[Yy]$') {
                         $totalSteps = 4
-                        Print-Info "Step $stepNum/$totalSteps`: Creating JSON backup (excluding Historical* tables)..."
-                        # Exclude all Historical* models to avoid "table does not exist" errors
-                        docker-compose -f $composeFile exec -T web python manage.py dumpdata --indent=2 --exclude=contenttypes --exclude=admin.logentry | Out-File -FilePath $backupJson -Encoding utf8
+                        Print-Info "Step $stepNum/$totalSteps`: Creating JSON backup (excluding apps with dropped Historical* tables)..."
+                        # Exclude apps with dropped Historical* tables to avoid "table does not exist" errors
+                        # gitlab_sync, kpi, and core have already dropped their historical tables
+                        docker-compose -f $composeFile exec -T web python manage.py dumpdata --indent=2 --exclude=contenttypes --exclude=admin.logentry --exclude=gitlab_sync --exclude=kpi --exclude=core | Out-File -FilePath $backupJson -Encoding utf8
                         if ($LASTEXITCODE -eq 0) {
                             Print-Success "JSON backup created: $(Split-Path $backupJson -Leaf)"
                         } else {

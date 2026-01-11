@@ -657,12 +657,16 @@ database_management() {
                 # Create JSON backup if requested
                 if [[ "$json_backup_choice" =~ ^[Yy]$ ]]; then
                     TOTAL_STEPS=4
-                    print_info "Step $STEP_NUM/$TOTAL_STEPS: Creating JSON backup (excluding Historical* tables)..."
-                    # Exclude all Historical* models to avoid "table does not exist" errors
+                    print_info "Step $STEP_NUM/$TOTAL_STEPS: Creating JSON backup (excluding apps with dropped Historical* tables)..."
+                    # Exclude apps with dropped Historical* tables to avoid "table does not exist" errors
+                    # gitlab_sync, kpi, and core have already dropped their historical tables
                     if docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T web python manage.py dumpdata \
                         --indent=2 \
                         --exclude=contenttypes \
                         --exclude=admin.logentry \
+                        --exclude=gitlab_sync \
+                        --exclude=kpi \
+                        --exclude=core \
                         > "$BACKUP_JSON" 2>&1; then
                         print_success "JSON backup created: $(basename $BACKUP_JSON)"
                     else
