@@ -407,6 +407,7 @@ database_management() {
     echo "  4) Reset database"
     echo "  5) Show migrations status"
     echo "  6) Backup database"
+    echo "  7) Flatten migrations (create fresh initial migrations)"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -514,6 +515,70 @@ database_management() {
                 print_success "Database backed up to: $BACKUP_FILE"
             else
                 print_error "Database file not found: $DB_FILE"
+            fi
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        7)
+            clear
+            print_header
+            print_warning "WARNING: This will delete all existing migration files and create fresh ones!"
+            print_warning "This should ONLY be done when all hosts are up to date with current migrations."
+            echo ""
+            print_info "This tool will:"
+            echo "  1. Backup the current database"
+            echo "  2. Delete all migration files (except __init__.py)"
+            echo "  3. Create new fresh initial migrations"
+            echo "  4. Fake-apply the new migrations to existing database"
+            echo ""
+            read -p "Are you sure? Type 'yes' to confirm: " confirm
+            if [ "$confirm" == "yes" ]; then
+                # Create backup first
+                mkdir -p "$BACKUP_ROOT/$DB_BACKUP_DIR"
+                TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+                BACKUP_FILE="$BACKUP_ROOT/$DB_BACKUP_DIR/db_backup_${TIMESTAMP}.sqlite3"
+                print_info "Backing up database first..."
+                if [ -f "$DB_FILE" ]; then
+                    cp "$DB_FILE" "$BACKUP_FILE"
+                    print_success "Database backed up to: $BACKUP_FILE"
+                else
+                    print_warning "Database file not found, proceeding anyway..."
+                fi
+                echo ""
+
+                # Find all Django apps with migrations
+                print_info "Finding Django apps with migrations..."
+                APPS=$(find . -type d -name migrations -path "*/migrations" | grep -v __pycache__ | sed 's|./||' | sed 's|/migrations||' | sort)
+                echo "$APPS"
+                echo ""
+
+                # Delete migration files (keep __init__.py)
+                print_info "Deleting old migration files..."
+                for app in $APPS; do
+                    echo "  Processing $app..."
+                    find "$app/migrations" -name "*.py" ! -name "__init__.py" -type f -delete
+                done
+                print_success "Old migration files deleted"
+                echo ""
+
+                # Create new initial migrations
+                print_info "Creating fresh initial migrations..."
+                echo ""
+                docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py makemigrations
+                echo ""
+                print_success "Fresh migrations created"
+                echo ""
+
+                # Fake-apply migrations to existing database
+                print_info "Fake-applying migrations to existing database..."
+                echo ""
+                docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate --fake-initial
+                echo ""
+                print_success "Migrations flattened successfully!"
+                echo ""
+                print_info "IMPORTANT: After deploying to other hosts, run: python manage.py migrate --fake-initial"
+            else
+                print_info "Flatten migrations cancelled"
             fi
             echo ""
             read -p "Press Enter to continue..."

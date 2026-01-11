@@ -441,6 +441,7 @@ function Show-DatabaseManagement {
     Write-Host "  4) Reset database"
     Write-Host "  5) Show migrations status"
     Write-Host "  6) Backup database"
+    Write-Host "  7) Flatten migrations (create fresh initial migrations)"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -562,6 +563,85 @@ function Show-DatabaseManagement {
                     Print-Success "Database backed up to: $backupFile"
                 } else {
                     Print-Error "Database file not found: $dbPath"
+                }
+                Write-Host ""
+                Read-Host "Press Enter to continue"
+            }
+            '7' {
+                Clear-Host
+                Print-Header
+                Print-Warning "WARNING: This will delete all existing migration files and create fresh ones!"
+                Print-Warning "This should ONLY be done when all hosts are up to date with current migrations."
+                Write-Host ""
+                Print-Info "This tool will:"
+                Write-Host "  1. Backup the current database"
+                Write-Host "  2. Delete all migration files (except __init__.py)"
+                Write-Host "  3. Create new fresh initial migrations"
+                Write-Host "  4. Fake-apply the new migrations to existing database"
+                Write-Host ""
+                $confirm = Read-Host "Are you sure? Type 'yes' to confirm"
+
+                if ($confirm -eq "yes") {
+                    # Create backup first
+                    $backupDir = Join-Path $BackupRoot $DbBackupDir
+                    if (-not (Test-Path $backupDir)) {
+                        New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
+                    }
+
+                    $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+                    $backupFile = Join-Path $backupDir "db_backup_${timestamp}.sqlite3"
+                    Print-Info "Backing up database first..."
+
+                    $dbPath = Join-Path $ProjectRoot $DbFile
+                    if (Test-Path $dbPath) {
+                        Copy-Item $dbPath $backupFile
+                        Print-Success "Database backed up to: $backupFile"
+                    } else {
+                        Print-Warning "Database file not found, proceeding anyway..."
+                    }
+                    Write-Host ""
+
+                    # Find all Django apps with migrations
+                    Print-Info "Finding Django apps with migrations..."
+                    $apps = Get-ChildItem -Path . -Directory -Recurse -Filter "migrations" |
+                            Where-Object { $_.FullName -notmatch "__pycache__" } |
+                            ForEach-Object {
+                                $_.Parent.FullName.Replace((Get-Location).Path, "").TrimStart("\").TrimStart("/")
+                            } |
+                            Sort-Object
+                    $apps | ForEach-Object { Write-Host $_ }
+                    Write-Host ""
+
+                    # Delete migration files (keep __init__.py)
+                    Print-Info "Deleting old migration files..."
+                    foreach ($app in $apps) {
+                        Write-Host "  Processing $app..."
+                        $migrationsPath = Join-Path $app "migrations"
+                        Get-ChildItem -Path $migrationsPath -Filter "*.py" |
+                            Where-Object { $_.Name -ne "__init__.py" } |
+                            Remove-Item -Force
+                    }
+                    Print-Success "Old migration files deleted"
+                    Write-Host ""
+
+                    # Create new initial migrations
+                    Print-Info "Creating fresh initial migrations..."
+                    Write-Host ""
+                    docker-compose -f $composeFile exec web python manage.py makemigrations
+                    Write-Host ""
+                    Print-Success "Fresh migrations created"
+                    Write-Host ""
+
+                    # Fake-apply migrations to existing database
+                    Print-Info "Fake-applying migrations to existing database..."
+                    Write-Host ""
+                    docker-compose -f $composeFile exec web python manage.py migrate --fake-initial
+                    Write-Host ""
+                    Print-Success "Migrations flattened successfully!"
+                    Write-Host ""
+                    Print-Info "IMPORTANT: After deploying to other hosts, run: python manage.py migrate --fake-initial"
+                } else {
+                    Print-Info "Flatten migrations cancelled"
                 }
                 Write-Host ""
                 Read-Host "Press Enter to continue"
