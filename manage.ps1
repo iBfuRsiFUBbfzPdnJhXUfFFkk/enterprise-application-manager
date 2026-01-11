@@ -442,6 +442,7 @@ function Show-DatabaseManagement {
     Write-Host "  5) Show migrations status"
     Write-Host "  6) Backup database"
     Write-Host "  7) Flatten migrations (create fresh initial migrations)"
+    Write-Host "  8) Apply flattened migrations (run after flatten on other hosts)"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -639,9 +640,37 @@ function Show-DatabaseManagement {
                     Write-Host ""
                     Print-Success "Migrations flattened successfully!"
                     Write-Host ""
-                    Print-Info "IMPORTANT: After deploying to other hosts, run: python manage.py migrate --fake-initial"
+                    Print-Info "IMPORTANT: After deploying to other hosts, run option 8 or: python manage.py migrate --fake-initial"
                 } else {
                     Print-Info "Flatten migrations cancelled"
+                }
+                Write-Host ""
+                Read-Host "Press Enter to continue"
+            }
+            '8' {
+                Clear-Host
+                Print-Header
+                Print-Info "This option applies flattened migrations from another host."
+                Print-Info "Use this AFTER migrations have been flattened on the main host."
+                Write-Host ""
+                Print-Warning "This will mark the initial migrations as applied without running them."
+                Write-Host ""
+                $confirm = Read-Host "Continue? Type 'yes' to confirm"
+
+                if ($confirm -eq "yes") {
+                    Print-Info "Applying flattened migrations..."
+                    Write-Host ""
+                    docker-compose -f $composeFile exec web python manage.py migrate --fake-initial
+
+                    if ($LASTEXITCODE -eq 0) {
+                        Write-Host ""
+                        Print-Success "Flattened migrations applied successfully!"
+                    } else {
+                        Write-Host ""
+                        Print-Error "Failed to apply flattened migrations"
+                    }
+                } else {
+                    Print-Info "Apply flattened migrations cancelled"
                 }
                 Write-Host ""
                 Read-Host "Press Enter to continue"

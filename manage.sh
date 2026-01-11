@@ -408,6 +408,7 @@ database_management() {
     echo "  5) Show migrations status"
     echo "  6) Backup database"
     echo "  7) Flatten migrations (create fresh initial migrations)"
+    echo "  8) Apply flattened migrations (run after flatten on other hosts)"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -576,9 +577,34 @@ database_management() {
                 echo ""
                 print_success "Migrations flattened successfully!"
                 echo ""
-                print_info "IMPORTANT: After deploying to other hosts, run: python manage.py migrate --fake-initial"
+                print_info "IMPORTANT: After deploying to other hosts, run option 8 or: python manage.py migrate --fake-initial"
             else
                 print_info "Flatten migrations cancelled"
+            fi
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        8)
+            clear
+            print_header
+            print_info "This option applies flattened migrations from another host."
+            print_info "Use this AFTER migrations have been flattened on the main host."
+            echo ""
+            print_warning "This will mark the initial migrations as applied without running them."
+            echo ""
+            read -p "Continue? Type 'yes' to confirm: " confirm
+            if [ "$confirm" == "yes" ]; then
+                print_info "Applying flattened migrations..."
+                echo ""
+                if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate --fake-initial; then
+                    echo ""
+                    print_success "Flattened migrations applied successfully!"
+                else
+                    echo ""
+                    print_error "Failed to apply flattened migrations"
+                fi
+            else
+                print_info "Apply flattened migrations cancelled"
             fi
             echo ""
             read -p "Press Enter to continue..."
