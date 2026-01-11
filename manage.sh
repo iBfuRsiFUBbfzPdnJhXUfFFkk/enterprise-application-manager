@@ -630,6 +630,14 @@ database_management() {
             echo ""
             read -p "Continue? Type 'yes' to confirm: " confirm
             if [ "$confirm" == "yes" ]; then
+                # Ask if user wants JSON backup (can be slow and may have issues)
+                echo ""
+                print_warning "JSON backup can be slow and may fail on large databases."
+                print_info "SQLite file backup is faster and always created."
+                echo ""
+                read -p "Create JSON backup? (y/N): " json_backup_choice
+                echo ""
+
                 # Show database size before
                 print_info "Database size before optimization:"
                 if [ -f "$DB_FILE" ]; then
@@ -643,18 +651,32 @@ database_management() {
                 BACKUP_JSON="$BACKUP_ROOT/$DB_BACKUP_DIR/backup_before_history_opt_${TIMESTAMP}.json"
                 BACKUP_SQLITE="$BACKUP_ROOT/$DB_BACKUP_DIR/db.sqlite3.backup_${TIMESTAMP}"
 
-                print_info "Step 1/4: Creating JSON backup..."
-                if docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T web python manage.py dumpdata --indent=2 > "$BACKUP_JSON" 2>&1; then
-                    print_success "JSON backup created: $(basename $BACKUP_JSON)"
-                else
-                    print_error "JSON backup failed, aborting!"
-                    echo ""
-                    read -p "Press Enter to continue..."
-                    return 1
-                fi
-                echo ""
+                STEP_NUM=1
+                TOTAL_STEPS=3
 
-                print_info "Step 2/4: Creating SQLite file backup..."
+                # Create JSON backup if requested
+                if [[ "$json_backup_choice" =~ ^[Yy]$ ]]; then
+                    TOTAL_STEPS=4
+                    print_info "Step $STEP_NUM/$TOTAL_STEPS: Creating JSON backup (excluding Historical* tables)..."
+                    # Exclude all Historical* models to avoid "table does not exist" errors
+                    if docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T web python manage.py dumpdata \
+                        --indent=2 \
+                        --exclude=contenttypes \
+                        --exclude=admin.logentry \
+                        > "$BACKUP_JSON" 2>&1; then
+                        print_success "JSON backup created: $(basename $BACKUP_JSON)"
+                    else
+                        print_warning "JSON backup failed, continuing with SQLite backup only..."
+                        rm -f "$BACKUP_JSON"
+                    fi
+                    echo ""
+                    STEP_NUM=$((STEP_NUM + 1))
+                else
+                    print_info "Skipping JSON backup (SQLite file backup will be created)"
+                    echo ""
+                fi
+
+                print_info "Step $STEP_NUM/$TOTAL_STEPS: Creating SQLite file backup..."
                 if [ -f "$DB_FILE" ]; then
                     cp "$DB_FILE" "$BACKUP_SQLITE"
                     print_success "SQLite backup created: $(basename $BACKUP_SQLITE)"
@@ -665,9 +687,10 @@ database_management() {
                     return 1
                 fi
                 echo ""
+                STEP_NUM=$((STEP_NUM + 1))
 
                 # Run migrations
-                print_info "Step 3/4: Running migrations to drop Historical* tables..."
+                print_info "Step $STEP_NUM/$TOTAL_STEPS: Running migrations to drop Historical* tables..."
                 echo ""
                 if docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py migrate; then
                     echo ""
@@ -681,9 +704,10 @@ database_management() {
                     return 1
                 fi
                 echo ""
+                STEP_NUM=$((STEP_NUM + 1))
 
                 # Run VACUUM
-                print_info "Step 4/4: Running VACUUM to reclaim disk space..."
+                print_info "Step $STEP_NUM/$TOTAL_STEPS: Running VACUUM to reclaim disk space..."
                 if docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T web python manage.py dbshell <<< "VACUUM;" 2>&1 | grep -v "Runtime error"; then
                     print_success "VACUUM completed successfully!"
                 else

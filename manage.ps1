@@ -697,6 +697,14 @@ function Show-DatabaseManagement {
                 $confirm = Read-Host "Continue? Type 'yes' to confirm"
 
                 if ($confirm -eq "yes") {
+                    # Ask if user wants JSON backup (can be slow and may have issues)
+                    Write-Host ""
+                    Print-Warning "JSON backup can be slow and may fail on large databases."
+                    Print-Info "SQLite file backup is faster and always created."
+                    Write-Host ""
+                    $jsonBackupChoice = Read-Host "Create JSON backup? (y/N)"
+                    Write-Host ""
+
                     # Show database size before
                     Print-Info "Database size before optimization:"
                     $dbPath = Join-Path $ProjectRoot $DbFile
@@ -717,19 +725,31 @@ function Show-DatabaseManagement {
                     $backupJson = Join-Path $backupDir "backup_before_history_opt_${timestamp}.json"
                     $backupSqlite = Join-Path $backupDir "db.sqlite3.backup_${timestamp}"
 
-                    Print-Info "Step 1/4: Creating JSON backup..."
-                    docker-compose -f $composeFile exec -T web python manage.py dumpdata --indent=2 | Out-File -FilePath $backupJson -Encoding utf8
-                    if ($LASTEXITCODE -eq 0) {
-                        Print-Success "JSON backup created: $(Split-Path $backupJson -Leaf)"
-                    } else {
-                        Print-Error "JSON backup failed, aborting!"
-                        Write-Host ""
-                        Read-Host "Press Enter to continue"
-                        return
-                    }
-                    Write-Host ""
+                    $stepNum = 1
+                    $totalSteps = 3
 
-                    Print-Info "Step 2/4: Creating SQLite file backup..."
+                    # Create JSON backup if requested
+                    if ($jsonBackupChoice -match '^[Yy]$') {
+                        $totalSteps = 4
+                        Print-Info "Step $stepNum/$totalSteps`: Creating JSON backup (excluding Historical* tables)..."
+                        # Exclude all Historical* models to avoid "table does not exist" errors
+                        docker-compose -f $composeFile exec -T web python manage.py dumpdata --indent=2 --exclude=contenttypes --exclude=admin.logentry | Out-File -FilePath $backupJson -Encoding utf8
+                        if ($LASTEXITCODE -eq 0) {
+                            Print-Success "JSON backup created: $(Split-Path $backupJson -Leaf)"
+                        } else {
+                            Print-Warning "JSON backup failed, continuing with SQLite backup only..."
+                            if (Test-Path $backupJson) {
+                                Remove-Item $backupJson -Force
+                            }
+                        }
+                        Write-Host ""
+                        $stepNum++
+                    } else {
+                        Print-Info "Skipping JSON backup (SQLite file backup will be created)"
+                        Write-Host ""
+                    }
+
+                    Print-Info "Step $stepNum/$totalSteps`: Creating SQLite file backup..."
                     if (Test-Path $dbPath) {
                         Copy-Item $dbPath $backupSqlite
                         Print-Success "SQLite backup created: $(Split-Path $backupSqlite -Leaf)"
@@ -740,9 +760,10 @@ function Show-DatabaseManagement {
                         return
                     }
                     Write-Host ""
+                    $stepNum++
 
                     # Run migrations
-                    Print-Info "Step 3/4: Running migrations to drop Historical* tables..."
+                    Print-Info "Step $stepNum/$totalSteps`: Running migrations to drop Historical* tables..."
                     Write-Host ""
                     docker-compose -f $composeFile exec web python manage.py migrate
 
@@ -758,9 +779,10 @@ function Show-DatabaseManagement {
                         return
                     }
                     Write-Host ""
+                    $stepNum++
 
                     # Run VACUUM
-                    Print-Info "Step 4/4: Running VACUUM to reclaim disk space..."
+                    Print-Info "Step $stepNum/$totalSteps`: Running VACUUM to reclaim disk space..."
                     $vacuumCmd = "VACUUM;"
                     $vacuumCmd | docker-compose -f $composeFile exec -T web python manage.py dbshell 2>&1 | Out-Null
                     if ($LASTEXITCODE -eq 0) {
