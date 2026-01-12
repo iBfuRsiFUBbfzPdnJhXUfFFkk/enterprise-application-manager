@@ -288,14 +288,14 @@ Settings are organized in a modular way under `core/settings/`:
 
 ### Model Patterns
 
-Models use `django-generic-model-fields` for consistent field creation:
-- `create_generic_fk()` - Foreign keys
-- `create_generic_m2m()` - Many-to-many relationships
-- `create_generic_varchar()` - Character fields
-- `create_generic_integer()` - Integer fields
-- `create_generic_boolean()` - Boolean fields
-- `create_generic_date()` / `create_generic_datetime()` - Date/datetime fields
-- `create_generic_enum()` - Enum fields with choices
+Models use Django's built-in field types with consistent nullable defaults:
+- `models.ForeignKey(..., on_delete=models.SET_NULL, null=True, blank=True, related_name=...)` - Foreign keys
+- `models.ManyToManyField(..., blank=True, related_name=...)` - Many-to-many relationships
+- `models.CharField(max_length=255, null=True, blank=True)` - Character fields
+- `models.IntegerField(null=True, blank=True)` - Integer fields
+- `models.BooleanField(null=True, blank=True, default=...)` - Boolean fields
+- `models.DateField(null=True, blank=True)` / `models.DateTimeField(null=True, blank=True)` - Date/datetime fields
+- `models.CharField(max_length=255, choices=..., null=True, blank=True)` - Enum fields with choices
 
 Models inherit from abstract base classes:
 - `AbstractBaseModel` - Common base functionality
