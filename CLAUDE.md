@@ -164,13 +164,6 @@ docker compose exec web python manage.py loaddata data.json
    docker compose up --build
    ```
 
-**Adding Node.js dependencies (for Tailwind CSS):**
-1. Add the package to `package.json`
-2. Rebuild the Docker image:
-   ```bash
-   docker compose up --build
-   ```
-
 **Freeze current Python packages (if needed):**
 ```bash
 docker compose exec web pip freeze > requirements.txt
@@ -202,11 +195,6 @@ docker compose exec web python manage.py shell
 docker compose exec web bash
 ```
 
-**Rebuild Tailwind CSS:**
-```bash
-docker compose exec web npm run build:css
-```
-
 **Collect static files:**
 ```bash
 docker compose exec web python manage.py collectstatic --noinput
@@ -220,7 +208,6 @@ The application runs in a Docker Compose environment with three interconnected s
 
 **1. web (Django Application)**
 - Based on Python 3.13 slim image
-- Includes Node.js 20.x for Tailwind CSS compilation
 - Automatically runs `collectstatic` on startup via `docker-entrypoint.sh`
 - Hot-reload enabled with volume mounts
 - Exposes port 8000 internally (proxied by nginx)
@@ -308,18 +295,14 @@ All models use `django-simple-history` for historical tracking (creates `Histori
 
 ### Form Patterns
 
-**IMPORTANT: Automatic Form Styling**
+**IMPORTANT: Form Styling**
 
-All forms inherit from `BaseModelForm` which automatically applies Tailwind CSS classes to form widgets. This ensures consistent, visible styling across all forms without manual CSS class definitions.
+All forms inherit from `BaseModelForm` for consistent form behavior. Form styling is handled by global CSS (`static/css/styles.css`) which applies styles to all form elements without needing explicit CSS classes.
 
-- **DO NOT** manually add CSS classes to basic form widgets - they are added automatically
-- The `BaseModelForm.__init__()` method applies appropriate Tailwind classes based on widget type:
-  - Text inputs, number inputs, email, URL, date/time inputs: Full-width with border, shadow, and focus states
-  - Textareas: Same styling as text inputs
-  - Select dropdowns: Consistent with text inputs
-  - Checkboxes: Smaller, rounded with blue accent
-  - File inputs: Consistent with text inputs
-- If custom classes are needed, add them to the widget definition - they will not be overridden
+- Form elements (inputs, textareas, selects, checkboxes) are styled automatically via global CSS
+- All form fields have visible borders and proper styling by default
+- No manual CSS class application is needed for basic form widgets
+- Custom styling can be added through CSS classes if needed for specific use cases
 - Forms should inherit from `BaseModelForm` and use `BaseModelFormMeta` as the Meta parent class
 
 Example form structure:
@@ -332,7 +315,7 @@ class MyModelForm(BaseModelForm):
     class Meta(BaseModelFormMeta):
         model = MyModel
         widgets = {
-            'date_field': DateInput(attrs={'type': 'date'}),  # Classes added automatically
+            'date_field': DateInput(attrs={'type': 'date'}),
         }
 ```
 
@@ -391,8 +374,9 @@ All views require login via `@login_required` decorator or URL-level wrapping.
 - **boto3** - AWS SDK for MinIO integration
 - **humanize 4.12.1** - Human-readable formatting
 
-**Node.js:**
-- **Tailwind CSS** - Utility-first CSS framework
+**Frontend:**
+- **Vanilla CSS** - Custom CSS in `static/css/styles.css`
+- **jQuery 3.6.0** - JavaScript library (loaded via CDN)
 
 **Infrastructure (Docker):**
 - **MinIO** - S3-compatible object storage
