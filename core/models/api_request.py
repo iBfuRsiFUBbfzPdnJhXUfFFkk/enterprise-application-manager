@@ -4,20 +4,21 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.environment_choices import ENVIRONMENT_CHOICES
 from core.models.common.enums.http_method_choices import HTTP_METHOD_CHOICES
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class APIRequest(AbstractBaseModel, AbstractComment, AbstractName):
-    api = create_generic_fk(to='API', related_name='requests')
-    authentication = create_generic_fk(
-        to='APIAuthentication', related_name='requests'
+    api = models.ForeignKey('API', on_delete=models.SET_NULL, null=True, blank=True, related_name='requests')
+    authentication = models.ForeignKey(
+        'APIAuthentication',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='requests'
     )
 
-    http_method = create_generic_enum(choices=HTTP_METHOD_CHOICES)
-    default_environment = create_generic_enum(choices=ENVIRONMENT_CHOICES)
-    url_path = create_generic_varchar()
+    http_method = models.CharField(max_length=255, choices=HTTP_METHOD_CHOICES, null=True, blank=True)
+    default_environment = models.CharField(max_length=255, choices=ENVIRONMENT_CHOICES, null=True, blank=True)
+    url_path = models.CharField(max_length=255, null=True, blank=True)
 
     path_parameters = models.JSONField(
         blank=True,
@@ -53,7 +54,7 @@ class APIRequest(AbstractBaseModel, AbstractComment, AbstractName):
         help_text='Request body (JSON, XML, or raw text)',
     )
 
-    content_type = create_generic_varchar()
+    content_type = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         api_name = self.api.name if self.api else 'No API'

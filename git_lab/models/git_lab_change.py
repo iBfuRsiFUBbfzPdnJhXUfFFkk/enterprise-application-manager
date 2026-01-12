@@ -1,11 +1,6 @@
 from datetime import datetime
 
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -37,35 +32,35 @@ class GitLabChange(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
-    assignees: set[GitLabUser] | None = create_generic_m2m(related_name="changes_assigned", to=GitLabUser)
-    author: GitLabUser | None = create_generic_fk(related_name="changes_authored", to=GitLabUser)
-    base_sha: str | None = create_generic_varchar()
-    changes_count: str | None = create_generic_varchar()
-    closed_by: GitLabUser | None = create_generic_fk(related_name="changes_closed", to=GitLabUser)
-    draft: bool | None = create_generic_boolean()
-    group: GitLabGroup | None = create_generic_fk(related_name="changes", to=GitLabGroup)
-    has_conflicts: bool | None = create_generic_boolean()
-    head_sha: str | None = create_generic_varchar()
-    latest_build_finished_at: datetime | None = create_generic_datetime()
-    latest_build_started_at: datetime | None = create_generic_datetime()
-    merge_commit_sha: str | None = create_generic_varchar()
-    merged_at: datetime | None = create_generic_datetime()
-    merged_by: GitLabUser | None = create_generic_fk(related_name="changes_merged", to=GitLabUser)
-    prepared_at: datetime | None = create_generic_datetime()
-    project: GitLabProject | None = create_generic_fk(related_name="changes", to=GitLabProject)
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="changes", to=ScrumSprint)
-    sha: str | None = create_generic_varchar()
-    squash_commit_sha: str | None = create_generic_varchar()
-    start_sha: str | None = create_generic_varchar()
-    state: str | None = create_generic_varchar()
-    total_files_added: int | None = create_generic_integer()
-    total_files_changed: int | None = create_generic_integer()
-    total_files_deleted: int | None = create_generic_integer()
-    total_files_generated: int | None = create_generic_integer()
-    total_files_renamed: int | None = create_generic_integer()
-    total_files_updated: int | None = create_generic_integer()
-    total_lines_added: int | None = create_generic_integer()
-    total_lines_removed: int | None = create_generic_integer()
+    assignees: set[GitLabUser] | None = models.ManyToManyField(GitLabUser, blank=True, related_name="changes_assigned")
+    author: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="changes_authored")
+    base_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    changes_count: str | None = models.CharField(max_length=255, null=True, blank=True)
+    closed_by: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="changes_closed")
+    draft: bool | None = models.BooleanField(null=True, blank=True)
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="changes")
+    has_conflicts: bool | None = models.BooleanField(null=True, blank=True)
+    head_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    latest_build_finished_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    latest_build_started_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    merge_commit_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    merged_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    merged_by: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="changes_merged")
+    prepared_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    project: GitLabProject | None = models.ForeignKey(GitLabProject, on_delete=models.SET_NULL, null=True, blank=True, related_name="changes")
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="changes")
+    sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    squash_commit_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    start_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    state: str | None = models.CharField(max_length=255, null=True, blank=True)
+    total_files_added: int | None = models.IntegerField(null=True, blank=True)
+    total_files_changed: int | None = models.IntegerField(null=True, blank=True)
+    total_files_deleted: int | None = models.IntegerField(null=True, blank=True)
+    total_files_generated: int | None = models.IntegerField(null=True, blank=True)
+    total_files_renamed: int | None = models.IntegerField(null=True, blank=True)
+    total_files_updated: int | None = models.IntegerField(null=True, blank=True)
+    total_lines_added: int | None = models.IntegerField(null=True, blank=True)
+    total_lines_removed: int | None = models.IntegerField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.references_long}"

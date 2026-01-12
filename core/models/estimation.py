@@ -1,11 +1,6 @@
 from decimal import Decimal
 
 from django.db import models
-from django_generic_model_fields.create_generic_decimal import create_generic_decimal
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.application import Application
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -21,26 +16,33 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     """
 
     # Related entities
-    application = create_generic_fk(
-        to=Application,
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='estimations'
     )
-    project = create_generic_fk(
-        to=Project,
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='estimations'
     )
 
     # Estimation details
-    description = create_generic_varchar()
+    description = models.CharField(max_length=255, null=True, blank=True)
 
     # Related links
-    links = create_generic_m2m(
-        to='Link',
+    links = models.ManyToManyField(
+        'Link',
+        blank=True,
         related_name='estimations'
     )
 
     # Contingency padding as a percentage (e.g., 20 for 20%)
-    contingency_padding_percent = create_generic_decimal()
+    contingency_padding_percent = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Story points modifier for team calibration (multiplier applied to auto-calculated story points)
     # Default 1.0 = standard calculation (1 point ≈ 4 hours)
@@ -53,13 +55,13 @@ class Estimation(AbstractBaseModel, AbstractComment, AbstractName):
     )
 
     # Sprint duration in weeks (for sprint calculation)
-    sprint_duration_weeks = create_generic_integer()
+    sprint_duration_weeks = models.IntegerField(null=True, blank=True)
 
     # Developer counts for duration estimation
-    junior_developer_count = create_generic_integer()
-    mid_developer_count = create_generic_integer()
-    senior_developer_count = create_generic_integer()
-    lead_developer_count = create_generic_integer()
+    junior_developer_count = models.IntegerField(null=True, blank=True)
+    mid_developer_count = models.IntegerField(null=True, blank=True)
+    senior_developer_count = models.IntegerField(null=True, blank=True)
+    lead_developer_count = models.IntegerField(null=True, blank=True)
 
     # Group ordering - stores the order of groups as a list of group names
     group_order = models.JSONField(

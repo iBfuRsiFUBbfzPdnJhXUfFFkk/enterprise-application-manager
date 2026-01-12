@@ -1,7 +1,4 @@
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -28,35 +25,35 @@ class AIHallucination(AbstractBaseModel, AbstractComment, AbstractName):
     """
 
     # Link to AI Use Case
-    ai_use_case = create_generic_fk(to='AIUseCase', related_name='hallucinations')
+    ai_use_case = models.ForeignKey('AIUseCase', on_delete=models.SET_NULL, null=True, blank=True, related_name='hallucinations')
 
     # Incident details
-    incident_date = create_generic_date()
-    severity = create_generic_enum(choices=HALLUCINATION_SEVERITY_CHOICES)
+    incident_date = models.DateField(null=True, blank=True)
+    severity = models.CharField(max_length=255, choices=HALLUCINATION_SEVERITY_CHOICES, null=True, blank=True)
 
     # Description
-    hallucination_description = create_generic_varchar()
-    expected_output = create_generic_varchar()
-    actual_output = create_generic_varchar()
+    hallucination_description = models.CharField(max_length=255, null=True, blank=True)
+    expected_output = models.CharField(max_length=255, null=True, blank=True)
+    actual_output = models.CharField(max_length=255, null=True, blank=True)
 
     # Context
-    user_prompt = create_generic_varchar()
-    context_information = create_generic_varchar()
+    user_prompt = models.CharField(max_length=255, null=True, blank=True)
+    context_information = models.CharField(max_length=255, null=True, blank=True)
 
     # Impact
-    impact_description = create_generic_varchar()
-    users_affected_count = create_generic_varchar()
-    business_impact = create_generic_varchar()
+    impact_description = models.CharField(max_length=255, null=True, blank=True)
+    users_affected_count = models.CharField(max_length=255, null=True, blank=True)
+    business_impact = models.CharField(max_length=255, null=True, blank=True)
 
     # Response and resolution
-    reported_by = create_generic_fk(to='Person', related_name='ai_hallucinations_reported')
-    resolution_description = create_generic_varchar()
-    corrective_actions = create_generic_varchar()
-    resolved_date = create_generic_date()
+    reported_by = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='ai_hallucinations_reported')
+    resolution_description = models.CharField(max_length=255, null=True, blank=True)
+    corrective_actions = models.CharField(max_length=255, null=True, blank=True)
+    resolved_date = models.DateField(null=True, blank=True)
 
     # Documentation
-    supporting_document = create_generic_fk(to='Document', related_name='ai_hallucination_documentation')
-    incident_ticket_url = create_generic_varchar()
+    supporting_document = models.ForeignKey('Document', on_delete=models.SET_NULL, null=True, blank=True, related_name='ai_hallucination_documentation')
+    incident_ticket_url = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} - {self.severity}"

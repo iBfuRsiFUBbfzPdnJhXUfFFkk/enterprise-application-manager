@@ -1,12 +1,9 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import AbstractGitLabWebUrl
 
 
@@ -23,28 +20,37 @@ class GitLabSyncSnippet(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="snippets",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    author = create_generic_fk(
+    author = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="snippets",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    gitlab_id: int | None = create_generic_integer()
-    title: str | None = create_generic_varchar()
-    file_name: str | None = create_generic_varchar()
-    description: str | None = create_generic_varchar()
-    visibility: str | None = create_generic_enum(
+    gitlab_id: int | None = models.IntegerField(null=True, blank=True)
+    title: str | None = models.CharField(max_length=255, null=True, blank=True)
+    file_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    description: str | None = models.CharField(max_length=255, null=True, blank=True)
+    visibility: str | None = models.CharField(
+        max_length=255,
         choices=[
             ("private", "Private"),
             ("internal", "Internal"),
             ("public", "Public"),
-        ]
+        ],
+        null=True,
+        blank=True,
     )
-    raw_url: str | None = create_generic_varchar()
-    created_at: datetime | None = create_generic_datetime()
-    updated_at: datetime | None = create_generic_datetime()
+    raw_url: str | None = models.CharField(max_length=255, null=True, blank=True)
+    created_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    updated_at: datetime | None = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.title}"

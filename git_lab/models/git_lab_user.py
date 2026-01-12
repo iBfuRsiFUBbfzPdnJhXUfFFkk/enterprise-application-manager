@@ -1,10 +1,9 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -22,9 +21,9 @@ class GitLabUser(
     AbstractGitLabWebUrl,
     AbstractName,
 ):
-    expires_at: datetime | None = create_generic_datetime()
-    locked: bool | None = create_generic_boolean()
-    username: str | None = create_generic_varchar()
+    expires_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    locked: bool | None = models.BooleanField(null=True, blank=True)
+    username: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def changes_assigned(self):

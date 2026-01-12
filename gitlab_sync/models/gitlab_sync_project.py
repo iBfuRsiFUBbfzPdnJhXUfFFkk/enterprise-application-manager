@@ -1,13 +1,10 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabAvatarUrl,
     AbstractGitLabCreatedAt,
@@ -38,28 +35,34 @@ class GitLabSyncProject(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    application = create_generic_fk(
+    application = models.ForeignKey(
+        "core.Application",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="gitlab_sync_projects",
-        to="core.Application",
     )
-    container_registry_image_prefix: str | None = create_generic_varchar()
-    default_branch: str | None = create_generic_varchar()
-    group = create_generic_fk(
+    container_registry_image_prefix: str | None = models.CharField(max_length=255, null=True, blank=True)
+    default_branch: str | None = models.CharField(max_length=255, null=True, blank=True)
+    group = models.ForeignKey(
+        "gitlab_sync.GitLabSyncGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="projects",
-        to="gitlab_sync.GitLabSyncGroup",
     )
-    http_url_to_repo: str | None = create_generic_varchar()
-    last_activity_at: datetime | None = create_generic_datetime()
-    name_with_namespace: str | None = create_generic_varchar()
-    open_issues_count: int | None = create_generic_integer()
-    path_with_namespace: str | None = create_generic_varchar()
-    readme_url: str | None = create_generic_varchar()
-    ssh_url_to_repo: str | None = create_generic_varchar()
-    visibility: str | None = create_generic_varchar()
-    archived: bool | None = create_generic_boolean()
-    star_count: int | None = create_generic_integer()
-    forks_count: int | None = create_generic_integer()
-    last_synced_at: datetime | None = create_generic_datetime()
+    http_url_to_repo: str | None = models.CharField(max_length=255, null=True, blank=True)
+    last_activity_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    name_with_namespace: str | None = models.CharField(max_length=255, null=True, blank=True)
+    open_issues_count: int | None = models.IntegerField(null=True, blank=True)
+    path_with_namespace: str | None = models.CharField(max_length=255, null=True, blank=True)
+    readme_url: str | None = models.CharField(max_length=255, null=True, blank=True)
+    ssh_url_to_repo: str | None = models.CharField(max_length=255, null=True, blank=True)
+    visibility: str | None = models.CharField(max_length=255, null=True, blank=True)
+    archived: bool | None = models.BooleanField(null=True, blank=True)
+    star_count: int | None = models.IntegerField(null=True, blank=True)
+    forks_count: int | None = models.IntegerField(null=True, blank=True)
+    last_synced_at: datetime | None = models.DateTimeField(null=True, blank=True)
 
     @property
     def repository(self):

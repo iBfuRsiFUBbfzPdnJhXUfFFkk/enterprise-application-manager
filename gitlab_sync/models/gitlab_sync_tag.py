@@ -1,11 +1,9 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class GitLabSyncTag(
@@ -20,23 +18,29 @@ class GitLabSyncTag(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="tags",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    repository = create_generic_fk(
+    repository = models.ForeignKey(
+        "gitlab_sync.GitLabSyncRepository",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="tags",
-        to="gitlab_sync.GitLabSyncRepository",
     )
-    commit_sha: str | None = create_generic_varchar()
-    commit_short_id: str | None = create_generic_varchar()
-    commit_title: str | None = create_generic_varchar()
-    commit_message: str | None = create_generic_varchar()
-    commit_created_at: datetime | None = create_generic_datetime()
-    message: str | None = create_generic_varchar()
-    release_description: str | None = create_generic_varchar()
-    protected: bool | None = create_generic_boolean()
-    target: str | None = create_generic_varchar()
+    commit_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    commit_short_id: str | None = models.CharField(max_length=255, null=True, blank=True)
+    commit_title: str | None = models.CharField(max_length=255, null=True, blank=True)
+    commit_message: str | None = models.CharField(max_length=255, null=True, blank=True)
+    commit_created_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    message: str | None = models.CharField(max_length=255, null=True, blank=True)
+    release_description: str | None = models.CharField(max_length=255, null=True, blank=True)
+    protected: bool | None = models.BooleanField(null=True, blank=True)
+    target: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name}"

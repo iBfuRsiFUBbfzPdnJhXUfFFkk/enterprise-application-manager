@@ -1,10 +1,7 @@
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabClosedAt,
     AbstractGitLabCreatedAt,
@@ -44,47 +41,69 @@ class GitLabSyncIssue(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    assignees = create_generic_m2m(
+    assignees = models.ManyToManyField(
+        "gitlab_sync.GitLabSyncUser",
+        blank=True,
         related_name="issues_assigned",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    author = create_generic_fk(
+    author = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues_authored",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    closed_by = create_generic_fk(
+    closed_by = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues_closed",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    group = create_generic_fk(
+    group = models.ForeignKey(
+        "gitlab_sync.GitLabSyncGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues",
-        to="gitlab_sync.GitLabSyncGroup",
     )
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    epic = create_generic_fk(
+    epic = models.ForeignKey(
+        "gitlab_sync.GitLabSyncEpic",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues",
-        to="gitlab_sync.GitLabSyncEpic",
     )
-    milestone = create_generic_fk(
+    milestone = models.ForeignKey(
+        "gitlab_sync.GitLabSyncMilestone",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues",
-        to="gitlab_sync.GitLabSyncMilestone",
     )
-    iteration = create_generic_fk(
+    iteration = models.ForeignKey(
+        "gitlab_sync.GitLabSyncIteration",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="issues",
-        to="gitlab_sync.GitLabSyncIteration",
     )
-    blocking_issues_count: int | None = create_generic_integer()
-    has_tasks: bool | None = create_generic_boolean()
-    issue_type: str | None = create_generic_varchar()
-    type: str | None = create_generic_varchar()
-    user_notes_count: int | None = create_generic_integer()
-    weight: int | None = create_generic_integer()
-    severity: str | None = create_generic_varchar()
-    due_date: str | None = create_generic_varchar()
-    confidential: bool | None = create_generic_boolean()
+    blocking_issues_count: int | None = models.IntegerField(null=True, blank=True)
+    has_tasks: bool | None = models.BooleanField(null=True, blank=True)
+    issue_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    user_notes_count: int | None = models.IntegerField(null=True, blank=True)
+    weight: int | None = models.IntegerField(null=True, blank=True)
+    severity: str | None = models.CharField(max_length=255, null=True, blank=True)
+    due_date: str | None = models.CharField(max_length=255, null=True, blank=True)
+    confidential: bool | None = models.BooleanField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"#{self.iid}: {self.title}"

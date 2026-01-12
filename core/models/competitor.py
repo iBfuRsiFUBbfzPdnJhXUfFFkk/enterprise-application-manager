@@ -1,7 +1,4 @@
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.application import Application
 from core.models.common.abstract.abstract_acronym import AbstractAcronym
@@ -27,20 +24,22 @@ class Competitor(
     """Model to track competitive companies with business intelligence and relationships."""
 
     # Business Intelligence Fields
-    primary_products: str | None = create_generic_varchar()
-    market_segment: str | None = create_generic_varchar()
-    employee_count_tier: str | None = create_generic_enum(choices=EMPLOYEE_COUNT_TIER_CHOICES)
-    revenue_tier: str | None = create_generic_enum(choices=REVENUE_TIER_CHOICES)
-    year_founded: int | None = create_generic_integer()
+    primary_products: str | None = models.CharField(max_length=255, null=True, blank=True)
+    market_segment: str | None = models.CharField(max_length=255, null=True, blank=True)
+    employee_count_tier: str | None = models.CharField(max_length=255, choices=EMPLOYEE_COUNT_TIER_CHOICES, null=True, blank=True)
+    revenue_tier: str | None = models.CharField(max_length=255, choices=REVENUE_TIER_CHOICES, null=True, blank=True)
+    year_founded: int | None = models.IntegerField(null=True, blank=True)
 
     # Relationships
-    competing_applications: set[Application] | None = create_generic_m2m(
-        related_name='competitors',
-        to=Application
+    competing_applications: set[Application] | None = models.ManyToManyField(
+        Application,
+        blank=True,
+        related_name='competitors'
     )
-    organizations: set[Organization] | None = create_generic_m2m(
-        related_name='competitors',
-        to=Organization
+    organizations: set[Organization] | None = models.ManyToManyField(
+        Organization,
+        blank=True,
+        related_name='competitors'
     )
 
     def __str__(self) -> str:

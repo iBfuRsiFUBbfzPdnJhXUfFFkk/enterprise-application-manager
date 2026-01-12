@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.tool import (
     tool_add_view,
     tool_delete_view,
@@ -9,19 +8,10 @@ from core.views.tool import (
     tool_view,
 )
 
-urlpatterns_tool: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='tool',
-    view=tool_view,
-    view_edit=tool_edit_view,
-    view_new=tool_add_view,
-)
-
-# Add detail view
-urlpatterns_tool.append(
-    path(name='tool_detail', route='tool/<int:model_id>/', view=tool_detail_view)
-)
-
-# Add delete view
-urlpatterns_tool.append(
-    path(name='tool_delete', route='tool/delete/<int:model_id>/', view=tool_delete_view)
-)
+urlpatterns_tool: list[URLPattern | URLResolver] = [
+    path("tool/", tool_view, name="tool"),
+    path("tool/edit/<int:model_id>/", tool_edit_view, name="tool_edit"),
+    path("tool/new/", tool_add_view, name="tool_new"),
+    path("tool/<int:model_id>/", tool_detail_view, name="tool_detail"),
+    path("tool/delete/<int:model_id>/", tool_delete_view, name="tool_delete"),
+]

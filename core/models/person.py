@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from django.db.models import QuerySet
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -10,20 +11,12 @@ from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScr
 from core.models.common.enums.job_level_choices import JOB_LEVEL_CHOICES
 from core.models.common.enums.job_title_choices import JOB_TITLE_CHOICES
 from core.models.common.enums.timezone_choices import TIMEZONE_CHOICES
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.models.job_level import JobLevel
 from core.models.job_title import JobTitle
 from core.models.role import Role
 from core.models.skill import Skill
 from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.cast_query_set import cast_query_set
-
 
 class Person(
     AbstractBaseModel,
@@ -32,35 +25,35 @@ class Person(
     AbstractPronunciation,
     AbstractScrumCapacityBase,
 ):
-    communication_email: str | None = create_generic_varchar()
-    date_birthday: date | None = create_generic_date()
-    date_hired: date | None = create_generic_date()
-    date_left: date | None = create_generic_date()
-    gitlab_sync_access_level: str | None = create_generic_varchar()
-    gitlab_sync_avatar_url: str | None = create_generic_varchar()
-    gitlab_sync_datetime_created_at: datetime | None = create_generic_datetime()
-    gitlab_sync_datetime_expires_at: datetime | None = create_generic_datetime()
-    gitlab_sync_id: str | None = create_generic_varchar()
-    gitlab_sync_is_locked: bool | None = create_generic_boolean()
-    gitlab_sync_membership_state: str | None = create_generic_varchar()
-    gitlab_sync_name: str | None = create_generic_varchar()
-    gitlab_sync_state: str | None = create_generic_varchar()
-    gitlab_sync_username: str | None = create_generic_varchar()
-    gitlab_sync_web_url: str | None = create_generic_varchar()
-    is_active: bool | None = create_generic_boolean(default=True)
-    is_bot: bool | None = create_generic_boolean()
-    is_employee: bool | None = create_generic_boolean(default=True)
-    link_sharepoint_profile: str | None = create_generic_varchar()
-    job_level: JobLevel | None = create_generic_fk(to=JobLevel)
-    job_title: JobLevel | None = create_generic_fk(to=JobTitle)
-    name_first: str | None = create_generic_varchar()
-    name_last: str | None = create_generic_varchar()
-    name_preferred: str | None = create_generic_varchar()
-    roles: list[Role] | None = create_generic_m2m(to=Role)
-    skills: list[Skill] | None = create_generic_m2m(to=Skill)
-    type_job_level: str | None = create_generic_enum(choices=JOB_LEVEL_CHOICES)
-    type_job_title: str | None = create_generic_enum(choices=JOB_TITLE_CHOICES)
-    type_timezone: str | None = create_generic_enum(choices=TIMEZONE_CHOICES)
+    communication_email: str | None = models.CharField(max_length=255, null=True, blank=True)
+    date_birthday: date | None = models.DateField(null=True, blank=True)
+    date_hired: date | None = models.DateField(null=True, blank=True)
+    date_left: date | None = models.DateField(null=True, blank=True)
+    gitlab_sync_access_level: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_avatar_url: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_datetime_created_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    gitlab_sync_datetime_expires_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    gitlab_sync_id: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_is_locked: bool | None = models.BooleanField(null=True, blank=True)
+    gitlab_sync_membership_state: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_state: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_username: str | None = models.CharField(max_length=255, null=True, blank=True)
+    gitlab_sync_web_url: str | None = models.CharField(max_length=255, null=True, blank=True)
+    is_active: bool | None = models.BooleanField(null=True, blank=True, default=True)
+    is_bot: bool | None = models.BooleanField(null=True, blank=True)
+    is_employee: bool | None = models.BooleanField(null=True, blank=True, default=True)
+    link_sharepoint_profile: str | None = models.CharField(max_length=255, null=True, blank=True)
+    job_level: JobLevel | None = models.ForeignKey(JobLevel, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_set")
+    job_title: JobLevel | None = models.ForeignKey(JobTitle, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_set")
+    name_first: str | None = models.CharField(max_length=255, null=True, blank=True)
+    name_last: str | None = models.CharField(max_length=255, null=True, blank=True)
+    name_preferred: str | None = models.CharField(max_length=255, null=True, blank=True)
+    roles: list[Role] | None = models.ManyToManyField(Role, blank=True, related_name="%(class)s_set")
+    skills: list[Skill] | None = models.ManyToManyField(Skill, blank=True, related_name="%(class)s_set")
+    type_job_level: str | None = models.CharField(max_length=255, choices=JOB_LEVEL_CHOICES, null=True, blank=True)
+    type_job_title: str | None = models.CharField(max_length=255, choices=JOB_TITLE_CHOICES, null=True, blank=True)
+    type_timezone: str | None = models.CharField(max_length=255, choices=TIMEZONE_CHOICES, null=True, blank=True)
 
     @property
     def coerced_communication_email(self) -> str | None:

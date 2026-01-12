@@ -1,11 +1,11 @@
+from django.db import models
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class Formula(AbstractBaseModel, AbstractComment, AbstractName):
-    formula = create_generic_varchar()
+    formula = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}"

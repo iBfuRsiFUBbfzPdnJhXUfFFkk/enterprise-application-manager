@@ -1,13 +1,11 @@
 from datetime import date
 
-from django.db.models import Model
-
-from django_generic_model_fields.create_generic_date import create_generic_date
+from django.db import models
 
 
-class AbstractStartEndDates(Model):
-    date_end: date | None = create_generic_date()
-    date_start: date | None = create_generic_date()
+class AbstractStartEndDates(models.Model):
+    date_end: date | None = models.DateField(null=True, blank=True)
+    date_start: date | None = models.DateField(null=True, blank=True)
 
     @property
     def date_range_string(self) -> str:

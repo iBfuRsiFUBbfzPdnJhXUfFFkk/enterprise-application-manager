@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.sprint import (
     sprint_add_view,
     sprint_delete_view,
@@ -9,19 +8,10 @@ from core.views.sprint import (
     sprint_view,
 )
 
-urlpatterns_sprint: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='sprint',
-    view=sprint_view,
-    view_edit=sprint_edit_view,
-    view_new=sprint_add_view,
-)
-
-# Add detail view
-urlpatterns_sprint.append(
-    path(name='sprint_detail', route='sprint/<int:model_id>/', view=sprint_detail_view)
-)
-
-# Add delete view
-urlpatterns_sprint.append(
-    path(name='sprint_delete', route='sprint/delete/<int:model_id>/', view=sprint_delete_view)
-)
+urlpatterns_sprint: list[URLPattern | URLResolver] = [
+    path("sprint/", sprint_view, name="sprint"),
+    path("sprint/edit/<int:model_id>/", sprint_edit_view, name="sprint_edit"),
+    path("sprint/new/", sprint_add_view, name="sprint_new"),
+    path("sprint/<int:model_id>/", sprint_detail_view, name="sprint_detail"),
+    path("sprint/delete/<int:model_id>/", sprint_delete_view, name="sprint_delete"),
+]

@@ -1,8 +1,7 @@
+from django.db import models
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class CommandLanguage:
@@ -22,8 +21,8 @@ class CommandLanguage:
 
 
 class Command(AbstractBaseModel, AbstractComment, AbstractName):
-    command = create_generic_varchar()
-    language = create_generic_enum(choices=CommandLanguage.CHOICES)
+    command = models.CharField(max_length=255, null=True, blank=True)
+    language = models.CharField(max_length=255, choices=CommandLanguage.CHOICES, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} {self.command}"

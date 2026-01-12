@@ -1,10 +1,10 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabAvatarUrl,
     AbstractGitLabCreatedAt,
@@ -33,10 +33,10 @@ class GitLabSyncGroup(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    full_name: str | None = create_generic_varchar()
-    full_path: str | None = create_generic_varchar()
-    visibility: str | None = create_generic_varchar()
-    last_synced_at: datetime | None = create_generic_datetime()
+    full_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    full_path: str | None = models.CharField(max_length=255, null=True, blank=True)
+    visibility: str | None = models.CharField(max_length=255, null=True, blank=True)
+    last_synced_at: datetime | None = models.DateTimeField(null=True, blank=True)
 
     @property
     def projects(self):

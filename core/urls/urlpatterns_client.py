@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.client import (
     client_add_view,
     client_delete_view,
@@ -9,19 +8,10 @@ from core.views.client import (
     client_view,
 )
 
-urlpatterns_client: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='client',
-    view=client_view,
-    view_edit=client_edit_view,
-    view_new=client_add_view,
-)
-
-# Add detail view
-urlpatterns_client.append(
-    path(name='client_detail', route='client/<int:model_id>/', view=client_detail_view)
-)
-
-# Add delete view
-urlpatterns_client.append(
-    path(name='client_delete', route='client/delete/<int:model_id>/', view=client_delete_view)
-)
+urlpatterns_client: list[URLPattern | URLResolver] = [
+    path("client/", client_view, name="client"),
+    path("client/edit/<int:model_id>/", client_edit_view, name="client_edit"),
+    path("client/new/", client_add_view, name="client_new"),
+    path("client/<int:model_id>/", client_detail_view, name="client_detail"),
+    path("client/delete/<int:model_id>/", client_delete_view, name="client_delete"),
+]

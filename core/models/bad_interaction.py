@@ -1,21 +1,16 @@
 from django.db import models
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.enums.bad_interaction_severity_choices import BAD_INTERACTION_SEVERITY_CHOICES
 from core.models.document import Document
 
-
 class BadInteraction(AbstractBaseModel, AbstractComment):
-    person = create_generic_fk(to='core.Person', related_name='bad_interactions')
-    reported_by = create_generic_fk(to='core.Person', related_name='reported_bad_interactions')
-    date_occurred = create_generic_date()
+    person = models.ForeignKey('core.Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='bad_interactions')
+    reported_by = models.ForeignKey('core.Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='reported_bad_interactions')
+    date_occurred = models.DateField(null=True, blank=True)
     description: str | None = models.TextField(blank=True, null=True, help_text='Description of what happened')
-    severity: str = create_generic_enum(choices=BAD_INTERACTION_SEVERITY_CHOICES)
+    severity: str = models.CharField(max_length=255, choices=BAD_INTERACTION_SEVERITY_CHOICES, null=True, blank=True)
 
     # MinIO file storage
     evidence_file = models.FileField(
@@ -26,7 +21,7 @@ class BadInteraction(AbstractBaseModel, AbstractComment):
     )
 
     # Many-to-many relationship to manually link documents
-    documents = create_generic_m2m(related_name='bad_interactions', to=Document)
+    documents = models.ManyToManyField(Document, blank=True, related_name='bad_interactions')
 
     @property
     def has_evidence(self):

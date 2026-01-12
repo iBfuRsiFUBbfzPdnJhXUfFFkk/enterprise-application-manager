@@ -1,8 +1,6 @@
 from datetime import date
 
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.utilities.cast_query_set import cast_query_set
@@ -27,12 +25,12 @@ class GitLabIteration(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
-    due_date: date | None = create_generic_date()
-    group: GitLabGroup | None = create_generic_fk(related_name="iterations", to=GitLabGroup)
-    sequence: int | None = create_generic_integer()
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="iterations", to=ScrumSprint)
-    start_date: date | None = create_generic_date()
-    state: int | None = create_generic_integer()
+    due_date: date | None = models.DateField(null=True, blank=True)
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="iterations")
+    sequence: int | None = models.IntegerField(null=True, blank=True)
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="iterations")
+    start_date: date | None = models.DateField(null=True, blank=True)
+    state: int | None = models.IntegerField(null=True, blank=True)
 
     @property
     def issues(self):

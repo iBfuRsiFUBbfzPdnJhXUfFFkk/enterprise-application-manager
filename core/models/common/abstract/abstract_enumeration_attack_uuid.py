@@ -1,12 +1,10 @@
 from typing import Optional
 
-from django.db.models import Model
-
-from django_generic_model_fields.create_generic_uuid import create_generic_uuid
+from django.db import models
 
 
-class AbstractEnumerationAttackUuid(Model):
-    enumeration_attack_uuid: str | None = create_generic_uuid()
+class AbstractEnumerationAttackUuid(models.Model):
+    enumeration_attack_uuid: str | None = models.UUIDField(null=True, blank=True)
 
     @property
     def uuid(self) -> str | None:

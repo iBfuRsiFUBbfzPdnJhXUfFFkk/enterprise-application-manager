@@ -1,7 +1,5 @@
 from django.core.exceptions import ValidationError
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.application import Application
 from core.models.application_group import ApplicationGroup
@@ -13,13 +11,13 @@ from core.models.common.abstract.abstract_name import AbstractName
 
 
 class BillingCode(AbstractBaseModel, AbstractComment, AbstractName):
-    application = create_generic_fk(to=Application)
-    application_group = create_generic_fk(to=ApplicationGroup)
-    billing_code = create_generic_varchar()
-    is_active = create_generic_boolean(default=True)
-    project_manager = create_generic_fk(to=Person, related_name='billing_codes_managed')
-    team = create_generic_fk(to=Team, related_name='billing_codes')
-    replaces = create_generic_fk(to='self', related_name='replaced_by_codes')
+    application = models.ForeignKey(Application, on_delete=models.SET_NULL, null=True, blank=True, related_name='billing_codes')
+    application_group = models.ForeignKey(ApplicationGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='billing_codes')
+    billing_code = models.CharField(max_length=255, null=True, blank=True)
+    is_active = models.BooleanField(null=True, blank=True, default=True)
+    project_manager = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='billing_codes_managed')
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='billing_codes')
+    replaces = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replaced_by_codes')
 
     def clean(self):
         """Validate that the project manager has the Project Manager role."""

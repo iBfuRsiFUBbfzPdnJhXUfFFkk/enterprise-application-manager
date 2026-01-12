@@ -9,28 +9,21 @@ from core.models.common.abstract.abstract_location import AbstractLocation
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.meeting_status_choices import MEETING_STATUS_CHOICES
 from core.models.common.enums.meeting_type_choices import MEETING_TYPE_CHOICES
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_text import create_generic_text
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
-
 
 class Meeting(AbstractBaseModel, AbstractComment, AbstractName, AbstractLocation):
-    datetime_start = create_generic_datetime()
-    datetime_end = create_generic_datetime()
-    description = create_generic_text()
-    agenda = create_generic_text()
-    minutes = create_generic_text()
-    organizer = create_generic_fk(to='Person', related_name='meetings_organized')
-    attendees = create_generic_m2m(to='Person', related_name='meetings_attended')
-    actual_attendees = create_generic_m2m(to='Person', related_name='meetings_actually_attended')
-    application = create_generic_fk(to='Application', related_name='meetings')
-    project = create_generic_fk(to='Project', related_name='meetings')
-    meeting_type = create_generic_enum(choices=MEETING_TYPE_CHOICES)
-    status = create_generic_enum(choices=MEETING_STATUS_CHOICES)
-    virtual_meeting_url = create_generic_varchar()
+    datetime_start = models.DateTimeField(null=True, blank=True)
+    datetime_end = models.DateTimeField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    agenda = models.TextField(null=True, blank=True)
+    minutes = models.TextField(null=True, blank=True)
+    organizer = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='meetings_organized')
+    attendees = models.ManyToManyField('Person', blank=True, related_name='meetings_attended')
+    actual_attendees = models.ManyToManyField('Person', blank=True, related_name='meetings_actually_attended')
+    application = models.ForeignKey('Application', on_delete=models.SET_NULL, null=True, blank=True, related_name='meetings')
+    project = models.ForeignKey('Project', on_delete=models.SET_NULL, null=True, blank=True, related_name='meetings')
+    meeting_type = models.CharField(max_length=255, choices=MEETING_TYPE_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=255, choices=MEETING_STATUS_CHOICES, null=True, blank=True)
+    virtual_meeting_url = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def duration_hours(self) -> float:

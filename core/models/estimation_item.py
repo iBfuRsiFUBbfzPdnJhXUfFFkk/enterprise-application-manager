@@ -1,13 +1,6 @@
 from decimal import Decimal
 
 from django.db import models
-from django_generic_model_fields.create_generic_decimal import create_generic_decimal
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_text import create_generic_text
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 
@@ -54,13 +47,16 @@ class EstimationItem(AbstractBaseModel):
     ]
 
     # Link to parent estimation
-    estimation = create_generic_fk(
-        to='Estimation',
+    estimation = models.ForeignKey(
+        'Estimation',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='items'
     )
 
     # Order within the estimation
-    order = create_generic_integer()
+    order = models.IntegerField(null=True, blank=True)
 
     # Optional group/category for logical organization
     group = models.CharField(
@@ -71,49 +67,59 @@ class EstimationItem(AbstractBaseModel):
     )
 
     # Item details
-    title = create_generic_varchar()
-    description = create_generic_text()
-    story_points = create_generic_decimal()
+    title = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    story_points = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Development hours by developer level
-    hours_junior = create_generic_decimal()
-    hours_mid = create_generic_decimal()
-    hours_senior = create_generic_decimal()
-    hours_lead = create_generic_decimal()
+    hours_junior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    hours_mid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    hours_senior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    hours_lead = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Code review hours by developer level
-    code_review_hours_junior = create_generic_decimal()
-    code_review_hours_mid = create_generic_decimal()
-    code_review_hours_senior = create_generic_decimal()
-    code_review_hours_lead = create_generic_decimal()
+    code_review_hours_junior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    code_review_hours_mid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    code_review_hours_senior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    code_review_hours_lead = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Code reviewer time (lead dev reviewing others' code - added to lead total only)
-    code_reviewer_hours = create_generic_decimal()
+    code_reviewer_hours = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Testing hours by developer level
-    tests_hours_junior = create_generic_decimal()
-    tests_hours_mid = create_generic_decimal()
-    tests_hours_senior = create_generic_decimal()
-    tests_hours_lead = create_generic_decimal()
+    tests_hours_junior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tests_hours_mid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tests_hours_senior = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tests_hours_lead = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     # Cone of Uncertainty - project phase indicator
-    cone_of_uncertainty = create_generic_enum(
-        choices=CONE_OF_UNCERTAINTY_CHOICES
+    cone_of_uncertainty = models.CharField(
+        max_length=255,
+        choices=CONE_OF_UNCERTAINTY_CHOICES,
+        null=True,
+        blank=True
     )
 
     # Complexity level
-    complexity_level = create_generic_enum(
-        choices=COMPLEXITY_CHOICES
+    complexity_level = models.CharField(
+        max_length=255,
+        choices=COMPLEXITY_CHOICES,
+        null=True,
+        blank=True
     )
 
     # Priority
-    priority = create_generic_enum(
-        choices=PRIORITY_CHOICES
+    priority = models.CharField(
+        max_length=255,
+        choices=PRIORITY_CHOICES,
+        null=True,
+        blank=True
     )
 
     # Related links (many-to-many)
-    links = create_generic_m2m(
-        to='Link',
+    links = models.ManyToManyField(
+        'Link',
+        blank=True,
         related_name='estimation_items'
     )
 

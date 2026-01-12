@@ -1,6 +1,7 @@
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -20,8 +21,8 @@ class GitLabGroup(
     AbstractGitLabWebUrl,
     AbstractName,
 ):
-    full_name: str | None = create_generic_varchar()
-    full_path: str | None = create_generic_varchar()
+    full_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    full_path: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def changes(self):

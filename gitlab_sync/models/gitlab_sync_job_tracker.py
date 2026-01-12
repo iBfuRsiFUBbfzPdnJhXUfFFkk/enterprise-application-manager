@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.db import models
 from django.db.models import JSONField, QuerySet
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -10,10 +11,6 @@ from core.models.common.enums.gitlab_sync_job_type_choices import (
     GITLAB_SYNC_JOB_TYPE_CHOICES,
 )
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
 
 
 class GitLabSyncJobTracker(AbstractBaseModel):
@@ -26,16 +23,22 @@ class GitLabSyncJobTracker(AbstractBaseModel):
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    job_type: str | None = create_generic_enum(choices=GITLAB_SYNC_JOB_TYPE_CHOICES)
-    status: str | None = create_generic_enum(choices=GITLAB_SYNC_JOB_STATUS_CHOICES)
-    progress_percent: int | None = create_generic_integer()
-    current_count: int | None = create_generic_integer()
-    total_count: int | None = create_generic_integer()
-    start_time: datetime | None = create_generic_datetime()
-    end_time: datetime | None = create_generic_datetime()
+    job_type: str | None = models.CharField(
+        max_length=255, choices=GITLAB_SYNC_JOB_TYPE_CHOICES, null=True, blank=True
+    )
+    status: str | None = models.CharField(
+        max_length=255, choices=GITLAB_SYNC_JOB_STATUS_CHOICES, null=True, blank=True
+    )
+    progress_percent: int | None = models.IntegerField(null=True, blank=True)
+    current_count: int | None = models.IntegerField(null=True, blank=True)
+    total_count: int | None = models.IntegerField(null=True, blank=True)
+    start_time: datetime | None = models.DateTimeField(null=True, blank=True)
+    end_time: datetime | None = models.DateTimeField(null=True, blank=True)
     error_messages: list[str] = JSONField(default=list, blank=True)
     detailed_logs: list[str] = JSONField(default=list, blank=True)
-    user: "User | None" = create_generic_fk(to="core.User")
+    user: "User | None" = models.ForeignKey(
+        "core.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="gitlab_sync_job_trackers"
+    )
 
     @property
     def duration_seconds(self) -> float | None:

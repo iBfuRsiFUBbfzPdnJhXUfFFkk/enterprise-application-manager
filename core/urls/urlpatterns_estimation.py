@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.estimation.estimation_add_view import estimation_add_view
 from core.views.estimation.estimation_delete_view import estimation_delete_view
 from core.views.estimation.estimation_detail_view import estimation_detail_view
@@ -27,13 +26,10 @@ from core.views.estimation.estimation_item_enhance_description_view import estim
 from core.views.estimation.estimation_view import estimation_view
 
 urlpatterns_estimation: list[URLPattern | URLResolver] = [
-    *create_generic_urlpatterns(
-        name="estimation",
-        view=estimation_view,
-        view_edit=estimation_edit_view,
-        view_new=estimation_add_view,
-    ),
-    path(name="estimation_detail", route="estimation/<int:model_id>/", view=estimation_detail_view),
+    path("estimation/", estimation_view, name="estimation"),
+    path("estimation/edit/<int:model_id>/", estimation_edit_view, name="estimation_edit"),
+    path("estimation/new/", estimation_add_view, name="estimation_new"),
+    path("estimation/<int:model_id>/", estimation_detail_view, name="estimation_detail"),
     path(name="estimation_delete", route="estimation/delete/<int:model_id>/", view=estimation_delete_view),
     path(name="estimation_export_docx", route="estimation/<int:model_id>/export/", view=estimation_export_docx_view),
     path(name="estimation_fix_item_order", route="estimation/<int:model_id>/fix-order/", view=estimation_fix_item_order_view),

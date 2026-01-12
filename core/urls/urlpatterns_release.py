@@ -1,17 +1,13 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.release.release_add_view import release_add_view
 from core.views.release.release_detail_view import release_detail_view
 from core.views.release.release_edit_view import release_edit_view
 from core.views.release.release_view import release_view
 
 urlpatterns_release: list[URLPattern | URLResolver] = [
-    *create_generic_urlpatterns(
-        name="release",
-        view=release_view,
-        view_edit=release_edit_view,
-        view_new=release_add_view,
-    ),
-    path(name="release_detail", route="release/detail/<int:model_id>/", view=release_detail_view),
+    path("release/", release_view, name="release"),
+    path("release/edit/<int:model_id>/", release_edit_view, name="release_edit"),
+    path("release/new/", release_add_view, name="release_new"),
+    path("release/detail/<int:model_id>/", release_detail_view, name="release_detail"),
 ]

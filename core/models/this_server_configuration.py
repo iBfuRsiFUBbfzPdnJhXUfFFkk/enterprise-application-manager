@@ -1,3 +1,4 @@
+from django.db import models
 from math import ceil
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -5,15 +6,8 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScrumCapacityBase
 from core.models.common.enums.git_lab_api_version_choices import GIT_LAB_API_VERSION_CHOICES, GIT_LAB_API_VERSION_FOUR
-from django_generic_model_fields.create_generic_decimal import create_generic_decimal
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.models.role import Role
 from core.models.secret import Secret
-
 
 class ThisServerConfiguration(
     AbstractBaseModel,
@@ -21,28 +15,28 @@ class ThisServerConfiguration(
     AbstractName,
     AbstractScrumCapacityBase,
 ):
-    connection_git_lab_api_version: str | None = create_generic_enum(choices=GIT_LAB_API_VERSION_CHOICES)
-    connection_git_lab_hostname: str | None = create_generic_varchar()
-    connection_git_lab_token: Secret | None = create_generic_fk(to=Secret)
-    connection_git_lab_top_level_group_id: str | None = create_generic_varchar()
-    connection_google_maps_api_key: Secret | None = create_generic_fk(to=Secret, related_name='server_config_google_maps')
-    connection_chatgpt_api_key: Secret | None = create_generic_fk(to=Secret, related_name='server_config_chatgpt')
-    gitlab_sync_max_group_depth: int | None = create_generic_integer()
-    gitlab_sync_max_projects_per_group: int | None = create_generic_integer()
-    gitlab_sync_pipelines_days_back: int | None = create_generic_integer()
-    gitlab_sync_max_pipelines_per_project: int | None = create_generic_integer()
-    gitlab_sync_commits_days_back: int | None = create_generic_integer()
-    gitlab_sync_max_issues_per_project: int | None = create_generic_integer()
-    gitlab_sync_max_merge_requests_per_project: int | None = create_generic_integer()
-    gitlab_sync_max_events_per_project: int | None = create_generic_integer()
-    gitlab_sync_operation_timeout_seconds: int | None = create_generic_integer()
-    gitlab_sync_skip_group_ids: str | None = create_generic_varchar()
-    kpi_developers_to_exclude = create_generic_m2m(to='Person')
-    scrum_capacity_base_per_day: float | None = create_generic_decimal()
-    scrum_number_of_business_days_in_sprint: int | None = create_generic_integer()
-    scrum_number_of_business_days_in_week: int | None = create_generic_integer()
-    scrum_number_of_weeks_in_a_sprint: int | None = create_generic_integer()
-    type_developer_role: Role | None = create_generic_fk(to=Role)
+    connection_git_lab_api_version: str | None = models.CharField(max_length=255, choices=GIT_LAB_API_VERSION_CHOICES, null=True, blank=True)
+    connection_git_lab_hostname: str | None = models.CharField(max_length=255, null=True, blank=True)
+    connection_git_lab_token: Secret | None = models.ForeignKey(Secret, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_set")
+    connection_git_lab_top_level_group_id: str | None = models.CharField(max_length=255, null=True, blank=True)
+    connection_google_maps_api_key: Secret | None = models.ForeignKey(Secret, on_delete=models.SET_NULL, null=True, blank=True, related_name='server_config_google_maps')
+    connection_chatgpt_api_key: Secret | None = models.ForeignKey(Secret, on_delete=models.SET_NULL, null=True, blank=True, related_name='server_config_chatgpt')
+    gitlab_sync_max_group_depth: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_max_projects_per_group: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_pipelines_days_back: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_max_pipelines_per_project: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_commits_days_back: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_max_issues_per_project: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_max_merge_requests_per_project: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_max_events_per_project: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_operation_timeout_seconds: int | None = models.IntegerField(null=True, blank=True)
+    gitlab_sync_skip_group_ids: str | None = models.CharField(max_length=255, null=True, blank=True)
+    kpi_developers_to_exclude = models.ManyToManyField('Person', blank=True, related_name="%(class)s_set")
+    scrum_capacity_base_per_day: float | None = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    scrum_number_of_business_days_in_sprint: int | None = models.IntegerField(null=True, blank=True)
+    scrum_number_of_business_days_in_week: int | None = models.IntegerField(null=True, blank=True)
+    scrum_number_of_weeks_in_a_sprint: int | None = models.IntegerField(null=True, blank=True)
+    type_developer_role: Role | None = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True, related_name="%(class)s_set")
 
     @property
     def google_maps_api_key_decrypted(self) -> str | None:

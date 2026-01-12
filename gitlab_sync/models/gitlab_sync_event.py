@@ -1,7 +1,6 @@
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabCreatedAt,
     AbstractGitLabTitle,
@@ -21,27 +20,33 @@ class GitLabSyncEvent(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    gitlab_id: int | None = create_generic_integer()
-    project = create_generic_fk(
+    gitlab_id: int | None = models.IntegerField(null=True, blank=True)
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="events",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    author = create_generic_fk(
+    author = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="events_authored",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    action_name: str | None = create_generic_varchar()
-    target_id: int | None = create_generic_integer()
-    target_iid: int | None = create_generic_integer()
-    target_type: str | None = create_generic_varchar()
-    target_title: str | None = create_generic_varchar()
-    push_data_commit_count: int | None = create_generic_integer()
-    push_data_action: str | None = create_generic_varchar()
-    push_data_ref_type: str | None = create_generic_varchar()
-    push_data_commit_from: str | None = create_generic_varchar()
-    push_data_commit_to: str | None = create_generic_varchar()
-    push_data_ref: str | None = create_generic_varchar()
-    push_data_commit_title: str | None = create_generic_varchar()
+    action_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    target_id: int | None = models.IntegerField(null=True, blank=True)
+    target_iid: int | None = models.IntegerField(null=True, blank=True)
+    target_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    target_title: str | None = models.CharField(max_length=255, null=True, blank=True)
+    push_data_commit_count: int | None = models.IntegerField(null=True, blank=True)
+    push_data_action: str | None = models.CharField(max_length=255, null=True, blank=True)
+    push_data_ref_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    push_data_commit_from: str | None = models.CharField(max_length=255, null=True, blank=True)
+    push_data_commit_to: str | None = models.CharField(max_length=255, null=True, blank=True)
+    push_data_ref: str | None = models.CharField(max_length=255, null=True, blank=True)
+    push_data_commit_title: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         if self.action_name:

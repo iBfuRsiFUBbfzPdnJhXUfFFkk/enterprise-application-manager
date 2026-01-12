@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.risk import (
     risk_add_view,
     risk_delete_view,
@@ -9,19 +8,10 @@ from core.views.risk import (
     risk_view,
 )
 
-urlpatterns_risk: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='risk',
-    view=risk_view,
-    view_edit=risk_edit_view,
-    view_new=risk_add_view,
-)
-
-# Add detail view
-urlpatterns_risk.append(
-    path(name='risk_detail', route='risk/<int:model_id>/', view=risk_detail_view)
-)
-
-# Add delete view
-urlpatterns_risk.append(
-    path(name='risk_delete', route='risk/delete/<int:model_id>/', view=risk_delete_view)
-)
+urlpatterns_risk: list[URLPattern | URLResolver] = [
+    path("risk/", risk_view, name="risk"),
+    path("risk/edit/<int:model_id>/", risk_edit_view, name="risk_edit"),
+    path("risk/new/", risk_add_view, name="risk_new"),
+    path("risk/<int:model_id>/", risk_detail_view, name="risk_detail"),
+    path("risk/delete/<int:model_id>/", risk_delete_view, name="risk_delete"),
+]

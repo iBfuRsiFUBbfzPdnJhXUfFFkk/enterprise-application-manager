@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.data_point import (
     data_point_add_view,
     data_point_delete_view,
@@ -9,19 +8,10 @@ from core.views.data_point import (
     data_point_view,
 )
 
-urlpatterns_data_point: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='data_point',
-    view=data_point_view,
-    view_edit=data_point_edit_view,
-    view_new=data_point_add_view,
-)
-
-# Add detail view
-urlpatterns_data_point.append(
-    path(name='data_point_detail', route='data_point/<int:model_id>/', view=data_point_detail_view)
-)
-
-# Add delete view
-urlpatterns_data_point.append(
-    path(name='data_point_delete', route='data_point/delete/<int:model_id>/', view=data_point_delete_view)
-)
+urlpatterns_data_point: list[URLPattern | URLResolver] = [
+    path("data_point/", data_point_view, name="data_point"),
+    path("data_point/edit/<int:model_id>/", data_point_edit_view, name="data_point_edit"),
+    path("data_point/new/", data_point_add_view, name="data_point_new"),
+    path("data_point/<int:model_id>/", data_point_detail_view, name="data_point_detail"),
+    path("data_point/delete/<int:model_id>/", data_point_delete_view, name="data_point_delete"),
+]

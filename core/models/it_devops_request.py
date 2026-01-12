@@ -1,10 +1,4 @@
-from django.db.models import CharField
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_text import create_generic_text
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -15,37 +9,37 @@ from core.models.common.enums.priority_choices import PRIORITY_CHOICES
 
 class ITDevOpsRequest(AbstractBaseModel, AbstractComment, AbstractName):
     # Unique document identifier (auto-generated on save)
-    document_id = CharField(max_length=255, unique=True, editable=False, blank=True, null=True)
+    document_id = models.CharField(max_length=255, unique=True, editable=False, blank=True, null=True)
 
     # Status and priority
-    status = create_generic_enum(choices=IT_DEVOPS_REQUEST_STATUS_CHOICES)
-    priority = create_generic_enum(choices=PRIORITY_CHOICES)
+    status = models.CharField(max_length=255, choices=IT_DEVOPS_REQUEST_STATUS_CHOICES, null=True, blank=True)
+    priority = models.CharField(max_length=255, choices=PRIORITY_CHOICES, null=True, blank=True)
 
     # Details
-    description = create_generic_text()
-    justification = create_generic_text()
-    expected_outcome = create_generic_text()
-    reference_number = create_generic_varchar()
+    description = models.TextField(null=True, blank=True)
+    justification = models.TextField(null=True, blank=True)
+    expected_outcome = models.TextField(null=True, blank=True)
+    reference_number = models.CharField(max_length=255, null=True, blank=True)
 
     # Dates
-    date_requested = create_generic_date()
-    date_due = create_generic_date()
-    date_completed = create_generic_date()
+    date_requested = models.DateField(null=True, blank=True)
+    date_due = models.DateField(null=True, blank=True)
+    date_completed = models.DateField(null=True, blank=True)
 
     # People
-    person_requester = create_generic_fk(to="Person", related_name="it_devops_requests_requested")
-    person_assignee = create_generic_fk(to="Person", related_name="it_devops_requests_assigned")
-    person_approver = create_generic_fk(to="Person", related_name="it_devops_requests_approved")
+    person_requester = models.ForeignKey("Person", on_delete=models.SET_NULL, null=True, blank=True, related_name="it_devops_requests_requested")
+    person_assignee = models.ForeignKey("Person", on_delete=models.SET_NULL, null=True, blank=True, related_name="it_devops_requests_assigned")
+    person_approver = models.ForeignKey("Person", on_delete=models.SET_NULL, null=True, blank=True, related_name="it_devops_requests_approved")
 
     # Related entities
-    application = create_generic_fk(to="Application", related_name="it_devops_requests")
-    project = create_generic_fk(to="Project", related_name="it_devops_requests")
+    application = models.ForeignKey("Application", on_delete=models.SET_NULL, null=True, blank=True, related_name="it_devops_requests")
+    project = models.ForeignKey("Project", on_delete=models.SET_NULL, null=True, blank=True, related_name="it_devops_requests")
 
     # Attachments
-    attachments = create_generic_m2m(to="Document", related_name="it_devops_requests")
+    attachments = models.ManyToManyField("Document", blank=True, related_name="it_devops_requests")
 
     # Links
-    links = create_generic_m2m(to="Link", related_name="it_devops_requests")
+    links = models.ManyToManyField("Link", blank=True, related_name="it_devops_requests")
 
     def save(self, *args, **kwargs):
         if not self.document_id:

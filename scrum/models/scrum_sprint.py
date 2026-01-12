@@ -1,4 +1,4 @@
-from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django.db import models
 
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -15,11 +15,11 @@ class ScrumSprint(
     AbstractName,
     AbstractStartEndDates,
 ):
-    cached_total_number_of_comments_made: int | None = create_generic_integer()
-    cached_total_number_of_issues: int | None = create_generic_integer()
-    cached_total_number_of_lines_added: int | None = create_generic_integer()
-    cached_total_number_of_lines_removed: int | None = create_generic_integer()
-    cached_total_number_of_merge_requests: int | None = create_generic_integer()
+    cached_total_number_of_comments_made = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_issues = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_lines_added = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_lines_removed = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_merge_requests = models.IntegerField(null=True, blank=True)
 
     @property
     def changes(self):

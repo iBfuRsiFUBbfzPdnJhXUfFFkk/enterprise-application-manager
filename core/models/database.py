@@ -1,3 +1,4 @@
+from django.db import models
 from core.models.application import Application
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -5,24 +6,20 @@ from core.models.common.abstract.abstract_version import AbstractVersion
 from core.models.common.enums.data_storage_form_choices import DATA_STORAGE_FORM_CHOICES
 from core.models.common.enums.database_flavor_choices import DATABASE_FLAVOR_CHOICES
 from core.models.common.enums.environment_choices import ENVIRONMENT_CHOICES
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.encryption import encrypt_secret, decrypt_secret
 
 
 class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
-    application = create_generic_fk(related_name='databases', to=Application)
-    encrypted_password = create_generic_varchar()
-    encrypted_username = create_generic_varchar()
-    hostname = create_generic_varchar()
-    ip_v4_internal = create_generic_varchar()
-    port = create_generic_integer()
-    schema = create_generic_varchar()
-    type_data_storage_form = create_generic_enum(choices=DATA_STORAGE_FORM_CHOICES)
-    type_database_flavor = create_generic_enum(choices=DATABASE_FLAVOR_CHOICES)
-    type_environment = create_generic_enum(choices=ENVIRONMENT_CHOICES)
+    application = models.ForeignKey(Application, on_delete=models.SET_NULL, null=True, blank=True, related_name='databases')
+    encrypted_password = models.CharField(max_length=255, null=True, blank=True)
+    encrypted_username = models.CharField(max_length=255, null=True, blank=True)
+    hostname = models.CharField(max_length=255, null=True, blank=True)
+    ip_v4_internal = models.CharField(max_length=255, null=True, blank=True)
+    port = models.IntegerField(null=True, blank=True)
+    schema = models.CharField(max_length=255, null=True, blank=True)
+    type_data_storage_form = models.CharField(max_length=255, choices=DATA_STORAGE_FORM_CHOICES, null=True, blank=True)
+    type_database_flavor = models.CharField(max_length=255, choices=DATABASE_FLAVOR_CHOICES, null=True, blank=True)
+    type_environment = models.CharField(max_length=255, choices=ENVIRONMENT_CHOICES, null=True, blank=True)
 
     def set_encrypted_password(self, secret: str | None) -> None:
         self.encrypted_password = encrypt_secret(secret=secret)

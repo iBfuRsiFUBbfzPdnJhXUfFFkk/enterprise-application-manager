@@ -1,11 +1,9 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabCreatedAt,
     AbstractGitLabPrimaryKey,
@@ -31,27 +29,33 @@ class GitLabSyncSecurityReport(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="security_reports",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    pipeline = create_generic_fk(
+    pipeline = models.ForeignKey(
+        "gitlab_sync.GitLabSyncPipeline",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="security_reports",
-        to="gitlab_sync.GitLabSyncPipeline",
     )
-    report_type: str | None = create_generic_varchar()
-    scan_started_at: datetime | None = create_generic_datetime()
-    scan_finished_at: datetime | None = create_generic_datetime()
-    scanner_name: str | None = create_generic_varchar()
-    scanner_vendor: str | None = create_generic_varchar()
-    scanner_version: str | None = create_generic_varchar()
-    vulnerabilities_count: int | None = create_generic_integer()
-    critical_count: int | None = create_generic_integer()
-    high_count: int | None = create_generic_integer()
-    medium_count: int | None = create_generic_integer()
-    low_count: int | None = create_generic_integer()
-    info_count: int | None = create_generic_integer()
-    unknown_count: int | None = create_generic_integer()
+    report_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    scan_started_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    scan_finished_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    scanner_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    scanner_vendor: str | None = models.CharField(max_length=255, null=True, blank=True)
+    scanner_version: str | None = models.CharField(max_length=255, null=True, blank=True)
+    vulnerabilities_count: int | None = models.IntegerField(null=True, blank=True)
+    critical_count: int | None = models.IntegerField(null=True, blank=True)
+    high_count: int | None = models.IntegerField(null=True, blank=True)
+    medium_count: int | None = models.IntegerField(null=True, blank=True)
+    low_count: int | None = models.IntegerField(null=True, blank=True)
+    info_count: int | None = models.IntegerField(null=True, blank=True)
+    unknown_count: int | None = models.IntegerField(null=True, blank=True)
 
     @property
     def vulnerabilities(self):

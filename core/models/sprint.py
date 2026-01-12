@@ -2,21 +2,19 @@ from datetime import date
 from typing import Optional
 
 from django.db.models import QuerySet
+from django.db import models
 
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_start_end_dates import AbstractStartEndDates
-from django_generic_model_fields.create_generic_decimal import create_generic_decimal
-from django_generic_model_fields.create_generic_integer import create_generic_integer
 from core.models.git_lab_iteration import GitLabIteration
 from core.models.this_server_configuration import ThisServerConfiguration
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.coerce_integer import coerce_integer
 from core.utilities.safe_divide import safe_divide
 from core.utilities.string_or_na import string_or_na
-
 
 class Sprint(
     AbstractAlias,
@@ -25,14 +23,14 @@ class Sprint(
     AbstractName,
     AbstractStartEndDates,
 ):
-    cached_accuracy: float | None = create_generic_decimal()
-    cached_total_adjusted_capacity: int | None = create_generic_integer()
-    cached_total_number_of_merge_requests_approved: int | None = create_generic_integer()
-    cached_total_number_of_story_points_delivered: int | None = create_generic_integer()
-    cached_total_number_of_story_points_committed_to: int | None = create_generic_integer()
-    cached_velocity: float | None = create_generic_decimal()
-    number_of_business_days_in_sprint: int | None = create_generic_integer()
-    number_of_holidays_during_sprint: int | None = create_generic_integer()
+    cached_accuracy: float | None = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    cached_total_adjusted_capacity: int | None = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_merge_requests_approved: int | None = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_story_points_delivered: int | None = models.IntegerField(null=True, blank=True)
+    cached_total_number_of_story_points_committed_to: int | None = models.IntegerField(null=True, blank=True)
+    cached_velocity: float | None = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    number_of_business_days_in_sprint: int | None = models.IntegerField(null=True, blank=True)
+    number_of_holidays_during_sprint: int | None = models.IntegerField(null=True, blank=True)
 
     @property
     def accuracy(self) -> float:

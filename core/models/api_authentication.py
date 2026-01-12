@@ -6,36 +6,49 @@ from core.models.common.enums.api_auth_type_choices import API_AUTH_TYPE_CHOICES
 from core.models.common.enums.api_key_location_choices import (
     API_KEY_LOCATION_CHOICES,
 )
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class APIAuthentication(AbstractBaseModel, AbstractComment, AbstractName):
-    api = create_generic_fk(to='API', related_name='authentications')
-    auth_type = create_generic_enum(choices=API_AUTH_TYPE_CHOICES)
+    api = models.ForeignKey('API', on_delete=models.SET_NULL, null=True, blank=True, related_name='authentications')
+    auth_type = models.CharField(max_length=255, choices=API_AUTH_TYPE_CHOICES, null=True, blank=True)
 
     # API Key fields
-    api_key_location = create_generic_enum(choices=API_KEY_LOCATION_CHOICES)
-    api_key_name = create_generic_varchar()
-    secret_api_key = create_generic_fk(
-        to='Secret', related_name='api_auth_api_key'
+    api_key_location = models.CharField(max_length=255, choices=API_KEY_LOCATION_CHOICES, null=True, blank=True)
+    api_key_name = models.CharField(max_length=255, null=True, blank=True)
+    secret_api_key = models.ForeignKey(
+        'Secret',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='api_auth_api_key'
     )
 
     # Bearer Token / OAuth fields
-    secret_bearer_token = create_generic_fk(
-        to='Secret', related_name='api_auth_bearer_token'
+    secret_bearer_token = models.ForeignKey(
+        'Secret',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='api_auth_bearer_token'
     )
-    oauth_token_url = create_generic_varchar()
-    oauth_client_id = create_generic_varchar()
-    secret_oauth_client_secret = create_generic_fk(
-        to='Secret', related_name='api_auth_oauth_secret'
+    oauth_token_url = models.CharField(max_length=255, null=True, blank=True)
+    oauth_client_id = models.CharField(max_length=255, null=True, blank=True)
+    secret_oauth_client_secret = models.ForeignKey(
+        'Secret',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='api_auth_oauth_secret'
     )
 
     # Basic Auth fields
-    basic_auth_username = create_generic_varchar()
-    secret_basic_auth_password = create_generic_fk(
-        to='Secret', related_name='api_auth_basic_password'
+    basic_auth_username = models.CharField(max_length=255, null=True, blank=True)
+    secret_basic_auth_password = models.ForeignKey(
+        'Secret',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='api_auth_basic_password'
     )
 
     # Custom Headers (stored as JSON text)

@@ -1,5 +1,4 @@
 from django.db import models
-from django_generic_model_fields.create_generic_fk import create_generic_fk
 
 from core.models.application import Application
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -16,14 +15,20 @@ class ApplicationPin(AbstractBaseModel):
 
     _disable_history = True  # User preference/UI state - low business value for audit trail
 
-    application = create_generic_fk(
+    application = models.ForeignKey(
+        Application,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='pins',
-        to=Application,
     )
 
-    user = create_generic_fk(
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='pinned_applications',
-        to=User,
     )
 
     order = models.PositiveIntegerField(

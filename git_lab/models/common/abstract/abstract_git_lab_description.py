@@ -1,10 +1,8 @@
-from django.db.models import Model
-
-from django_generic_model_fields.create_generic_text import create_generic_text
+from django.db import models
 
 
-class AbstractGitLabDescription(Model):
-    description: str | None = create_generic_text()
+class AbstractGitLabDescription(models.Model):
+    description: str | None = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract = True

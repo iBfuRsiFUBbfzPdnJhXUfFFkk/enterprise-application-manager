@@ -1,13 +1,9 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabClosedAt,
     AbstractGitLabCreatedAt,
@@ -47,63 +43,89 @@ class GitLabSyncMergeRequest(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    assignees = create_generic_m2m(
+    assignees = models.ManyToManyField(
+        "gitlab_sync.GitLabSyncUser",
+        blank=True,
         related_name="merge_requests_assigned",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    author = create_generic_fk(
+    author = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests_authored",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    closed_by = create_generic_fk(
+    closed_by = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests_closed",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    merged_by = create_generic_fk(
+    merged_by = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests_merged",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    reviewers = create_generic_m2m(
+    reviewers = models.ManyToManyField(
+        "gitlab_sync.GitLabSyncUser",
+        blank=True,
         related_name="merge_requests_reviewed",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    group = create_generic_fk(
+    group = models.ForeignKey(
+        "gitlab_sync.GitLabSyncGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests",
-        to="gitlab_sync.GitLabSyncGroup",
     )
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    head_pipeline = create_generic_fk(
+    head_pipeline = models.ForeignKey(
+        "gitlab_sync.GitLabSyncPipeline",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests",
-        to="gitlab_sync.GitLabSyncPipeline",
     )
-    milestone = create_generic_fk(
+    milestone = models.ForeignKey(
+        "gitlab_sync.GitLabSyncMilestone",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests",
-        to="gitlab_sync.GitLabSyncMilestone",
     )
-    iteration = create_generic_fk(
+    iteration = models.ForeignKey(
+        "gitlab_sync.GitLabSyncIteration",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="merge_requests",
-        to="gitlab_sync.GitLabSyncIteration",
     )
-    blocking_discussions_resolved: bool | None = create_generic_boolean()
-    draft: bool | None = create_generic_boolean()
-    has_conflicts: bool | None = create_generic_boolean()
-    merged_at: datetime | None = create_generic_datetime()
-    prepared_at: datetime | None = create_generic_datetime()
-    sha: str | None = create_generic_varchar()
-    source_branch: str | None = create_generic_varchar()
-    target_branch: str | None = create_generic_varchar()
-    squash: bool | None = create_generic_boolean()
-    squash_commit_sha: str | None = create_generic_varchar()
-    merge_status: str | None = create_generic_varchar()
-    diff_refs_base_sha: str | None = create_generic_varchar()
-    diff_refs_head_sha: str | None = create_generic_varchar()
-    diff_refs_start_sha: str | None = create_generic_varchar()
-    user_notes_count: int | None = create_generic_integer()
-    upvotes: int | None = create_generic_integer()
-    downvotes: int | None = create_generic_integer()
+    blocking_discussions_resolved: bool | None = models.BooleanField(null=True, blank=True)
+    draft: bool | None = models.BooleanField(null=True, blank=True)
+    has_conflicts: bool | None = models.BooleanField(null=True, blank=True)
+    merged_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    prepared_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    source_branch: str | None = models.CharField(max_length=255, null=True, blank=True)
+    target_branch: str | None = models.CharField(max_length=255, null=True, blank=True)
+    squash: bool | None = models.BooleanField(null=True, blank=True)
+    squash_commit_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    merge_status: str | None = models.CharField(max_length=255, null=True, blank=True)
+    diff_refs_base_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    diff_refs_head_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    diff_refs_start_sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    user_notes_count: int | None = models.IntegerField(null=True, blank=True)
+    upvotes: int | None = models.IntegerField(null=True, blank=True)
+    downvotes: int | None = models.IntegerField(null=True, blank=True)
 
     @property
     def pipelines(self):

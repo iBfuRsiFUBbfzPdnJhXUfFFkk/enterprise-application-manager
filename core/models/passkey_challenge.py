@@ -2,11 +2,6 @@ from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 
@@ -27,15 +22,15 @@ class PasskeyChallenge(AbstractBaseModel):
 
     _disable_history = True  # Temporary data, expires in 5 minutes
 
-    challenge_type: str = create_generic_enum(choices=CHALLENGE_TYPE_CHOICES)
+    challenge_type: str = models.CharField(max_length=255, choices=CHALLENGE_TYPE_CHOICES, null=True, blank=True)
     challenge: str = models.TextField()
     user = models.ForeignKey(
         to='core.User', on_delete=models.CASCADE, related_name='passkey_challenges', null=True, blank=True
     )
-    session_key: str | None = create_generic_varchar()
+    session_key: str | None = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     expires_at = models.DateTimeField()
-    used: bool = create_generic_boolean(default=False)
+    used: bool = models.BooleanField(null=True, blank=True, default=False)
 
     def save(self, *args, **kwargs):
         """Set expiration to 5 minutes from creation if not already set."""

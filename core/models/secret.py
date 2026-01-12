@@ -1,12 +1,11 @@
+from django.db import models
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.encryption import encrypt_secret, decrypt_secret
 
-
 class Secret(AbstractBaseModel, AbstractComment, AbstractName):
-    encrypted_value = create_generic_varchar()
+    encrypted_value = models.CharField(max_length=255, null=True, blank=True)
 
     def set_encrypted_value(self, secret: str | None) -> None:
         self.encrypted_value = encrypt_secret(secret=secret)

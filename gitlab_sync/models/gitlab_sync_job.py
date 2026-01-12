@@ -1,13 +1,10 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_decimal import create_generic_decimal
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabCreatedAt,
     AbstractGitLabPrimaryKey,
@@ -30,30 +27,39 @@ class GitLabSyncJob(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    pipeline = create_generic_fk(
+    pipeline = models.ForeignKey(
+        "gitlab_sync.GitLabSyncPipeline",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="jobs",
-        to="gitlab_sync.GitLabSyncPipeline",
     )
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="jobs",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    user = create_generic_fk(
+    user = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="jobs_triggered",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    stage: str | None = create_generic_varchar()
-    status: str | None = create_generic_varchar()
-    ref: str | None = create_generic_varchar()
-    tag: bool | None = create_generic_boolean()
-    coverage: str | None = create_generic_varchar()
-    allow_failure: bool | None = create_generic_boolean()
-    started_at: datetime | None = create_generic_datetime()
-    finished_at: datetime | None = create_generic_datetime()
-    duration = create_generic_decimal()
-    queued_duration = create_generic_decimal()
-    failure_reason: str | None = create_generic_varchar()
-    runner_description: str | None = create_generic_varchar()
+    stage: str | None = models.CharField(max_length=255, null=True, blank=True)
+    status: str | None = models.CharField(max_length=255, null=True, blank=True)
+    ref: str | None = models.CharField(max_length=255, null=True, blank=True)
+    tag: bool | None = models.BooleanField(null=True, blank=True)
+    coverage: str | None = models.CharField(max_length=255, null=True, blank=True)
+    allow_failure: bool | None = models.BooleanField(null=True, blank=True)
+    started_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    finished_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    duration = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    queued_duration = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    failure_reason: str | None = models.CharField(max_length=255, null=True, blank=True)
+    runner_description: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def artifacts(self):

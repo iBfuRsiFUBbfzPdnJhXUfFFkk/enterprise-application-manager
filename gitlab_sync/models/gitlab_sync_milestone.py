@@ -1,14 +1,10 @@
 from datetime import date, datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import AbstractGitLabWebUrl
 
 
@@ -25,27 +21,36 @@ class GitLabSyncMilestone(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="milestones",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    group = create_generic_fk(
+    group = models.ForeignKey(
+        "gitlab_sync.GitLabSyncGroup",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="milestones",
-        to="gitlab_sync.GitLabSyncGroup",
     )
-    gitlab_id: int | None = create_generic_integer()
-    title: str | None = create_generic_varchar()
-    description: str | None = create_generic_varchar()
-    state: str | None = create_generic_enum(
+    gitlab_id: int | None = models.IntegerField(null=True, blank=True)
+    title: str | None = models.CharField(max_length=255, null=True, blank=True)
+    description: str | None = models.CharField(max_length=255, null=True, blank=True)
+    state: str | None = models.CharField(
+        max_length=255,
         choices=[
             ("active", "Active"),
             ("closed", "Closed"),
-        ]
+        ],
+        null=True,
+        blank=True,
     )
-    due_date: date | None = create_generic_date()
-    start_date: date | None = create_generic_date()
-    created_at: datetime | None = create_generic_datetime()
-    updated_at: datetime | None = create_generic_datetime()
+    due_date: date | None = models.DateField(null=True, blank=True)
+    start_date: date | None = models.DateField(null=True, blank=True)
+    created_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    updated_at: datetime | None = models.DateTimeField(null=True, blank=True)
 
     @property
     def issues(self):

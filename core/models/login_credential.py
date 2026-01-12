@@ -1,11 +1,9 @@
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
+from django.db import models
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.encryption import decrypt_secret, encrypt_secret
-
 
 class LoginCredential(AbstractBaseModel, AbstractComment, AbstractName):
     """
@@ -13,17 +11,17 @@ class LoginCredential(AbstractBaseModel, AbstractComment, AbstractName):
     Can be linked to servers, databases, applications, service providers, tools, and people.
     """
 
-    username = create_generic_varchar()
+    username = models.CharField(max_length=255, null=True, blank=True)
 
-    encrypted_password = create_generic_varchar()
+    encrypted_password = models.CharField(max_length=255, null=True, blank=True)
 
     # Foreign key relationships
-    server = create_generic_fk(to='Server', related_name='login_credentials')
-    database = create_generic_fk(to='Database', related_name='login_credentials_database')
-    application = create_generic_fk(to='Application', related_name='login_credentials_application')
-    service_provider = create_generic_fk(to='ServiceProvider', related_name='login_credentials_service_provider')
-    tool = create_generic_fk(to='Tool', related_name='login_credentials_tool')
-    person = create_generic_fk(to='Person', related_name='login_credentials_person')
+    server = models.ForeignKey('Server', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials')
+    database = models.ForeignKey('Database', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials_database')
+    application = models.ForeignKey('Application', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials_application')
+    service_provider = models.ForeignKey('ServiceProvider', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials_service_provider')
+    tool = models.ForeignKey('Tool', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials_tool')
+    person = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials_person')
 
     def set_encrypted_password(self, password: str | None) -> None:
         """Encrypt and store the password."""

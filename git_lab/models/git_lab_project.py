@@ -1,13 +1,9 @@
 from datetime import datetime
 
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_avatar_url import AbstractGitLabAvatarUrl
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -30,25 +26,25 @@ class GitLabProject(
     AbstractGitLabWebUrl,
     AbstractName,
 ):
-    container_registry_image_prefix: str | None = create_generic_varchar()
-    default_branch: str | None = create_generic_varchar()
-    group: GitLabGroup | None = create_generic_fk(related_name="projects", to=GitLabGroup)
-    http_url_to_repo: str | None = create_generic_varchar()
-    last_activity_at: datetime | None = create_generic_datetime()
-    link_cluster_agents: str | None = create_generic_varchar()
-    link_events: str | None = create_generic_varchar()
-    link_issues: str | None = create_generic_varchar()
-    link_labels: str | None = create_generic_varchar()
-    link_members: str | None = create_generic_varchar()
-    link_merge_requests: str | None = create_generic_varchar()
-    link_repo_branches: str | None = create_generic_varchar()
-    link_self: str | None = create_generic_varchar()
-    name_with_namespace: str | None = create_generic_varchar()
-    open_issues_count: int | None = create_generic_integer()
-    path_with_namespace: str | None = create_generic_varchar()
-    readme_url: str | None = create_generic_varchar()
-    should_skip: bool | None = create_generic_boolean()
-    ssh_url_to_repo: str | None = create_generic_varchar()
+    container_registry_image_prefix: str | None = models.CharField(max_length=255, null=True, blank=True)
+    default_branch: str | None = models.CharField(max_length=255, null=True, blank=True)
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="projects")
+    http_url_to_repo: str | None = models.CharField(max_length=255, null=True, blank=True)
+    last_activity_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    link_cluster_agents: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_events: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_issues: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_labels: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_members: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_merge_requests: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_repo_branches: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_self: str | None = models.CharField(max_length=255, null=True, blank=True)
+    name_with_namespace: str | None = models.CharField(max_length=255, null=True, blank=True)
+    open_issues_count: int | None = models.IntegerField(null=True, blank=True)
+    path_with_namespace: str | None = models.CharField(max_length=255, null=True, blank=True)
+    readme_url: str | None = models.CharField(max_length=255, null=True, blank=True)
+    should_skip: bool | None = models.BooleanField(null=True, blank=True)
+    ssh_url_to_repo: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     @property
     def changes(self):

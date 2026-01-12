@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.team import (
     team_add_view,
     team_delete_view,
@@ -9,19 +8,10 @@ from core.views.team import (
     team_view,
 )
 
-urlpatterns_team: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='team',
-    view=team_view,
-    view_edit=team_edit_view,
-    view_new=team_add_view,
-)
-
-# Add detail view
-urlpatterns_team.append(
-    path(name='team_detail', route='team/<int:model_id>/', view=team_detail_view)
-)
-
-# Add delete view
-urlpatterns_team.append(
-    path(name='team_delete', route='team/delete/<int:model_id>/', view=team_delete_view)
-)
+urlpatterns_team: list[URLPattern | URLResolver] = [
+    path("team/", team_view, name="team"),
+    path("team/edit/<int:model_id>/", team_edit_view, name="team_edit"),
+    path("team/new/", team_add_view, name="team_new"),
+    path("team/<int:model_id>/", team_detail_view, name="team_detail"),
+    path("team/delete/<int:model_id>/", team_delete_view, name="team_delete"),
+]

@@ -1,6 +1,4 @@
-from django.db.models import CharField
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -16,12 +14,12 @@ class GitLabDiscussion(
     AbstractGitLabCreatedAt,
     AbstractGitLabUpdatedAt,
 ):
-    group: GitLabGroup | None = create_generic_fk(related_name="discussions", to=GitLabGroup)
-    id: str = CharField(max_length=40, primary_key=True)
-    individual_note: bool | None = create_generic_boolean()
-    project: GitLabProject | None = create_generic_fk(related_name="discussions", to=GitLabProject)
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="discussions", to=ScrumSprint)
-    started_by: GitLabUser | None = create_generic_fk(related_name="discussions_started", to=GitLabUser)
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="discussions")
+    id: str = models.CharField(max_length=40, primary_key=True)
+    individual_note: bool | None = models.BooleanField(null=True, blank=True)
+    project: GitLabProject | None = models.ForeignKey(GitLabProject, on_delete=models.SET_NULL, null=True, blank=True, related_name="discussions")
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="discussions")
+    started_by: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="discussions_started")
 
     @property
     def notes(self):

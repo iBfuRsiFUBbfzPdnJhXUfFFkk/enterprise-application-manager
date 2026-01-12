@@ -1,10 +1,6 @@
-from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
+from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.utilities.cast_query_set import cast_query_set
 from git_lab.models.common.abstract.abstract_git_lab_closed_at import AbstractGitLabClosedAt
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -40,23 +36,23 @@ class GitLabIssue(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
-    assignees: set[GitLabUser] | None = create_generic_m2m(related_name="issues_assigned", to=GitLabUser)
-    author: GitLabUser | None = create_generic_fk(related_name="issues_authored", to=GitLabUser)
-    blocking_issues_count: int | None = create_generic_integer()
-    closed_by: GitLabUser | None = create_generic_fk(related_name="issues_closed", to=GitLabUser)
-    group: GitLabGroup | None = create_generic_fk(related_name="issues", to=GitLabGroup)
-    has_tasks: bool | None = create_generic_boolean()
-    issue_type: str | None = create_generic_varchar()
-    iteration: GitLabIteration | None = create_generic_fk(related_name="issues", to=GitLabIteration)
-    link_award_emoji: str | None = create_generic_varchar()
-    link_notes: str | None = create_generic_varchar()
-    link_project: str | None = create_generic_varchar()
-    link_self: str | None = create_generic_varchar()
-    project: GitLabProject | None = create_generic_fk(related_name="issues", to=GitLabProject)
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="issues", to=ScrumSprint)
-    type: str | None = create_generic_varchar()
-    user_notes_count: int | None = create_generic_integer()
-    weight: int | None = create_generic_integer()
+    assignees: set[GitLabUser] | None = models.ManyToManyField(GitLabUser, blank=True, related_name="issues_assigned")
+    author: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="issues_authored")
+    blocking_issues_count: int | None = models.IntegerField(null=True, blank=True)
+    closed_by: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="issues_closed")
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="issues")
+    has_tasks: bool | None = models.BooleanField(null=True, blank=True)
+    issue_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    iteration: GitLabIteration | None = models.ForeignKey(GitLabIteration, on_delete=models.SET_NULL, null=True, blank=True, related_name="issues")
+    link_award_emoji: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_notes: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_project: str | None = models.CharField(max_length=255, null=True, blank=True)
+    link_self: str | None = models.CharField(max_length=255, null=True, blank=True)
+    project: GitLabProject | None = models.ForeignKey(GitLabProject, on_delete=models.SET_NULL, null=True, blank=True, related_name="issues")
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="issues")
+    type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    user_notes_count: int | None = models.IntegerField(null=True, blank=True)
+    weight: int | None = models.IntegerField(null=True, blank=True)
 
     @property
     def kpi_sprints(self):

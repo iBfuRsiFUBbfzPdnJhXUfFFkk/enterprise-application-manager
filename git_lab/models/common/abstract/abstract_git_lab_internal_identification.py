@@ -1,10 +1,8 @@
-from django.db.models import Model
-
-from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django.db import models
 
 
-class AbstractGitLabInternalIdentification(Model):
-    iid: int | None = create_generic_integer()
+class AbstractGitLabInternalIdentification(models.Model):
+    iid: int | None = models.IntegerField(null=True, blank=True)
 
     class Meta:
         abstract = True

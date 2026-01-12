@@ -1,15 +1,11 @@
 from django.core.exceptions import ValidationError
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.application import Application
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.person import Person
-
 
 class Project(AbstractBaseModel, AbstractComment, AbstractName):
     STATUS_CHOICES = [
@@ -22,11 +18,11 @@ class Project(AbstractBaseModel, AbstractComment, AbstractName):
         ('denied', 'Denied'),
     ]
 
-    applications = create_generic_m2m(to=Application)
-    billing_codes = create_generic_m2m(to='BillingCode', related_name='projects')
-    person_stake_holders = create_generic_m2m(to=Person)
-    project_manager = create_generic_fk(to=Person, related_name='projects_managed')
-    status = create_generic_enum(choices=STATUS_CHOICES)
+    applications = models.ManyToManyField(Application, blank=True, related_name="%(class)s_set")
+    billing_codes = models.ManyToManyField('BillingCode', blank=True, related_name='projects')
+    person_stake_holders = models.ManyToManyField(Person, blank=True, related_name="%(class)s_set")
+    project_manager = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True, related_name='projects_managed')
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, null=True, blank=True)
 
     def clean(self):
         """

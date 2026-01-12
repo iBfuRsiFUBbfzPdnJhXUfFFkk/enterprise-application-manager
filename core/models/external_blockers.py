@@ -1,4 +1,4 @@
-from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -7,7 +7,7 @@ from core.models.organization import Organization
 
 
 class ExternalBlockers(AbstractBaseModel, AbstractComment, AbstractName):
-    organization = create_generic_fk(to=Organization)
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True, related_name='external_blockers')
 
     def __str__(self):
         return f"{self.name}"

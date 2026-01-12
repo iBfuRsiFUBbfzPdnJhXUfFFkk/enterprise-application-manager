@@ -1,10 +1,8 @@
-from django.db.models import Model
-
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 
-class AbstractGitLabState(Model):
-    state: str | None = create_generic_varchar()
+class AbstractGitLabState(models.Model):
+    state: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         abstract = True

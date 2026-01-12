@@ -1,11 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-
 
 class UserPasskey(AbstractBaseModel):
     """
@@ -13,17 +9,17 @@ class UserPasskey(AbstractBaseModel):
     Each user can have multiple passkeys (different devices).
     """
 
-    user = create_generic_fk(to='core.User', related_name='passkeys')
-    name: str = create_generic_varchar()
+    user = models.ForeignKey('core.User', on_delete=models.SET_NULL, null=True, blank=True, related_name='passkeys')
+    name: str = models.CharField(max_length=255, null=True, blank=True)
     credential_id: str = models.TextField(unique=True)
     public_key: str = models.TextField()
     sign_count: int = models.IntegerField(default=0)
-    aaguid: str | None = create_generic_varchar()
-    credential_type: str = create_generic_varchar()
-    transports: str | None = create_generic_varchar()
-    backup_eligible: bool = create_generic_boolean(default=False)
-    backup_state: bool = create_generic_boolean(default=False)
-    user_verified: bool = create_generic_boolean(default=False)
+    aaguid: str | None = models.CharField(max_length=255, null=True, blank=True)
+    credential_type: str = models.CharField(max_length=255, null=True, blank=True)
+    transports: str | None = models.CharField(max_length=255, null=True, blank=True)
+    backup_eligible: bool = models.BooleanField(null=True, blank=True, default=False)
+    backup_state: bool = models.BooleanField(null=True, blank=True, default=False)
+    user_verified: bool = models.BooleanField(null=True, blank=True, default=False)
     created_at = models.DateTimeField(default=timezone.now)
     last_used_at = models.DateTimeField(null=True, blank=True)
 

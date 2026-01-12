@@ -1,10 +1,8 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 
 
 class GitLabSyncArtifact(AbstractBaseModel):
@@ -16,19 +14,25 @@ class GitLabSyncArtifact(AbstractBaseModel):
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    job = create_generic_fk(
+    job = models.ForeignKey(
+        "gitlab_sync.GitLabSyncJob",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="artifacts",
-        to="gitlab_sync.GitLabSyncJob",
     )
-    project = create_generic_fk(
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="artifacts",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    file_type: str | None = create_generic_varchar()
-    size: int | None = create_generic_integer()
-    filename: str | None = create_generic_varchar()
-    file_format: str | None = create_generic_varchar()
-    expire_at: datetime | None = create_generic_datetime()
+    file_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    size: int | None = models.IntegerField(null=True, blank=True)
+    filename: str | None = models.CharField(max_length=255, null=True, blank=True)
+    file_format: str | None = models.CharField(max_length=255, null=True, blank=True)
+    expire_at: datetime | None = models.DateTimeField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.filename} ({self.file_type})"

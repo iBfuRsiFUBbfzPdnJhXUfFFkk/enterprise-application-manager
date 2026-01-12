@@ -1,4 +1,4 @@
-from django_generic_model_fields.create_generic_fk import create_generic_fk
+from django.db import models
 
 from core.models.application import Application
 from core.models.application_group import ApplicationGroup
@@ -16,10 +16,10 @@ class ScrumWish(
     AbstractName,
     AbstractStartEndDates,
 ):
-    application = create_generic_fk(to=Application)
-    application_group = create_generic_fk(to=ApplicationGroup)
-    person_submitted_by = create_generic_fk(to=Person)
-    project = create_generic_fk(to=Project)
+    application = models.ForeignKey(Application, on_delete=models.SET_NULL, null=True, blank=True)
+    application_group = models.ForeignKey(ApplicationGroup, on_delete=models.SET_NULL, null=True, blank=True)
+    person_submitted_by = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         ordering = ['-id']

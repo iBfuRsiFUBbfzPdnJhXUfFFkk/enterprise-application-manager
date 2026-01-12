@@ -1,4 +1,4 @@
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
@@ -10,9 +10,9 @@ class AIVendor(AbstractBaseModel, AbstractComment, AbstractName):
     AI vendor/provider information (e.g., OpenAI, Anthropic, Google, etc.)
     """
 
-    website_url = create_generic_varchar()
-    contact_email = create_generic_varchar()
-    support_url = create_generic_varchar()
+    website_url = models.CharField(max_length=255, null=True, blank=True)
+    contact_email = models.CharField(max_length=255, null=True, blank=True)
+    support_url = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"{self.name}"

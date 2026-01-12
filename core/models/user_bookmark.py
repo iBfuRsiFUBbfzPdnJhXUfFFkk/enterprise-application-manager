@@ -1,6 +1,5 @@
 from django.conf import settings
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 
@@ -14,22 +13,31 @@ class UserBookmark(AbstractBaseModel):
 
     _disable_history = True  # User preference/UI state - low business value for audit trail
 
-    user = create_generic_fk(
-        to=settings.AUTH_USER_MODEL,
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='user_bookmarks',
     )
 
-    link = create_generic_fk(
-        to='core.Link',
+    link = models.ForeignKey(
+        'core.Link',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='user_bookmarks',
     )
 
-    folder = create_generic_fk(
-        to='core.BookmarkFolder',
+    folder = models.ForeignKey(
+        'core.BookmarkFolder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='bookmarks',
     )
 
-    order = create_generic_integer()
+    order = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         folder_name = self.folder.name if self.folder else "Uncategorized"

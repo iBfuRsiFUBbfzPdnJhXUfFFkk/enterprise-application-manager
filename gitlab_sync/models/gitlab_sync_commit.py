@@ -1,11 +1,9 @@
 from datetime import datetime
 
+from django.db import models
+
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.utilities.cast_query_set import cast_query_set
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
 from gitlab_sync.models.common.abstract import (
     AbstractGitLabCreatedAt,
     AbstractGitLabTitle,
@@ -27,31 +25,40 @@ class GitLabSyncCommit(
 
     _disable_history = True  # Synced from GitLab - authoritative history exists in external system
 
-    sha: str | None = create_generic_varchar()
-    short_id: str | None = create_generic_varchar()
-    author = create_generic_fk(
+    sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    short_id: str | None = models.CharField(max_length=255, null=True, blank=True)
+    author = models.ForeignKey(
+        "gitlab_sync.GitLabSyncUser",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="commits_authored",
-        to="gitlab_sync.GitLabSyncUser",
     )
-    author_name: str | None = create_generic_varchar()
-    author_email: str | None = create_generic_varchar()
-    authored_date: datetime | None = create_generic_datetime()
-    committer_name: str | None = create_generic_varchar()
-    committer_email: str | None = create_generic_varchar()
-    committed_date: datetime | None = create_generic_datetime()
-    project = create_generic_fk(
+    author_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    author_email: str | None = models.CharField(max_length=255, null=True, blank=True)
+    authored_date: datetime | None = models.DateTimeField(null=True, blank=True)
+    committer_name: str | None = models.CharField(max_length=255, null=True, blank=True)
+    committer_email: str | None = models.CharField(max_length=255, null=True, blank=True)
+    committed_date: datetime | None = models.DateTimeField(null=True, blank=True)
+    project = models.ForeignKey(
+        "gitlab_sync.GitLabSyncProject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="commits",
-        to="gitlab_sync.GitLabSyncProject",
     )
-    repository = create_generic_fk(
+    repository = models.ForeignKey(
+        "gitlab_sync.GitLabSyncRepository",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="commits",
-        to="gitlab_sync.GitLabSyncRepository",
     )
-    message: str | None = create_generic_varchar()
-    parent_ids: str | None = create_generic_varchar()
-    additions: int | None = create_generic_integer()
-    deletions: int | None = create_generic_integer()
-    total_changes: int | None = create_generic_integer()
+    message: str | None = models.CharField(max_length=255, null=True, blank=True)
+    parent_ids: str | None = models.CharField(max_length=255, null=True, blank=True)
+    additions: int | None = models.IntegerField(null=True, blank=True)
+    deletions: int | None = models.IntegerField(null=True, blank=True)
+    total_changes: int | None = models.IntegerField(null=True, blank=True)
 
     @property
     def pipelines(self):

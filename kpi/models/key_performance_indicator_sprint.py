@@ -1,13 +1,10 @@
+from django.db import models
 from django.db.models import QuerySet, Q
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 from math import ceil
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_scrum_capacity_base import AbstractScrumCapacityBase
-from django_generic_model_fields.create_generic_decimal import create_generic_decimal
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
 from core.models.person import Person
 from core.models.sprint import Sprint
 from core.models.this_server_configuration import ThisServerConfiguration
@@ -28,26 +25,26 @@ class KeyPerformanceIndicatorSprint(
 ):
     _disable_history = True  # Cached/computed data - history exists in source models (sprints, issues)
 
-    cached_capacity_adjusted: int | None = create_generic_integer()
-    cached_capacity_base_velocity: float | None = create_generic_decimal()
-    cached_capacity_per_day: float | None = create_generic_decimal()
-    cached_commitment_accuracy: float | None = create_generic_decimal()
-    git_lab_issues: set[GitLabIssue] | None = create_generic_m2m(related_name="kpi_sprints", to=GitLabIssue)
-    git_lab_iterations: set[GitLabIteration] | None = create_generic_m2m(related_name="kpi_sprints", to=GitLabIteration)
-    git_lab_user: GitLabUser | None = create_generic_fk(related_name="kpi_sprints", to=GitLabUser)
-    number_of_code_lines_added: int | None = create_generic_integer()
-    number_of_code_lines_removed: int | None = create_generic_integer()
-    number_of_comments_made: int | None = create_generic_integer()
-    number_of_context_switches: int | None = create_generic_integer()
-    number_of_issues_written: int | None = create_generic_integer()
-    number_of_merge_requests_approved: int | None = create_generic_integer()
-    number_of_paid_time_off_days: int | None = create_generic_integer()
-    number_of_story_points_committed_to: int | None = create_generic_integer()
-    number_of_story_points_delivered: int | None = create_generic_integer()
-    number_of_threads_made: int | None = create_generic_integer()
-    person_developer: Person | None = create_generic_fk(to=Person)
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="kpi_sprints", to=ScrumSprint)
-    sprint: Sprint | None = create_generic_fk(to=Sprint)
+    cached_capacity_adjusted: int | None = models.IntegerField(null=True, blank=True)
+    cached_capacity_base_velocity: float | None = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    cached_capacity_per_day: float | None = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    cached_commitment_accuracy: float | None = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    git_lab_issues: set[GitLabIssue] | None = models.ManyToManyField(GitLabIssue, related_name="kpi_sprints", blank=True)
+    git_lab_iterations: set[GitLabIteration] | None = models.ManyToManyField(GitLabIteration, related_name="kpi_sprints", blank=True)
+    git_lab_user: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="kpi_sprints")
+    number_of_code_lines_added: int | None = models.IntegerField(null=True, blank=True)
+    number_of_code_lines_removed: int | None = models.IntegerField(null=True, blank=True)
+    number_of_comments_made: int | None = models.IntegerField(null=True, blank=True)
+    number_of_context_switches: int | None = models.IntegerField(null=True, blank=True)
+    number_of_issues_written: int | None = models.IntegerField(null=True, blank=True)
+    number_of_merge_requests_approved: int | None = models.IntegerField(null=True, blank=True)
+    number_of_paid_time_off_days: int | None = models.IntegerField(null=True, blank=True)
+    number_of_story_points_committed_to: int | None = models.IntegerField(null=True, blank=True)
+    number_of_story_points_delivered: int | None = models.IntegerField(null=True, blank=True)
+    number_of_threads_made: int | None = models.IntegerField(null=True, blank=True)
+    person_developer: Person | None = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True, blank=True)
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="kpi_sprints")
+    sprint: Sprint | None = models.ForeignKey(Sprint, on_delete=models.SET_NULL, null=True, blank=True)
 
     @property
     def adjusted_capacity(self) -> int:

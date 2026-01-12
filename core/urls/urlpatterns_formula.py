@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.formula import (
     formula_add_view,
     formula_delete_view,
@@ -9,19 +8,10 @@ from core.views.formula import (
     formula_view,
 )
 
-urlpatterns_formula: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='formula',
-    view=formula_view,
-    view_edit=formula_edit_view,
-    view_new=formula_add_view,
-)
-
-# Add detail view
-urlpatterns_formula.append(
-    path(name='formula_detail', route='formula/<int:model_id>/', view=formula_detail_view)
-)
-
-# Add delete view
-urlpatterns_formula.append(
-    path(name='formula_delete', route='formula/delete/<int:model_id>/', view=formula_delete_view)
-)
+urlpatterns_formula: list[URLPattern | URLResolver] = [
+    path("formula/", formula_view, name="formula"),
+    path("formula/edit/<int:model_id>/", formula_edit_view, name="formula_edit"),
+    path("formula/new/", formula_add_view, name="formula_new"),
+    path("formula/<int:model_id>/", formula_detail_view, name="formula_detail"),
+    path("formula/delete/<int:model_id>/", formula_delete_view, name="formula_delete"),
+]

@@ -1,10 +1,6 @@
 from datetime import datetime
 
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_closed_at import AbstractGitLabClosedAt
@@ -40,22 +36,22 @@ class GitLabMergeRequest(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
-    assignees: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_assigned", to=GitLabUser)
-    author: GitLabUser | None = create_generic_fk(related_name="merge_requests_authored", to=GitLabUser)
-    blocking_discussions_resolved: bool | None = create_generic_boolean()
-    closed_by: GitLabUser | None = create_generic_fk(related_name="merge_requests_closed", to=GitLabUser)
-    draft: bool | None = create_generic_boolean()
-    group: GitLabGroup | None = create_generic_fk(related_name="merge_requests", to=GitLabGroup)
-    has_conflicts: bool | None = create_generic_boolean()
-    merged_at: datetime | None = create_generic_datetime()
-    merged_by: GitLabUser | None = create_generic_fk(related_name="merge_requests_merged", to=GitLabUser)
-    prepared_at: datetime | None = create_generic_datetime()
-    project: GitLabProject | None = create_generic_fk(related_name="merge_requests", to=GitLabProject)
-    reviewers: set[GitLabUser] | None = create_generic_m2m(related_name="merge_requests_reviewed", to=GitLabUser)
-    sha: str | None = create_generic_varchar()
-    source_branch: str | None = create_generic_varchar()
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="merge_requests", to=ScrumSprint)
-    target_branch: str | None = create_generic_varchar()
+    assignees: set[GitLabUser] | None = models.ManyToManyField(GitLabUser, blank=True, related_name="merge_requests_assigned")
+    author: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="merge_requests_authored")
+    blocking_discussions_resolved: bool | None = models.BooleanField(null=True, blank=True)
+    closed_by: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="merge_requests_closed")
+    draft: bool | None = models.BooleanField(null=True, blank=True)
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="merge_requests")
+    has_conflicts: bool | None = models.BooleanField(null=True, blank=True)
+    merged_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    merged_by: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="merge_requests_merged")
+    prepared_at: datetime | None = models.DateTimeField(null=True, blank=True)
+    project: GitLabProject | None = models.ForeignKey(GitLabProject, on_delete=models.SET_NULL, null=True, blank=True, related_name="merge_requests")
+    reviewers: set[GitLabUser] | None = models.ManyToManyField(GitLabUser, blank=True, related_name="merge_requests_reviewed")
+    sha: str | None = models.CharField(max_length=255, null=True, blank=True)
+    source_branch: str | None = models.CharField(max_length=255, null=True, blank=True)
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="merge_requests")
+    target_branch: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.references_relative}"

@@ -5,20 +5,15 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.action_item_status_choices import ACTION_ITEM_STATUS_CHOICES
 from core.models.common.enums.priority_choices import PRIORITY_CHOICES
-from django_generic_model_fields.create_generic_date import create_generic_date
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_text import create_generic_text
-
 
 class MeetingActionItem(AbstractBaseModel, AbstractComment, AbstractName):
-    description = create_generic_text()
-    due_date = create_generic_date()
-    meeting = create_generic_fk(to='Meeting', related_name='action_items')
-    assignee = create_generic_fk(to='Person', related_name='action_items_assigned')
-    priority = create_generic_enum(choices=PRIORITY_CHOICES)
-    status = create_generic_enum(choices=ACTION_ITEM_STATUS_CHOICES)
-    date_completed = create_generic_date()
+    description = models.TextField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
+    meeting = models.ForeignKey('Meeting', on_delete=models.SET_NULL, null=True, blank=True, related_name='action_items')
+    assignee = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='action_items_assigned')
+    priority = models.CharField(max_length=255, choices=PRIORITY_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=255, choices=ACTION_ITEM_STATUS_CHOICES, null=True, blank=True)
+    date_completed = models.DateField(null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name}"

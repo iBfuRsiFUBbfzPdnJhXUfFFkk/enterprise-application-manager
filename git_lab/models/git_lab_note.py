@@ -1,8 +1,4 @@
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
-from django_generic_model_fields.create_generic_text import create_generic_text
-from django_generic_model_fields.create_generic_varchar import create_generic_varchar
+from django.db import models
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from git_lab.models.common.abstract.abstract_git_lab_created_at import AbstractGitLabCreatedAt
@@ -25,17 +21,17 @@ class GitLabNote(
     AbstractGitLabUpdatedAt,
     AbstractGitLabWebUrl,
 ):
-    author: GitLabUser | None = create_generic_fk(related_name="notes_authored", to=GitLabUser)
-    body: str | None = create_generic_text()
-    discussion: GitLabDiscussion | None = create_generic_fk(related_name="notes", to=GitLabDiscussion)
-    group: GitLabGroup | None = create_generic_fk(related_name="notes", to=GitLabGroup)
-    noteable_id: int | None = create_generic_integer()
-    noteable_iid: int | None = create_generic_integer()
-    noteable_type: str | None = create_generic_varchar()
-    project: GitLabProject | None = create_generic_fk(related_name="notes", to=GitLabProject)
-    scrum_sprint: ScrumSprint | None = create_generic_fk(related_name="notes", to=ScrumSprint)
-    system: bool | None = create_generic_boolean()
-    type: str | None = create_generic_varchar()
+    author: GitLabUser | None = models.ForeignKey(GitLabUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="notes_authored")
+    body: str | None = models.TextField(null=True, blank=True)
+    discussion: GitLabDiscussion | None = models.ForeignKey(GitLabDiscussion, on_delete=models.SET_NULL, null=True, blank=True, related_name="notes")
+    group: GitLabGroup | None = models.ForeignKey(GitLabGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="notes")
+    noteable_id: int | None = models.IntegerField(null=True, blank=True)
+    noteable_iid: int | None = models.IntegerField(null=True, blank=True)
+    noteable_type: str | None = models.CharField(max_length=255, null=True, blank=True)
+    project: GitLabProject | None = models.ForeignKey(GitLabProject, on_delete=models.SET_NULL, null=True, blank=True, related_name="notes")
+    scrum_sprint: ScrumSprint | None = models.ForeignKey(ScrumSprint, on_delete=models.SET_NULL, null=True, blank=True, related_name="notes")
+    system: bool | None = models.BooleanField(null=True, blank=True)
+    type: str | None = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.title}"

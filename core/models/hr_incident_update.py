@@ -1,17 +1,14 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import DateTimeField
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.document import Document
 
-
 class HRIncidentUpdate(AbstractBaseModel, AbstractComment):
-    hr_incident = create_generic_fk(to='core.HRIncident', related_name='updates')
-    created_by = create_generic_fk(to=settings.AUTH_USER_MODEL, related_name='hr_incident_updates')
+    hr_incident = models.ForeignKey('core.HRIncident', on_delete=models.SET_NULL, null=True, blank=True, related_name='updates')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='hr_incident_updates')
     datetime_created = DateTimeField(auto_now_add=True)
 
     # MinIO file storage
@@ -23,7 +20,7 @@ class HRIncidentUpdate(AbstractBaseModel, AbstractComment):
     )
 
     # Many-to-many relationship to manually link documents
-    documents = create_generic_m2m(related_name='hr_incident_updates', to=Document)
+    documents = models.ManyToManyField(Document, blank=True, related_name='hr_incident_updates')
 
     @property
     def has_attachment(self):

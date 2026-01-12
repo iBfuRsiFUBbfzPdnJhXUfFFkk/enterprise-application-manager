@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django_generic_model_fields.create_generic_boolean import create_generic_boolean
+from django.db import models
 
 from core.models.common.abstract.abstract_acronym import AbstractAcronym
 from core.models.common.abstract.abstract_alias import AbstractAlias
@@ -9,7 +9,6 @@ from core.models.common.abstract.abstract_name import AbstractName
 from core.utilities.cast_query_set import cast_query_set
 from core.utilities.get_name_acronym import get_name_acronym
 
-
 class Role(
     AbstractAcronym,
     AbstractAlias,
@@ -17,7 +16,7 @@ class Role(
     AbstractComment,
     AbstractName,
 ):
-    is_protected: bool | None = create_generic_boolean(default=False)
+    is_protected: bool | None = models.BooleanField(null=True, blank=True, default=False)
 
     @property
     def people_who_hold_this_role(self):

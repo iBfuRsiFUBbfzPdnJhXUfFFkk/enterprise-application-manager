@@ -1,10 +1,8 @@
-from django.db.models import Model
-
-from django_generic_model_fields.create_generic_text import create_generic_text
+from django.db import models
 
 
-class AbstractComment(Model):
-    comment: str | None = create_generic_text()
+class AbstractComment(models.Model):
+    comment: str | None = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract = True

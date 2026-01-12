@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.competitor import (
     competitor_add_view,
     competitor_delete_view,
@@ -9,19 +8,10 @@ from core.views.competitor import (
     competitor_view,
 )
 
-urlpatterns_competitor: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='competitor',
-    view=competitor_view,
-    view_edit=competitor_edit_view,
-    view_new=competitor_add_view,
-)
-
-# Add detail view
-urlpatterns_competitor.append(
-    path(name='competitor_detail', route='competitor/<int:model_id>/', view=competitor_detail_view)
-)
-
-# Add delete view
-urlpatterns_competitor.append(
-    path(name='competitor_delete', route='competitor/delete/<int:model_id>/', view=competitor_delete_view)
-)
+urlpatterns_competitor: list[URLPattern | URLResolver] = [
+    path("competitor/", competitor_view, name="competitor"),
+    path("competitor/edit/<int:model_id>/", competitor_edit_view, name="competitor_edit"),
+    path("competitor/new/", competitor_add_view, name="competitor_new"),
+    path("competitor/<int:model_id>/", competitor_detail_view, name="competitor_detail"),
+    path("competitor/delete/<int:model_id>/", competitor_delete_view, name="competitor_delete"),
+]

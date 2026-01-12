@@ -8,22 +8,16 @@ from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.maintenance_severity_choices import MAINTENANCE_SEVERITY_CHOICES
 from core.models.common.enums.maintenance_status_choices import MAINTENANCE_STATUS_CHOICES
-from django_generic_model_fields.create_generic_datetime import create_generic_datetime
-from django_generic_model_fields.create_generic_enum import create_generic_enum
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_m2m import create_generic_m2m
-from django_generic_model_fields.create_generic_text import create_generic_text
-
 
 class MaintenanceWindow(AbstractBaseModel, AbstractComment, AbstractName):
-    date_time_start = create_generic_datetime()
-    date_time_end = create_generic_datetime()
-    description = create_generic_text()
-    severity = create_generic_enum(choices=MAINTENANCE_SEVERITY_CHOICES)
-    status = create_generic_enum(choices=MAINTENANCE_STATUS_CHOICES)
-    applications_affected = create_generic_m2m(to='Application', related_name='maintenance_windows')
-    person_contact = create_generic_fk(to='Person', related_name='maintenance_windows_as_contact')
-    person_created_by = create_generic_fk(to='Person', related_name='maintenance_windows_created')
+    date_time_start = models.DateTimeField(null=True, blank=True)
+    date_time_end = models.DateTimeField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    severity = models.CharField(max_length=255, choices=MAINTENANCE_SEVERITY_CHOICES, null=True, blank=True)
+    status = models.CharField(max_length=255, choices=MAINTENANCE_STATUS_CHOICES, null=True, blank=True)
+    applications_affected = models.ManyToManyField('Application', blank=True, related_name='maintenance_windows')
+    person_contact = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='maintenance_windows_as_contact')
+    person_created_by = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='maintenance_windows_created')
 
     @property
     def duration_hours(self) -> float:

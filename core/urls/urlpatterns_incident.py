@@ -1,6 +1,5 @@
 from django.urls import URLPattern, URLResolver, path
 
-from core.urls.common.create_generic_urlpatterns import create_generic_urlpatterns
 from core.views.incident import (
     incident_add_view,
     incident_delete_view,
@@ -9,19 +8,10 @@ from core.views.incident import (
     incident_view,
 )
 
-urlpatterns_incident: list[URLPattern | URLResolver] = create_generic_urlpatterns(
-    name='incident',
-    view=incident_view,
-    view_edit=incident_edit_view,
-    view_new=incident_add_view,
-)
-
-# Add detail view
-urlpatterns_incident.append(
-    path(name='incident_detail', route='incident/<int:model_id>/', view=incident_detail_view)
-)
-
-# Add delete view
-urlpatterns_incident.append(
-    path(name='incident_delete', route='incident/delete/<int:model_id>/', view=incident_delete_view)
-)
+urlpatterns_incident: list[URLPattern | URLResolver] = [
+    path("incident/", incident_view, name="incident"),
+    path("incident/edit/<int:model_id>/", incident_edit_view, name="incident_edit"),
+    path("incident/new/", incident_add_view, name="incident_new"),
+    path("incident/<int:model_id>/", incident_detail_view, name="incident_detail"),
+    path("incident/delete/<int:model_id>/", incident_delete_view, name="incident_delete"),
+]

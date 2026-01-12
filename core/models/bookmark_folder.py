@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.db import models
-from django_generic_model_fields.create_generic_fk import create_generic_fk
-from django_generic_model_fields.create_generic_integer import create_generic_integer
 
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_name import AbstractName
@@ -14,17 +12,23 @@ class BookmarkFolder(AbstractBaseModel, AbstractName):
     Each user has their own independent folder structure.
     """
 
-    user = create_generic_fk(
-        to=settings.AUTH_USER_MODEL,
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='bookmark_folders',
     )
 
-    parent_folder = create_generic_fk(
-        to='core.BookmarkFolder',
+    parent_folder = models.ForeignKey(
+        'core.BookmarkFolder',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='child_folders',
     )
 
-    order = create_generic_integer()
+    order = models.IntegerField(null=True, blank=True)
 
     color: str | None = models.CharField(
         max_length=7,
