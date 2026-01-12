@@ -1,10 +1,11 @@
 from typing import Optional
+from uuid import uuid4
 
 from django.db import models
 
 
 class AbstractEnumerationAttackUuid(models.Model):
-    enumeration_attack_uuid: str | None = models.UUIDField(null=True, blank=True)
+    enumeration_attack_uuid: str | None = models.UUIDField(default=uuid4, editable=False, unique=True)
 
     @property
     def uuid(self) -> str | None:
