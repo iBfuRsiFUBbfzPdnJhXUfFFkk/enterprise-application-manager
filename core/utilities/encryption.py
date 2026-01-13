@@ -1,6 +1,6 @@
 from os import getenv
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 
 secret_key: str | None = getenv('ENCRYPTION_SECRET')
 if secret_key is None:
@@ -18,5 +18,8 @@ def encrypt_secret(secret: str | None) -> str | None:
 def decrypt_secret(encrypted_secret: str | None) -> str | None:
     if encrypted_secret is None:
         return None
-    decrypted_secret: bytes = cipher_suite.decrypt(token=encrypted_secret.encode())
-    return decrypted_secret.decode()
+    try:
+        decrypted_secret: bytes = cipher_suite.decrypt(token=encrypted_secret.encode())
+        return decrypted_secret.decode()
+    except InvalidToken:
+        return None
