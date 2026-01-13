@@ -15,5 +15,10 @@ class DatabaseForm(BaseModelForm):
         return generic_encrypted_save(
             model_form=self,
             instance=instance,
-            data_points=["encrypted_password", "encrypted_username"],
+            data_points=[
+                "encrypted_password",
+                "encrypted_username",
+                "encrypted_ssh_tunnel_username",
+                "encrypted_ssh_tunnel_password",
+            ],
         )

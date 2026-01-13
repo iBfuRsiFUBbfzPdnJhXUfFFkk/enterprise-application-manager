@@ -130,6 +130,186 @@
                 </div>
             </div>
 
+            <!-- Network & Security Section -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Network & Security</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Network Access</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if database.is_public_facing %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Public Facing
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                        Private Network
+                                    </span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Access Mode</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if database.is_read_only %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                        Read Only
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                        Read/Write
+                                    </span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% if database.type_ssl_support %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">SSL Support</dt>
+                            <dd class="text-lg text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                    {% if database.type_ssl_support == 'Required' %}bg-green-100 text-green-800
+                                    {% elif database.type_ssl_support == 'Preferred' %}bg-blue-100 text-blue-800
+                                    {% elif database.type_ssl_support == 'Optional' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ database.get_type_ssl_support_display }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if database.type_connection_type %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Connection Type</dt>
+                            <dd class="text-lg text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                                    {{ database.get_type_connection_type_display }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if database.type_authentication_method %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Authentication Method</dt>
+                            <dd class="text-lg text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                    {{ database.get_type_authentication_method_display }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- SSH Tunnel Section -->
+            {% if database.is_ssh_tunnel_required %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">SSH Tunnel Configuration</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if database.ssh_tunnel_host %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">SSH Host</dt>
+                            <dd class="text-lg text-gray-900 font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300">
+                                {{ database.ssh_tunnel_host }}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if database.ssh_tunnel_port %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">SSH Port</dt>
+                            <dd class="text-lg text-gray-900 font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300">
+                                {{ database.ssh_tunnel_port }}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if decrypted_ssh_tunnel_username %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">SSH Username</dt>
+                            <dd class="text-lg text-gray-900">
+                                <span class="font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300">{{ decrypted_ssh_tunnel_username }}</span>
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if decrypted_ssh_tunnel_password %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">SSH Password</dt>
+                            <dd class="text-lg text-gray-900">
+                                <div class="flex items-center gap-2">
+                                    <span id="ssh-password" class="font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300 select-all">••••••••</span>
+                                    <button onclick="toggleSSHPassword()" class="text-sm text-cyan-600 hover:text-cyan-700 underline">
+                                        Show/Hide
+                                    </button>
+                                    <button onclick="copySSHPassword()" class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors">
+                                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                        </svg>
+                                        <span id="copy-ssh-button-text">Copy</span>
+                                    </button>
+                                </div>
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Certificate Section -->
+            {% if database.is_certificate_required %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">SSL/TLS Certificate</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Certificate Required</dt>
+                            <dd class="text-lg text-gray-900">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                                    <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    Certificate Required
+                                </span>
+                            </dd>
+                        </div>
+                        {% if database.certificate %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Certificate File</dt>
+                            <dd class="text-lg">
+                                <a href="{% url 'document_detail' model_id=database.certificate.id %}"
+                                   class="inline-flex items-center text-cyan-600 hover:text-cyan-700 hover:underline">
+                                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    {{ database.certificate.name }}
+                                </a>
+                            </dd>
+                        </div>
+                        {% else %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Certificate File</dt>
+                            <dd class="text-lg text-gray-400">
+                                Not uploaded
+                            </dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Credentials Section -->
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -288,8 +468,10 @@
     <script>
         let passwordVisible = false;
         let connectionStringVisible = false;
+        let sshPasswordVisible = false;
         const actualPassword = '{{ decrypted_password|escapejs }}';
         const actualConnectionString = '{{ connection_string|escapejs }}';
+        const actualSSHPassword = '{{ decrypted_ssh_tunnel_password|escapejs }}';
 
         function togglePassword() {
             const passwordElement = document.getElementById('password');
@@ -406,6 +588,65 @@
                 }, 2000);
 
                 console.error('Failed to copy connection string:', err);
+            }
+        }
+
+        function toggleSSHPassword() {
+            const sshPasswordElement = document.getElementById('ssh-password');
+            if (sshPasswordVisible) {
+                sshPasswordElement.textContent = '••••••••';
+                sshPasswordVisible = false;
+            } else {
+                sshPasswordElement.textContent = actualSSHPassword;
+                sshPasswordVisible = true;
+            }
+        }
+
+        async function copySSHPassword() {
+            const buttonText = document.getElementById('copy-ssh-button-text');
+            const originalText = buttonText.textContent;
+
+            try {
+                // Try using the modern Clipboard API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(actualSSHPassword);
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = actualSSHPassword;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+
+                // Show success feedback
+                buttonText.textContent = 'Copied!';
+                buttonText.parentElement.classList.add('bg-green-50', 'border-green-300', 'text-green-700');
+                buttonText.parentElement.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    buttonText.textContent = originalText;
+                    buttonText.parentElement.classList.remove('bg-green-50', 'border-green-300', 'text-green-700');
+                    buttonText.parentElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                }, 2000);
+            } catch (err) {
+                // Show error feedback
+                buttonText.textContent = 'Failed';
+                buttonText.parentElement.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
+                buttonText.parentElement.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    buttonText.textContent = originalText;
+                    buttonText.parentElement.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
+                    buttonText.parentElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                }, 2000);
+
+                console.error('Failed to copy SSH password:', err);
             }
         }
     </script>

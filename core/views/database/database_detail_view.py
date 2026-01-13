@@ -24,6 +24,8 @@ def database_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
             'updated_record': updated_record,
             'decrypted_username': database.get_encrypted_username(),
             'decrypted_password': database.get_encrypted_password(),
+            'decrypted_ssh_tunnel_username': database.get_encrypted_ssh_tunnel_username(),
+            'decrypted_ssh_tunnel_password': database.get_encrypted_ssh_tunnel_password(),
             'connection_string': database.get_connection_string(),
         }
     )

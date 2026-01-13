@@ -4,8 +4,11 @@ from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
 from core.models.common.abstract.abstract_version import AbstractVersion
 from core.models.common.enums.data_storage_form_choices import DATA_STORAGE_FORM_CHOICES
+from core.models.common.enums.database_authentication_method_choices import DATABASE_AUTH_METHOD_CHOICES
+from core.models.common.enums.database_connection_type_choices import DATABASE_CONNECTION_TYPE_CHOICES
 from core.models.common.enums.database_flavor_choices import DATABASE_FLAVOR_CHOICES
 from core.models.common.enums.environment_choices import ENVIRONMENT_CHOICES
+from core.models.common.enums.ssl_support_choices import SSL_SUPPORT_CHOICES
 from core.utilities.encryption import encrypt_secret, decrypt_secret
 
 
@@ -21,6 +24,24 @@ class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
     type_database_flavor = models.CharField(max_length=255, choices=DATABASE_FLAVOR_CHOICES, null=True, blank=True)
     type_environment = models.CharField(max_length=255, choices=ENVIRONMENT_CHOICES, null=True, blank=True)
 
+    # Network and Security Fields
+    is_public_facing = models.BooleanField(null=True, blank=True, default=False, help_text='Is this database accessible from the public internet?')
+    is_read_only = models.BooleanField(null=True, blank=True, default=False, help_text='Is this database connection read-only?')
+    type_authentication_method = models.CharField(max_length=255, choices=DATABASE_AUTH_METHOD_CHOICES, null=True, blank=True)
+    type_connection_type = models.CharField(max_length=255, choices=DATABASE_CONNECTION_TYPE_CHOICES, null=True, blank=True)
+    type_ssl_support = models.CharField(max_length=255, choices=SSL_SUPPORT_CHOICES, null=True, blank=True)
+
+    # SSH Tunnel Configuration
+    is_ssh_tunnel_required = models.BooleanField(null=True, blank=True, default=False, help_text='Does this database require SSH tunneling?')
+    ssh_tunnel_host = models.CharField(max_length=255, null=True, blank=True, help_text='SSH tunnel hostname')
+    ssh_tunnel_port = models.IntegerField(null=True, blank=True, help_text='SSH tunnel port (usually 22)')
+    encrypted_ssh_tunnel_username = models.CharField(max_length=255, null=True, blank=True)
+    encrypted_ssh_tunnel_password = models.CharField(max_length=255, null=True, blank=True)
+
+    # Certificate Management
+    is_certificate_required = models.BooleanField(null=True, blank=True, default=False, help_text='Does this connection require an SSL/TLS certificate?')
+    certificate = models.ForeignKey('Document', on_delete=models.SET_NULL, null=True, blank=True, related_name='databases_using_certificate', help_text='SSL/TLS certificate file')
+
     def set_encrypted_password(self, secret: str | None) -> None:
         self.encrypted_password = encrypt_secret(secret=secret)
 
@@ -32,6 +53,18 @@ class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
 
     def get_encrypted_username(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_username)
+
+    def set_encrypted_ssh_tunnel_username(self, secret: str | None) -> None:
+        self.encrypted_ssh_tunnel_username = encrypt_secret(secret=secret)
+
+    def get_encrypted_ssh_tunnel_username(self) -> str | None:
+        return decrypt_secret(encrypted_secret=self.encrypted_ssh_tunnel_username)
+
+    def set_encrypted_ssh_tunnel_password(self, secret: str | None) -> None:
+        self.encrypted_ssh_tunnel_password = encrypt_secret(secret=secret)
+
+    def get_encrypted_ssh_tunnel_password(self) -> str | None:
+        return decrypt_secret(encrypted_secret=self.encrypted_ssh_tunnel_password)
 
     def get_connection_string(self) -> str | None:
         """Generate a connection string based on database flavor"""
