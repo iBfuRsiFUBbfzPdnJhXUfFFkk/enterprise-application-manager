@@ -151,10 +151,18 @@
                             <dt class="text-sm font-medium text-gray-500 mb-1">Password</dt>
                             <dd class="text-lg text-gray-900">
                                 {% if decrypted_password %}
-                                    <span id="password" class="font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300 select-all">••••••••</span>
-                                    <button onclick="togglePassword()" class="ml-3 text-sm text-cyan-600 hover:text-cyan-700 underline">
-                                        Show/Hide
-                                    </button>
+                                    <div class="flex items-center gap-2">
+                                        <span id="password" class="font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300 select-all">••••••••</span>
+                                        <button onclick="togglePassword()" class="text-sm text-cyan-600 hover:text-cyan-700 underline">
+                                            Show/Hide
+                                        </button>
+                                        <button onclick="copyPassword()" class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors">
+                                            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span id="copy-button-text">Copy</span>
+                                        </button>
+                                    </div>
                                 {% else %}
                                     <span class="text-gray-400">Not set</span>
                                 {% endif %}
@@ -254,6 +262,54 @@
             } else {
                 passwordElement.textContent = actualPassword;
                 passwordVisible = true;
+            }
+        }
+
+        async function copyPassword() {
+            const buttonText = document.getElementById('copy-button-text');
+            const originalText = buttonText.textContent;
+
+            try {
+                // Try using the modern Clipboard API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(actualPassword);
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = actualPassword;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+
+                // Show success feedback
+                buttonText.textContent = 'Copied!';
+                buttonText.parentElement.classList.add('bg-green-50', 'border-green-300', 'text-green-700');
+                buttonText.parentElement.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    buttonText.textContent = originalText;
+                    buttonText.parentElement.classList.remove('bg-green-50', 'border-green-300', 'text-green-700');
+                    buttonText.parentElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                }, 2000);
+            } catch (err) {
+                // Show error feedback
+                buttonText.textContent = 'Failed';
+                buttonText.parentElement.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
+                buttonText.parentElement.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    buttonText.textContent = originalText;
+                    buttonText.parentElement.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
+                    buttonText.parentElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                }, 2000);
+
+                console.error('Failed to copy password:', err);
             }
         }
     </script>
