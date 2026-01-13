@@ -25,17 +25,25 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                 <!-- Search -->
-                <div class="lg:col-span-2">
+                <div class="lg:col-span-1">
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search</label>
                     <div class="relative">
                         <input type="text"
                                id="search"
-                               placeholder="Search by application, hostname, schema..."
+                               placeholder="Search by hostname, schema..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
+                </div>
+
+                <!-- Application Filter -->
+                <div>
+                    <label for="application-filter" class="block text-sm font-medium text-gray-700 mb-2">Application</label>
+                    <select id="application-filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">All Applications</option>
+                    </select>
                 </div>
 
                 <!-- Environment Filter -->
@@ -285,6 +293,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search');
+    const applicationFilter = document.getElementById('application-filter');
     const environmentFilter = document.getElementById('environment-filter');
     const flavorFilter = document.getElementById('flavor-filter');
     const gridViewBtn = document.getElementById('grid-view-btn');
@@ -308,6 +317,18 @@ document.addEventListener('DOMContentLoaded', function() {
             flavor: card.dataset.flavor,
             version: card.dataset.version.toLowerCase()
         });
+    });
+
+    // Populate application filter
+    const applications = new Set();
+    allItems.forEach(item => {
+        if (item.application) applications.add(item.application);
+    });
+    Array.from(applications).sort().forEach(app => {
+        const option = document.createElement('option');
+        option.value = app;
+        option.textContent = app;
+        applicationFilter.appendChild(option);
     });
 
     // Populate environment filter
@@ -334,9 +355,43 @@ document.addEventListener('DOMContentLoaded', function() {
         flavorFilter.appendChild(option);
     });
 
+    // Get URL parameters
+    function getUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            search: params.get('search') || '',
+            application: params.get('application') || '',
+            environment: params.get('environment') || '',
+            flavor: params.get('flavor') || ''
+        };
+    }
+
+    // Update URL parameters without page reload
+    function updateUrlParams() {
+        const params = new URLSearchParams();
+
+        if (searchInput.value) params.set('search', searchInput.value);
+        if (applicationFilter.value) params.set('application', applicationFilter.value);
+        if (environmentFilter.value) params.set('environment', environmentFilter.value);
+        if (flavorFilter.value) params.set('flavor', flavorFilter.value);
+
+        const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    // Restore filters from URL parameters
+    function restoreFilters() {
+        const params = getUrlParams();
+        searchInput.value = params.search;
+        applicationFilter.value = params.application;
+        environmentFilter.value = params.environment;
+        flavorFilter.value = params.flavor;
+    }
+
     // Filter function
     function filterItems() {
         const searchTerm = searchInput.value.toLowerCase();
+        const selectedApplication = applicationFilter.value.toLowerCase();
         const selectedEnvironment = environmentFilter.value;
         const selectedFlavor = flavorFilter.value;
 
@@ -344,15 +399,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         allItems.forEach(item => {
             const matchesSearch = !searchTerm ||
-                                item.application.includes(searchTerm) ||
                                 item.hostname.includes(searchTerm) ||
                                 item.schema.includes(searchTerm) ||
                                 item.version.includes(searchTerm);
 
+            const matchesApplication = !selectedApplication || item.application === selectedApplication;
             const matchesEnvironment = !selectedEnvironment || item.environment === selectedEnvironment;
             const matchesFlavor = !selectedFlavor || item.flavor === selectedFlavor;
 
-            const isVisible = matchesSearch && matchesEnvironment && matchesFlavor;
+            const isVisible = matchesSearch && matchesApplication && matchesEnvironment && matchesFlavor;
 
             if (isVisible) {
                 item.card.classList.remove('hidden');
@@ -384,10 +439,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 listView.classList.remove('hidden');
             }
         }
+
+        // Update URL parameters
+        updateUrlParams();
     }
 
     // Event listeners for filtering
     searchInput.addEventListener('input', filterItems);
+    applicationFilter.addEventListener('change', filterItems);
     environmentFilter.addEventListener('change', filterItems);
     flavorFilter.addEventListener('change', filterItems);
 
@@ -417,6 +476,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore saved view preference
     const savedView = localStorage.getItem('eam_database_view') || 'grid';
     setView(savedView);
+
+    // Restore filters from URL and apply them
+    restoreFilters();
+    filterItems();
 });
 </script>
 {% endblock %}
