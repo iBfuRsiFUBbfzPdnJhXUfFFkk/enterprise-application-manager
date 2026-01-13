@@ -210,29 +210,27 @@
                 </div>
                 <div class="px-6 py-6">
                     <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {% if historical_records %}
-                            {% with created_record=historical_records|last updated_record=historical_records|first %}
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
-                                <dd class="text-base text-gray-900">
-                                    <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
-                                    {% if created_record.history_user %}
-                                        <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
-                                    {% endif %}
-                                </dd>
-                            </div>
-                            {% if updated_record.history_date != created_record.history_date %}
-                            <div>
-                                <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
-                                <dd class="text-base text-gray-900">
-                                    <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
-                                    {% if updated_record.history_user %}
-                                        <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
-                                    {% endif %}
-                                </dd>
-                            </div>
-                            {% endif %}
-                            {% endwith %}
+                        {% if created_record %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
+                                {% if created_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        {% if updated_record and created_record and updated_record.history_date != created_record.history_date %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
+                            <dd class="text-base text-gray-900">
+                                <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
+                                {% if updated_record.history_user %}
+                                    <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
+                                {% endif %}
+                            </dd>
+                        </div>
                         {% endif %}
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
