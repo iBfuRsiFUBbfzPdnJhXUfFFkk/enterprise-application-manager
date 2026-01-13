@@ -228,8 +228,18 @@
                             <label for="{{ form.certificate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Select the certificate document">
                                 Certificate File
                             </label>
-                            {{ form.certificate }}
-                            <p class="mt-1 text-xs text-gray-500">Select an existing certificate document or upload a new one first.</p>
+                            <div class="flex gap-2">
+                                <div class="flex-1">
+                                    {{ form.certificate }}
+                                </div>
+                                <button type="button" onclick="openCertificateModal()" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Upload New
+                                </button>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Select an existing certificate or click "Upload New" to add a certificate file.</p>
                             {% if form.certificate.errors %}<p class="mt-2 text-sm text-red-600">{{ form.certificate.errors.0 }}</p>{% endif %}
                         </div>
                     </div>
@@ -415,4 +425,158 @@
             opacity: 1;
         }
     </style>
+
+    <!-- Certificate Upload Modal -->
+    <div id="certificateModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Upload Certificate</h3>
+                <button type="button" onclick="closeCertificateModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="px-6 py-6">
+                <form id="certificateUploadForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div>
+                            <label for="cert_name" class="block text-sm font-medium text-gray-700 mb-2">
+                                Certificate Name *
+                            </label>
+                            <input type="text" id="cert_name" name="name" required
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="cert_version" class="block text-sm font-medium text-gray-700 mb-2">
+                                Version <span class="text-gray-400">(optional)</span>
+                            </label>
+                            <input type="text" id="cert_version" name="version" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="cert_comment" class="block text-sm font-medium text-gray-700 mb-2">
+                                Comment
+                            </label>
+                            <textarea id="cert_comment" name="comment" rows="3" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Certificate description or notes"></textarea>
+                        </div>
+                        <div>
+                            <label for="cert_file" class="block text-sm font-medium text-gray-700 mb-2">
+                                Certificate File <span class="text-red-600">*</span>
+                            </label>
+                            <input type="file" id="cert_file" name="file" accept=".pem,.crt,.cer,.p12,.pfx,.key" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"/>
+                            <p class="mt-1 text-xs text-gray-500">Supported formats: .pem, .crt, .cer, .key, .p12, .pfx</p>
+                        </div>
+                    </div>
+                    <div id="upload-error" class="hidden mt-4 px-4 py-3 bg-red-50 border border-red-200 rounded-md">
+                        <p class="text-sm text-red-800"></p>
+                    </div>
+                </form>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeCertificateModal()" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="uploadCertificate()" id="upload-cert-btn" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 7m4-4v12"/>
+                        </svg>
+                        Upload
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openCertificateModal() {
+            document.getElementById('certificateModal').classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificateModal').classList.add('hidden');
+            document.getElementById('certificateUploadForm').reset();
+            const errorDiv = document.getElementById('upload-error');
+            errorDiv.classList.add('hidden');
+            errorDiv.querySelector('p').textContent = '';
+        }
+
+        async function uploadCertificate() {
+            const uploadButton = document.getElementById('upload-cert-btn');
+            const originalButtonText = uploadButton.innerHTML;
+
+            // Disable button and show loading state
+            uploadButton.disabled = true;
+            uploadButton.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Uploading...';
+
+            try {
+                const formData = new FormData();
+                const nameInput = document.getElementById('cert_name');
+                const versionInput = document.getElementById('cert_version');
+                const commentInput = document.getElementById('cert_comment');
+                const fileInput = document.getElementById('cert_file');
+
+                // Validate required fields
+                if (!nameInput.value.trim()) {
+                    alert('Please enter a certificate name');
+                    uploadButton.disabled = false;
+                    uploadButton.innerHTML = originalButtonText;
+                    return;
+                }
+
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Please select a file to upload');
+                    uploadButton.disabled = false;
+                    uploadButton.innerHTML = originalButtonText;
+                    return;
+                }
+
+                // Add form data
+                formData.append('name', nameInput.value);
+                formData.append('version', versionInput.value);
+                formData.append('comment', commentInput.value);
+                formData.append('file', fileInput.files[0]);
+
+                // Get CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                // Submit via AJAX
+                const response = await fetch('{% url "document_create_ajax" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Add new option to select dropdown
+                    const certificateSelect = document.getElementById('{{ form.certificate.id_for_label }}');
+                    const newOption = new Option(data.document.name, data.document.id, true, true);
+                    certificateSelect.add(newOption);
+
+                    // Close modal
+                    closeCertificateModal();
+
+                    // Show success message
+                    alert('Certificate uploaded successfully!');
+                } else {
+                    // Show errors
+                    let errorMessage = 'Upload failed:\n';
+                    for (const [field, errors] of Object.entries(data.errors)) {
+                        errorMessage += `${field}: ${errors.join(', ')}\n`;
+                    }
+                    alert(errorMessage);
+                }
+            } catch (error) {
+                alert('An error occurred while uploading the certificate: ' + error.message);
+            } finally {
+                uploadButton.disabled = false;
+                uploadButton.innerHTML = originalButtonText;
+            }
+        }
+    </script>
 {% endblock %}
