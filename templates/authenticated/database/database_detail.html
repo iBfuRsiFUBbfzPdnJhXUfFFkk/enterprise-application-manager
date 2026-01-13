@@ -172,6 +172,41 @@
                 </div>
             </div>
 
+            <!-- Connection String Section -->
+            {% if connection_string %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Connection String</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Connection String</dt>
+                            <dd class="text-lg text-gray-900">
+                                <div class="flex items-start gap-2">
+                                    <span id="connection-string" class="flex-1 font-mono text-sm bg-gray-100 px-3 py-2 rounded border border-gray-300 break-all">••••••••••••••••••••••••••••••••••••••••••••</span>
+                                    <div class="flex flex-col sm:flex-row gap-2">
+                                        <button onclick="toggleConnectionString()" class="whitespace-nowrap text-sm text-cyan-600 hover:text-cyan-700 underline">
+                                            Show/Hide
+                                        </button>
+                                        <button onclick="copyConnectionString()" class="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors whitespace-nowrap">
+                                            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span id="copy-connection-button-text">Copy</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    <span class="font-medium">Format:</span> {{ database.type_database_flavor }} connection string
+                                </p>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Related Application -->
             {% if database.application %}
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -252,7 +287,9 @@
 
     <script>
         let passwordVisible = false;
+        let connectionStringVisible = false;
         const actualPassword = '{{ decrypted_password|escapejs }}';
+        const actualConnectionString = '{{ connection_string|escapejs }}';
 
         function togglePassword() {
             const passwordElement = document.getElementById('password');
@@ -262,6 +299,17 @@
             } else {
                 passwordElement.textContent = actualPassword;
                 passwordVisible = true;
+            }
+        }
+
+        function toggleConnectionString() {
+            const connectionStringElement = document.getElementById('connection-string');
+            if (connectionStringVisible) {
+                connectionStringElement.textContent = '••••••••••••••••••••••••••••••••••••••••••••';
+                connectionStringVisible = false;
+            } else {
+                connectionStringElement.textContent = actualConnectionString;
+                connectionStringVisible = true;
             }
         }
 
@@ -310,6 +358,54 @@
                 }, 2000);
 
                 console.error('Failed to copy password:', err);
+            }
+        }
+
+        async function copyConnectionString() {
+            const buttonText = document.getElementById('copy-connection-button-text');
+            const originalText = buttonText.textContent;
+
+            try {
+                // Try using the modern Clipboard API
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(actualConnectionString);
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = actualConnectionString;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                }
+
+                // Show success feedback
+                buttonText.textContent = 'Copied!';
+                buttonText.parentElement.classList.add('bg-green-50', 'border-green-300', 'text-green-700');
+                buttonText.parentElement.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    buttonText.textContent = originalText;
+                    buttonText.parentElement.classList.remove('bg-green-50', 'border-green-300', 'text-green-700');
+                    buttonText.parentElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                }, 2000);
+            } catch (err) {
+                // Show error feedback
+                buttonText.textContent = 'Failed';
+                buttonText.parentElement.classList.add('bg-red-50', 'border-red-300', 'text-red-700');
+                buttonText.parentElement.classList.remove('bg-white', 'border-gray-300', 'text-gray-700');
+
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    buttonText.textContent = originalText;
+                    buttonText.parentElement.classList.remove('bg-red-50', 'border-red-300', 'text-red-700');
+                    buttonText.parentElement.classList.add('bg-white', 'border-gray-300', 'text-gray-700');
+                }, 2000);
+
+                console.error('Failed to copy connection string:', err);
             }
         }
     </script>

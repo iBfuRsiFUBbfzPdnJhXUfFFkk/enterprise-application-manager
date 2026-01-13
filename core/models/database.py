@@ -33,6 +33,74 @@ class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
     def get_encrypted_username(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_username)
 
+    def get_connection_string(self) -> str | None:
+        """Generate a connection string based on database flavor"""
+        username = self.get_encrypted_username()
+        password = self.get_encrypted_password()
+        hostname = self.hostname
+        port = self.port
+        schema = self.schema
+        flavor = self.type_database_flavor
+
+        # Return None if essential fields are missing
+        if not hostname or not flavor:
+            return None
+
+        # PostgreSQL
+        if flavor == "PostgreSQL":
+            if username and password and port and schema:
+                return f"postgresql://{username}:{password}@{hostname}:{port}/{schema}"
+            elif username and password and schema:
+                return f"postgresql://{username}:{password}@{hostname}/{schema}"
+            return None
+
+        # MariaDB
+        elif flavor == "MariaDB":
+            if username and password and port and schema:
+                return f"mysql://{username}:{password}@{hostname}:{port}/{schema}"
+            elif username and password and schema:
+                return f"mysql://{username}:{password}@{hostname}/{schema}"
+            return None
+
+        # MongoDB
+        elif flavor == "MongoDB":
+            if username and password and port and schema:
+                return f"mongodb://{username}:{password}@{hostname}:{port}/{schema}"
+            elif username and password and port:
+                return f"mongodb://{username}:{password}@{hostname}:{port}"
+            elif port:
+                return f"mongodb://{hostname}:{port}"
+            return f"mongodb://{hostname}"
+
+        # SQLite
+        elif flavor == "SQLite":
+            if schema:
+                return f"sqlite:///{schema}"
+            return None
+
+        # CosmosDB
+        elif flavor == "CosmosDB":
+            if password:  # Password serves as AccountKey
+                return f"AccountEndpoint=https://{hostname}/;AccountKey={password};"
+            return None
+
+        # MinIO
+        elif flavor == "MinIO":
+            if username and password and port and schema:
+                return f"s3://{username}:{password}@{hostname}:{port}/{schema}"
+            elif username and password and schema:
+                return f"s3://{username}:{password}@{hostname}/{schema}"
+            return None
+
+        # Azure Blob Storage
+        elif flavor == "Azure Blob Storage":
+            if username and password:  # username is account name, password is account key
+                return f"DefaultEndpointsProtocol=https;AccountName={username};AccountKey={password};EndpointSuffix=core.windows.net"
+            return None
+
+        # Unknown flavor
+        return None
+
     def __str__(self):
         return f"{self.application.acronym if self.application is not None else 'N/A'} - {self.type_environment} - v{self.version}"
 
