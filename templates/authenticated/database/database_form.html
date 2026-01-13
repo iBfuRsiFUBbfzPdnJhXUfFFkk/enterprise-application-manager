@@ -118,6 +118,123 @@
                     </div>
                 </div>
 
+                <!-- Network & Security -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Network & Security</h2>
+                        <p class="mt-1 text-sm text-gray-500">Network access and security settings</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start">
+                            {{ form.is_public_facing }}
+                            <label for="{{ form.is_public_facing.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-700 cursor-help" title="Check if this database is accessible from the public internet">
+                                Public Facing
+                            </label>
+                            {% if form.is_public_facing.errors %}<p class="mt-2 text-sm text-red-600">{{ form.is_public_facing.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="flex items-start">
+                            {{ form.is_read_only }}
+                            <label for="{{ form.is_read_only.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-700 cursor-help" title="Check if this database connection is read-only">
+                                Read Only
+                            </label>
+                            {% if form.is_read_only.errors %}<p class="mt-2 text-sm text-red-600">{{ form.is_read_only.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_ssl_support.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="SSL/TLS encryption support level">
+                                SSL Support
+                            </label>
+                            {{ form.type_ssl_support }}
+                            {% if form.type_ssl_support.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_ssl_support.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.type_connection_type.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The type of connection method">
+                                Connection Type
+                            </label>
+                            {{ form.type_connection_type }}
+                            {% if form.type_connection_type.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_connection_type.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="{{ form.type_authentication_method.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="The authentication method used for this database">
+                                Authentication Method
+                            </label>
+                            {{ form.type_authentication_method }}
+                            {% if form.type_authentication_method.errors %}<p class="mt-2 text-sm text-red-600">{{ form.type_authentication_method.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SSH Tunnel Configuration -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">SSH Tunnel Configuration</h2>
+                        <p class="mt-1 text-sm text-gray-500">SSH tunneling settings for secure connections</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-start md:col-span-2">
+                            {{ form.is_ssh_tunnel_required }}
+                            <label for="{{ form.is_ssh_tunnel_required.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-700 cursor-help" title="Check if SSH tunneling is required to access this database">
+                                SSH Tunnel Required
+                            </label>
+                            {% if form.is_ssh_tunnel_required.errors %}<p class="mt-2 text-sm text-red-600">{{ form.is_ssh_tunnel_required.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.ssh_tunnel_host.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="SSH tunnel hostname or IP address">
+                                SSH Host
+                            </label>
+                            {{ form.ssh_tunnel_host }}
+                            {% if form.ssh_tunnel_host.errors %}<p class="mt-2 text-sm text-red-600">{{ form.ssh_tunnel_host.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.ssh_tunnel_port.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="SSH tunnel port (usually 22)">
+                                SSH Port
+                            </label>
+                            {{ form.ssh_tunnel_port }}
+                            {% if form.ssh_tunnel_port.errors %}<p class="mt-2 text-sm text-red-600">{{ form.ssh_tunnel_port.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.encrypted_ssh_tunnel_username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="SSH username (will be encrypted)">
+                                SSH Username
+                            </label>
+                            {{ form.encrypted_ssh_tunnel_username }}
+                            <p class="mt-1 text-xs text-gray-500">This value will be encrypted before storing.</p>
+                            {% if form.encrypted_ssh_tunnel_username.errors %}<p class="mt-2 text-sm text-red-600">{{ form.encrypted_ssh_tunnel_username.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.encrypted_ssh_tunnel_password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="SSH password (will be encrypted)">
+                                SSH Password
+                            </label>
+                            {{ form.encrypted_ssh_tunnel_password }}
+                            <p class="mt-1 text-xs text-gray-500">This value will be encrypted before storing.</p>
+                            {% if form.encrypted_ssh_tunnel_password.errors %}<p class="mt-2 text-sm text-red-600">{{ form.encrypted_ssh_tunnel_password.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificate Management -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Certificate Management</h2>
+                        <p class="mt-1 text-sm text-gray-500">SSL/TLS certificate configuration</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div class="flex items-start">
+                            {{ form.is_certificate_required }}
+                            <label for="{{ form.is_certificate_required.id_for_label }}" class="ml-2 block text-sm font-medium text-gray-700 cursor-help" title="Check if an SSL/TLS certificate is required for this connection">
+                                Certificate Required
+                            </label>
+                            {% if form.is_certificate_required.errors %}<p class="mt-2 text-sm text-red-600">{{ form.is_certificate_required.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.certificate.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Select the certificate document">
+                                Certificate File
+                            </label>
+                            {{ form.certificate }}
+                            <p class="mt-1 text-xs text-gray-500">Select an existing certificate document or upload a new one first.</p>
+                            {% if form.certificate.errors %}<p class="mt-2 text-sm text-red-600">{{ form.certificate.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Credentials -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
