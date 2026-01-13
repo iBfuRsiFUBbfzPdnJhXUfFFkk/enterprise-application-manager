@@ -1,0 +1,272 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load templatetags_markdown %}
+{% load humanize %}
+
+{% block content %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'database' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ database.name|default:"Database" }}</h1>
+                        {% if database.schema %}
+                            <p class="mt-1 text-sm text-gray-500">{{ database.schema }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <a href="{% url 'database_edit' model_id=database.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="space-y-6">
+            <!-- Basic Information -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
+                            <dd class="text-lg text-gray-900">{{ database.name|default:"-" }}</dd>
+                        </div>
+                        {% if database.acronym %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Acronym</dt>
+                            <dd class="text-lg text-gray-900">{{ database.acronym }}</dd>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Hostname</dt>
+                            <dd class="text-lg text-gray-900 font-mono">{{ database.hostname|default:"-" }}</dd>
+                        </div>
+                        {% if database.ip_v4_internal %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Internal IP</dt>
+                            <dd class="text-lg text-gray-900 font-mono">{{ database.ip_v4_internal }}</dd>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Port</dt>
+                            <dd class="text-lg text-gray-900 font-mono">{{ database.port|default:"-" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Schema</dt>
+                            <dd class="text-lg text-gray-900 font-mono">{{ database.schema|default:"-" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Version</dt>
+                            <dd class="text-lg text-gray-900">{{ database.version|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Database Configuration -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Configuration</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Database Flavor</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if database.type_database_flavor %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                        {{ database.get_type_database_flavor_display }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Environment</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if database.type_environment %}
+                                    {% if database.type_environment == 'PRODUCTION' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                            {{ database.get_type_environment_display }}
+                                        </span>
+                                    {% elif database.type_environment == 'STAGING' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                            {{ database.get_type_environment_display }}
+                                        </span>
+                                    {% elif database.type_environment == 'DEVELOPMENT' %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                            {{ database.get_type_environment_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                            {{ database.get_type_environment_display }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Data Storage Form</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if database.type_data_storage_form %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                        {{ database.get_type_data_storage_form_display }}
+                                    </span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Credentials Section -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Credentials</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Username</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if decrypted_username %}
+                                    <span class="font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300">{{ decrypted_username }}</span>
+                                {% else %}
+                                    <span class="text-gray-400">Not set</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Password</dt>
+                            <dd class="text-lg text-gray-900">
+                                {% if decrypted_password %}
+                                    <span id="password" class="font-mono bg-gray-100 px-3 py-1 rounded border border-gray-300 select-all">••••••••</span>
+                                    <button onclick="togglePassword()" class="ml-3 text-sm text-cyan-600 hover:text-cyan-700 underline">
+                                        Show/Hide
+                                    </button>
+                                {% else %}
+                                    <span class="text-gray-400">Not set</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Related Application -->
+            {% if database.application %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Related Application</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Application</dt>
+                            <dd class="text-lg">
+                                <a href="{% url 'application_detail' model_id=database.application.id %}"
+                                   class="text-cyan-600 hover:text-cyan-700 hover:underline">
+                                    {{ database.application.name }}
+                                    {% if database.application.acronym %}
+                                        ({{ database.application.acronym }})
+                                    {% endif %}
+                                </a>
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Description/Comment Section -->
+            {% if database.comment %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Description</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose max-w-none">
+                        {{ database.comment|markdown }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Metadata -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Metadata</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if historical_records %}
+                            {% with created_record=historical_records|last updated_record=historical_records|first %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Created</dt>
+                                <dd class="text-base text-gray-900">
+                                    <span title="{{ created_record.history_date|date:'F j, Y, g:i:s A' }}">{{ created_record.history_date|timesince }} ago</span>
+                                    {% if created_record.history_user %}
+                                        <span class="text-sm text-gray-600">by {{ created_record.history_user }}</span>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            {% if updated_record.history_date != created_record.history_date %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500 mb-1">Last Updated</dt>
+                                <dd class="text-base text-gray-900">
+                                    <span title="{{ updated_record.history_date|date:'F j, Y, g:i:s A' }}">{{ updated_record.history_date|timesince }} ago</span>
+                                    {% if updated_record.history_user %}
+                                        <span class="text-sm text-gray-600">by {{ updated_record.history_user }}</span>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">ID</dt>
+                            <dd class="text-base text-gray-900 font-mono">{{ database.id }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let passwordVisible = false;
+        const actualPassword = '{{ decrypted_password|escapejs }}';
+
+        function togglePassword() {
+            const passwordElement = document.getElementById('password');
+            if (passwordVisible) {
+                passwordElement.textContent = '••••••••';
+                passwordVisible = false;
+            } else {
+                passwordElement.textContent = actualPassword;
+                passwordVisible = true;
+            }
+        }
+    </script>
+{% endblock %}
