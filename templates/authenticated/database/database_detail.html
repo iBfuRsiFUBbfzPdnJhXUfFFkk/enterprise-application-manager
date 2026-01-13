@@ -14,7 +14,7 @@
                         </svg>
                     </a>
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">{{ database.name|default:"Database" }}</h1>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ database.hostname|default:"Database" }}</h1>
                         {% if database.schema %}
                             <p class="mt-1 text-sm text-gray-500">{{ database.schema }}</p>
                         {% endif %}
@@ -43,16 +43,6 @@
                 </div>
                 <div class="px-6 py-6">
                     <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">Name</dt>
-                            <dd class="text-lg text-gray-900">{{ database.name|default:"-" }}</dd>
-                        </div>
-                        {% if database.acronym %}
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 mb-1">Acronym</dt>
-                            <dd class="text-lg text-gray-900">{{ database.acronym }}</dd>
-                        </div>
-                        {% endif %}
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-1">Hostname</dt>
                             <dd class="text-lg text-gray-900 font-mono">{{ database.hostname|default:"-" }}</dd>
