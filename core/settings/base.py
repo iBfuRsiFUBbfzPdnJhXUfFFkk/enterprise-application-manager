@@ -11,6 +11,8 @@ from core.settings.common.internationalization import *
 # noinspection PyUnresolvedReferences
 from core.settings.common.ldap import *
 # noinspection PyUnresolvedReferences
+from core.settings.common.logging import *
+# noinspection PyUnresolvedReferences
 from core.settings.common.middleware import *
 # noinspection PyUnresolvedReferences
 from core.settings.common.models import *

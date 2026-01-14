@@ -746,6 +746,7 @@ django_commands() {
     echo "  5) Create new app"
     echo "  6) Custom manage.py command"
     echo "  7) Check for issues"
+    echo "  8) Validate encrypted data"
     echo "  0) Back"
     echo "  q) Exit script"
     echo ""
@@ -879,6 +880,22 @@ django_commands() {
             print_info "Checking for issues..."
             echo ""
             docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py check
+            echo ""
+            read -p "Press Enter to continue..."
+            ;;
+        8)
+            clear
+            print_header
+            print_info "Validating encrypted data..."
+            echo ""
+            echo "This will scan all encrypted fields and validate:"
+            echo "  • Encryption key is correct"
+            echo "  • Data can be decrypted"
+            echo "  • Format validation (v1 vs legacy)"
+            echo ""
+            docker-compose -f "$DOCKER_COMPOSE_FILE" exec web python manage.py validate_encrypted_data --verbose
+            echo ""
+            print_info "💡 Tip: Use health check endpoint for quick status: /authenticated/health/encryption/"
             echo ""
             read -p "Press Enter to continue..."
             ;;

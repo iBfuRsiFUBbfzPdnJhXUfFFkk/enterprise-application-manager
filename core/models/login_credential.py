@@ -24,8 +24,15 @@ class LoginCredential(AbstractBaseModel, AbstractComment, AbstractName):
     person = models.ForeignKey('Person', on_delete=models.SET_NULL, null=True, blank=True, related_name='login_credentials_person')
 
     def set_encrypted_password(self, password: str | None) -> None:
-        """Encrypt and store the password."""
-        self.encrypted_password = encrypt_secret(secret=password)
+        """
+        Encrypt and store the password.
+        Empty strings are treated as None and will not be encrypted.
+        """
+        # Treat empty strings as None
+        if password == "" or (isinstance(password, str) and password.strip() == ""):
+            self.encrypted_password = None
+        else:
+            self.encrypted_password = encrypt_secret(secret=password)
 
     def get_decrypted_password(self) -> str | None:
         """Decrypt and return the password."""

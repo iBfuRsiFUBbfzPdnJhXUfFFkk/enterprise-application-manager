@@ -835,6 +835,7 @@ function Show-DjangoCommands {
     Write-Host "  5) Create new app"
     Write-Host "  6) Custom manage.py command"
     Write-Host "  7) Check for issues"
+    Write-Host "  8) Validate encrypted data"
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
     Write-Host ""
@@ -977,6 +978,22 @@ function Show-DjangoCommands {
                 Print-Info "Checking for issues..."
                 Write-Host ""
                 docker-compose -f $composeFile exec web python manage.py check
+                Write-Host ""
+                Read-Host "Press Enter to continue"
+            }
+            '8' {
+                Clear-Host
+                Print-Header
+                Print-Info "Validating encrypted data..."
+                Write-Host ""
+                Write-Host "This will scan all encrypted fields and validate:"
+                Write-Host "  • Encryption key is correct"
+                Write-Host "  • Data can be decrypted"
+                Write-Host "  • Format validation (v1 vs legacy)"
+                Write-Host ""
+                docker-compose -f $composeFile exec web python manage.py validate_encrypted_data --verbose
+                Write-Host ""
+                Print-Info "💡 Tip: Use health check endpoint for quick status: /authenticated/health/encryption/"
                 Write-Host ""
                 Read-Host "Press Enter to continue"
             }

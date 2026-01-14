@@ -8,7 +8,15 @@ class Secret(AbstractBaseModel, AbstractComment, AbstractName):
     encrypted_value = models.CharField(max_length=255, null=True, blank=True)
 
     def set_encrypted_value(self, secret: str | None) -> None:
-        self.encrypted_value = encrypt_secret(secret=secret)
+        """
+        Set and encrypt a secret value.
+        Empty strings are treated as None and will not be encrypted.
+        """
+        # Treat empty strings as None
+        if secret == "" or (isinstance(secret, str) and secret.strip() == ""):
+            self.encrypted_value = None
+        else:
+            self.encrypted_value = encrypt_secret(secret=secret)
 
     def get_encrypted_value(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_value)

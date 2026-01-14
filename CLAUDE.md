@@ -398,9 +398,112 @@ All views require login via `@login_required` decorator or URL-level wrapping.
 - **MinIO** - S3-compatible object storage
 - **nginx** - Reverse proxy with SSL termination
 
+## Encryption System
+
+The application uses Fernet symmetric encryption to protect sensitive data (passwords, API keys, secrets). The encryption system includes:
+
+### Key Features
+
+- **v1 Format with Validation**: All new encrypted data includes SHA256 checksums for integrity validation
+- **Wrong Key Detection**: Immediately raises `InvalidEncryptionKeyError` if `ENCRYPTION_SECRET` is incorrect
+- **Backwards Compatible**: Supports legacy encrypted data (auto-upgrades on save)
+- **Blank Field Protection**: Editing forms with blank encrypted fields preserve existing values (critical bug fix)
+- **Comprehensive Logging**: All encryption events logged to `logs/encryption.log`
+- **Health Monitoring**: Health check endpoint at `/authenticated/health/encryption/`
+
+### Encrypted Models
+
+- **Secret** - `encrypted_value` field
+- **LoginCredential** - `encrypted_password` field
+- **Database** - 4 encrypted fields (password, username, SSH tunnel credentials)
+
+### Management Commands
+
+**Validate encrypted data:**
+```bash
+# Via interactive menu
+./manage.sh → 8) Django commands → 8) Validate encrypted data
+
+# Or directly
+docker compose exec web python manage.py validate_encrypted_data --verbose
+
+# Re-encrypt legacy format to v1
+docker compose exec web python manage.py validate_encrypted_data --fix
+```
+
+**Re-encrypt all data (for key rotation):**
+```bash
+docker compose exec web python manage.py reencrypt_data [--force] [--dry-run]
+```
+
+### Health Check Endpoint
+
+Access: `https://localhost:50478/authenticated/health/encryption/`
+- Requires staff authentication
+- Returns JSON with encryption status, format statistics, and warnings
+
+### Troubleshooting
+
+**Common Issues:**
+
+1. **InvalidEncryptionKeyError when viewing records**
+   - Cause: Wrong `ENCRYPTION_SECRET` in `.env`
+   - Fix: Verify `ENCRYPTION_SECRET` matches the key used to encrypt data
+   - See: `.documentation/troubleshooting-encryption.md`
+
+2. **Passwords stop working after editing**
+   - Cause: This was a bug (now fixed) where blank fields overwrote encrypted values
+   - Fix: Re-enter the password in the edit form
+   - Prevention: The fix now preserves existing values when fields are left blank
+
+3. **Legacy format warnings**
+   - Cause: Data encrypted before v1 format upgrade
+   - Impact: Low - data still works correctly
+   - Fix (optional): Run `validate_encrypted_data --fix` to upgrade
+
+**View encryption logs:**
+```bash
+docker compose exec web cat logs/encryption.log
+docker compose exec web tail -f logs/encryption.log  # Real-time
+```
+
+**Test encryption in shell:**
+```bash
+docker compose exec web python manage.py shell
+```
+```python
+from core.utilities.encryption import encrypt_secret, decrypt_secret
+encrypted = encrypt_secret("test")
+print(decrypt_secret(encrypted))  # Should print "test"
+```
+
+### Key Rotation Procedure
+
+When rotating `ENCRYPTION_SECRET`:
+
+1. Backup database: `python manage.py dumpdata > backup.json`
+2. Validate current encryption: `python manage.py validate_encrypted_data`
+3. Update `ENCRYPTION_SECRET` in `.env`
+4. Restart: `docker compose restart web`
+5. Re-encrypt: `python manage.py reencrypt_data`
+6. Validate: `python manage.py validate_encrypted_data`
+
+### Important Notes
+
+- ⚠️ **Never commit `ENCRYPTION_SECRET` to version control**
+- ⚠️ **Backup database before key rotation**
+- ⚠️ **Changing `ENCRYPTION_SECRET` without re-encryption makes data unrecoverable**
+- ✅ **Always test in staging before production**
+
+For detailed information, see:
+- `.documentation/encryption-architecture.md` - Complete encryption system documentation
+- `.documentation/troubleshooting-encryption.md` - Troubleshooting guide
+
 ## Additional Documentation
 
 More detailed documentation is available in the `.documentation/` directory:
+- `encryption-architecture.md` - Complete encryption system documentation
+- `troubleshooting-encryption.md` - Encryption troubleshooting guide
 - `environment-setup.md` - Environment setup details
 - `commands-python-unix.md` - UNIX-specific Python commands
 - `commands-python-windows.md` - Windows-specific Python commands

@@ -43,25 +43,53 @@ class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
     certificate = models.ForeignKey('Document', on_delete=models.SET_NULL, null=True, blank=True, related_name='databases_using_certificate', help_text='SSL/TLS certificate file')
 
     def set_encrypted_password(self, secret: str | None) -> None:
-        self.encrypted_password = encrypt_secret(secret=secret)
+        """
+        Set and encrypt the database password.
+        Empty strings are treated as None and will not be encrypted.
+        """
+        if secret == "" or (isinstance(secret, str) and secret.strip() == ""):
+            self.encrypted_password = None
+        else:
+            self.encrypted_password = encrypt_secret(secret=secret)
 
     def get_encrypted_password(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_password)
 
     def set_encrypted_username(self, secret: str | None) -> None:
-        self.encrypted_username = encrypt_secret(secret=secret)
+        """
+        Set and encrypt the database username.
+        Empty strings are treated as None and will not be encrypted.
+        """
+        if secret == "" or (isinstance(secret, str) and secret.strip() == ""):
+            self.encrypted_username = None
+        else:
+            self.encrypted_username = encrypt_secret(secret=secret)
 
     def get_encrypted_username(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_username)
 
     def set_encrypted_ssh_tunnel_username(self, secret: str | None) -> None:
-        self.encrypted_ssh_tunnel_username = encrypt_secret(secret=secret)
+        """
+        Set and encrypt the SSH tunnel username.
+        Empty strings are treated as None and will not be encrypted.
+        """
+        if secret == "" or (isinstance(secret, str) and secret.strip() == ""):
+            self.encrypted_ssh_tunnel_username = None
+        else:
+            self.encrypted_ssh_tunnel_username = encrypt_secret(secret=secret)
 
     def get_encrypted_ssh_tunnel_username(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_ssh_tunnel_username)
 
     def set_encrypted_ssh_tunnel_password(self, secret: str | None) -> None:
-        self.encrypted_ssh_tunnel_password = encrypt_secret(secret=secret)
+        """
+        Set and encrypt the SSH tunnel password.
+        Empty strings are treated as None and will not be encrypted.
+        """
+        if secret == "" or (isinstance(secret, str) and secret.strip() == ""):
+            self.encrypted_ssh_tunnel_password = None
+        else:
+            self.encrypted_ssh_tunnel_password = encrypt_secret(secret=secret)
 
     def get_encrypted_ssh_tunnel_password(self) -> str | None:
         return decrypt_secret(encrypted_secret=self.encrypted_ssh_tunnel_password)
