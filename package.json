@@ -1,12 +1,7 @@
 {
   "name": "enterprise-application-manager",
   "version": "1.0.0",
-  "description": "Enterprise Application Manager - Django application with Tailwind CSS",
-  "scripts": {
-    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --minify",
-    "watch:css": "tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --watch"
-  },
-  "devDependencies": {
-    "tailwindcss": "^3.4.1"
-  }
+  "description": "Enterprise Application Manager - Django application with vanilla CSS and jQuery",
+  "scripts": {},
+  "devDependencies": {}
 }
