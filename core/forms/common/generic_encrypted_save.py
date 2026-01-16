@@ -29,13 +29,21 @@ def generic_encrypted_save(
     if data_points is None:
         return instance
 
+    # Fetch original instance from database if editing existing record
+    original_instance = None
+    if instance.pk:
+        try:
+            original_instance = instance.__class__.objects.get(pk=instance.pk)
+        except instance.__class__.DoesNotExist:
+            pass
+
     for data_point in data_points:
         encrypted_value: str | None = model_form.cleaned_data[data_point]
 
         # CRITICAL FIX: Check if value is blank/empty
         if not encrypted_value or (isinstance(encrypted_value, str) and encrypted_value.strip() == ""):
-            # Check if instance already has encrypted data in this field
-            existing_encrypted = getattr(instance, data_point, None)
+            # Check if original instance has encrypted data in this field
+            existing_encrypted = getattr(original_instance, data_point, None) if original_instance else None
 
             if existing_encrypted:
                 # PRESERVE existing encrypted value - don't overwrite with empty value
@@ -43,7 +51,9 @@ def generic_encrypted_save(
                     f"Preserving existing encrypted value for {instance.__class__.__name__}.{data_point} "
                     f"(id={instance.pk}) - form field was blank"
                 )
-                continue  # Skip this field, keep existing value
+                # Restore the original encrypted value
+                setattr(instance, data_point, existing_encrypted)
+                continue  # Skip calling the setter, value is already restored
             else:
                 # No existing value - it's intentionally empty, save None
                 logger.debug(

@@ -2,11 +2,18 @@ from django.db.models import Model
 
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
+from core.forms.common.encrypted_field_form_mixin import EncryptedFieldFormMixin
 from core.forms.common.generic_encrypted_save import generic_encrypted_save
 from core.models.database import Database
 
 
-class DatabaseForm(BaseModelForm):
+class DatabaseForm(EncryptedFieldFormMixin, BaseModelForm):
+    encrypted_field_names = [
+        "encrypted_password",
+        "encrypted_username",
+        "encrypted_ssh_tunnel_username",
+        "encrypted_ssh_tunnel_password",
+    ]
     class Meta(BaseModelFormMeta):
         model = Database
 
