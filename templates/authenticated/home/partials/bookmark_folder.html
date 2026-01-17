@@ -31,9 +31,9 @@
                 {{ folder.name }}
             </span>
 
-            <!-- Bookmark Count -->
+            <!-- Bookmark Count (includes subfolders) -->
             <span class="text-xs text-gray-500 flex-shrink-0">
-                ({{ folder.bookmarks.count }})
+                ({{ folder.get_total_bookmark_count }})
             </span>
         </div>
 

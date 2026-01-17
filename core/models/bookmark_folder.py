@@ -78,3 +78,11 @@ class BookmarkFolder(AbstractBaseModel, AbstractName):
             children.append(child)
             children.extend(child.get_all_children_recursive)
         return children
+
+    @property
+    def get_total_bookmark_count(self) -> int:
+        """Returns total bookmarks in this folder and all subfolders."""
+        count = self.bookmarks.count()
+        for child in self.child_folders.all():
+            count += child.get_total_bookmark_count
+        return count
