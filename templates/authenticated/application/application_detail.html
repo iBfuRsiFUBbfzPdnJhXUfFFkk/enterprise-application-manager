@@ -1,4 +1,5 @@
 {% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
 {% load templatetags_markdown %}
 {% load humanize %}
 
@@ -538,6 +539,9 @@
                     </dl>
                 </div>
             </div>
+
+            <!-- Comments Section -->
+            {% include 'authenticated/common/components/comments_section.html' %}
         </div>
     </div>
 
@@ -570,4 +574,5 @@
             }
         });
     </script>
+    <script src="{% static 'js/comments.js' %}"></script>
 {% endblock %}

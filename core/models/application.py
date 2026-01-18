@@ -5,6 +5,7 @@ from core.models.common.abstract.abstract_acronym import AbstractAcronym
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_commentable import AbstractCommentable
 from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.enums.authentication_choices import AUTHENTICATION_TYPE_CHOICES
 from core.models.common.enums.authorization_choices import AUTHORIZATION_TYPE_CHOICES
@@ -23,7 +24,7 @@ from core.models.tool import Tool
 from core.utilities.get_name_acronym import get_name_acronym
 
 
-class Application(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractName):
+class Application(AbstractAlias, AbstractAcronym, AbstractBaseModel, AbstractComment, AbstractCommentable, AbstractName):
     application_downstream_dependencies = models.ManyToManyField('self', blank=True, related_name='upstream_dependent_applications', symmetrical=False)
     application_group_platform = models.ForeignKey(ApplicationGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications')
     application_groups = models.ManyToManyField(ApplicationGroup, blank=True, related_name='grouped_applications')

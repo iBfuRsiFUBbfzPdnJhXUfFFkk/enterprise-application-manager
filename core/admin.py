@@ -1,6 +1,8 @@
 from django.contrib import admin
+from django.contrib.contenttypes.models import ContentType
 
 from core.models.application_pin import ApplicationPin
+from core.models.comment import Comment
 from core.models.competitor import Competitor
 from core.models.it_devops_request import ITDevOpsRequest
 from core.models.it_devops_request_update import ITDevOpsRequestUpdate
@@ -233,6 +235,34 @@ class MeetingNoteAdmin(admin.ModelAdmin):
         }),
         ('Timestamps', {
             'fields': ('datetime_created', 'created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def content_preview(self, obj):
+        return obj.content[:75] + '...' if len(obj.content) > 75 else obj.content
+
+    content_preview.short_description = 'Content Preview'
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'content_type', 'object_id', 'created_by', 'is_internal', 'created_at', 'content_preview')
+    list_filter = ('is_internal', 'content_type', 'created_at')
+    search_fields = ('content', 'created_by__username')
+    ordering = ('-created_at', '-id')
+    readonly_fields = ('created_at', 'modified_at', 'created', 'modified')
+    raw_id_fields = ('created_by',)
+
+    fieldsets = (
+        ('Target Object', {
+            'fields': ('content_type', 'object_id')
+        }),
+        ('Comment', {
+            'fields': ('content', 'is_internal', 'created_by')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'modified_at', 'created', 'modified'),
             'classes': ('collapse',)
         }),
     )
