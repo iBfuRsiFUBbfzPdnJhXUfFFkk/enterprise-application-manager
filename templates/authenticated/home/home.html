@@ -7,23 +7,6 @@
         <p class="mt-2 text-sm text-gray-600">Overview of your application data</p>
     </div>
 
-    <!-- Total Records Card -->
-    <div class="mb-6">
-        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-blue-100">Total Records</p>
-                    <p class="text-4xl font-bold mt-2">{{ stats.total_records|default:0 }}</p>
-                </div>
-                <div class="bg-white bg-opacity-20 rounded-full p-4">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Bookmarks Section -->
     <div class="mb-6">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -458,6 +441,31 @@
                        class="h-10 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
+            <!-- Duplicate Warning -->
+            <div id="create-folder-duplicates" class="hidden mb-4">
+                <!-- Exact conflict (blocking) -->
+                <div id="create-folder-exact-conflict" class="hidden bg-red-50 border border-red-200 rounded-md p-3 mb-2">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-red-800">A folder with this exact name already exists at this location.</p>
+                    </div>
+                </div>
+                <!-- Similar names (warning) -->
+                <div id="create-folder-similar" class="hidden bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-yellow-800">Similar folder names exist:</p>
+                            <ul id="create-folder-similar-list" class="mt-1 text-sm text-yellow-700 list-disc list-inside"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="create-folder-error" class="hidden text-red-600 text-sm mb-4"></div>
 
             <div class="flex justify-end space-x-2">
@@ -501,6 +509,31 @@
                 <label for="rename-folder-color" class="block text-sm font-medium text-gray-700 mb-1">Color (optional)</label>
                 <input type="color" id="rename-folder-color" name="color" value="#3B82F6"
                        class="h-10 w-full rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <!-- Duplicate Warning -->
+            <div id="rename-folder-duplicates" class="hidden mb-4">
+                <!-- Exact conflict (blocking) -->
+                <div id="rename-folder-exact-conflict" class="hidden bg-red-50 border border-red-200 rounded-md p-3 mb-2">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-red-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-sm text-red-800">A folder with this exact name already exists at this location.</p>
+                    </div>
+                </div>
+                <!-- Similar names (warning) -->
+                <div id="rename-folder-similar" class="hidden bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-yellow-800">Similar folder names exist:</p>
+                            <ul id="rename-folder-similar-list" class="mt-1 text-sm text-yellow-700 list-disc list-inside"></ul>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="rename-folder-error" class="hidden text-red-600 text-sm mb-4"></div>
@@ -597,6 +630,19 @@
                     <div id="error-comment" class="hidden text-red-600 text-sm mt-1"></div>
                 </div>
 
+                <!-- Duplicate Warning -->
+                <div id="create-link-duplicates" class="hidden bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                    <div class="flex items-start">
+                        <svg class="h-5 w-5 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-yellow-800">Potential duplicates found:</p>
+                            <ul id="create-link-duplicates-list" class="mt-1 text-sm text-yellow-700 list-disc list-inside"></ul>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="create-link-error" class="hidden text-red-600 text-sm"></div>
 
                 <div class="flex justify-end space-x-2 pt-4">
@@ -658,6 +704,19 @@
                           class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Add a description..."></textarea>
                 <div id="error-edit-link-comment" class="hidden text-red-600 text-sm mt-1"></div>
+            </div>
+
+            <!-- Duplicate Warning -->
+            <div id="edit-link-duplicates" class="hidden bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
+                <div class="flex items-start">
+                    <svg class="h-5 w-5 text-yellow-400 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-yellow-800">Potential duplicates found:</p>
+                        <ul id="edit-link-duplicates-list" class="mt-1 text-sm text-yellow-700 list-disc list-inside"></ul>
+                    </div>
+                </div>
             </div>
 
             <div id="edit-link-error" class="hidden text-red-600 text-sm mb-4"></div>
@@ -1851,6 +1910,226 @@ function checkAndStartAutoScroll(event) {
         stopAutoScroll();
     }
 }
+
+// ============================================================
+// DUPLICATE DETECTION FUNCTIONALITY
+// ============================================================
+
+let linkDuplicateCheckTimeout;
+let folderDuplicateCheckTimeout;
+
+// Link duplicate detection
+async function checkForLinkDuplicates(nameValue, urlValue, excludeId = null, targetPrefix = 'create-link') {
+    clearTimeout(linkDuplicateCheckTimeout);
+
+    const duplicatesContainer = document.getElementById(`${targetPrefix}-duplicates`);
+    const duplicatesList = document.getElementById(`${targetPrefix}-duplicates-list`);
+
+    if (!duplicatesContainer || !duplicatesList) return;
+
+    // Hide if inputs are too short
+    if ((!nameValue || nameValue.length < 2) && (!urlValue || urlValue.length < 5)) {
+        duplicatesContainer.classList.add('hidden');
+        return;
+    }
+
+    linkDuplicateCheckTimeout = setTimeout(async () => {
+        try {
+            const params = new URLSearchParams();
+            if (nameValue) params.append('name', nameValue);
+            if (urlValue) params.append('url', urlValue);
+            if (excludeId) params.append('exclude_id', excludeId);
+
+            const response = await fetch(`/authenticated/link/search-duplicates/?${params}`);
+            const data = await response.json();
+
+            if (data.duplicates && data.duplicates.length > 0) {
+                duplicatesList.innerHTML = '';
+                data.duplicates.forEach(dup => {
+                    const li = document.createElement('li');
+                    const matchType = dup.match_type === 'name' ? 'name' : 'URL';
+                    li.textContent = `${dup.name} (${dup.url}) - matches ${matchType}`;
+                    duplicatesList.appendChild(li);
+                });
+                duplicatesContainer.classList.remove('hidden');
+            } else {
+                duplicatesContainer.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Error checking for duplicates:', error);
+            duplicatesContainer.classList.add('hidden');
+        }
+    }, 300);
+}
+
+// Folder duplicate detection
+async function checkForFolderDuplicates(nameValue, parentId = null, excludeId = null, targetPrefix = 'create-folder') {
+    clearTimeout(folderDuplicateCheckTimeout);
+
+    const duplicatesContainer = document.getElementById(`${targetPrefix}-duplicates`);
+    const exactConflict = document.getElementById(`${targetPrefix}-exact-conflict`);
+    const similarContainer = document.getElementById(`${targetPrefix}-similar`);
+    const similarList = document.getElementById(`${targetPrefix}-similar-list`);
+
+    if (!duplicatesContainer) return;
+
+    // Hide if input is too short
+    if (!nameValue || nameValue.length < 2) {
+        duplicatesContainer.classList.add('hidden');
+        if (exactConflict) exactConflict.classList.add('hidden');
+        if (similarContainer) similarContainer.classList.add('hidden');
+        return;
+    }
+
+    folderDuplicateCheckTimeout = setTimeout(async () => {
+        try {
+            const params = new URLSearchParams();
+            params.append('name', nameValue);
+            if (parentId) params.append('parent_id', parentId);
+            if (excludeId) params.append('exclude_id', excludeId);
+
+            const response = await fetch(`/authenticated/bookmark/folder/search-duplicates/?${params}`);
+            const data = await response.json();
+
+            let hasContent = false;
+
+            // Handle exact conflict
+            if (exactConflict) {
+                if (data.exact_conflict) {
+                    exactConflict.classList.remove('hidden');
+                    hasContent = true;
+                } else {
+                    exactConflict.classList.add('hidden');
+                }
+            }
+
+            // Handle similar folders
+            if (similarContainer && similarList) {
+                if (data.similar && data.similar.length > 0) {
+                    similarList.innerHTML = '';
+                    data.similar.forEach(folder => {
+                        const li = document.createElement('li');
+                        li.textContent = `${folder.name} (${folder.path})`;
+                        similarList.appendChild(li);
+                    });
+                    similarContainer.classList.remove('hidden');
+                    hasContent = true;
+                } else {
+                    similarContainer.classList.add('hidden');
+                }
+            }
+
+            if (hasContent) {
+                duplicatesContainer.classList.remove('hidden');
+            } else {
+                duplicatesContainer.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Error checking for folder duplicates:', error);
+            duplicatesContainer.classList.add('hidden');
+        }
+    }, 300);
+}
+
+// Set up event listeners for duplicate detection
+document.addEventListener('DOMContentLoaded', function() {
+    // Create Link form - name and URL inputs
+    const newLinkName = document.getElementById('new-link-name');
+    const newLinkUrl = document.getElementById('new-link-url');
+
+    if (newLinkName) {
+        newLinkName.addEventListener('input', function() {
+            const urlValue = newLinkUrl ? newLinkUrl.value : '';
+            checkForLinkDuplicates(this.value, urlValue, null, 'create-link');
+        });
+    }
+
+    if (newLinkUrl) {
+        newLinkUrl.addEventListener('input', function() {
+            const nameValue = newLinkName ? newLinkName.value : '';
+            checkForLinkDuplicates(nameValue, this.value, null, 'create-link');
+        });
+    }
+
+    // Edit Link form - name and URL inputs
+    const editLinkName = document.getElementById('edit-link-name');
+    const editLinkUrl = document.getElementById('edit-link-url');
+    const editLinkId = document.getElementById('edit-link-id');
+
+    if (editLinkName) {
+        editLinkName.addEventListener('input', function() {
+            const urlValue = editLinkUrl ? editLinkUrl.value : '';
+            const excludeId = editLinkId ? editLinkId.value : null;
+            checkForLinkDuplicates(this.value, urlValue, excludeId, 'edit-link');
+        });
+    }
+
+    if (editLinkUrl) {
+        editLinkUrl.addEventListener('input', function() {
+            const nameValue = editLinkName ? editLinkName.value : '';
+            const excludeId = editLinkId ? editLinkId.value : null;
+            checkForLinkDuplicates(nameValue, this.value, excludeId, 'edit-link');
+        });
+    }
+
+    // Create Folder form - name input
+    const folderName = document.getElementById('folder-name');
+    const parentFolder = document.getElementById('parent-folder');
+
+    if (folderName) {
+        folderName.addEventListener('input', function() {
+            const parentId = parentFolder ? parentFolder.value : null;
+            checkForFolderDuplicates(this.value, parentId, null, 'create-folder');
+        });
+    }
+
+    if (parentFolder) {
+        parentFolder.addEventListener('change', function() {
+            const nameValue = folderName ? folderName.value : '';
+            checkForFolderDuplicates(nameValue, this.value, null, 'create-folder');
+        });
+    }
+
+    // Rename Folder form - name input
+    const renameFolderName = document.getElementById('rename-folder-name');
+    const renameFolderId = document.getElementById('rename-folder-id');
+
+    if (renameFolderName) {
+        renameFolderName.addEventListener('input', function() {
+            const excludeId = renameFolderId ? renameFolderId.value : null;
+            checkForFolderDuplicates(this.value, null, excludeId, 'rename-folder');
+        });
+    }
+});
+
+// Clear duplicate warnings when modals are closed
+const originalCloseAddBookmarkModal = closeAddBookmarkModal;
+closeAddBookmarkModal = function() {
+    const duplicatesContainer = document.getElementById('create-link-duplicates');
+    if (duplicatesContainer) duplicatesContainer.classList.add('hidden');
+    originalCloseAddBookmarkModal();
+};
+
+const originalCloseEditLinkModal = closeEditLinkModal;
+closeEditLinkModal = function() {
+    const duplicatesContainer = document.getElementById('edit-link-duplicates');
+    if (duplicatesContainer) duplicatesContainer.classList.add('hidden');
+    originalCloseEditLinkModal();
+};
+
+const originalCloseCreateFolderModal = closeCreateFolderModal;
+closeCreateFolderModal = function() {
+    const duplicatesContainer = document.getElementById('create-folder-duplicates');
+    if (duplicatesContainer) duplicatesContainer.classList.add('hidden');
+    originalCloseCreateFolderModal();
+};
+
+const originalCloseRenameFolderModal = closeRenameFolderModal;
+closeRenameFolderModal = function() {
+    const duplicatesContainer = document.getElementById('rename-folder-duplicates');
+    if (duplicatesContainer) duplicatesContainer.classList.add('hidden');
+    originalCloseRenameFolderModal();
+};
 </script>
 
 <style>
