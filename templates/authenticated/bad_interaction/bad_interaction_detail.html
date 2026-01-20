@@ -89,7 +89,7 @@
         </div>
 
         <!-- Evidence -->
-        {% if bad_interaction.evidence_blob_data %}
+        {% if bad_interaction.has_evidence %}
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Evidence</h2>
@@ -101,11 +101,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                         <div>
-                            <p class="text-sm font-medium text-gray-900">{{ bad_interaction.evidence_blob_filename }}</p>
-                            <p class="text-xs text-gray-500">{{ bad_interaction.evidence_blob_content_type }}</p>
+                            <p class="text-sm font-medium text-gray-900">{{ bad_interaction.get_evidence_filename }}</p>
+                            <p class="text-xs text-gray-500">{{ bad_interaction.get_evidence_size }}</p>
                         </div>
                     </div>
-                    <a href="{% url 'bad_interaction_download_evidence' model_id=bad_interaction.id %}"
+                    <a href="{{ bad_interaction.get_evidence_url }}"
                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                         <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -214,13 +214,13 @@
                                     <p class="text-sm font-medium text-gray-900">{{ update.created_by.get_full_name|default:update.created_by.username }}</p>
                                     <p class="text-xs text-gray-500">{{ update.datetime_created|date:"F d, Y g:i A" }}</p>
                                 </div>
-                                {% if update.attachment_blob_data %}
-                                <a href="{% url 'bad_interaction_download_update_attachment' update_id=update.id %}"
+                                {% if update.has_attachment %}
+                                <a href="{{ update.get_attachment_url }}"
                                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
                                     <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
                                     </svg>
-                                    {{ update.attachment_blob_filename }}
+                                    {{ update.get_attachment_filename }}
                                 </a>
                                 {% endif %}
                             </div>
