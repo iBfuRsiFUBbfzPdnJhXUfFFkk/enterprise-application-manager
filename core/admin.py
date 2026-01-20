@@ -7,6 +7,8 @@ from core.models.competitor import Competitor
 from core.models.it_devops_request import ITDevOpsRequest
 from core.models.it_devops_request_update import ITDevOpsRequestUpdate
 from core.models.maintenance_window import MaintenanceWindow
+from core.models.proposal import Proposal
+from core.models.proposal_update import ProposalUpdate
 from core.models.meeting import Meeting
 from core.models.meeting_action_item import MeetingActionItem
 from core.models.meeting_note import MeetingNote
@@ -118,6 +120,75 @@ class ITDevOpsRequestUpdateAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('it_devops_request', 'person_author', 'comment', 'is_internal_note')
+        }),
+        ('Timestamps', {
+            'fields': ('datetime_created', 'created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Proposal)
+class ProposalAdmin(admin.ModelAdmin):
+    list_display = ('document_id', 'name', 'status', 'priority', 'person_author', 'date_created', 'date_submitted')
+    list_filter = ('status', 'priority', 'date_created')
+    search_fields = ('document_id', 'name', 'executive_summary', 'reference_number')
+    ordering = ('-date_created', '-id')
+    readonly_fields = ('document_id', 'created', 'modified')
+    filter_horizontal = ('attachments', 'links')
+
+    fieldsets = (
+        ('Document Information', {
+            'fields': ('document_id', 'name')
+        }),
+        ('Basic Information', {
+            'fields': ('status', 'priority', 'version', 'reference_number')
+        }),
+        ('People', {
+            'fields': ('person_author', 'person_reviewer', 'person_approver')
+        }),
+        ('Related Entities', {
+            'fields': ('application', 'project')
+        }),
+        ('Executive Summary', {
+            'fields': ('executive_summary',)
+        }),
+        ('Problem & Solution', {
+            'fields': ('problem_statement', 'proposed_solution')
+        }),
+        ('Benefits & Risks', {
+            'fields': ('benefits', 'risks_and_mitigations')
+        }),
+        ('Implementation', {
+            'fields': ('timeline', 'resources_required', 'success_criteria')
+        }),
+        ('Key Dates', {
+            'fields': ('date_created', 'date_submitted', 'date_review_completed', 'date_decision', 'date_implementation_target')
+        }),
+        ('Attachments & Links', {
+            'fields': ('attachments', 'links')
+        }),
+        ('Additional', {
+            'fields': ('comment',)
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(ProposalUpdate)
+class ProposalUpdateAdmin(admin.ModelAdmin):
+    list_display = ('proposal', 'person_author', 'datetime_created', 'is_internal_note')
+    list_filter = ('is_internal_note', 'datetime_created')
+    search_fields = ('proposal__document_id', 'proposal__name', 'comment')
+    ordering = ('-datetime_created', '-id')
+    readonly_fields = ('datetime_created', 'created', 'modified')
+
+    fieldsets = (
+        (None, {
+            'fields': ('proposal', 'person_author', 'comment', 'is_internal_note')
         }),
         ('Timestamps', {
             'fields': ('datetime_created', 'created', 'modified'),

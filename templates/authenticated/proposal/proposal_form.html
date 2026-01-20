@@ -1,0 +1,491 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Markdown Parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% include 'authenticated/common/components/link_modal.html' %}
+{% include 'authenticated/common/components/document_modal.html' %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'proposal' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Proposal</h1>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update proposal details{% else %}Create a new formal proposal{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="space-y-6">
+                <!-- Document ID -->
+                {% if form.instance.pk and form.instance.document_id %}
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-purple-700">
+                                <strong>Document ID:</strong> <span class="font-mono font-bold">{{ form.instance.document_id }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                A unique document ID will be automatically generated when you save this proposal
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Proposal title, status, and priority</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Proposal Title {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <div>
+                                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}<p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Priority
+                                </label>
+                                {{ form.priority }}
+                                {% if form.priority.errors %}<p class="mt-2 text-sm text-red-600">{{ form.priority.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.version.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Version
+                                </label>
+                                {{ form.version }}
+                                <p class="mt-1 text-xs text-gray-500">e.g., 1.0, 2.1</p>
+                                {% if form.version.errors %}<p class="mt-2 text-sm text-red-600">{{ form.version.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.reference_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Reference Number
+                                </label>
+                                {{ form.reference_number }}
+                                <p class="mt-1 text-xs text-gray-500">External reference (optional)</p>
+                                {% if form.reference_number.errors %}<p class="mt-2 text-sm text-red-600">{{ form.reference_number.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- People -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">People</h2>
+                        <p class="mt-1 text-sm text-gray-500">Author, reviewer, and approver</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.person_author.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Author
+                                </label>
+                                {% if current_user_person_id %}
+                                <button type="button" id="select-me-btn-author" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors duration-150">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    Select Me
+                                </button>
+                                {% endif %}
+                            </div>
+                            {{ form.person_author }}
+                            {% if form.person_author.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_author.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_reviewer.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Reviewer
+                            </label>
+                            {{ form.person_reviewer }}
+                            <p class="mt-1 text-xs text-gray-500">Person reviewing the proposal</p>
+                            {% if form.person_reviewer.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_reviewer.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.person_approver.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Approver
+                            </label>
+                            {{ form.person_approver }}
+                            <p class="mt-1 text-xs text-gray-500">Person who will approve the proposal</p>
+                            {% if form.person_approver.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_approver.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Entities -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
+                        <p class="mt-1 text-sm text-gray-500">Link to application or project (optional)</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.application.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Application
+                            </label>
+                            {{ form.application }}
+                            {% if form.application.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Project
+                            </label>
+                            {{ form.project }}
+                            {% if form.project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.project.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Executive Summary -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Executive Summary</h2>
+                        <p class="mt-1 text-sm text-gray-500">Brief overview of the proposal (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.executive_summary.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Executive Summary
+                        </label>
+                        {{ form.executive_summary }}
+                        {% if form.executive_summary.errors %}<p class="mt-2 text-sm text-red-600">{{ form.executive_summary.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Problem Statement -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Problem Statement</h2>
+                        <p class="mt-1 text-sm text-gray-500">What problem does this proposal solve? (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.problem_statement.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Problem Statement
+                        </label>
+                        {{ form.problem_statement }}
+                        {% if form.problem_statement.errors %}<p class="mt-2 text-sm text-red-600">{{ form.problem_statement.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Proposed Solution -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Proposed Solution</h2>
+                        <p class="mt-1 text-sm text-gray-500">Detailed description of the proposed solution (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.proposed_solution.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Proposed Solution
+                        </label>
+                        {{ form.proposed_solution }}
+                        {% if form.proposed_solution.errors %}<p class="mt-2 text-sm text-red-600">{{ form.proposed_solution.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Benefits -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Benefits</h2>
+                        <p class="mt-1 text-sm text-gray-500">Expected benefits of implementing this proposal (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.benefits.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Benefits
+                        </label>
+                        {{ form.benefits }}
+                        {% if form.benefits.errors %}<p class="mt-2 text-sm text-red-600">{{ form.benefits.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Risks & Mitigations -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Risks & Mitigations</h2>
+                        <p class="mt-1 text-sm text-gray-500">Potential risks and how to mitigate them (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.risks_and_mitigations.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Risks & Mitigations
+                        </label>
+                        {{ form.risks_and_mitigations }}
+                        {% if form.risks_and_mitigations.errors %}<p class="mt-2 text-sm text-red-600">{{ form.risks_and_mitigations.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
+                        <p class="mt-1 text-sm text-gray-500">Implementation timeline and milestones (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.timeline.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Timeline
+                        </label>
+                        {{ form.timeline }}
+                        {% if form.timeline.errors %}<p class="mt-2 text-sm text-red-600">{{ form.timeline.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Resources Required -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Resources Required</h2>
+                        <p class="mt-1 text-sm text-gray-500">Resources needed for implementation (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.resources_required.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Resources Required
+                        </label>
+                        {{ form.resources_required }}
+                        {% if form.resources_required.errors %}<p class="mt-2 text-sm text-red-600">{{ form.resources_required.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Success Criteria -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Success Criteria</h2>
+                        <p class="mt-1 text-sm text-gray-500">How will success be measured? (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.success_criteria.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Success Criteria
+                        </label>
+                        {{ form.success_criteria }}
+                        {% if form.success_criteria.errors %}<p class="mt-2 text-sm text-red-600">{{ form.success_criteria.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Key Dates -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Key Dates</h2>
+                        <p class="mt-1 text-sm text-gray-500">Important dates for this proposal</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="{{ form.date_created.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Created
+                            </label>
+                            {{ form.date_created }}
+                            {% if form.date_created.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_created.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_submitted.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Submitted
+                            </label>
+                            {{ form.date_submitted }}
+                            {% if form.date_submitted.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_submitted.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_review_completed.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Review Completed
+                            </label>
+                            {{ form.date_review_completed }}
+                            {% if form.date_review_completed.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_review_completed.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_decision.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Decision Date
+                            </label>
+                            {{ form.date_decision }}
+                            {% if form.date_decision.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_decision.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_implementation_target.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Target Implementation
+                            </label>
+                            {{ form.date_implementation_target }}
+                            {% if form.date_implementation_target.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_implementation_target.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
+                        <p class="mt-1 text-sm text-gray-500">Reference links and resources for this proposal</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <label for="{{ form.links.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Links
+                            </label>
+                            <button type="button" id="open-link-modal-btn" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 transition-colors duration-150">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add New Link
+                            </button>
+                        </div>
+                        {{ form.links }}
+                        <p class="mt-1 text-xs text-gray-500">Hold Ctrl (Cmd on Mac) to select multiple links</p>
+                        {% if form.links.errors %}<p class="mt-2 text-sm text-red-600">{{ form.links.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Attachments</h2>
+                        <p class="mt-1 text-sm text-gray-500">Supporting documents for this proposal</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="{{ form.attachments.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Documents
+                            </label>
+                            <button type="button" id="open-document-modal-btn"
+                                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Upload New
+                            </button>
+                        </div>
+                        {{ form.attachments }}
+                        <p class="mt-1 text-xs text-gray-500">Select existing documents or upload new ones</p>
+                        {% if form.attachments.errors %}<p class="mt-2 text-sm text-red-600">{{ form.attachments.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
+                        <p class="mt-1 text-sm text-gray-500">Any other relevant information</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Comments
+                        </label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex items-center justify-end space-x-4 pt-6">
+                    <a href="{% url 'proposal' %}"
+                       class="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        {% if form.instance.pk %}Update Proposal{% else %}Create Proposal{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Select Me button for author
+    const selectMeBtn = document.getElementById('select-me-btn-author');
+    if (selectMeBtn) {
+        selectMeBtn.addEventListener('click', function() {
+            const authorSelect = document.getElementById('{{ form.person_author.id_for_label }}');
+            if (authorSelect) {
+                authorSelect.value = '{{ current_user_person_id }}';
+            }
+        });
+    }
+
+    // Link Modal Integration
+    const openLinkModalBtn = document.getElementById('open-link-modal-btn');
+    if (openLinkModalBtn) {
+        openLinkModalBtn.addEventListener('click', function() {
+            window.openLinkModal(function(newLink) {
+                const linksSelect = document.getElementById('{{ form.links.id_for_label }}');
+                if (linksSelect) {
+                    const option = document.createElement('option');
+                    option.value = newLink.id;
+                    option.text = newLink.name;
+                    option.selected = true;
+                    linksSelect.add(option);
+
+                    const label = linksSelect.previousElementSibling;
+                    if (label) {
+                        const originalText = label.innerHTML;
+                        label.innerHTML = '<span class="text-green-600">Link added!</span>';
+                        setTimeout(() => {
+                            label.innerHTML = originalText;
+                        }, 2000);
+                    }
+                }
+            });
+        });
+    }
+
+    // Document Modal Integration
+    const openDocumentModalBtn = document.getElementById('open-document-modal-btn');
+    if (openDocumentModalBtn) {
+        openDocumentModalBtn.addEventListener('click', function() {
+            window.openDocumentModal(function(newDocument) {
+                const attachmentsSelect = document.getElementById('{{ form.attachments.id_for_label }}');
+                if (attachmentsSelect) {
+                    const option = document.createElement('option');
+                    option.value = newDocument.id;
+                    option.text = newDocument.name + ' v' + newDocument.version + ' (' + newDocument.blob_filename + ')';
+                    option.selected = true;
+                    attachmentsSelect.add(option);
+
+                    const label = document.querySelector('label[for="{{ form.attachments.id_for_label }}"]');
+                    if (label) {
+                        const originalText = label.innerHTML;
+                        label.innerHTML = '<span class="text-green-600">Document uploaded!</span>';
+                        setTimeout(() => {
+                            label.innerHTML = originalText;
+                        }, 2000);
+                    }
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

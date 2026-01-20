@@ -1,0 +1,19 @@
+PROPOSAL_STATUS_DRAFT: str = "draft"
+PROPOSAL_STATUS_SUBMITTED: str = "submitted"
+PROPOSAL_STATUS_UNDER_REVIEW: str = "under_review"
+PROPOSAL_STATUS_APPROVED: str = "approved"
+PROPOSAL_STATUS_REJECTED: str = "rejected"
+PROPOSAL_STATUS_DEFERRED: str = "deferred"
+PROPOSAL_STATUS_IMPLEMENTED: str = "implemented"
+PROPOSAL_STATUS_CANCELLED: str = "cancelled"
+
+PROPOSAL_STATUS_CHOICES: list[tuple[str, str]] = [
+    (PROPOSAL_STATUS_DRAFT, "Draft"),
+    (PROPOSAL_STATUS_SUBMITTED, "Submitted"),
+    (PROPOSAL_STATUS_UNDER_REVIEW, "Under Review"),
+    (PROPOSAL_STATUS_APPROVED, "Approved"),
+    (PROPOSAL_STATUS_REJECTED, "Rejected"),
+    (PROPOSAL_STATUS_DEFERRED, "Deferred"),
+    (PROPOSAL_STATUS_IMPLEMENTED, "Implemented"),
+    (PROPOSAL_STATUS_CANCELLED, "Cancelled"),
+]

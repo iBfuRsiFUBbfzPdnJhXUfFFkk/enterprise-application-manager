@@ -1,0 +1,564 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center mb-4">
+                <a href="{% url 'proposal' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="inline-flex items-center px-4 py-1.5 rounded-full text-base font-bold bg-purple-100 text-purple-800">
+                            {{ proposal.document_id }}
+                        </span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                            {% if proposal.status == 'draft' %}bg-gray-100 text-gray-800
+                            {% elif proposal.status == 'submitted' %}bg-yellow-100 text-yellow-800
+                            {% elif proposal.status == 'under_review' %}bg-blue-100 text-blue-800
+                            {% elif proposal.status == 'approved' %}bg-green-100 text-green-800
+                            {% elif proposal.status == 'rejected' %}bg-red-100 text-red-800
+                            {% elif proposal.status == 'deferred' %}bg-orange-100 text-orange-800
+                            {% elif proposal.status == 'implemented' %}bg-emerald-100 text-emerald-800
+                            {% elif proposal.status == 'cancelled' %}bg-red-100 text-red-800
+                            {% endif %}">
+                            {{ proposal.get_status_display }}
+                        </span>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ proposal.name }}</h1>
+                    <p class="mt-1 text-sm text-gray-500">Proposal Details</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'proposal_export_pdf' %}?ids={{ proposal.id }}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        Export PDF
+                    </a>
+                    <a href="{% url 'proposal_export_docx' %}?ids={{ proposal.id }}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        Export DOCX
+                    </a>
+                    <a href="{% url 'proposal_edit' model_id=proposal.id %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="space-y-6">
+            <!-- Proposal Overview -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Proposal Overview</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {% if proposal.priority %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Priority</dt>
+                            <dd class="mt-1">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if proposal.priority == 'high' %}bg-red-100 text-red-800
+                                    {% elif proposal.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                    {% elif proposal.priority == 'low' %}bg-green-100 text-green-800
+                                    {% endif %}">
+                                    {{ proposal.get_priority_display }}
+                                </span>
+                            </dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.version %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Version</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-mono">{{ proposal.version }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.reference_number %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Reference Number</dt>
+                            <dd class="mt-1 text-sm text-gray-900 font-mono">{{ proposal.reference_number }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+
+            <!-- People -->
+            {% if proposal.person_author or proposal.person_reviewer or proposal.person_approver %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">People</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {% if proposal.person_author %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Author</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.person_author }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.person_reviewer %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Reviewer</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.person_reviewer }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.person_approver %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Approver</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.person_approver }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Key Dates -->
+            {% if proposal.date_created or proposal.date_submitted or proposal.date_review_completed or proposal.date_decision or proposal.date_implementation_target %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Key Dates</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        {% if proposal.date_created %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Created</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.date_created }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.date_submitted %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Submitted</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.date_submitted }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.date_review_completed %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Review Completed</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.date_review_completed }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.date_decision %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Decision Date</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.date_decision }}</dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.date_implementation_target %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Target Implementation</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.date_implementation_target }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Related Entities -->
+            {% if proposal.application or proposal.project %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% if proposal.application %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Application</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if proposal.application.acronym %}
+                                    {{ proposal.application.acronym }} - {{ proposal.application.name }}
+                                {% else %}
+                                    {{ proposal.application.name }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% endif %}
+
+                        {% if proposal.project %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Project</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ proposal.project.name }}</dd>
+                        </div>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Executive Summary -->
+            {% if executive_summary_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Executive Summary</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ executive_summary_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Problem Statement -->
+            {% if problem_statement_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Problem Statement</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ problem_statement_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Proposed Solution -->
+            {% if proposed_solution_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Proposed Solution</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ proposed_solution_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Benefits -->
+            {% if benefits_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Benefits</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ benefits_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Risks & Mitigations -->
+            {% if risks_and_mitigations_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Risks & Mitigations</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ risks_and_mitigations_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Timeline -->
+            {% if timeline_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ timeline_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Resources Required -->
+            {% if resources_required_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Resources Required</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ resources_required_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Success Criteria -->
+            {% if success_criteria_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Success Criteria</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ success_criteria_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Related Links -->
+            {% if proposal.links.all %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="space-y-3">
+                        {% for link in proposal.links.all %}
+                        <li class="flex items-start text-sm">
+                            <svg class="h-5 w-5 text-blue-400 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            <div class="flex-1">
+                                <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
+                                   class="text-blue-600 hover:text-blue-800 hover:underline font-medium break-all">
+                                    {{ link.name }}
+                                </a>
+                                {% if link.comment %}
+                                <p class="mt-1 text-xs text-gray-500">{{ link.comment }}</p>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Attachments -->
+            {% if proposal.attachments.all %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Attachments</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <ul class="space-y-3">
+                        {% for document in proposal.attachments.all %}
+                        <li class="flex items-center text-sm">
+                            <svg class="h-5 w-5 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span class="text-gray-900">{{ document.name }}</span>
+                            {% if document.blob_filename %}
+                            <span class="ml-2 text-gray-500 text-xs">({{ document.blob_filename }})</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Updates Timeline -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Updates Timeline</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <!-- Add Update Form -->
+                    <div class="mb-6 pb-6 border-b border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Add Update</h3>
+                        <form id="add-update-form">
+                            {% csrf_token %}
+                            <div class="space-y-3">
+                                <textarea id="update-comment"
+                                          rows="3"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          placeholder="Enter update details..."></textarea>
+                                <div class="flex items-center justify-between">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="update-internal" class="rounded text-blue-600 mr-2">
+                                        <span class="text-sm text-gray-600">Internal note (not visible externally)</span>
+                                    </label>
+                                    <button type="submit"
+                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                        </svg>
+                                        Add Update
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="update-error" class="hidden mt-2 text-sm text-red-600"></div>
+                        <div id="update-success" class="hidden mt-2 text-sm text-green-600"></div>
+                    </div>
+
+                    <!-- Updates List -->
+                    <div id="updates-list" class="space-y-4">
+                        {% if updates %}
+                            {% for update in updates %}
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                        <svg class="h-4 w-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ update.person_author }}
+                                            {% if update.is_internal_note %}
+                                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                Internal
+                                            </span>
+                                            {% endif %}
+                                        </p>
+                                        <p class="text-xs text-gray-500">{{ update.datetime_created|date:"Y-m-d H:i" }}</p>
+                                    </div>
+                                    <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap">{{ update.comment }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-sm text-gray-500 italic">No updates yet. Add the first update above.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            {% if comment_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ comment_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('add-update-form');
+    const commentTextarea = document.getElementById('update-comment');
+    const internalCheckbox = document.getElementById('update-internal');
+    const errorDiv = document.getElementById('update-error');
+    const successDiv = document.getElementById('update-success');
+    const updatesList = document.getElementById('updates-list');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const comment = commentTextarea.value.trim();
+        if (!comment) {
+            showError('Please enter an update comment');
+            return;
+        }
+
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch('{% url "proposal_update_add" model_id=proposal.id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                comment: comment,
+                is_internal_note: internalCheckbox.checked
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                commentTextarea.value = '';
+                internalCheckbox.checked = false;
+                showSuccess('Update added successfully');
+                const updateHtml = createUpdateHtml(data.update);
+                updatesList.insertAdjacentHTML('afterbegin', updateHtml);
+                const noUpdatesMsg = updatesList.querySelector('p.italic');
+                if (noUpdatesMsg) {
+                    noUpdatesMsg.remove();
+                }
+            } else {
+                showError(data.error || 'Failed to add update');
+            }
+        })
+        .catch(error => {
+            showError('Error: ' + error.message);
+        });
+    });
+
+    function createUpdateHtml(update) {
+        const internalBadge = update.is_internal_note
+            ? '<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Internal</span>'
+            : '';
+
+        return `
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                        <svg class="h-4 w-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-900">
+                            ${update.author}
+                            ${internalBadge}
+                        </p>
+                        <p class="text-xs text-gray-500">${update.datetime_created}</p>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap">${update.comment}</p>
+                </div>
+            </div>
+        `;
+    }
+
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.classList.remove('hidden');
+        successDiv.classList.add('hidden');
+        setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+    }
+
+    function showSuccess(message) {
+        successDiv.textContent = message;
+        successDiv.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+        setTimeout(() => successDiv.classList.add('hidden'), 5000);
+    }
+});
+</script>
+{% endblock %}
