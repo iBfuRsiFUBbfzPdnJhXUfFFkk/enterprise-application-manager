@@ -61,6 +61,28 @@
                 </div>
             </div>
 
+            <!-- Tools Section -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Tools</h2>
+                </div>
+                <div class="px-6 py-6">
+                    {%if service_provider.tools.all %}
+                    <ul class="space-y-2">
+                        {%for tool in service_provider.tools.all %}
+                        <li>
+                            <a href="{%url 'tool_detail' model_id=tool.id %}" class="text-sky-600 hover:text-sky-800 hover:underline">
+                                {{ tool.name }}
+                            </a>
+                        </li>
+                        {%endfor %}
+                    </ul>
+                    {%else %}
+                    <p class="text-gray-500 italic">No tools linked</p>
+                    {%endif %}
+                </div>
+            </div>
+
             <!-- Description/Comment Section -->
             {%if service_provider.comment %}
             <div class="bg-white shadow-md rounded-lg overflow-hidden">

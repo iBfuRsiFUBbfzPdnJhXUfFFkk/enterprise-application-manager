@@ -59,6 +59,26 @@
                     </div>
                 </div>
 
+                <!-- Service Providers -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Service Providers</h2>
+                        <p class="mt-1 text-sm text-gray-500">Service providers that offer this tool</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div>
+                            <label for="{{ form.service_providers.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Select service providers that offer this tool">
+                                Service Providers
+                            </label>
+                            {{ form.service_providers }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Select all service providers that apply.
+                            </p>
+                            {%if form.service_providers.errors %}<p class="mt-2 text-sm text-red-600">{{ form.service_providers.errors.0 }}</p>{%endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
@@ -171,6 +191,50 @@
         /* Multi-select styling */
         select[multiple] {
             min-height: 120px;
+        }
+
+        /* Checkbox grid styling for service providers */
+        #id_service_providers {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+            padding: 0;
+        }
+
+        #id_service_providers li {
+            list-style: none;
+            margin: 0;
+        }
+
+        #id_service_providers label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        #id_service_providers label:hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        #id_service_providers input[type="checkbox"]:checked + label,
+        #id_service_providers label:has(input[type="checkbox"]:checked) {
+            background-color: #f1f5f9;
+            border-color: #64748b;
+            color: #334155;
+        }
+
+        #id_service_providers input[type="checkbox"] {
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
     </style>
 {%endblock %}

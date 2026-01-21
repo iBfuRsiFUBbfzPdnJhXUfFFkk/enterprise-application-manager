@@ -61,6 +61,28 @@
                 </div>
             </div>
 
+            <!-- Service Providers Section -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Service Providers</h2>
+                </div>
+                <div class="px-6 py-6">
+                    {%if tool.service_providers.all %}
+                    <ul class="space-y-2">
+                        {%for provider in tool.service_providers.all %}
+                        <li>
+                            <a href="{%url 'service_provider_detail' model_id=provider.id %}" class="text-slate-600 hover:text-slate-800 hover:underline">
+                                {{ provider.name }}
+                            </a>
+                        </li>
+                        {%endfor %}
+                    </ul>
+                    {%else %}
+                    <p class="text-gray-500 italic">No service providers linked</p>
+                    {%endif %}
+                </div>
+            </div>
+
             <!-- Description/Comment Section -->
             {%if tool.comment %}
             <div class="bg-white shadow-md rounded-lg overflow-hidden">

@@ -59,6 +59,26 @@
                     </div>
                 </div>
 
+                <!-- Tools -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Tools</h2>
+                        <p class="mt-1 text-sm text-gray-500">Tools offered by this service provider</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div>
+                            <label for="{{ form.tools.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Select tools this service provider offers">
+                                Tools
+                            </label>
+                            {{ form.tools }}
+                            <p class="mt-1 text-xs text-gray-500">
+                                Select all tools that apply.
+                            </p>
+                            {%if form.tools.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tools.errors.0 }}</p>{%endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
@@ -171,6 +191,50 @@
         /* Multi-select styling */
         select[multiple] {
             min-height: 120px;
+        }
+
+        /* Checkbox grid styling for tools */
+        #id_tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.5rem;
+            padding: 0;
+        }
+
+        #id_tools li {
+            list-style: none;
+            margin: 0;
+        }
+
+        #id_tools label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        #id_tools label:hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        #id_tools input[type="checkbox"]:checked + label,
+        #id_tools label:has(input[type="checkbox"]:checked) {
+            background-color: #e0f2fe;
+            border-color: #0ea5e9;
+            color: #0369a1;
+        }
+
+        #id_tools input[type="checkbox"] {
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
     </style>
 {%endblock %}
