@@ -31,7 +31,10 @@ from core.urls.urlpatterns_document import urlpatterns_document
 from core.urls.urlpatterns_estimation import urlpatterns_estimation
 from core.urls.urlpatterns_external_blocker import urlpatterns_external_blocker
 from core.urls.urlpatterns_formula import urlpatterns_formula
-from core.urls.urlpatterns_health import urlpatterns as urlpatterns_health
+from core.urls.urlpatterns_health import (
+    urlpatterns_health_authenticated,
+    urlpatterns_health_public,
+)
 from core.urls.urlpatterns_hotfix import urlpatterns_hotfix
 from core.urls.urlpatterns_hr_incident import urlpatterns_hr_incident
 from core.urls.urlpatterns_incident import urlpatterns_incident
@@ -163,7 +166,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_vulnerability,
     path(name="gitlab_sync", route='gitlab-sync/', view=include(arg=urlpatterns_gitlab_sync)),
     path(name="kpi", route='kpi/', view=include(arg=(urlpatterns_kpi, 'kpi'), namespace="kpi")),
-    path(name="health", route='health/', view=include(arg=urlpatterns_health)),
+    path(name="health", route='health/', view=include(arg=urlpatterns_health_authenticated)),
     *urlpatterns_api
 ]
 
@@ -173,6 +176,8 @@ urlpatterns: list[URLPattern | URLResolver] = [
     *urlpatterns_passkey_public,
     # Public short URL redirect (no authentication required)
     path(name="link_short_redirect", route='-/<str:short_code>/', view=link_short_redirect_view),
+    # Public health check endpoints (no authentication required for Docker health checks)
+    path(name="health_public", route='health/', view=include(arg=urlpatterns_health_public)),
     path(name="authenticated", route='authenticated/', view=include(arg=urlpatterns_authenticated)),
 ]
 

@@ -63,7 +63,7 @@ services:
     tty: true
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/startup/"]
       interval: 10s
       timeout: 5s
       retries: 5
