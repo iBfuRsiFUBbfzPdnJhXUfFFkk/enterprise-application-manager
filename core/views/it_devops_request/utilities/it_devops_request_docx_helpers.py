@@ -96,12 +96,14 @@ def add_request_section(document: Document, request: ITDevOpsRequest) -> None:
     # Status
     row = table.add_row()
     row.cells[0].text = "Status"
-    row.cells[1].text = request.get_status_display() if hasattr(request, "get_status_display") else request.status
+    status_display = request.get_status_display() if hasattr(request, "get_status_display") else request.status
+    row.cells[1].text = status_display or "Not Set"
 
     # Priority
     row = table.add_row()
     row.cells[0].text = "Priority"
-    row.cells[1].text = request.get_priority_display() if hasattr(request, "get_priority_display") else request.priority
+    priority_display = request.get_priority_display() if hasattr(request, "get_priority_display") else request.priority
+    row.cells[1].text = priority_display or "Not Set"
 
     # Reference number
     if request.reference_number:
@@ -182,7 +184,8 @@ def add_request_section(document: Document, request: ITDevOpsRequest) -> None:
         if request.project:
             row = entities_table.add_row()
             row.cells[0].text = "Project"
-            row.cells[1].text = request.project.name if hasattr(request.project, "name") else str(request.project)
+            project_name = request.project.name if hasattr(request.project, "name") else str(request.project)
+            row.cells[1].text = project_name or str(request.project)
 
         # Format entities table
         for row in entities_table.rows:
@@ -263,8 +266,11 @@ def add_updates_section(document: Document, updates) -> None:
 
 def add_attachments_section(document: Document, request: ITDevOpsRequest) -> None:
     """Add attachments section with embedded content (text, images, PDFs as images)."""
+    import logging
     import mimetypes
     from PIL import Image
+
+    logger = logging.getLogger(__name__)
 
     if not request.attachments.exists():
         return
@@ -282,9 +288,16 @@ def add_attachments_section(document: Document, request: ITDevOpsRequest) -> Non
             document.add_page_break()
         first_attachment = False
 
-        # Get file info from MinIO
-        filename = attachment.get_filename()
-        file_size = attachment.get_file_size()
+        # Get file info from MinIO (with error handling for missing files)
+        try:
+            filename = attachment.get_filename()
+            file_size = attachment.get_file_size()
+        except Exception as e:
+            logger.warning(f"Failed to get file info for attachment {attachment.id}: {e}")
+            para = document.add_paragraph()
+            para.add_run(f"Attachment: {attachment.name or 'Unknown'}\n").bold = True
+            para.add_run("Error: Unable to access file in storage.").italic = True
+            continue
 
         # Guess content type from filename
         content_type, _ = mimetypes.guess_type(filename) if filename else (None, None)

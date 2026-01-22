@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from io import BytesIO
 
@@ -6,6 +7,8 @@ from django.http import HttpRequest, HttpResponse
 from docx import Document
 
 from core.models.it_devops_request import ITDevOpsRequest
+
+logger = logging.getLogger(__name__)
 from core.views.generic.generic_500 import generic_500
 from core.views.it_devops_request.utilities.it_devops_request_docx_helpers import (
     add_attachments_section,
@@ -101,5 +104,6 @@ def it_devops_request_export_docx_view(request: HttpRequest) -> HttpResponse:
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
-    except Exception:
+    except Exception as e:
+        logger.exception(f"Failed to export IT/DevOps request to DOCX: {e}")
         return generic_500(request=request)
