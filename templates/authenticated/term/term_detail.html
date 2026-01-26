@@ -56,7 +56,17 @@
                             <dt class="text-sm font-medium text-gray-500 mb-1">Alias</dt>
                             <dd class="text-lg text-gray-900">{{ term_alias|default:"-" }}</dd>
                         </div>
-
+                        {%if linked_acronym %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Linked Acronym</dt>
+                            <dd class="text-lg text-gray-900">
+                                <a href="{%url 'acronym_detail' model_id=linked_acronym.id %}"
+                                   class="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-150">
+                                    {{ linked_acronym.acronym }}
+                                </a>
+                            </dd>
+                        </div>
+                        {%endif %}
                     </dl>
                 </div>
             </div>

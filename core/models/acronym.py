@@ -1,3 +1,5 @@
+from django.db import models
+
 from core.models.common.abstract.abstract_acronym import AbstractAcronym
 from core.models.common.abstract.abstract_alias import AbstractAlias
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
@@ -17,6 +19,14 @@ class Acronym(
     AbstractPronunciation,
     AbstractSupportingLink,
 ):
+    term = models.OneToOneField(
+        'Term',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='acronym'
+    )
+
     def __str__(self):
         return get_name_acronym(acronym=self.acronym, name=self.name)
 

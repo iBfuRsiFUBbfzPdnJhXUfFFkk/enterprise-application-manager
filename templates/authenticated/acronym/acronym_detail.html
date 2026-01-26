@@ -77,6 +77,17 @@
                             </dd>
                         </div>
                         {% endif %}
+                        {% if model.term %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 mb-1">Linked Term</dt>
+                            <dd class="text-base text-gray-900">
+                                <a href="{% url 'term_detail' model_id=model.term.id %}"
+                                   class="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-150">
+                                    {{ model.term.name }}
+                                </a>
+                            </dd>
+                        </div>
+                        {% endif %}
                     </dl>
                 </div>
             </div>

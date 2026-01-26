@@ -60,6 +60,13 @@
                             {{ form.aliases_csv }}
                             {% if form.aliases_csv.errors %}<p class="mt-2 text-sm text-red-600">{{ form.aliases_csv.errors.0 }}</p>{% endif %}
                         </div>
+                        <div>
+                            <label for="{{ form.term.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Link this acronym to a defined term">
+                                Linked Term
+                            </label>
+                            {{ form.term }}
+                            {% if form.term.errors %}<p class="mt-2 text-sm text-red-600">{{ form.term.errors.0 }}</p>{% endif %}
+                        </div>
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 cursor-help" title="Additional context, usage notes, or explanation of the acronym">
                                 Comment
