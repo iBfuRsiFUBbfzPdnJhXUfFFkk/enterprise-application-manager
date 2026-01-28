@@ -14,7 +14,7 @@ WORKDIR /app
 # - poppler-utils: PDF processing (pdf2image)
 # - gcc, build-essential: Compilation for native extensions
 # - libldap2-dev, libsasl2-dev: LDAP support (if enabled)
-# - curl: Health checks and Node.js installation
+# - curl: Health checks
 RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
     gcc \
@@ -26,11 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js 20.x for Tailwind CSS build
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -38,15 +33,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Install MinIO dependencies
 RUN pip install --no-cache-dir django-storages[s3] boto3
 
-# Install Node.js dependencies for Tailwind CSS
-COPY package.json .
-RUN npm install
-
-# Copy project
+# Copy project (Tailwind CSS uses CDN in development)
 COPY . .
-
-# Build Tailwind CSS
-RUN npm run build:css
 
 # Copy and set entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh

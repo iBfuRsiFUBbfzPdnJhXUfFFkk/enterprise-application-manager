@@ -15,8 +15,8 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 20s
+      interval: 5s
+      timeout: 3s
       retries: 3
     networks:
       - enterprise-network
@@ -49,7 +49,7 @@ services:
       # CSRF for HTTPS
       - CSRF_TRUSTED_ORIGINS_EXTRA=${CSRF_TRUSTED_ORIGINS_EXTRA:-}
       # Pass through all .env variables
-      - DEBUG=${DEBUG:-True}
+      - DEBUG=${DEBUG:-False}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - ENCRYPTION_SECRET=${ENCRYPTION_SECRET}
@@ -64,10 +64,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/startup/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
     depends_on:
       minio:
         condition: service_healthy
