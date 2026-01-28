@@ -1,19 +1,25 @@
+import json
+
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
+from django.views.decorators.http import require_http_methods
 
 from core.models.document import Document
 from core.utilities.thumbnail_generator import generate_thumbnail
 
 
+@require_http_methods(["POST"])
 def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
     """Regenerate thumbnails for all documents."""
-    if request.method != 'POST':
-        return redirect('document')
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     documents = Document.objects.filter(file__isnull=False).exclude(file='')
+    total = documents.count()
     generated = 0
+    skipped = 0
     errors = 0
+    error_names = []
 
     for doc in documents:
         try:
@@ -24,9 +30,23 @@ def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
                     doc.thumbnail = thumb
                     doc.save(update_fields=['thumbnail'])
                     generated += 1
-        except Exception:
+                else:
+                    skipped += 1
+        except Exception as e:
             errors += 1
+            error_names.append(doc.name or f"Document #{doc.pk}")
 
+    if is_ajax:
+        return JsonResponse({
+            'success': True,
+            'total': total,
+            'generated': generated,
+            'skipped': skipped,
+            'errors': errors,
+            'error_names': error_names[:10],
+        })
+
+    # Fallback for non-AJAX requests
     if errors:
         messages.warning(
             request,
