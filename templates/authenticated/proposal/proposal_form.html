@@ -8,7 +8,7 @@
 {% include 'authenticated/common/components/document_modal.html' %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center">
                 <a href="{% url 'proposal' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,11 +24,11 @@
     </div>
 
     <!-- Form Section -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <form method="POST">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" class="w-full">
             {% csrf_token %}
 
-            <div class="space-y-6">
+            <div class="space-y-6 w-full">
                 <!-- Document ID -->
                 {% if form.instance.pk and form.instance.document_id %}
                 <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-r-lg">
@@ -63,7 +63,7 @@
                 {% endif %}
 
                 <!-- Basic Information -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
                         <p class="mt-1 text-sm text-gray-500">Proposal title, status, and priority</p>
@@ -112,7 +112,7 @@
                 </div>
 
                 <!-- People -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">People</h2>
                         <p class="mt-1 text-sm text-gray-500">Author, reviewer, and approver</p>
@@ -155,7 +155,7 @@
                 </div>
 
                 <!-- Related Entities -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
                         <p class="mt-1 text-sm text-gray-500">Link to application or project (optional)</p>
@@ -179,7 +179,7 @@
                 </div>
 
                 <!-- Executive Summary -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Executive Summary</h2>
                         <p class="mt-1 text-sm text-gray-500">Brief overview of the proposal (Markdown supported)</p>
@@ -194,7 +194,7 @@
                 </div>
 
                 <!-- Problem Statement -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Problem Statement</h2>
                         <p class="mt-1 text-sm text-gray-500">What problem does this proposal solve? (Markdown supported)</p>
@@ -209,7 +209,7 @@
                 </div>
 
                 <!-- Proposed Solution -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Proposed Solution</h2>
                         <p class="mt-1 text-sm text-gray-500">Detailed description of the proposed solution (Markdown supported)</p>
@@ -224,7 +224,7 @@
                 </div>
 
                 <!-- Benefits -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Benefits</h2>
                         <p class="mt-1 text-sm text-gray-500">Expected benefits of implementing this proposal (Markdown supported)</p>
@@ -239,7 +239,7 @@
                 </div>
 
                 <!-- Risks & Mitigations -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Risks & Mitigations</h2>
                         <p class="mt-1 text-sm text-gray-500">Potential risks and how to mitigate them (Markdown supported)</p>
@@ -254,7 +254,7 @@
                 </div>
 
                 <!-- Timeline -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
                         <p class="mt-1 text-sm text-gray-500">Implementation timeline and milestones (Markdown supported)</p>
@@ -269,7 +269,7 @@
                 </div>
 
                 <!-- Resources Required -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Resources Required</h2>
                         <p class="mt-1 text-sm text-gray-500">Resources needed for implementation (Markdown supported)</p>
@@ -284,7 +284,7 @@
                 </div>
 
                 <!-- Success Criteria -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Success Criteria</h2>
                         <p class="mt-1 text-sm text-gray-500">How will success be measured? (Markdown supported)</p>
@@ -299,7 +299,7 @@
                 </div>
 
                 <!-- Key Dates -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Key Dates</h2>
                         <p class="mt-1 text-sm text-gray-500">Important dates for this proposal</p>
@@ -344,7 +344,7 @@
                 </div>
 
                 <!-- Links -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
                         <p class="mt-1 text-sm text-gray-500">Reference links and resources for this proposal</p>
@@ -368,7 +368,7 @@
                 </div>
 
                 <!-- Attachments -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Attachments</h2>
                         <p class="mt-1 text-sm text-gray-500">Supporting documents for this proposal</p>
@@ -393,7 +393,7 @@
                 </div>
 
                 <!-- Additional Notes -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
                         <p class="mt-1 text-sm text-gray-500">Any other relevant information</p>

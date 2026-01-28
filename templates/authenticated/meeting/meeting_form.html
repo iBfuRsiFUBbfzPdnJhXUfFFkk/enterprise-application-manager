@@ -3,7 +3,7 @@
 {% block content %}
 <!-- Header -->
 <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center">
             <a href="{% url 'meeting' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,12 +25,12 @@
 </div>
 
 <!-- Form -->
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-    <form method="POST" class="space-y-6">
+<div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <form method="POST" class="space-y-6 w-full">
         {% csrf_token %}
 
         <!-- Basic Information -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
             </div>
@@ -70,7 +70,7 @@
         </div>
 
         <!-- Schedule -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Schedule</h2>
             </div>
@@ -94,7 +94,7 @@
         </div>
 
         <!-- Attendees -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Attendees</h2>
             </div>
@@ -109,7 +109,7 @@
         </div>
 
         <!-- Location -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Location</h2>
             </div>
@@ -173,7 +173,7 @@
         </div>
 
         <!-- Content -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Content</h2>
             </div>
@@ -197,7 +197,7 @@
         </div>
 
         <!-- Related Entities -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
             </div>
@@ -221,7 +221,7 @@
         </div>
 
         <!-- Additional Information -->
-        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900">Additional Information</h2>
             </div>

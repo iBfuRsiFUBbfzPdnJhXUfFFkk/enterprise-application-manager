@@ -1,7 +1,7 @@
 {%extends 'authenticated/base_authenticated.html' %}
 {%block content %}
 <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div class="flex items-center">
             <a href="{%url 'ai_hallucination' %}" class="mr-4 text-gray-400 hover:text-gray-600">
                 <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,11 +16,11 @@
     </div>
 </div>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-    <form method="POST">
+<div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+    <form method="POST" class="w-full">
         {%csrf_token %}
-        <div class="space-y-6">
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="space-y-6 w-full">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">Form Fields</h2>
                 </div>
@@ -28,7 +28,7 @@
                     {{ form.as_p }}
                 </div>
             </div>
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                 <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
                     <a href="{%url 'ai_hallucination' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                         Cancel

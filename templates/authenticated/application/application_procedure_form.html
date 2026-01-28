@@ -4,7 +4,7 @@
 {% block content %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center">
                 <a href="{% url 'application_procedure_list' model_id=application.id %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,8 +20,8 @@
     </div>
 
     <!-- Form Section -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <form method="POST" class="space-y-6">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" class="space-y-6 w-full">
             {% csrf_token %}
 
             {{ form.application }}
@@ -29,7 +29,7 @@
             {{ form.step_data }}
 
             <!-- Basic Information Card -->
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">Step Information</h2>
                 </div>
@@ -59,7 +59,7 @@
             </div>
 
             <!-- Type-Specific Fields Card -->
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">Step Content</h2>
                 </div>
@@ -147,7 +147,7 @@
             </div>
 
             <!-- Additional Notes Card -->
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                 <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
                 </div>

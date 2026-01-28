@@ -8,7 +8,7 @@
 {% include 'authenticated/common/components/document_modal.html' %}
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center">
                 <a href="{% url 'it_devops_request' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,11 +24,11 @@
     </div>
 
     <!-- Form Section -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <form method="POST">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" class="w-full">
             {% csrf_token %}
 
-            <div class="space-y-6">
+            <div class="space-y-6 w-full">
                 <!-- Document ID -->
                 {% if form.instance.pk and form.instance.document_id %}
                 <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
@@ -63,7 +63,7 @@
                 {% endif %}
 
                 <!-- Basic Information -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
                         <p class="mt-1 text-sm text-gray-500">Request title, status, and priority</p>
@@ -104,7 +104,7 @@
                 </div>
 
                 <!-- People -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">People</h2>
                         <p class="mt-1 text-sm text-gray-500">Request requester, assignee, and approver</p>
@@ -147,7 +147,7 @@
                 </div>
 
                 <!-- Related Entities -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
                         <p class="mt-1 text-sm text-gray-500">Link to application or project (optional)</p>
@@ -171,7 +171,7 @@
                 </div>
 
                 <!-- Request Details -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Request Details</h2>
                         <p class="mt-1 text-sm text-gray-500">Detailed description, justification, and expected outcomes (Markdown supported)</p>
@@ -205,7 +205,7 @@
                 </div>
 
                 <!-- Timeline -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
                         <p class="mt-1 text-sm text-gray-500">Important dates for this request</p>
@@ -238,7 +238,7 @@
                 </div>
 
                 <!-- Links -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
                         <p class="mt-1 text-sm text-gray-500">Reference links and resources for this request</p>
@@ -262,7 +262,7 @@
                 </div>
 
                 <!-- Attachments -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Attachments</h2>
                         <p class="mt-1 text-sm text-gray-500">Supporting documents for this request</p>
@@ -287,7 +287,7 @@
                 </div>
 
                 <!-- Additional Notes -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
                         <p class="mt-1 text-sm text-gray-500">Any other relevant information</p>

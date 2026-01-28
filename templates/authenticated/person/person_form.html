@@ -7,7 +7,7 @@
 
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center">
                 <a href="{% url 'person' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,13 +23,13 @@
     </div>
 
     <!-- Form Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <form method="POST">
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" class="w-full">
             {% csrf_token %}
 
-            <div class="space-y-6">
+            <div class="space-y-6 w-full">
                 <!-- Status - Moved to top as it controls visibility of other sections -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Status</h2>
                         <p class="mt-1 text-sm text-gray-500">Employment and system access status</p>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Basic Information -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
                         <p class="mt-1 text-sm text-gray-500">Personal and contact details</p>
@@ -442,7 +442,7 @@
                 </div>
 
                 <!-- Links -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                         <h2 class="text-lg font-semibold text-gray-900">Links & References</h2>
                         <p class="mt-1 text-sm text-gray-500">External profiles and resources</p>
@@ -469,7 +469,7 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
                         <a href="{% url 'person' %}"
                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
