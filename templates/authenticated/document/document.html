@@ -886,7 +886,7 @@ $(document).ready(function() {
             const response = await fetch('{% url "document_reprocess_thumbnails" %}', {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-CSRFToken': getCookie('eam_csrftoken'),
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });

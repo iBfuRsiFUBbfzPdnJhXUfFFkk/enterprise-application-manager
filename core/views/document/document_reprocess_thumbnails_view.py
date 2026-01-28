@@ -1,6 +1,5 @@
-import json
-
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import redirect
 from django.views.decorators.http import require_http_methods
@@ -9,6 +8,7 @@ from core.models.document import Document
 from core.utilities.thumbnail_generator import generate_thumbnail
 
 
+@login_required
 @require_http_methods(["POST"])
 def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
     """Regenerate thumbnails for all documents."""
