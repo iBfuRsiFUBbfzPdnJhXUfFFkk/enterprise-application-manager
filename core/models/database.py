@@ -2,6 +2,7 @@ from django.db import models
 from core.models.application import Application
 from core.models.common.abstract.abstract_base_model import AbstractBaseModel
 from core.models.common.abstract.abstract_comment import AbstractComment
+from core.models.common.abstract.abstract_name import AbstractName
 from core.models.common.abstract.abstract_version import AbstractVersion
 from core.models.common.enums.data_storage_form_choices import DATA_STORAGE_FORM_CHOICES
 from core.models.common.enums.database_authentication_method_choices import DATABASE_AUTH_METHOD_CHOICES
@@ -12,7 +13,7 @@ from core.models.common.enums.ssl_support_choices import SSL_SUPPORT_CHOICES
 from core.utilities.encryption import encrypt_secret, decrypt_secret
 
 
-class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
+class Database(AbstractBaseModel, AbstractName, AbstractComment, AbstractVersion):
     application = models.ForeignKey(Application, on_delete=models.SET_NULL, null=True, blank=True, related_name='databases')
     encrypted_password = models.CharField(max_length=255, null=True, blank=True)
     encrypted_username = models.CharField(max_length=255, null=True, blank=True)
@@ -163,6 +164,8 @@ class Database(AbstractBaseModel, AbstractComment, AbstractVersion):
         return None
 
     def __str__(self):
+        if self.name:
+            return self.name
         return f"{self.application.acronym if self.application is not None else 'N/A'} - {self.type_environment} - v{self.version}"
 
     class Meta:

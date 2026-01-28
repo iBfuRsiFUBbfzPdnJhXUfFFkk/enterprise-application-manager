@@ -30,7 +30,7 @@
                     <div class="relative">
                         <input type="text"
                                id="search"
-                               placeholder="Search by hostname, schema..."
+                               placeholder="Search by name, hostname, schema..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -89,11 +89,11 @@
             {% for model in models %}
             <div class="db-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
                  data-application="{{ model.application.name|default:'' }}"
+                 data-name="{{ model.name|default:'' }}"
                  data-hostname="{{ model.hostname|default:'' }}"
                  data-schema="{{ model.schema|default:'' }}"
                  data-environment="{{ model.type_environment|default:'' }}"
                  data-flavor="{{ model.type_database_flavor|default:'' }}"
-                 data-version="{{ model.version|default:'' }}"
                  ondblclick="window.location.href='{% url 'database_detail' model_id=model.id %}'">
                 <div class="p-6">
                     <!-- Application Name -->
@@ -194,12 +194,46 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Environment</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flavor</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hostname</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schema</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <button type="button" class="sort-btn group inline-flex items-center gap-1 hover:text-gray-700" data-sort="name">
+                                        Name
+                                        <span class="sort-icon text-gray-400 group-hover:text-gray-500">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <button type="button" class="sort-btn group inline-flex items-center gap-1 hover:text-gray-700" data-sort="application">
+                                        Application
+                                        <span class="sort-icon text-gray-400 group-hover:text-gray-500">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <button type="button" class="sort-btn group inline-flex items-center gap-1 hover:text-gray-700" data-sort="environment">
+                                        Environment
+                                        <span class="sort-icon text-gray-400 group-hover:text-gray-500">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <button type="button" class="sort-btn group inline-flex items-center gap-1 hover:text-gray-700" data-sort="flavor">
+                                        Flavor
+                                        <span class="sort-icon text-gray-400 group-hover:text-gray-500">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </th>
                                 <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -207,13 +241,16 @@
                             {% for model in models %}
                             <tr class="db-row hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
                                 data-application="{{ model.application.name|default:'' }}"
-                                data-hostname="{{ model.hostname|default:'' }}"
-                                data-schema="{{ model.schema|default:'' }}"
+                                data-name="{{ model.name|default:'' }}"
                                 data-environment="{{ model.type_environment|default:'' }}"
                                 data-flavor="{{ model.type_database_flavor|default:'' }}"
-                                data-version="{{ model.version|default:'' }}"
                                 ondblclick="window.location.href='{% url 'database_detail' model_id=model.id %}'">
                                 <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
+                                    <div class="truncate" title="{{ model.name|default:'-' }}">
+                                        {{ model.name|default:"-" }}
+                                    </div>
+                                </td>
+                                <td class="px-3 py-3 text-sm text-gray-900" style="max-width: 250px;">
                                     <div class="truncate" title="{{ model.application.name|default:'N/A' }}">
                                         {{ model.application.name|default:"N/A" }}
                                     </div>
@@ -242,25 +279,6 @@
                                     {% else %}
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                                    {% if model.version %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                        v{{ model.version }}
-                                    </span>
-                                    {% else %}
-                                    <span class="text-gray-400">-</span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 200px;">
-                                    <div class="truncate" title="{{ model.hostname|default:'-' }}">
-                                        {{ model.hostname|default:"-" }}
-                                    </div>
-                                </td>
-                                <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 150px;">
-                                    <div class="truncate" title="{{ model.schema|default:'-' }}">
-                                        {{ model.schema|default:"-" }}
-                                    </div>
                                 </td>
                                 <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
                                     <a href="{% url 'database_detail' model_id=model.id %}"
@@ -313,11 +331,11 @@ document.addEventListener('DOMContentLoaded', function() {
             card: card,
             row: row,
             application: card.dataset.application.toLowerCase(),
+            name: (card.dataset.name || '').toLowerCase(),
             hostname: card.dataset.hostname.toLowerCase(),
             schema: card.dataset.schema.toLowerCase(),
             environment: card.dataset.environment,
-            flavor: card.dataset.flavor,
-            version: card.dataset.version.toLowerCase()
+            flavor: card.dataset.flavor
         });
     });
 
@@ -401,9 +419,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         allItems.forEach(item => {
             const matchesSearch = !searchTerm ||
+                                item.name.includes(searchTerm) ||
                                 item.hostname.includes(searchTerm) ||
-                                item.schema.includes(searchTerm) ||
-                                item.version.includes(searchTerm);
+                                item.schema.includes(searchTerm);
 
             const matchesApplication = !selectedApplication || item.application === selectedApplication;
             const matchesEnvironment = !selectedEnvironment || item.environment === selectedEnvironment;
@@ -482,6 +500,83 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore filters from URL and apply them
     restoreFilters();
     filterItems();
+
+    // Sorting functionality
+    let currentSort = { column: null, direction: 'asc' };
+    const tableBody = document.querySelector('#list-view tbody');
+    const sortButtons = document.querySelectorAll('.sort-btn');
+
+    const sortIconDefault = `<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+    </svg>`;
+    const sortIconAsc = `<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+    </svg>`;
+    const sortIconDesc = `<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+    </svg>`;
+
+    function updateSortIcons() {
+        sortButtons.forEach(btn => {
+            const icon = btn.querySelector('.sort-icon');
+            const column = btn.dataset.sort;
+            if (column === currentSort.column) {
+                icon.innerHTML = currentSort.direction === 'asc' ? sortIconAsc : sortIconDesc;
+                icon.classList.remove('text-gray-400');
+                icon.classList.add('text-blue-600');
+            } else {
+                icon.innerHTML = sortIconDefault;
+                icon.classList.remove('text-blue-600');
+                icon.classList.add('text-gray-400');
+            }
+        });
+    }
+
+    function sortTable(column) {
+        // Toggle direction if same column, otherwise start with asc
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+
+        // Get all visible rows
+        const rows = Array.from(tableBody.querySelectorAll('.db-row:not(.hidden)'));
+
+        rows.sort((a, b) => {
+            let aVal = (a.dataset[column] || '').toLowerCase();
+            let bVal = (b.dataset[column] || '').toLowerCase();
+
+            if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // Re-append rows in sorted order
+        rows.forEach(row => tableBody.appendChild(row));
+
+        // Also sort grid view cards
+        const gridContainer = document.getElementById('grid-view');
+        const cards = Array.from(gridContainer.querySelectorAll('.db-card:not(.hidden)'));
+
+        cards.sort((a, b) => {
+            let aVal = (a.dataset[column] || '').toLowerCase();
+            let bVal = (b.dataset[column] || '').toLowerCase();
+
+            if (aVal < bVal) return currentSort.direction === 'asc' ? -1 : 1;
+            if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        cards.forEach(card => gridContainer.appendChild(card));
+
+        updateSortIcons();
+    }
+
+    sortButtons.forEach(btn => {
+        btn.addEventListener('click', () => sortTable(btn.dataset.sort));
+    });
 });
 </script>
 {% endblock %}
