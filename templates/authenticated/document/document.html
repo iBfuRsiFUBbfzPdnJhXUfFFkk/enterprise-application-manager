@@ -24,16 +24,13 @@
                         </svg>
                         Similar Images
                     </a>
-                    <form action="{% url 'document_rehash' %}" method="post" onsubmit="return confirm('Recalculate hashes for all documents?');">
-                        {% csrf_token %}
-                        <button type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
-                            <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                            Rehash Files
-                        </button>
-                    </form>
+                    <button type="button" id="openRehashModal"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        Rehash Files
+                    </button>
                     <button type="button" id="openThumbnailModal"
                             class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
                         <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,16 +38,13 @@
                         </svg>
                         Regen Thumbnails
                     </button>
-                    <form action="{% url 'document_rename_files' %}" method="post" onsubmit="return confirm('Are you sure you want to rename all files to random UUIDs? This cannot be undone.');">
-                        {% csrf_token %}
-                        <button type="submit"
-                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
-                            <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                            </svg>
-                            Rename Files
-                        </button>
-                    </form>
+                    <button type="button" id="openRenameModal"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Rename Files
+                    </button>
                     <a href="{% url 'document_new' %}"
                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
                         <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -732,6 +726,222 @@ $(document).ready(function() {
     }
 </style>
 
+<!-- Rehash Files Modal -->
+<div id="rehashModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-semibold text-gray-900">Rehash Files</h3>
+            <button type="button" class="closeRehashModal text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Initial State -->
+        <div id="rehashInitial" class="mt-4">
+            <div class="flex items-center space-x-3 p-4 bg-green-50 rounded-lg">
+                <svg class="h-8 w-8 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+                <div>
+                    <p class="text-sm text-gray-700">Recalculate SHA-256 hashes and perceptual image hashes for all documents.</p>
+                    <p class="text-xs text-gray-500 mt-1">Used for duplicate detection and similar image finding.</p>
+                </div>
+            </div>
+            <div id="rehashFileCountInfo" class="mt-3 p-3 bg-gray-50 rounded-lg text-center">
+                <span id="rehashFileCountLoading" class="text-sm text-gray-500">Loading document count...</span>
+                <span id="rehashFileCountDisplay" class="hidden text-sm font-medium text-gray-700">
+                    <span id="rehashInitialFileCount">0</span> document(s) to process
+                </span>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" class="closeRehashModal px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="button" id="startRehashBtn" class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700">
+                    Start Processing
+                </button>
+            </div>
+        </div>
+
+        <!-- Processing State -->
+        <div id="rehashProcessing" class="hidden mt-4">
+            <div class="flex flex-col items-center justify-center py-4">
+                <p class="text-sm font-medium text-gray-700 mb-2">Rehashing files...</p>
+                <p class="text-lg font-semibold text-green-600 mb-3">
+                    <span id="rehashCurrentCount">0</span> of <span id="rehashTotalCount">0</span>
+                </p>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                    <div id="rehashProgressBar" class="bg-green-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="rehashCurrentFileName" class="text-xs text-gray-500 truncate max-w-full px-4">Starting...</p>
+                <div class="flex space-x-4 mt-4 text-xs">
+                    <span class="text-green-600"><span id="rehashLiveHashed">0</span> hashed</span>
+                    <span class="text-blue-600"><span id="rehashLiveImages">0</span> images</span>
+                    <span class="text-red-600"><span id="rehashLiveErrors">0</span> errors</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete State -->
+        <div id="rehashComplete" class="hidden mt-4">
+            <div id="rehashSuccessIcon" class="hidden flex items-center justify-center mb-4">
+                <div class="rounded-full bg-green-100 p-3">
+                    <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+            </div>
+            <div id="rehashWarningIcon" class="hidden flex items-center justify-center mb-4">
+                <div class="rounded-full bg-yellow-100 p-3">
+                    <svg class="h-8 w-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-center mb-4">
+                <h4 id="rehashResultTitle" class="text-lg font-medium text-gray-900">Processing Complete</h4>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Total documents:</span>
+                    <span id="rehashResultTotal" class="font-medium text-gray-900">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Files hashed:</span>
+                    <span id="rehashResultHashed" class="font-medium text-green-600">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Image hashes:</span>
+                    <span id="rehashResultImages" class="font-medium text-blue-600">0</span>
+                </div>
+                <div id="rehashErrorRow" class="hidden flex justify-between text-sm">
+                    <span class="text-gray-600">Errors:</span>
+                    <span id="rehashResultErrors" class="font-medium text-red-600">0</span>
+                </div>
+            </div>
+            <div id="rehashErrorDetails" class="hidden mt-3 p-3 bg-red-50 rounded-lg">
+                <p class="text-xs font-medium text-red-800 mb-1">Failed documents:</p>
+                <ul id="rehashErrorList" class="text-xs text-red-700 list-disc list-inside"></ul>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" id="closeRehashCompleteBtn" class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rename Files Modal -->
+<div id="renameModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-semibold text-gray-900">Rename Files</h3>
+            <button type="button" class="closeRenameModal text-gray-400 hover:text-gray-600">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Initial State -->
+        <div id="renameInitial" class="mt-4">
+            <div class="flex items-center space-x-3 p-4 bg-yellow-50 rounded-lg">
+                <svg class="h-8 w-8 text-yellow-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div>
+                    <p class="text-sm text-gray-700">Rename all files to random UUIDs while preserving extensions.</p>
+                    <p class="text-xs text-red-600 font-medium mt-1">Warning: This cannot be undone!</p>
+                </div>
+            </div>
+            <div id="renameFileCountInfo" class="mt-3 p-3 bg-gray-50 rounded-lg text-center">
+                <span id="renameFileCountLoading" class="text-sm text-gray-500">Loading document count...</span>
+                <span id="renameFileCountDisplay" class="hidden text-sm font-medium text-gray-700">
+                    <span id="renameInitialFileCount">0</span> document(s) to process
+                </span>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" class="closeRenameModal px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button type="button" id="startRenameBtn" class="px-4 py-2 bg-yellow-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-yellow-700">
+                    Start Renaming
+                </button>
+            </div>
+        </div>
+
+        <!-- Processing State -->
+        <div id="renameProcessing" class="hidden mt-4">
+            <div class="flex flex-col items-center justify-center py-4">
+                <p class="text-sm font-medium text-gray-700 mb-2">Renaming files...</p>
+                <p class="text-lg font-semibold text-yellow-600 mb-3">
+                    <span id="renameCurrentCount">0</span> of <span id="renameTotalCount">0</span>
+                </p>
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                    <div id="renameProgressBar" class="bg-yellow-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="renameCurrentFileName" class="text-xs text-gray-500 truncate max-w-full px-4">Starting...</p>
+                <div class="flex space-x-4 mt-4 text-xs">
+                    <span class="text-green-600"><span id="renameLiveRenamed">0</span> renamed</span>
+                    <span class="text-gray-500"><span id="renameLiveSkipped">0</span> skipped</span>
+                    <span class="text-red-600"><span id="renameLiveErrors">0</span> errors</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Complete State -->
+        <div id="renameComplete" class="hidden mt-4">
+            <div id="renameSuccessIcon" class="hidden flex items-center justify-center mb-4">
+                <div class="rounded-full bg-green-100 p-3">
+                    <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+            </div>
+            <div id="renameWarningIcon" class="hidden flex items-center justify-center mb-4">
+                <div class="rounded-full bg-yellow-100 p-3">
+                    <svg class="h-8 w-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-center mb-4">
+                <h4 id="renameResultTitle" class="text-lg font-medium text-gray-900">Processing Complete</h4>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Total documents:</span>
+                    <span id="renameResultTotal" class="font-medium text-gray-900">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Files renamed:</span>
+                    <span id="renameResultRenamed" class="font-medium text-green-600">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Skipped:</span>
+                    <span id="renameResultSkipped" class="font-medium text-gray-500">0</span>
+                </div>
+                <div id="renameErrorRow" class="hidden flex justify-between text-sm">
+                    <span class="text-gray-600">Errors:</span>
+                    <span id="renameResultErrors" class="font-medium text-red-600">0</span>
+                </div>
+            </div>
+            <div id="renameErrorDetails" class="hidden mt-3 p-3 bg-red-50 rounded-lg">
+                <p class="text-xs font-medium text-red-800 mb-1">Failed documents:</p>
+                <ul id="renameErrorList" class="text-xs text-red-700 list-disc list-inside"></ul>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" id="closeRenameCompleteBtn" class="px-4 py-2 bg-yellow-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-yellow-700">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Thumbnail Regeneration Modal -->
 <div id="thumbnailModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
     <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
@@ -854,6 +1064,338 @@ $(document).ready(function() {
 </div>
 
 <script>
+// Shared utility function
+function getCsrfToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 13) === 'eam_csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(13));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Rehash Modal Functionality
+(function() {
+    const modal = document.getElementById('rehashModal');
+    const openBtn = document.getElementById('openRehashModal');
+    const closeBtns = document.querySelectorAll('.closeRehashModal');
+    const startBtn = document.getElementById('startRehashBtn');
+    const completeBtn = document.getElementById('closeRehashCompleteBtn');
+
+    const initialState = document.getElementById('rehashInitial');
+    const processingState = document.getElementById('rehashProcessing');
+    const completeState = document.getElementById('rehashComplete');
+
+    let documentIds = [];
+    let errorDetails = [];
+
+    function showState(state) {
+        initialState.classList.add('hidden');
+        processingState.classList.add('hidden');
+        completeState.classList.add('hidden');
+        state.classList.remove('hidden');
+    }
+
+    async function openModal() {
+        modal.classList.remove('hidden');
+        showState(initialState);
+        documentIds = [];
+        errorDetails = [];
+
+        document.getElementById('rehashFileCountLoading').classList.remove('hidden');
+        document.getElementById('rehashFileCountDisplay').classList.add('hidden');
+
+        try {
+            const response = await fetch('{% url "document_rehash" %}', {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+            documentIds = data.document_ids;
+
+            document.getElementById('rehashInitialFileCount').textContent = documentIds.length;
+            document.getElementById('rehashFileCountLoading').classList.add('hidden');
+            document.getElementById('rehashFileCountDisplay').classList.remove('hidden');
+        } catch (error) {
+            document.getElementById('rehashFileCountLoading').textContent = 'Could not load count';
+        }
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    async function startProcessing() {
+        showState(processingState);
+
+        const total = documentIds.length;
+        let processed = 0, hashed = 0, images = 0, errors = 0;
+
+        document.getElementById('rehashTotalCount').textContent = total;
+        document.getElementById('rehashCurrentCount').textContent = '0';
+        document.getElementById('rehashProgressBar').style.width = '0%';
+        document.getElementById('rehashLiveHashed').textContent = '0';
+        document.getElementById('rehashLiveImages').textContent = '0';
+        document.getElementById('rehashLiveErrors').textContent = '0';
+
+        for (const docId of documentIds) {
+            try {
+                document.getElementById('rehashCurrentFileName').textContent = `Processing document #${docId}...`;
+
+                const response = await fetch('{% url "document_rehash" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ document_id: docId })
+                });
+
+                const data = await response.json();
+                processed++;
+
+                if (data.status === 'hashed') {
+                    hashed++;
+                    if (data.is_image) images++;
+                    document.getElementById('rehashCurrentFileName').textContent = `✓ ${data.name}`;
+                } else if (data.status === 'error') {
+                    errors++;
+                    errorDetails.push(`${data.name}: ${data.error}`);
+                    document.getElementById('rehashCurrentFileName').textContent = `✗ ${data.name}`;
+                }
+
+                document.getElementById('rehashCurrentCount').textContent = processed;
+                document.getElementById('rehashProgressBar').style.width = `${(processed / total) * 100}%`;
+                document.getElementById('rehashLiveHashed').textContent = hashed;
+                document.getElementById('rehashLiveImages').textContent = images;
+                document.getElementById('rehashLiveErrors').textContent = errors;
+
+            } catch (error) {
+                processed++;
+                errors++;
+                errorDetails.push(`Document #${docId}: ${error.message}`);
+                document.getElementById('rehashCurrentCount').textContent = processed;
+                document.getElementById('rehashProgressBar').style.width = `${(processed / total) * 100}%`;
+                document.getElementById('rehashLiveErrors').textContent = errors;
+            }
+        }
+
+        showComplete(total, hashed, images, errors);
+    }
+
+    function showComplete(total, hashed, images, errors) {
+        document.getElementById('rehashResultTotal').textContent = total;
+        document.getElementById('rehashResultHashed').textContent = hashed;
+        document.getElementById('rehashResultImages').textContent = images;
+        document.getElementById('rehashResultErrors').textContent = errors;
+
+        if (errors > 0) {
+            document.getElementById('rehashErrorRow').classList.remove('hidden');
+            document.getElementById('rehashWarningIcon').classList.remove('hidden');
+            document.getElementById('rehashSuccessIcon').classList.add('hidden');
+            document.getElementById('rehashResultTitle').textContent = 'Completed with Errors';
+
+            if (errorDetails.length > 0) {
+                document.getElementById('rehashErrorDetails').classList.remove('hidden');
+                const list = document.getElementById('rehashErrorList');
+                list.innerHTML = '';
+                errorDetails.slice(0, 10).forEach(detail => {
+                    const li = document.createElement('li');
+                    li.textContent = detail;
+                    li.className = 'truncate';
+                    li.title = detail;
+                    list.appendChild(li);
+                });
+            }
+        } else {
+            document.getElementById('rehashErrorRow').classList.add('hidden');
+            document.getElementById('rehashErrorDetails').classList.add('hidden');
+            document.getElementById('rehashWarningIcon').classList.add('hidden');
+            document.getElementById('rehashSuccessIcon').classList.remove('hidden');
+            document.getElementById('rehashResultTitle').textContent = 'Processing Complete';
+        }
+
+        showState(completeState);
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+    startBtn.addEventListener('click', startProcessing);
+    completeBtn.addEventListener('click', function() {
+        closeModal();
+        window.location.reload();
+    });
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+})();
+
+// Rename Modal Functionality
+(function() {
+    const modal = document.getElementById('renameModal');
+    const openBtn = document.getElementById('openRenameModal');
+    const closeBtns = document.querySelectorAll('.closeRenameModal');
+    const startBtn = document.getElementById('startRenameBtn');
+    const completeBtn = document.getElementById('closeRenameCompleteBtn');
+
+    const initialState = document.getElementById('renameInitial');
+    const processingState = document.getElementById('renameProcessing');
+    const completeState = document.getElementById('renameComplete');
+
+    let documentIds = [];
+    let errorDetails = [];
+
+    function showState(state) {
+        initialState.classList.add('hidden');
+        processingState.classList.add('hidden');
+        completeState.classList.add('hidden');
+        state.classList.remove('hidden');
+    }
+
+    async function openModal() {
+        modal.classList.remove('hidden');
+        showState(initialState);
+        documentIds = [];
+        errorDetails = [];
+
+        document.getElementById('renameFileCountLoading').classList.remove('hidden');
+        document.getElementById('renameFileCountDisplay').classList.add('hidden');
+
+        try {
+            const response = await fetch('{% url "document_rename_files" %}', {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+            documentIds = data.document_ids;
+
+            document.getElementById('renameInitialFileCount').textContent = documentIds.length;
+            document.getElementById('renameFileCountLoading').classList.add('hidden');
+            document.getElementById('renameFileCountDisplay').classList.remove('hidden');
+        } catch (error) {
+            document.getElementById('renameFileCountLoading').textContent = 'Could not load count';
+        }
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+    }
+
+    async function startProcessing() {
+        showState(processingState);
+
+        const total = documentIds.length;
+        let processed = 0, renamed = 0, skipped = 0, errors = 0;
+
+        document.getElementById('renameTotalCount').textContent = total;
+        document.getElementById('renameCurrentCount').textContent = '0';
+        document.getElementById('renameProgressBar').style.width = '0%';
+        document.getElementById('renameLiveRenamed').textContent = '0';
+        document.getElementById('renameLiveSkipped').textContent = '0';
+        document.getElementById('renameLiveErrors').textContent = '0';
+
+        for (const docId of documentIds) {
+            try {
+                document.getElementById('renameCurrentFileName').textContent = `Processing document #${docId}...`;
+
+                const response = await fetch('{% url "document_rename_files" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ document_id: docId })
+                });
+
+                const data = await response.json();
+                processed++;
+
+                if (data.status === 'renamed') {
+                    renamed++;
+                    document.getElementById('renameCurrentFileName').textContent = `✓ ${data.name}`;
+                } else if (data.status === 'skipped') {
+                    skipped++;
+                    document.getElementById('renameCurrentFileName').textContent = `- ${data.name} (skipped)`;
+                } else if (data.status === 'error') {
+                    errors++;
+                    errorDetails.push(`${data.name}: ${data.error}`);
+                    document.getElementById('renameCurrentFileName').textContent = `✗ ${data.name}`;
+                }
+
+                document.getElementById('renameCurrentCount').textContent = processed;
+                document.getElementById('renameProgressBar').style.width = `${(processed / total) * 100}%`;
+                document.getElementById('renameLiveRenamed').textContent = renamed;
+                document.getElementById('renameLiveSkipped').textContent = skipped;
+                document.getElementById('renameLiveErrors').textContent = errors;
+
+            } catch (error) {
+                processed++;
+                errors++;
+                errorDetails.push(`Document #${docId}: ${error.message}`);
+                document.getElementById('renameCurrentCount').textContent = processed;
+                document.getElementById('renameProgressBar').style.width = `${(processed / total) * 100}%`;
+                document.getElementById('renameLiveErrors').textContent = errors;
+            }
+        }
+
+        showComplete(total, renamed, skipped, errors);
+    }
+
+    function showComplete(total, renamed, skipped, errors) {
+        document.getElementById('renameResultTotal').textContent = total;
+        document.getElementById('renameResultRenamed').textContent = renamed;
+        document.getElementById('renameResultSkipped').textContent = skipped;
+        document.getElementById('renameResultErrors').textContent = errors;
+
+        if (errors > 0) {
+            document.getElementById('renameErrorRow').classList.remove('hidden');
+            document.getElementById('renameWarningIcon').classList.remove('hidden');
+            document.getElementById('renameSuccessIcon').classList.add('hidden');
+            document.getElementById('renameResultTitle').textContent = 'Completed with Errors';
+
+            if (errorDetails.length > 0) {
+                document.getElementById('renameErrorDetails').classList.remove('hidden');
+                const list = document.getElementById('renameErrorList');
+                list.innerHTML = '';
+                errorDetails.slice(0, 10).forEach(detail => {
+                    const li = document.createElement('li');
+                    li.textContent = detail;
+                    li.className = 'truncate';
+                    li.title = detail;
+                    list.appendChild(li);
+                });
+            }
+        } else {
+            document.getElementById('renameErrorRow').classList.add('hidden');
+            document.getElementById('renameErrorDetails').classList.add('hidden');
+            document.getElementById('renameWarningIcon').classList.add('hidden');
+            document.getElementById('renameSuccessIcon').classList.remove('hidden');
+            document.getElementById('renameResultTitle').textContent = 'Processing Complete';
+        }
+
+        showState(completeState);
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
+    startBtn.addEventListener('click', startProcessing);
+    completeBtn.addEventListener('click', function() {
+        closeModal();
+        window.location.reload();
+    });
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+})();
+
 // Thumbnail Modal Functionality
 (function() {
     const modal = document.getElementById('thumbnailModal');
@@ -910,21 +1452,6 @@ $(document).ready(function() {
         modal.classList.add('hidden');
     }
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-
     async function startProcessing() {
         showState(processingState);
 
@@ -950,7 +1477,7 @@ $(document).ready(function() {
                 const response = await fetch('{% url "document_reprocess_thumbnails" %}', {
                     method: 'POST',
                     headers: {
-                        'X-CSRFToken': getCookie('eam_csrftoken'),
+                        'X-CSRFToken': getCsrfToken(),
                         'X-Requested-With': 'XMLHttpRequest',
                         'Content-Type': 'application/json'
                     },
