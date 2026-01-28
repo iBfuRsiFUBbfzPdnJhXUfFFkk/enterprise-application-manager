@@ -18,6 +18,7 @@ class DocumentForm(BaseModelForm):
         # Make file required only for new documents (not editing)
         if not self.instance.pk:
             self.fields['file'].required = True
+            self.fields['version'].initial = 1
         else:
             # Populate applications from reverse relation for existing documents
             self.fields['applications'].initial = self.instance.applications.all()

@@ -194,32 +194,30 @@
                         </div>
 
                         <!-- Usage Indicators -->
-                        {% with app_count=model.applications.count bad_int_count=model.evidence_for_bad_interactions.count bad_upd_count=model.attachment_for_bad_interaction_updates.count hr_upd_count=model.attachment_for_hr_incident_updates.count %}
-                        {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
+                        {% if model.app_count > 0 or model.bad_int_count > 0 or model.bad_upd_count > 0 or model.hr_upd_count > 0 %}
                         <div class="flex items-center flex-wrap gap-1 text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                            {% if app_count > 0 %}
+                            {% if model.app_count > 0 %}
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700">
-                                {{ app_count }} app{{ app_count|pluralize }}
+                                {{ model.app_count }} app{{ model.app_count|pluralize }}
                             </span>
                             {% endif %}
-                            {% if bad_int_count > 0 %}
+                            {% if model.bad_int_count > 0 %}
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-orange-50 text-orange-700">
-                                {{ bad_int_count }} int
+                                {{ model.bad_int_count }} int
                             </span>
                             {% endif %}
-                            {% if bad_upd_count > 0 %}
+                            {% if model.bad_upd_count > 0 %}
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-700">
-                                {{ bad_upd_count }} BI
+                                {{ model.bad_upd_count }} BI
                             </span>
                             {% endif %}
-                            {% if hr_upd_count > 0 %}
+                            {% if model.hr_upd_count > 0 %}
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-green-50 text-green-700">
-                                {{ hr_upd_count }} HR
+                                {{ model.hr_upd_count }} HR
                             </span>
                             {% endif %}
                         </div>
                         {% endif %}
-                        {% endwith %}
                     </div>
 
                     <!-- Actions -->
@@ -270,10 +268,10 @@
                 <div class="flex items-center space-x-2">
                     <label for="grid-page-size" class="text-sm text-gray-600">Show</label>
                     <select id="grid-page-size" class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="12">12</option>
-                        <option value="24" selected>24</option>
-                        <option value="48">48</option>
-                        <option value="96">96</option>
+                        <option value="10" selected>10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
                     </select>
                     <span class="text-sm text-gray-600">per page</span>
                 </div>
@@ -350,35 +348,33 @@
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="px-3 py-3 text-sm text-gray-500" data-order="{{ model.applications.count|default:0|add:model.evidence_for_bad_interactions.count|default:0|add:model.attachment_for_bad_interaction_updates.count|default:0|add:model.attachment_for_hr_incident_updates.count|default:0 }}">
-                                    {% with app_count=model.applications.count bad_int_count=model.evidence_for_bad_interactions.count bad_upd_count=model.attachment_for_bad_interaction_updates.count hr_upd_count=model.attachment_for_hr_incident_updates.count %}
-                                    {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
+                                <td class="px-3 py-3 text-sm text-gray-500" data-order="{{ model.app_count|default:0|add:model.bad_int_count|default:0|add:model.bad_upd_count|default:0|add:model.hr_upd_count|default:0 }}">
+                                    {% if model.app_count > 0 or model.bad_int_count > 0 or model.bad_upd_count > 0 or model.hr_upd_count > 0 %}
                                     <div class="flex flex-wrap gap-1">
-                                        {% if app_count > 0 %}
+                                        {% if model.app_count > 0 %}
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700">
-                                            {{ app_count }} app{{ app_count|pluralize }}
+                                            {{ model.app_count }} app{{ model.app_count|pluralize }}
                                         </span>
                                         {% endif %}
-                                        {% if bad_int_count > 0 %}
+                                        {% if model.bad_int_count > 0 %}
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-orange-50 text-orange-700">
-                                            {{ bad_int_count }} int{{ bad_int_count|pluralize }}
+                                            {{ model.bad_int_count }} int{{ model.bad_int_count|pluralize }}
                                         </span>
                                         {% endif %}
-                                        {% if bad_upd_count > 0 %}
+                                        {% if model.bad_upd_count > 0 %}
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-purple-50 text-purple-700">
-                                            {{ bad_upd_count }} BI{{ bad_upd_count|pluralize }}
+                                            {{ model.bad_upd_count }} BI{{ model.bad_upd_count|pluralize }}
                                         </span>
                                         {% endif %}
-                                        {% if hr_upd_count > 0 %}
+                                        {% if model.hr_upd_count > 0 %}
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700">
-                                            {{ hr_upd_count }} HR{{ hr_upd_count|pluralize }}
+                                            {{ model.hr_upd_count }} HR{{ model.hr_upd_count|pluralize }}
                                         </span>
                                         {% endif %}
                                     </div>
                                     {% else %}
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
-                                    {% endwith %}
                                 </td>
                                 <td class="px-2 py-3 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end space-x-2">
@@ -460,7 +456,7 @@ $(document).ready(function() {
 
     // Initialize DataTables for list view
     var table = $('#documentTable').DataTable({
-        pageLength: 25,
+        pageLength: 10,
         order: [[1, 'desc']],
         language: {
             search: "",
@@ -502,7 +498,7 @@ $(document).ready(function() {
     // Grid pagination state
     let currentViewState = 'grid';
     let gridCurrentPage = 1;
-    let gridPageSize = 24;
+    let gridPageSize = 10;
     let filteredCards = [...allCards];
 
     // Render grid pagination controls
