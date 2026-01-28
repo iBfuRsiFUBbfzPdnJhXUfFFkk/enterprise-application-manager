@@ -1,0 +1,197 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'document' %}" class="mr-4 text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Deduplicate Files</h1>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Found {{ total_groups }} group(s) with {{ total_duplicates }} duplicate file(s)
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {% if not duplicate_groups %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">No Duplicates Found</h3>
+            <p class="mt-1 text-sm text-gray-500">All documents have unique file contents.</p>
+            <a href="{% url 'document' %}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                Back to Documents
+            </a>
+        </div>
+        {% endif %}
+
+        {% for group in duplicate_groups %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            Duplicate Group: {{ group.count }} files
+                        </h2>
+                        <p class="text-xs text-gray-500 font-mono mt-1">Hash: {{ group.hash }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" action="{% url 'document_merge_duplicates' %}" onsubmit="return validateMergeForm(this);">
+                {% csrf_token %}
+                <div class="divide-y divide-gray-200">
+                    {% for item in group.documents %}
+                    <div class="px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-start space-x-4">
+                                <div class="flex flex-col items-center space-y-2 pt-1">
+                                    <label class="flex items-center" title="Keep this file">
+                                        <input type="radio" name="keep_id" value="{{ item.document.id }}"
+                                               class="h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                               {% if item.total_relations > 0 %}checked{% endif %}>
+                                        <span class="ml-1 text-xs text-green-600 font-medium">Keep</span>
+                                    </label>
+                                    <label class="flex items-center" title="Delete this file">
+                                        <input type="checkbox" name="delete_ids" value="{{ item.document.id }}"
+                                               class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500 delete-checkbox"
+                                               data-doc-id="{{ item.document.id }}">
+                                        <span class="ml-1 text-xs text-red-600 font-medium">Delete</span>
+                                    </label>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <a href="{% url 'document_detail' model_id=item.document.id %}" class="text-lg font-medium text-blue-600 hover:text-blue-800">
+                                            {{ item.document.name }}
+                                        </a>
+                                        {% if item.document.version %}
+                                        <span class="ml-2 text-xs text-gray-500">v{{ item.document.version }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1" title="{{ item.document.uploaded_at|date:'F d, Y g:i A' }}">
+                                        Uploaded {{ item.document.uploaded_at|timesince }} ago
+                                    </p>
+                                    {% if item.document.get_filename %}
+                                    <p class="text-xs text-gray-400 font-mono mt-1">{{ item.document.get_filename }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col items-end space-y-1">
+                                {% if item.total_relations == 0 %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                    No relations
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ item.total_relations }} relation{{ item.total_relations|pluralize }}
+                                </span>
+                                {% endif %}
+
+                                {% if item.app_count > 0 %}
+                                <span class="text-xs text-gray-500">
+                                    {{ item.app_count }} application{{ item.app_count|pluralize }}
+                                </span>
+                                {% endif %}
+                                {% if item.bad_interaction_count > 0 %}
+                                <span class="text-xs text-gray-500">
+                                    {{ item.bad_interaction_count }} bad interaction{{ item.bad_interaction_count|pluralize }}
+                                </span>
+                                {% endif %}
+                                {% if item.bad_interaction_update_count > 0 %}
+                                <span class="text-xs text-gray-500">
+                                    {{ item.bad_interaction_update_count }} BI update{{ item.bad_interaction_update_count|pluralize }}
+                                </span>
+                                {% endif %}
+                                {% if item.hr_incident_update_count > 0 %}
+                                <span class="text-xs text-gray-500">
+                                    {{ item.hr_incident_update_count }} HR update{{ item.hr_incident_update_count|pluralize }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Merge Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function validateMergeForm(form) {
+    const keepId = form.querySelector('input[name="keep_id"]:checked');
+    const deleteCheckboxes = form.querySelectorAll('input[name="delete_ids"]:checked');
+
+    if (!keepId) {
+        alert('Please select a document to keep.');
+        return false;
+    }
+
+    if (deleteCheckboxes.length === 0) {
+        alert('Please select at least one document to delete.');
+        return false;
+    }
+
+    // Make sure keep and delete don't overlap
+    for (const cb of deleteCheckboxes) {
+        if (cb.value === keepId.value) {
+            alert('You cannot delete the document you selected to keep.');
+            return false;
+        }
+    }
+
+    const deleteCount = deleteCheckboxes.length;
+    return confirm(`Delete ${deleteCount} document(s) and move their relations to the kept document?`);
+}
+
+// Auto-uncheck delete when keep is selected
+document.querySelectorAll('input[name="keep_id"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const form = this.closest('form');
+        const deleteCheckbox = form.querySelector(`input[name="delete_ids"][value="${this.value}"]`);
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = false;
+        }
+    });
+});
+
+// Auto-unselect keep when delete is checked
+document.querySelectorAll('input[name="delete_ids"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            const form = this.closest('form');
+            const keepRadio = form.querySelector(`input[name="keep_id"][value="${this.value}"]`);
+            if (keepRadio && keepRadio.checked) {
+                // Find another radio to select
+                const otherRadio = form.querySelector(`input[name="keep_id"]:not([value="${this.value}"])`);
+                if (otherRadio) {
+                    otherRadio.checked = true;
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
