@@ -26,13 +26,26 @@ class BadInteraction(AbstractBaseModel, AbstractComment):
 
     @property
     def has_evidence(self):
-        """Check if bad interaction has evidence file."""
+        """Check if bad interaction has evidence file reference."""
         return bool(self.evidence_file)
+
+    @property
+    def evidence_file_exists(self):
+        """Check if evidence file actually exists in storage."""
+        if not self.evidence_file:
+            return False
+        try:
+            return self.evidence_file.storage.exists(self.evidence_file.name)
+        except Exception:
+            return False
 
     def get_evidence_url(self):
         """Get download URL for evidence file."""
         if self.evidence_file:
-            return self.evidence_file.url
+            try:
+                return self.evidence_file.url
+            except Exception:
+                return None
         return None
 
     def get_evidence_filename(self):
@@ -44,7 +57,10 @@ class BadInteraction(AbstractBaseModel, AbstractComment):
     def get_evidence_size(self):
         """Get file size."""
         if self.evidence_file:
-            return self.evidence_file.size
+            try:
+                return self.evidence_file.size
+            except Exception:
+                return None
         return None
 
     @property

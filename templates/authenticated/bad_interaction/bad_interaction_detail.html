@@ -1,5 +1,24 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% load templatetags_markdown %}
+
+{% block extra_css %}
+<style>
+    /* Ensure update form textarea is full width */
+    #id_comment {
+        width: 100% !important;
+    }
+    /* Remove border from textarea inside tabbed markdown editor */
+    .tab-content textarea {
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+    .tab-content textarea:focus {
+        outline: none !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
@@ -102,6 +121,7 @@
                 <h2 class="text-lg font-semibold text-gray-900">Evidence</h2>
             </div>
             <div class="px-6 py-6">
+                {% if bad_interaction.evidence_file_exists %}
                 <!-- File info and download -->
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
@@ -160,6 +180,18 @@
                     </iframe>
                 </div>
                 {% endif %}
+                {% else %}
+                <!-- File missing warning -->
+                <div class="flex items-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <svg class="h-6 w-6 text-yellow-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-yellow-800">Evidence file not found</p>
+                        <p class="text-xs text-yellow-600 mt-1">The file <code class="bg-yellow-100 px-1 rounded">{{ bad_interaction.get_evidence_filename }}</code> no longer exists in storage. You can upload a new file by editing this record.</p>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -214,23 +246,58 @@
             </div>
             <div class="px-6 py-6">
                 <!-- Add Update Form -->
-                <form method="post" action="{% url 'bad_interaction_add_update' model_id=bad_interaction.id %}" enctype="multipart/form-data" class="mb-6 pb-6 border-b border-gray-200">
+                <form method="post" action="{% url 'bad_interaction_add_update' model_id=bad_interaction.id %}" enctype="multipart/form-data" class="mb-6 pb-6 border-b border-gray-200 w-full">
                     {% csrf_token %}
-                    <div class="space-y-4">
-                        <div>
-                            <label for="{{ update_form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Add Update</label>
-                            {{ update_form.comment }}
+                    <div class="space-y-4 w-full">
+                        <div class="w-full">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Add Update</label>
+                            <div class="border border-gray-300 rounded-md overflow-hidden w-full">
+                                <div class="flex border-b border-gray-300 bg-gray-50">
+                                    <button type="button" class="update-tab-btn active px-4 py-2 text-sm font-medium text-gray-700 border-b-2 border-blue-500" data-target="update-write">Write</button>
+                                    <button type="button" class="update-tab-btn px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="update-preview">Preview</button>
+                                    <span class="ml-auto px-4 py-2 text-xs text-gray-400">Markdown supported</span>
+                                </div>
+                                <div id="update-write" class="tab-content">
+                                    {{ update_form.comment }}
+                                </div>
+                                <div id="update-preview" class="tab-content hidden p-4 min-h-[100px] prose prose-sm max-w-none bg-white">
+                                    <p class="text-gray-400 italic">Nothing to preview</p>
+                                </div>
+                            </div>
                             {% if update_form.comment.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ update_form.comment.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
-                            <label for="{{ update_form.attachment_file.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Attachment (optional)</label>
-                            {{ update_form.attachment_file }}
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Attachment (optional)</label>
+                            <div id="attachment-drop-zone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
+                                <div id="attachment-placeholder">
+                                    <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">Drag & drop a file here, paste from clipboard, or <span class="text-blue-600 underline">click to browse</span></p>
+                                    <p class="mt-1 text-xs text-gray-400">Any file type supported</p>
+                                </div>
+                                <div id="attachment-preview" class="hidden">
+                                    <div id="attachment-image-preview" class="hidden">
+                                        <img id="attachment-preview-img" class="max-h-32 mx-auto rounded" alt="Preview">
+                                    </div>
+                                    <div id="attachment-file-preview" class="hidden flex items-center justify-center">
+                                        <svg class="h-10 w-10 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        <div class="text-left">
+                                            <p id="attachment-file-name" class="text-sm font-medium text-gray-700"></p>
+                                            <p id="attachment-file-size" class="text-xs text-gray-500"></p>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="attachment-remove-btn" class="mt-3 text-sm text-red-600 hover:text-red-800">Remove file</button>
+                                </div>
+                            </div>
+                            <div class="hidden">{{ update_form.attachment_file }}</div>
                             {% if update_form.attachment_file.errors %}
                             <p class="mt-1 text-sm text-red-600">{{ update_form.attachment_file.errors.0 }}</p>
                             {% endif %}
-                            <p class="mt-1 text-xs text-gray-500">Attach a file to this update</p>
                         </div>
                         <div>
                             <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -271,7 +338,7 @@
                                 </a>
                                 {% endif %}
                             </div>
-                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ update.comment }}</p>
+                            <div class="text-sm text-gray-700 prose prose-sm max-w-none">{{ update.comment|markdown }}</div>
                             {% if update.documents.exists %}
                             <div class="mt-2 flex flex-wrap gap-2">
                                 {% for document in update.documents.all %}
@@ -321,4 +388,158 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Markdown preview tab functionality for update form
+    const tabButtons = document.querySelectorAll('.update-tab-btn');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.dataset.target;
+            const container = this.closest('.border');
+            const allTabs = container.querySelectorAll('.tab-content');
+            const allBtns = container.querySelectorAll('.update-tab-btn');
+
+            // Update button styles
+            allBtns.forEach(b => {
+                b.classList.remove('active', 'text-gray-700', 'border-b-2', 'border-blue-500');
+                b.classList.add('text-gray-500');
+            });
+            this.classList.add('active', 'text-gray-700', 'border-b-2', 'border-blue-500');
+            this.classList.remove('text-gray-500');
+
+            // Show/hide content
+            allTabs.forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(targetId).classList.remove('hidden');
+
+            // Render markdown preview if switching to preview tab
+            if (targetId === 'update-preview') {
+                const writeTab = document.getElementById('update-write');
+                const textarea = writeTab.querySelector('textarea');
+                const previewDiv = document.getElementById('update-preview');
+
+                if (textarea && textarea.value.trim()) {
+                    previewDiv.innerHTML = marked.parse(textarea.value);
+                } else {
+                    previewDiv.innerHTML = '<p class="text-gray-400 italic">Nothing to preview</p>';
+                }
+            }
+        });
+    });
+
+    // Attachment drag & drop, paste, and preview
+    const dropZone = document.getElementById('attachment-drop-zone');
+    const placeholder = document.getElementById('attachment-placeholder');
+    const preview = document.getElementById('attachment-preview');
+    const imagePreview = document.getElementById('attachment-image-preview');
+    const filePreview = document.getElementById('attachment-file-preview');
+    const previewImg = document.getElementById('attachment-preview-img');
+    const fileName = document.getElementById('attachment-file-name');
+    const fileSize = document.getElementById('attachment-file-size');
+    const removeBtn = document.getElementById('attachment-remove-btn');
+    const fileInput = document.querySelector('input[name="attachment_file"]');
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function isImageFile(file) {
+        return file.type.startsWith('image/');
+    }
+
+    function showFilePreview(file) {
+        placeholder.classList.add('hidden');
+        preview.classList.remove('hidden');
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+
+        if (isImageFile(file)) {
+            imagePreview.classList.remove('hidden');
+            filePreview.classList.add('hidden');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.classList.add('hidden');
+            filePreview.classList.remove('hidden');
+        }
+    }
+
+    function clearPreview() {
+        placeholder.classList.remove('hidden');
+        preview.classList.add('hidden');
+        imagePreview.classList.add('hidden');
+        filePreview.classList.add('hidden');
+        previewImg.src = '';
+        const dataTransfer = new DataTransfer();
+        fileInput.files = dataTransfer.files;
+    }
+
+    function handleFiles(files) {
+        if (files && files.length > 0) {
+            const file = files[0];
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            showFilePreview(file);
+        }
+    }
+
+    // Click to open file dialog
+    dropZone.addEventListener('click', function(e) {
+        if (e.target !== removeBtn && !removeBtn.contains(e.target)) {
+            fileInput.click();
+        }
+    });
+
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            showFilePreview(this.files[0]);
+        }
+    });
+
+    // Drag and drop
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('border-blue-500', 'bg-blue-50');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // Paste from clipboard
+    document.addEventListener('paste', function(e) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind === 'file') {
+                const file = items[i].getAsFile();
+                handleFiles([file]);
+                break;
+            }
+        }
+    });
+
+    // Remove button
+    removeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearPreview();
+    });
+});
+</script>
 {% endblock %}
