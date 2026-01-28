@@ -1071,8 +1071,9 @@ function getCsrfToken() {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
-            if (cookie.substring(0, 13) === 'eam_csrftoken=') {
-                cookieValue = decodeURIComponent(cookie.substring(13));
+            // 'eam_csrftoken=' is 14 characters
+            if (cookie.substring(0, 14) === 'eam_csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(14));
                 break;
             }
         }
