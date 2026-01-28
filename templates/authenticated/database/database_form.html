@@ -6,11 +6,11 @@
     <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
         <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div class="flex items-center">
-                <a href="{% url 'database' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                <button type="button" onclick="window.history.back()" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
-                </a>
+                </button>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Database</h1>
                     <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update database instance details{% else %}Add a new database instance{% endif %}</p>
