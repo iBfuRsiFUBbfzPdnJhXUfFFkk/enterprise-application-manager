@@ -46,3 +46,4 @@ jmespath==1.0.1
 s3transfer==0.10.4
 opencv-python-headless==4.10.0.84
 numpy==1.26.4
+pillow-avif-plugin==1.4.6

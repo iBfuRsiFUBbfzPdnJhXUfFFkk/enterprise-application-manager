@@ -10,7 +10,9 @@ from core.views.document.document_file_view import document_file_view
 from core.views.document.document_merge_duplicates_view import document_merge_duplicates_view
 from core.views.document.document_rehash_view import document_rehash_view
 from core.views.document.document_rename_files_view import document_rename_files_view
+from core.views.document.document_reprocess_thumbnails_view import document_reprocess_thumbnails_view
 from core.views.document.document_similar_images_view import document_similar_images_view
+from core.views.document.document_thumbnail_view import document_thumbnail_view
 from core.views.document.document_view import document_view
 
 urlpatterns_document: list[URLPattern | URLResolver] = [
@@ -26,4 +28,6 @@ urlpatterns_document: list[URLPattern | URLResolver] = [
     path("document/duplicates/", document_duplicates_view, name="document_duplicates"),
     path("document/merge-duplicates/", document_merge_duplicates_view, name="document_merge_duplicates"),
     path("document/similar-images/", document_similar_images_view, name="document_similar_images"),
+    path("document/thumbnail/<int:model_id>/", document_thumbnail_view, name="document_thumbnail"),
+    path("document/reprocess-thumbnails/", document_reprocess_thumbnails_view, name="document_reprocess_thumbnails"),
 ]

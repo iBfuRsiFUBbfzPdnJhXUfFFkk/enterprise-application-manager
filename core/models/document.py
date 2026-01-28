@@ -34,6 +34,12 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
         db_index=True,
         help_text='Perceptual hash (dhash) for similar image detection'
     )
+    thumbnail = models.FileField(
+        upload_to='thumbnails/',
+        null=True,
+        blank=True,
+        help_text='AVIF thumbnail for fast preview'
+    )
 
     def _calculate_file_hash(self):
         """Calculate SHA-256 hash of file contents."""
@@ -68,6 +74,18 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
         from core.utilities.image_similarity import is_image_file
         return is_image_file(self.file.name if self.file else '')
 
+    @property
+    def has_thumbnail(self):
+        """Check if document has a thumbnail."""
+        return bool(self.thumbnail)
+
+    def get_thumbnail_url(self):
+        """Get URL for thumbnail via authenticated view."""
+        if self.thumbnail:
+            from django.urls import reverse
+            return reverse('document_thumbnail', kwargs={'model_id': self.pk})
+        return None
+
     def save(self, *args, **kwargs):
         # Strip EXIF data from images before saving
         if self.file and hasattr(self.file, 'seek'):
@@ -75,6 +93,11 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
             # Calculate hashes after EXIF stripping
             self.file_hash = self._calculate_file_hash()
             self.image_hash = self._calculate_image_hash()
+            # Generate thumbnail
+            from core.utilities.thumbnail_generator import generate_thumbnail
+            thumb = generate_thumbnail(self.file, self.file.name)
+            if thumb:
+                self.thumbnail = thumb
         super().save(*args, **kwargs)
 
     def get_duplicates(self):
