@@ -3,13 +3,32 @@
 
 {% block extra_css %}
 <style>
-    #drop-zone:focus {
+    #drop-zone:focus-within {
         outline: 2px solid #3b82f6;
         outline-offset: 2px;
     }
     #drop-zone.drag-over {
         border-color: #3b82f6;
         background-color: #eff6ff;
+    }
+    /* File input overlay styling */
+    #drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    /* When file is selected, hide the input overlay */
+    #drop-zone.has-file input[type="file"] {
+        pointer-events: none;
+    }
+    #drop-zone.has-file #drop-zone-content {
+        display: none;
+    }
+    #drop-zone.has-file #file-preview {
+        pointer-events: auto;
     }
 
     /* Searchable multi-select with chips styles */
@@ -158,14 +177,15 @@
                             </p>
                             {% endif %}
 
-                            <!-- Hidden file input -->
-                            <div class="hidden">{{ form.file }}</div>
-
-                            <!-- Drop zone -->
+                            <!-- Drop zone with file input overlay -->
                             <div id="drop-zone"
-                                 class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors duration-150"
+                                 class="relative border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors duration-150"
                                  tabindex="0">
-                                <div id="drop-zone-content">
+                                <!-- File input positioned absolutely but visually hidden -->
+                                <div class="absolute inset-0 overflow-hidden">
+                                    {{ form.file }}
+                                </div>
+                                <div id="drop-zone-content" class="relative z-10 pointer-events-none">
                                     <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                     </svg>
@@ -176,7 +196,7 @@
                                 </div>
 
                                 <!-- File preview (hidden by default) -->
-                                <div id="file-preview" class="hidden">
+                                <div id="file-preview" class="hidden relative z-10">
                                     <div id="image-preview-container" class="hidden">
                                         <img id="image-preview" class="max-h-48 mx-auto rounded-lg shadow-sm" alt="Preview">
                                     </div>
@@ -300,6 +320,7 @@ $(document).ready(function() {
     }
 
     function showFilePreview(file) {
+        dropZone.classList.add('has-file');
         dropZoneContent.classList.add('hidden');
         filePreview.classList.remove('hidden');
         fileName.textContent = file.name;
@@ -321,6 +342,7 @@ $(document).ready(function() {
 
     function resetFileInput() {
         fileInput.value = '';
+        dropZone.classList.remove('has-file');
         dropZoneContent.classList.remove('hidden');
         filePreview.classList.add('hidden');
         imagePreviewContainer.classList.add('hidden');
@@ -336,13 +358,6 @@ $(document).ready(function() {
             showFilePreview(file);
         }
     }
-
-    // Click to upload
-    dropZone.addEventListener('click', function(e) {
-        if (e.target !== removeFileBtn && !removeFileBtn.contains(e.target)) {
-            fileInput.click();
-        }
-    });
 
     // File input change
     fileInput.addEventListener('change', function() {
@@ -386,19 +401,125 @@ $(document).ready(function() {
         }
     });
 
-    // Keyboard support for drop zone
-    dropZone.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            fileInput.click();
-        }
-    });
+    // Keyboard support is handled by the file input itself
 
     // Remove file
     removeFileBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         resetFileInput();
     });
+
+    // ===== Searchable Multi-Select for Applications =====
+    const nativeSelect = document.getElementById('{{ form.applications.id_for_label }}');
+    const appsSearchInput = document.getElementById('apps-search-input');
+    const appsChipsContainer = document.getElementById('selected-apps-chips');
+    const appsDropdown = document.getElementById('apps-search-dropdown');
+
+    if (nativeSelect && appsSearchInput && appsChipsContainer && appsDropdown) {
+        // Get all available options from the native select
+        const allOptions = Array.from(nativeSelect.options).map(option => ({
+            value: option.value,
+            text: option.text,
+            selected: option.selected
+        }));
+
+        // Track selected items
+        let selectedItems = allOptions.filter(opt => opt.selected);
+
+        // Initialize - render chips for pre-selected items
+        renderChips();
+
+        // Search input event
+        appsSearchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            renderDropdown(searchTerm);
+        });
+
+        // Focus event - show dropdown
+        appsSearchInput.addEventListener('focus', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            renderDropdown(searchTerm);
+        });
+
+        // Click outside to close dropdown
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#apps-select-container')) {
+                appsDropdown.classList.add('hidden');
+            }
+        });
+
+        function renderChips() {
+            appsChipsContainer.innerHTML = '';
+            selectedItems.forEach(item => {
+                const chip = document.createElement('div');
+                chip.className = 'chip';
+                chip.innerHTML = `
+                    <span>${escapeHtml(item.text)}</span>
+                    <span class="chip-remove" data-value="${item.value}">&times;</span>
+                `;
+                appsChipsContainer.appendChild(chip);
+            });
+
+            // Update native select
+            Array.from(nativeSelect.options).forEach(option => {
+                option.selected = selectedItems.some(item => item.value === option.value);
+            });
+        }
+
+        function renderDropdown(searchTerm) {
+            // Filter available items (not already selected)
+            const availableItems = allOptions.filter(opt =>
+                !selectedItems.some(sel => sel.value === opt.value) &&
+                opt.text.toLowerCase().includes(searchTerm)
+            );
+
+            if (availableItems.length === 0) {
+                appsDropdown.innerHTML = '<div class="dropdown-empty">No applications found</div>';
+            } else {
+                appsDropdown.innerHTML = availableItems.map(item => `
+                    <div class="dropdown-item" data-value="${item.value}">
+                        ${escapeHtml(item.text)}
+                    </div>
+                `).join('');
+            }
+
+            appsDropdown.classList.remove('hidden');
+        }
+
+        // Event delegation for dropdown items
+        appsDropdown.addEventListener('click', function(e) {
+            const item = e.target.closest('.dropdown-item');
+            if (item) {
+                const value = item.dataset.value;
+                const option = allOptions.find(opt => opt.value === value);
+                if (option) {
+                    selectedItems.push(option);
+                    renderChips();
+                    appsSearchInput.value = '';
+                    renderDropdown('');
+                    appsSearchInput.focus();
+                }
+            }
+        });
+
+        // Event delegation for chip removal
+        appsChipsContainer.addEventListener('click', function(e) {
+            const removeBtn = e.target.closest('.chip-remove');
+            if (removeBtn) {
+                const value = removeBtn.dataset.value;
+                selectedItems = selectedItems.filter(item => item.value !== value);
+                renderChips();
+                const searchTerm = appsSearchInput.value.toLowerCase().trim();
+                renderDropdown(searchTerm);
+            }
+        });
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    }
 });
 </script>
 {% endblock %}
