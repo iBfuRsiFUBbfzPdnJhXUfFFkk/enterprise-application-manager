@@ -30,9 +30,11 @@ def bad_interaction_edit_view(request: HttpRequest, model_id: int) -> HttpRespon
     else:
         form = BadInteractionForm(instance=bad_interaction)
 
+    current_user_person_id = getattr(request.user, 'person_mapping_id', None)
     context: Mapping[str, Any] = {
         'form': form,
         'bad_interaction': bad_interaction,
+        'current_user_person_id': current_user_person_id,
     }
     return base_render(
         context=context,

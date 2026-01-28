@@ -78,5 +78,8 @@ package-lock.json
 # Compiled CSS
 static/css/tailwind.css
 
+# Django admin static files (copied from Django package)
+static/admin/
+
 # Misc
 **/qodana.sarif.json

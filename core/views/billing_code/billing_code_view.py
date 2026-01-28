@@ -80,7 +80,7 @@ def billing_code_view(request: HttpRequest) -> HttpResponse:
 
     # Get applications that have billing codes
     applications_with_billing_codes = Application.objects.filter(
-        billingcode__isnull=False
+        billing_codes__isnull=False
     ).distinct().order_by('name')
 
     # Get project managers that have billing codes

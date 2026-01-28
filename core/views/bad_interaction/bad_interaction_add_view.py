@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any, Mapping
 
 from django.http import HttpRequest, HttpResponse
@@ -9,6 +10,8 @@ from core.utilities.base_render import base_render
 
 
 def bad_interaction_add_view(request: HttpRequest) -> HttpResponse:
+    current_user_person_id = getattr(request.user, 'person_mapping_id', None)
+
     if request.method == 'POST':
         form = BadInteractionForm(request.POST, request.FILES)
         if form.is_valid():
@@ -23,9 +26,17 @@ def bad_interaction_add_view(request: HttpRequest) -> HttpResponse:
 
             return redirect(to='bad_interaction')
     else:
-        form = BadInteractionForm()
+        initial = {
+            'reported_by': current_user_person_id,
+            'severity': 'MEDIUM',
+            'date_occurred': date.today(),
+        }
+        form = BadInteractionForm(initial=initial)
 
-    context: Mapping[str, Any] = {'form': form}
+    context: Mapping[str, Any] = {
+        'form': form,
+        'current_user_person_id': current_user_person_id,
+    }
     return base_render(
         context=context,
         request=request,
