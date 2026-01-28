@@ -1,3 +1,5 @@
+import hashlib
+
 from django.db import models
 from django.utils import timezone
 
@@ -18,12 +20,41 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
         help_text='File stored in MinIO object storage'
     )
     uploaded_at = models.DateTimeField(default=timezone.now, help_text='When the document was uploaded')
+    file_hash = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text='SHA-256 hash of file contents for duplicate detection'
+    )
+
+    def _calculate_file_hash(self):
+        """Calculate SHA-256 hash of file contents."""
+        if not self.file:
+            return None
+        try:
+            self.file.seek(0)
+            sha256 = hashlib.sha256()
+            for chunk in self.file.chunks():
+                sha256.update(chunk)
+            self.file.seek(0)
+            return sha256.hexdigest()
+        except Exception:
+            return None
 
     def save(self, *args, **kwargs):
         # Strip EXIF data from images before saving
         if self.file and hasattr(self.file, 'seek'):
             self.file = strip_exif_from_file(self.file)
+            # Calculate hash after EXIF stripping
+            self.file_hash = self._calculate_file_hash()
         super().save(*args, **kwargs)
+
+    def get_duplicates(self):
+        """Find other documents with the same file hash."""
+        if not self.file_hash:
+            return Document.objects.none()
+        return Document.objects.filter(file_hash=self.file_hash).exclude(pk=self.pk)
 
     @property
     def has_file(self):

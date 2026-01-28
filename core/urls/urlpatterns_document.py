@@ -5,6 +5,7 @@ from core.views.document.document_create_ajax_view import document_create_ajax_v
 from core.views.document.document_detail_view import document_detail_view
 from core.views.document.document_edit_view import document_edit_view
 from core.views.document.document_file_view import document_file_view
+from core.views.document.document_rehash_view import document_rehash_view
 from core.views.document.document_rename_files_view import document_rename_files_view
 from core.views.document.document_view import document_view
 
@@ -16,4 +17,5 @@ urlpatterns_document: list[URLPattern | URLResolver] = [
     path("document/create/ajax/", document_create_ajax_view, name="document_create_ajax"),
     path("document/file/<int:model_id>/", document_file_view, name="document_file"),
     path("document/rename-files/", document_rename_files_view, name="document_rename_files"),
+    path("document/rehash/", document_rehash_view, name="document_rehash"),
 ]
