@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.contrib import messages
@@ -15,24 +16,72 @@ logger = logging.getLogger(__name__)
 @login_required
 @require_http_methods(["GET", "POST"])
 def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
-    """Regenerate thumbnails for all documents."""
+    """Regenerate thumbnails for documents."""
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
-    documents = Document.objects.filter(file__isnull=False).exclude(file='')
-    total = documents.count()
-
-    # GET request returns just the count for the modal
+    # GET request returns list of document IDs for processing
     if request.method == 'GET' and is_ajax:
-        return JsonResponse({'total': total})
+        doc_ids = list(
+            Document.objects.filter(file__isnull=False)
+            .exclude(file='')
+            .values_list('id', flat=True)
+        )
+        return JsonResponse({'document_ids': doc_ids, 'total': len(doc_ids)})
 
-    # POST processes the thumbnails
+    # POST processes a single document by ID (AJAX) or all documents (form)
     if request.method != 'POST':
         return redirect('document')
 
+    # AJAX: Process single document
+    if is_ajax:
+        try:
+            data = json.loads(request.body)
+            doc_id = data.get('document_id')
+        except (json.JSONDecodeError, KeyError):
+            return JsonResponse({'error': 'Invalid request'}, status=400)
+
+        try:
+            doc = Document.objects.get(pk=doc_id)
+            doc_name = doc.name or f'Document #{doc.pk}'
+
+            if doc.file:
+                doc.file.seek(0)
+                thumb = generate_thumbnail(doc.file, doc.file.name)
+                if thumb:
+                    doc.thumbnail = thumb
+                    doc.save(update_fields=['thumbnail'])
+                    return JsonResponse({
+                        'success': True,
+                        'status': 'generated',
+                        'name': doc_name
+                    })
+                else:
+                    return JsonResponse({
+                        'success': True,
+                        'status': 'skipped',
+                        'name': doc_name
+                    })
+        except Document.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'status': 'error',
+                'name': f'Document #{doc_id}',
+                'error': f'Document {doc_id} not found'
+            })
+        except Exception as e:
+            error_msg = str(e)
+            logger.warning(f"Thumbnail generation failed for doc {doc_id}: {error_msg}")
+            return JsonResponse({
+                'success': False,
+                'status': 'error',
+                'name': doc_name if 'doc_name' in dir() else f'Document #{doc_id}',
+                'error': error_msg
+            })
+
+    # Non-AJAX fallback: batch process all documents
+    documents = Document.objects.filter(file__isnull=False).exclude(file='')
     generated = 0
-    skipped = 0
     errors = 0
-    error_details = []
 
     for doc in documents:
         try:
@@ -43,30 +92,11 @@ def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
                     doc.thumbnail = thumb
                     doc.save(update_fields=['thumbnail'])
                     generated += 1
-                else:
-                    skipped += 1
-        except Exception as e:
+        except Exception:
             errors += 1
-            error_msg = f"{doc.name or f'Document #{doc.pk}'}: {str(e)}"
-            error_details.append(error_msg)
-            logger.warning(f"Thumbnail generation failed: {error_msg}")
 
-    if is_ajax:
-        return JsonResponse({
-            'success': True,
-            'total': total,
-            'generated': generated,
-            'skipped': skipped,
-            'errors': errors,
-            'error_details': error_details[:10],
-        })
-
-    # Fallback for non-AJAX requests
     if errors:
-        messages.warning(
-            request,
-            f"Generated {generated} thumbnail(s), {errors} error(s)."
-        )
+        messages.warning(request, f"Generated {generated} thumbnail(s), {errors} error(s).")
     else:
         messages.success(request, f"Generated {generated} thumbnail(s).")
 

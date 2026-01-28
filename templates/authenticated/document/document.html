@@ -775,13 +775,26 @@ $(document).ready(function() {
 
         <!-- Processing State -->
         <div id="thumbnailProcessing" class="hidden mt-4">
-            <div class="flex flex-col items-center justify-center py-8">
-                <svg class="animate-spin h-12 w-12 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p class="text-sm font-medium text-gray-700">Processing thumbnails...</p>
-                <p id="processingCount" class="text-xs text-gray-500 mt-1">Processing <span id="processingFileCount">0</span> document(s)</p>
+            <div class="flex flex-col items-center justify-center py-4">
+                <p class="text-sm font-medium text-gray-700 mb-2">Processing thumbnails...</p>
+                <p id="processingStatus" class="text-lg font-semibold text-blue-600 mb-3">
+                    <span id="currentCount">0</span> of <span id="totalCount">0</span>
+                </p>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-3">
+                    <div id="progressBar" class="bg-blue-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <!-- Current File -->
+                <p id="currentFileName" class="text-xs text-gray-500 truncate max-w-full px-4">Starting...</p>
+
+                <!-- Stats -->
+                <div class="flex space-x-4 mt-4 text-xs">
+                    <span class="text-green-600"><span id="liveGenerated">0</span> generated</span>
+                    <span class="text-gray-500"><span id="liveSkipped">0</span> skipped</span>
+                    <span class="text-red-600"><span id="liveErrors">0</span> errors</span>
+                </div>
             </div>
         </div>
 
@@ -854,7 +867,8 @@ $(document).ready(function() {
     const processingState = document.getElementById('thumbnailProcessing');
     const completeState = document.getElementById('thumbnailComplete');
 
-    let documentCount = 0;
+    let documentIds = [];
+    let errorDetails = [];
 
     function showState(state) {
         initialState.classList.add('hidden');
@@ -866,12 +880,14 @@ $(document).ready(function() {
     async function openModal() {
         modal.classList.remove('hidden');
         showState(initialState);
+        documentIds = [];
+        errorDetails = [];
 
         // Reset count display
         document.getElementById('fileCountLoading').classList.remove('hidden');
         document.getElementById('fileCountDisplay').classList.add('hidden');
 
-        // Fetch document count
+        // Fetch document IDs
         try {
             const response = await fetch('{% url "document_reprocess_thumbnails" %}', {
                 method: 'GET',
@@ -880,9 +896,9 @@ $(document).ready(function() {
                 }
             });
             const data = await response.json();
-            documentCount = data.total;
+            documentIds = data.document_ids;
 
-            document.getElementById('initialFileCount').textContent = documentCount;
+            document.getElementById('initialFileCount').textContent = documentIds.length;
             document.getElementById('fileCountLoading').classList.add('hidden');
             document.getElementById('fileCountDisplay').classList.remove('hidden');
         } catch (error) {
@@ -910,77 +926,117 @@ $(document).ready(function() {
     }
 
     async function startProcessing() {
-        // Update processing count display
-        document.getElementById('processingFileCount').textContent = documentCount;
         showState(processingState);
 
-        try {
-            const response = await fetch('{% url "document_reprocess_thumbnails" %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('eam_csrftoken'),
-                    'X-Requested-With': 'XMLHttpRequest'
+        const total = documentIds.length;
+        let processed = 0;
+        let generated = 0;
+        let skipped = 0;
+        let errors = 0;
+
+        // Update initial display
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('currentCount').textContent = '0';
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('liveGenerated').textContent = '0';
+        document.getElementById('liveSkipped').textContent = '0';
+        document.getElementById('liveErrors').textContent = '0';
+
+        // Process each document
+        for (const docId of documentIds) {
+            try {
+                document.getElementById('currentFileName').textContent = `Processing document #${docId}...`;
+
+                const response = await fetch('{% url "document_reprocess_thumbnails" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('eam_csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ document_id: docId })
+                });
+
+                const data = await response.json();
+                processed++;
+
+                if (data.status === 'generated') {
+                    generated++;
+                    document.getElementById('currentFileName').textContent = `✓ ${data.name}`;
+                } else if (data.status === 'skipped') {
+                    skipped++;
+                    document.getElementById('currentFileName').textContent = `- ${data.name} (skipped)`;
+                } else if (data.status === 'error') {
+                    errors++;
+                    errorDetails.push(`${data.name}: ${data.error}`);
+                    document.getElementById('currentFileName').textContent = `✗ ${data.name}`;
                 }
-            });
 
-            const data = await response.json();
+                // Update live stats
+                document.getElementById('currentCount').textContent = processed;
+                document.getElementById('progressBar').style.width = `${(processed / total) * 100}%`;
+                document.getElementById('liveGenerated').textContent = generated;
+                document.getElementById('liveSkipped').textContent = skipped;
+                document.getElementById('liveErrors').textContent = errors;
 
-            // Update results
-            document.getElementById('resultTotal').textContent = data.total;
-            document.getElementById('resultGenerated').textContent = data.generated;
-            document.getElementById('resultSkipped').textContent = data.skipped;
-            document.getElementById('resultErrors').textContent = data.errors;
-
-            // Show/hide error details
-            const errorRow = document.getElementById('errorRow');
-            const errorDetailsEl = document.getElementById('errorDetails');
-            const errorList = document.getElementById('errorList');
-            const successIcon = document.getElementById('thumbnailSuccessIcon');
-            const warningIcon = document.getElementById('thumbnailWarningIcon');
-            const resultTitle = document.getElementById('thumbnailResultTitle');
-
-            if (data.errors > 0) {
-                errorRow.classList.remove('hidden');
-                warningIcon.classList.remove('hidden');
-                successIcon.classList.add('hidden');
-                resultTitle.textContent = 'Completed with Errors';
-
-                if (data.error_details && data.error_details.length > 0) {
-                    errorDetailsEl.classList.remove('hidden');
-                    errorList.innerHTML = '';
-                    data.error_details.forEach(detail => {
-                        const li = document.createElement('li');
-                        li.textContent = detail;
-                        li.className = 'truncate';
-                        li.title = detail;
-                        errorList.appendChild(li);
-                    });
-                    if (data.errors > data.error_details.length) {
-                        const li = document.createElement('li');
-                        li.textContent = `...and ${data.errors - data.error_details.length} more`;
-                        errorList.appendChild(li);
-                    }
-                }
-            } else {
-                errorRow.classList.add('hidden');
-                errorDetailsEl.classList.add('hidden');
-                warningIcon.classList.add('hidden');
-                successIcon.classList.remove('hidden');
-                resultTitle.textContent = 'Processing Complete';
+            } catch (error) {
+                processed++;
+                errors++;
+                errorDetails.push(`Document #${docId}: ${error.message}`);
+                document.getElementById('currentCount').textContent = processed;
+                document.getElementById('progressBar').style.width = `${(processed / total) * 100}%`;
+                document.getElementById('liveErrors').textContent = errors;
             }
-
-            showState(completeState);
-
-        } catch (error) {
-            console.error('Error processing thumbnails:', error);
-            document.getElementById('thumbnailResultTitle').textContent = 'Processing Failed';
-            document.getElementById('thumbnailWarningIcon').classList.remove('hidden');
-            document.getElementById('thumbnailSuccessIcon').classList.add('hidden');
-            document.getElementById('resultTotal').textContent = '-';
-            document.getElementById('resultGenerated').textContent = '-';
-            document.getElementById('resultSkipped').textContent = '-';
-            showState(completeState);
         }
+
+        // Show completion state
+        showComplete(total, generated, skipped, errors);
+    }
+
+    function showComplete(total, generated, skipped, errors) {
+        document.getElementById('resultTotal').textContent = total;
+        document.getElementById('resultGenerated').textContent = generated;
+        document.getElementById('resultSkipped').textContent = skipped;
+        document.getElementById('resultErrors').textContent = errors;
+
+        const errorRow = document.getElementById('errorRow');
+        const errorDetailsEl = document.getElementById('errorDetails');
+        const errorList = document.getElementById('errorList');
+        const successIcon = document.getElementById('thumbnailSuccessIcon');
+        const warningIcon = document.getElementById('thumbnailWarningIcon');
+        const resultTitle = document.getElementById('thumbnailResultTitle');
+
+        if (errors > 0) {
+            errorRow.classList.remove('hidden');
+            warningIcon.classList.remove('hidden');
+            successIcon.classList.add('hidden');
+            resultTitle.textContent = 'Completed with Errors';
+
+            if (errorDetails.length > 0) {
+                errorDetailsEl.classList.remove('hidden');
+                errorList.innerHTML = '';
+                errorDetails.slice(0, 10).forEach(detail => {
+                    const li = document.createElement('li');
+                    li.textContent = detail;
+                    li.className = 'truncate';
+                    li.title = detail;
+                    errorList.appendChild(li);
+                });
+                if (errors > 10) {
+                    const li = document.createElement('li');
+                    li.textContent = `...and ${errors - 10} more`;
+                    errorList.appendChild(li);
+                }
+            }
+        } else {
+            errorRow.classList.add('hidden');
+            errorDetailsEl.classList.add('hidden');
+            warningIcon.classList.add('hidden');
+            successIcon.classList.remove('hidden');
+            resultTitle.textContent = 'Processing Complete';
+        }
+
+        showState(completeState);
     }
 
     // Event listeners
