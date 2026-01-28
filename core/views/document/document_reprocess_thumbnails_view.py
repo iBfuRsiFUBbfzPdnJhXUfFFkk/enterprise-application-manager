@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
@@ -7,19 +9,30 @@ from django.views.decorators.http import require_http_methods
 from core.models.document import Document
 from core.utilities.thumbnail_generator import generate_thumbnail
 
+logger = logging.getLogger(__name__)
+
 
 @login_required
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
     """Regenerate thumbnails for all documents."""
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     documents = Document.objects.filter(file__isnull=False).exclude(file='')
     total = documents.count()
+
+    # GET request returns just the count for the modal
+    if request.method == 'GET' and is_ajax:
+        return JsonResponse({'total': total})
+
+    # POST processes the thumbnails
+    if request.method != 'POST':
+        return redirect('document')
+
     generated = 0
     skipped = 0
     errors = 0
-    error_names = []
+    error_details = []
 
     for doc in documents:
         try:
@@ -34,7 +47,9 @@ def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
                     skipped += 1
         except Exception as e:
             errors += 1
-            error_names.append(doc.name or f"Document #{doc.pk}")
+            error_msg = f"{doc.name or f'Document #{doc.pk}'}: {str(e)}"
+            error_details.append(error_msg)
+            logger.warning(f"Thumbnail generation failed: {error_msg}")
 
     if is_ajax:
         return JsonResponse({
@@ -43,7 +58,7 @@ def document_reprocess_thumbnails_view(request: HttpRequest) -> HttpResponse:
             'generated': generated,
             'skipped': skipped,
             'errors': errors,
-            'error_names': error_names[:10],
+            'error_details': error_details[:10],
         })
 
     # Fallback for non-AJAX requests

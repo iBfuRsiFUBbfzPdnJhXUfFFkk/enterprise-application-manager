@@ -755,6 +755,12 @@ $(document).ready(function() {
                     <p class="text-xs text-gray-500 mt-1">Existing thumbnails will be replaced.</p>
                 </div>
             </div>
+            <div id="fileCountInfo" class="mt-3 p-3 bg-gray-50 rounded-lg text-center">
+                <span id="fileCountLoading" class="text-sm text-gray-500">Loading document count...</span>
+                <span id="fileCountDisplay" class="hidden text-sm font-medium text-gray-700">
+                    <span id="initialFileCount">0</span> document(s) to process
+                </span>
+            </div>
             <div class="mt-6 flex justify-end space-x-3">
                 <button type="button" id="cancelThumbnailBtn"
                         class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
@@ -775,7 +781,7 @@ $(document).ready(function() {
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <p class="text-sm font-medium text-gray-700">Processing thumbnails...</p>
-                <p class="text-xs text-gray-500 mt-1">This may take a while for large libraries.</p>
+                <p id="processingCount" class="text-xs text-gray-500 mt-1">Processing <span id="processingFileCount">0</span> document(s)</p>
             </div>
         </div>
 
@@ -848,6 +854,8 @@ $(document).ready(function() {
     const processingState = document.getElementById('thumbnailProcessing');
     const completeState = document.getElementById('thumbnailComplete');
 
+    let documentCount = 0;
+
     function showState(state) {
         initialState.classList.add('hidden');
         processingState.classList.add('hidden');
@@ -855,9 +863,31 @@ $(document).ready(function() {
         state.classList.remove('hidden');
     }
 
-    function openModal() {
+    async function openModal() {
         modal.classList.remove('hidden');
         showState(initialState);
+
+        // Reset count display
+        document.getElementById('fileCountLoading').classList.remove('hidden');
+        document.getElementById('fileCountDisplay').classList.add('hidden');
+
+        // Fetch document count
+        try {
+            const response = await fetch('{% url "document_reprocess_thumbnails" %}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            documentCount = data.total;
+
+            document.getElementById('initialFileCount').textContent = documentCount;
+            document.getElementById('fileCountLoading').classList.add('hidden');
+            document.getElementById('fileCountDisplay').classList.remove('hidden');
+        } catch (error) {
+            document.getElementById('fileCountLoading').textContent = 'Could not load count';
+        }
     }
 
     function closeModal() {
@@ -880,6 +910,8 @@ $(document).ready(function() {
     }
 
     async function startProcessing() {
+        // Update processing count display
+        document.getElementById('processingFileCount').textContent = documentCount;
         showState(processingState);
 
         try {
@@ -901,7 +933,7 @@ $(document).ready(function() {
 
             // Show/hide error details
             const errorRow = document.getElementById('errorRow');
-            const errorDetails = document.getElementById('errorDetails');
+            const errorDetailsEl = document.getElementById('errorDetails');
             const errorList = document.getElementById('errorList');
             const successIcon = document.getElementById('thumbnailSuccessIcon');
             const warningIcon = document.getElementById('thumbnailWarningIcon');
@@ -913,23 +945,25 @@ $(document).ready(function() {
                 successIcon.classList.add('hidden');
                 resultTitle.textContent = 'Completed with Errors';
 
-                if (data.error_names && data.error_names.length > 0) {
-                    errorDetails.classList.remove('hidden');
+                if (data.error_details && data.error_details.length > 0) {
+                    errorDetailsEl.classList.remove('hidden');
                     errorList.innerHTML = '';
-                    data.error_names.forEach(name => {
+                    data.error_details.forEach(detail => {
                         const li = document.createElement('li');
-                        li.textContent = name;
+                        li.textContent = detail;
+                        li.className = 'truncate';
+                        li.title = detail;
                         errorList.appendChild(li);
                     });
-                    if (data.errors > data.error_names.length) {
+                    if (data.errors > data.error_details.length) {
                         const li = document.createElement('li');
-                        li.textContent = `...and ${data.errors - data.error_names.length} more`;
+                        li.textContent = `...and ${data.errors - data.error_details.length} more`;
                         errorList.appendChild(li);
                     }
                 }
             } else {
                 errorRow.classList.add('hidden');
-                errorDetails.classList.add('hidden');
+                errorDetailsEl.classList.add('hidden');
                 warningIcon.classList.add('hidden');
                 successIcon.classList.remove('hidden');
                 resultTitle.textContent = 'Processing Complete';
