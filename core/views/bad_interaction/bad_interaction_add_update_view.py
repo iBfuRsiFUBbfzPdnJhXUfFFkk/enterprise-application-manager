@@ -17,12 +17,16 @@ def bad_interaction_add_update_view(request: HttpRequest, model_id: int) -> Http
             update.created_by = request.user
             update.save()
 
-            # If a file was uploaded, create a Document and link it
-            if update.attachment_file:
-                document = Document(name=update.get_attachment_filename())
-                document.file.name = update.attachment_file.name
-                document.save()
-                update.documents.add(document)
+            # If a file was uploaded, create a Document and link it via FK
+            uploaded_file = request.FILES.get('attachment_upload')
+            if uploaded_file:
+                document = Document.objects.create(
+                    name=uploaded_file.name,
+                    version='1.0',
+                    file=uploaded_file,
+                )
+                update.attachment_document = document
+                update.save()
 
             return redirect('bad_interaction_detail', model_id=model_id)
 

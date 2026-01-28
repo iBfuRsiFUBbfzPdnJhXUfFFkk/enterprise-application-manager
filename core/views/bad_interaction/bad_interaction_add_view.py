@@ -17,12 +17,16 @@ def bad_interaction_add_view(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             bad_interaction = form.save()
 
-            # If a file was uploaded, create a Document and link it
-            if bad_interaction.evidence_file:
-                document = Document(name=bad_interaction.get_evidence_filename())
-                document.file.name = bad_interaction.evidence_file.name
-                document.save()
-                bad_interaction.documents.add(document)
+            # If a file was uploaded, create a Document and link it via FK
+            uploaded_file = request.FILES.get('evidence_upload')
+            if uploaded_file:
+                document = Document.objects.create(
+                    name=uploaded_file.name,
+                    version='1.0',
+                    file=uploaded_file,
+                )
+                bad_interaction.evidence_document = document
+                bad_interaction.save()
 
             return redirect(to='bad_interaction')
     else:

@@ -9,13 +9,25 @@
                     <h1 class="text-3xl font-bold text-gray-900">Documents</h1>
                     <p class="mt-1 text-sm text-gray-500">Store and manage project documentation and files</p>
                 </div>
-                <a href="{% url 'document_new' %}"
-                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
-                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    New Document
-                </a>
+                <div class="flex items-center space-x-3">
+                    <form action="{% url 'document_rename_files' %}" method="post" onsubmit="return confirm('Are you sure you want to rename all files to random UUIDs? This cannot be undone.');">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                            <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            Rename Files to UUIDs
+                        </button>
+                    </form>
+                    <a href="{% url 'document_new' %}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        New Document
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -30,7 +42,7 @@
                     <div class="relative">
                         <input type="text"
                                id="search"
-                               placeholder="Search by name, filename, version..."
+                               placeholder="Search by name or filename..."
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         <svg class="absolute right-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -73,9 +85,9 @@
             {% for model in models %}
             <div class="doc-card bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer"
                  data-name="{{ model.name|default:'' }}"
-                 data-filename="{{ model.blob_filename|default:'' }}"
+                 data-filename="{{ model.get_filename|default:'' }}"
                  data-version="{{ model.version|default:'' }}"
-                 data-filetype="{{ model.blob_content_type|default:'' }}"
+                 data-filetype="{{ model.get_file_extension|default:'' }}"
                  ondblclick="window.location.href='{% url 'document_detail' model_id=model.id %}'">
                 <div class="p-6">
                     <!-- Document Icon and Name -->
@@ -84,9 +96,10 @@
                             <h3 class="text-lg font-semibold text-gray-900 truncate" title="{{ model.name }}">
                                 {{ model.name }}
                             </h3>
-                            {% if model.version %}
-                            <p class="text-xs text-gray-500 mt-1">Version {{ model.version }}</p>
-                            {% endif %}
+                            <p class="text-xs text-gray-500 mt-1" title="{{ model.uploaded_at|date:'F d, Y g:i A' }}">
+                                {{ model.uploaded_at|timesince }} ago
+                                {% if model.version %} &middot; v{{ model.version }}{% endif %}
+                            </p>
                         </div>
                         <svg class="h-8 w-8 text-gray-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
@@ -96,32 +109,32 @@
                     <!-- File Details -->
                     <div class="space-y-3">
                         <!-- Filename -->
-                        {% if model.blob_filename %}
+                        {% if model.get_filename %}
                         <div class="pt-3 border-t border-gray-100">
                             <div class="flex items-start text-xs mb-2">
                                 <svg class="h-4 w-4 text-gray-400 mr-1.5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
-                                <code class="text-gray-600 break-all font-mono">{{ model.blob_filename }}</code>
+                                <code class="text-gray-600 break-all font-mono">{{ model.get_filename }}</code>
                             </div>
                         </div>
                         {% endif %}
 
                         <!-- File Type and Size -->
                         <div class="flex items-center space-x-2 flex-wrap">
-                            {% if model.blob_content_type %}
+                            {% if model.get_file_extension %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {{ model.blob_content_type|truncatechars:20 }}
+                                {{ model.get_file_extension }}
                             </span>
                             {% endif %}
-                            {% if model.blob_size %}
+                            {% if model.get_file_size %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {% if model.blob_size < 1024 %}
-                                    {{ model.blob_size }} B
-                                {% elif model.blob_size < 1048576 %}
-                                    {{ model.blob_size|floatformat:0|add:"0"|divisibleby:"1024" }}{{ model.blob_size|add:"0"|floatformat:0 }} KB
+                                {% if model.get_file_size < 1024 %}
+                                    {{ model.get_file_size }} B
+                                {% elif model.get_file_size < 1048576 %}
+                                    {% widthratio model.get_file_size 1024 1 %} KB
                                 {% else %}
-                                    {% widthratio model.blob_size 1048576 1 %} MB
+                                    {% widthratio model.get_file_size 1048576 1 %} MB
                                 {% endif %}
                             </span>
                             {% endif %}
@@ -135,7 +148,7 @@
                         {% endif %}
 
                         <!-- Usage Indicators -->
-                        {% with app_count=model.applications.count bad_int_count=model.bad_interactions.count bad_upd_count=model.bad_interaction_updates.count hr_upd_count=model.hr_incident_updates.count %}
+                        {% with app_count=model.applications.count bad_int_count=model.evidence_for_bad_interactions.count bad_upd_count=model.attachment_for_bad_interaction_updates.count hr_upd_count=model.attachment_for_hr_incident_updates.count %}
                         {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
                         <div class="flex items-center flex-wrap gap-1.5 text-xs text-gray-500 mt-2 pt-2 border-t border-gray-200">
                             {% if app_count > 0 %}
@@ -188,8 +201,7 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filename</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
                                 <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used In</th>
@@ -200,54 +212,38 @@
                             {% for model in models %}
                             <tr class="doc-row hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
                                 data-name="{{ model.name|default:'' }}"
-                                data-filename="{{ model.blob_filename|default:'' }}"
+                                data-filename="{{ model.get_filename|default:'' }}"
                                 data-version="{{ model.version|default:'' }}"
-                                data-filetype="{{ model.blob_content_type|default:'' }}"
+                                data-filetype="{{ model.get_file_extension|default:'' }}"
                                 ondblclick="window.location.href='{% url 'document_detail' model_id=model.id %}'">
                                 <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
                                     <div class="truncate" title="{{ model.name }}">
                                         {{ model.name }}
                                     </div>
                                 </td>
-                                <td class="px-3 py-3 text-sm text-gray-500" style="max-width: 200px;">
-                                    {% if model.blob_filename %}
-                                    <div class="flex items-center">
-                                        <svg class="h-4 w-4 mr-1.5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                                        </svg>
-                                        <code class="text-xs truncate font-mono" title="{{ model.blob_filename }}">{{ model.blob_filename }}</code>
-                                    </div>
-                                    {% else %}
-                                    <span class="text-gray-400">-</span>
-                                    {% endif %}
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                                    {% if model.version %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                        v{{ model.version }}
+                                <td class="px-3 py-3 text-sm text-gray-500 whitespace-nowrap">
+                                    <span title="{{ model.uploaded_at|date:'F d, Y g:i A' }}" class="cursor-help">
+                                        {{ model.uploaded_at|timesince }} ago
                                     </span>
-                                    {% else %}
-                                    <span class="text-gray-400">-</span>
-                                    {% endif %}
                                 </td>
                                 <td class="px-3 py-3 whitespace-nowrap text-sm">
-                                    {% if model.blob_content_type %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title="{{ model.blob_content_type }}">
-                                        {{ model.blob_content_type|truncatechars:15 }}
+                                    {% if model.get_file_extension %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ model.get_file_extension }}
                                     </span>
                                     {% else %}
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
                                 </td>
                                 <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                                    {% if model.blob_size %}
+                                    {% if model.get_file_size %}
                                     <span class="text-xs">
-                                        {% if model.blob_size < 1024 %}
-                                            {{ model.blob_size }} B
-                                        {% elif model.blob_size < 1048576 %}
-                                            {% widthratio model.blob_size 1024 1 %} KB
+                                        {% if model.get_file_size < 1024 %}
+                                            {{ model.get_file_size }} B
+                                        {% elif model.get_file_size < 1048576 %}
+                                            {% widthratio model.get_file_size 1024 1 %} KB
                                         {% else %}
-                                            {% widthratio model.blob_size 1048576 1 %} MB
+                                            {% widthratio model.get_file_size 1048576 1 %} MB
                                         {% endif %}
                                     </span>
                                     {% else %}
@@ -255,7 +251,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="px-3 py-3 text-sm text-gray-500">
-                                    {% with app_count=model.applications.count bad_int_count=model.bad_interactions.count bad_upd_count=model.bad_interaction_updates.count hr_upd_count=model.hr_incident_updates.count %}
+                                    {% with app_count=model.applications.count bad_int_count=model.evidence_for_bad_interactions.count bad_upd_count=model.attachment_for_bad_interaction_updates.count hr_upd_count=model.attachment_for_hr_incident_updates.count %}
                                     {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
                                     <div class="flex flex-wrap gap-1">
                                         {% if app_count > 0 %}

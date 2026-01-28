@@ -182,59 +182,25 @@
                 {% endif %}
                 {% else %}
                 <!-- File missing warning -->
-                <div class="flex items-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <svg class="h-6 w-6 text-yellow-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                    <div>
-                        <p class="text-sm font-medium text-yellow-800">Evidence file not found</p>
-                        <p class="text-xs text-yellow-600 mt-1">The file <code class="bg-yellow-100 px-1 rounded">{{ bad_interaction.get_evidence_filename }}</code> no longer exists in storage. You can upload a new file by editing this record.</p>
+                <div class="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-center">
+                        <svg class="h-6 w-6 text-yellow-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-yellow-800">Evidence file not found</p>
+                            <p class="text-xs text-yellow-600 mt-1">The file <code class="bg-yellow-100 px-1 rounded">{{ bad_interaction.get_evidence_filename }}</code> no longer exists in storage.</p>
+                        </div>
                     </div>
+                    <button type="button" id="open-file-picker-btn"
+                            class="inline-flex items-center px-3 py-2 border border-yellow-300 shadow-sm text-sm font-medium rounded-md text-yellow-800 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Select Existing File
+                    </button>
                 </div>
                 {% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Linked Documents -->
-        {% if bad_interaction.documents.exists %}
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Linked Documents</h2>
-            </div>
-            <div class="px-6 py-6">
-                <ul class="divide-y divide-gray-200">
-                    {% for document in bad_interaction.documents.all %}
-                    <li class="py-3">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <svg class="h-8 w-8 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <div>
-                                    <p class="text-sm font-medium text-gray-900">{{ document.name }}{% if document.version %} v{{ document.version }}{% endif %}</p>
-                                    {% if document.has_file %}
-                                    <p class="text-xs text-gray-500">{{ document.get_filename }}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                {% if document.has_file %}
-                                <a href="{{ document.get_file_url }}" download class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
-                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                    </svg>
-                                    Download
-                                </a>
-                                {% endif %}
-                                <a href="{% url 'document_edit' model_id=document.id %}" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800">
-                                    View
-                                </a>
-                            </div>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
             </div>
         </div>
         {% endif %}
@@ -294,9 +260,9 @@
                                     <button type="button" id="attachment-remove-btn" class="mt-3 text-sm text-red-600 hover:text-red-800">Remove file</button>
                                 </div>
                             </div>
-                            <div class="hidden">{{ update_form.attachment_file }}</div>
-                            {% if update_form.attachment_file.errors %}
-                            <p class="mt-1 text-sm text-red-600">{{ update_form.attachment_file.errors.0 }}</p>
+                            <div class="hidden">{{ update_form.attachment_upload }}</div>
+                            {% if update_form.attachment_upload.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ update_form.attachment_upload.errors.0 }}</p>
                             {% endif %}
                         </div>
                         <div>
@@ -329,26 +295,33 @@
                                     <p class="text-xs text-gray-500">{{ update.datetime_created|date:"F d, Y g:i A" }}</p>
                                 </div>
                                 {% if update.has_attachment %}
-                                <a href="{{ update.get_attachment_url }}"
+                                <a href="{{ update.get_attachment_url }}" download
                                    class="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
                                     <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                     </svg>
                                     {{ update.get_attachment_filename }}
                                 </a>
                                 {% endif %}
                             </div>
                             <div class="text-sm text-gray-700 prose prose-sm max-w-none">{{ update.comment|markdown }}</div>
-                            {% if update.documents.exists %}
-                            <div class="mt-2 flex flex-wrap gap-2">
-                                {% for document in update.documents.all %}
-                                <a href="{% url 'document_edit' model_id=document.id %}" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100">
-                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                    {{ document.name }}
+                            {% if update.has_attachment and update.attachment_file_exists %}
+                            <!-- Attachment Preview -->
+                            <div class="mt-3">
+                                {% if update.is_attachment_image %}
+                                <a href="{{ update.get_attachment_url }}" target="_blank" class="block">
+                                    <img src="{{ update.get_attachment_url }}"
+                                         alt="{{ update.get_attachment_filename }}"
+                                         class="max-w-full max-h-64 rounded-lg border border-gray-200 hover:opacity-90 transition-opacity">
                                 </a>
-                                {% endfor %}
+                                {% elif update.is_attachment_pdf %}
+                                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                    <iframe src="{{ update.get_attachment_url }}"
+                                            class="w-full h-64"
+                                            title="{{ update.get_attachment_filename }}">
+                                    </iframe>
+                                </div>
+                                {% endif %}
                             </div>
                             {% endif %}
                         </div>
@@ -386,6 +359,61 @@
             </div>
         </div>
         {% endif %}
+    </div>
+</div>
+
+<!-- File Picker Modal -->
+<div id="file-picker-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div id="file-picker-overlay" class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900" id="modal-title">Select Evidence File</h3>
+                    <button type="button" id="close-file-picker-btn" class="text-gray-400 hover:text-gray-500">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Loading state -->
+                <div id="file-picker-loading" class="py-12 text-center">
+                    <svg class="animate-spin h-8 w-8 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">Loading files...</p>
+                </div>
+
+                <!-- Empty state -->
+                <div id="file-picker-empty" class="hidden py-12 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">No evidence files found in storage.</p>
+                </div>
+
+                <!-- File grid -->
+                <div id="file-picker-grid" class="hidden grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-96 overflow-y-auto">
+                    <!-- Files will be injected here -->
+                </div>
+            </div>
+
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button type="button" id="confirm-file-picker-btn" disabled
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                    Use Selected File
+                </button>
+                <button type="button" id="cancel-file-picker-btn"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    Cancel
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -439,7 +467,7 @@ $(document).ready(function() {
     const fileName = document.getElementById('attachment-file-name');
     const fileSize = document.getElementById('attachment-file-size');
     const removeBtn = document.getElementById('attachment-remove-btn');
-    const fileInput = document.querySelector('input[name="attachment_file"]');
+    const fileInput = document.querySelector('input[name="attachment_upload"]');
 
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
@@ -539,6 +567,182 @@ $(document).ready(function() {
     removeBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         clearPreview();
+    });
+
+    // File Picker Modal functionality
+    const modal = document.getElementById('file-picker-modal');
+    const openBtn = document.getElementById('open-file-picker-btn');
+    const closeBtn = document.getElementById('close-file-picker-btn');
+    const cancelBtn = document.getElementById('cancel-file-picker-btn');
+    const confirmBtn = document.getElementById('confirm-file-picker-btn');
+    const overlay = document.getElementById('file-picker-overlay');
+    const loadingDiv = document.getElementById('file-picker-loading');
+    const emptyDiv = document.getElementById('file-picker-empty');
+    const gridDiv = document.getElementById('file-picker-grid');
+
+    let selectedFile = null;
+
+    function formatFileSizeModal(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function openModal() {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        loadFiles();
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+        selectedFile = null;
+        confirmBtn.disabled = true;
+    }
+
+    function loadFiles() {
+        loadingDiv.classList.remove('hidden');
+        emptyDiv.classList.add('hidden');
+        gridDiv.classList.add('hidden');
+        gridDiv.innerHTML = '';
+
+        fetch('{% url "bad_interaction_list_evidence_files" %}')
+            .then(response => response.json())
+            .then(data => {
+                loadingDiv.classList.add('hidden');
+
+                if (data.files && data.files.length > 0) {
+                    gridDiv.classList.remove('hidden');
+                    data.files.forEach(file => {
+                        const card = createFileCard(file);
+                        gridDiv.appendChild(card);
+                    });
+                } else {
+                    emptyDiv.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                loadingDiv.classList.add('hidden');
+                emptyDiv.classList.remove('hidden');
+                console.error('Error loading files:', error);
+            });
+    }
+
+    function createFileCard(file) {
+        const card = document.createElement('div');
+        card.className = 'border border-gray-200 rounded-lg p-2 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors';
+        card.dataset.id = file.id;
+        card.dataset.name = file.name;
+
+        let preview = '';
+        if (file.type === 'image') {
+            preview = `<img src="${file.url}" alt="${file.name}" class="w-full h-24 object-cover rounded mb-2">`;
+        } else if (file.type === 'pdf') {
+            preview = `
+                <div class="w-full h-24 bg-red-50 rounded mb-2 flex items-center justify-center">
+                    <svg class="h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>`;
+        } else {
+            preview = `
+                <div class="w-full h-24 bg-gray-100 rounded mb-2 flex items-center justify-center">
+                    <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </div>`;
+        }
+
+        card.innerHTML = `
+            ${preview}
+            <p class="text-xs font-medium text-gray-700 truncate" title="${file.name}">${file.name}</p>
+            <p class="text-xs text-gray-500">${formatFileSizeModal(file.size)}</p>
+        `;
+
+        card.addEventListener('click', function() {
+            // Deselect all
+            gridDiv.querySelectorAll('.border-blue-500').forEach(el => {
+                el.classList.remove('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-500');
+                el.classList.add('border-gray-200');
+            });
+
+            // Select this one
+            this.classList.remove('border-gray-200');
+            this.classList.add('border-blue-500', 'bg-blue-50', 'ring-2', 'ring-blue-500');
+
+            selectedFile = {
+                id: this.dataset.id,
+                name: this.dataset.name
+            };
+            confirmBtn.disabled = false;
+        });
+
+        return card;
+    }
+
+    function confirmSelection() {
+        if (!selectedFile) return;
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = `
+            <svg class="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Updating...
+        `;
+
+        fetch('{% url "bad_interaction_fix_evidence" model_id=bad_interaction.id %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ document_id: selectedFile.id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show the updated file
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to update file reference'));
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = 'Use Selected File';
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Use Selected File';
+        });
+    }
+
+    // Event listeners
+    if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+    }
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeModal);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', closeModal);
+    }
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', confirmSelection);
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+            closeModal();
+        }
     });
 });
 </script>

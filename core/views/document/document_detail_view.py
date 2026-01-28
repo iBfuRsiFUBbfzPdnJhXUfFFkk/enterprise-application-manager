@@ -41,11 +41,11 @@ def document_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
             else:
                 file_type = 'other'
 
-    # Prefetch M2M relationships
+    # Fetch related objects via FK relationships
     applications = document.applications.all()
-    bad_interactions = document.bad_interactions.all()
-    bad_interaction_updates = document.bad_interaction_updates.all()
-    hr_incident_updates = document.hr_incident_updates.all()
+    bad_interactions = document.evidence_for_bad_interactions.all()
+    bad_interaction_updates = document.attachment_for_bad_interaction_updates.all()
+    hr_incident_updates = document.attachment_for_hr_incident_updates.all()
 
     context: Mapping[str, Any] = {
         'model': document,

@@ -11,20 +11,22 @@ from core.utilities.base_render import base_render
 
 def bad_interaction_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
     bad_interaction = get_object_or_404(BadInteraction, pk=model_id)
-    old_evidence_file_name = bad_interaction.evidence_file.name if bad_interaction.evidence_file else None
 
     if request.method == 'POST':
         form = BadInteractionForm(request.POST, request.FILES, instance=bad_interaction)
         if form.is_valid():
             bad_interaction = form.save()
 
-            # If a new file was uploaded, create a Document and link it
-            new_file_name = bad_interaction.evidence_file.name if bad_interaction.evidence_file else None
-            if new_file_name and new_file_name != old_evidence_file_name:
-                document = Document(name=bad_interaction.get_evidence_filename())
-                document.file.name = bad_interaction.evidence_file.name
-                document.save()
-                bad_interaction.documents.add(document)
+            # If a new file was uploaded, create a Document and link it via FK
+            uploaded_file = request.FILES.get('evidence_upload')
+            if uploaded_file:
+                document = Document.objects.create(
+                    name=uploaded_file.name,
+                    version='1.0',
+                    file=uploaded_file,
+                )
+                bad_interaction.evidence_document = document
+                bad_interaction.save()
 
             return redirect(to='bad_interaction')
     else:

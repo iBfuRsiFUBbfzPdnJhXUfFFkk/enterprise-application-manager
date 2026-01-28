@@ -10,7 +10,7 @@ from core.utilities.base_render import base_render
 
 def bad_interaction_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
     bad_interaction = get_object_or_404(
-        BadInteraction.objects.select_related('person', 'reported_by').prefetch_related('hr_incidents', 'updates__created_by', 'documents', 'updates__documents'),
+        BadInteraction.objects.select_related('person', 'reported_by', 'evidence_document').prefetch_related('hr_incidents', 'updates__created_by', 'updates__attachment_document'),
         pk=model_id
     )
 
