@@ -12,7 +12,7 @@ class BadInteractionForm(BaseModelForm):
 
     class Meta(BaseModelFormMeta):
         model = BadInteraction
-        fields = ['person', 'reported_by', 'date_occurred', 'description', 'comment', 'severity', 'evidence_file', 'documents']
+        fields = ['name', 'person', 'reported_by', 'date_occurred', 'description', 'comment', 'severity', 'evidence_file', 'documents']
         widgets = {
             'date_occurred': DateInput(attrs={'type': 'date'}),
             'description': Textarea(attrs={'rows': 4}),

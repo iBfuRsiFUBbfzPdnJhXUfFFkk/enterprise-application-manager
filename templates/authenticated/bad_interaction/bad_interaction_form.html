@@ -29,6 +29,25 @@
             border-radius: 0.375rem;
             padding: 6px 12px;
         }
+        /* Remove border from textarea inside tabbed markdown editor */
+        .tab-content textarea {
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        .tab-content textarea:focus {
+            ring: none !important;
+            outline: none !important;
+        }
+        /* Drop zone focus and drag states */
+        #drop-zone:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+        #drop-zone.drag-over {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
     </style>
 {% endblock %}
 
@@ -63,6 +82,14 @@
                         <p class="mt-1 text-sm text-gray-500">Details about the bad interaction</p>
                     </div>
                     <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Name {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+                            <p class="mt-1 text-xs text-gray-500">Brief title for the interaction (e.g., "Missed deadline without notice")</p>
+                        </div>
                         <div>
                             <label for="{{ form.person.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                 Person {% if form.person.field.required %}<span class="text-red-500">*</span>{% endif %}
@@ -108,26 +135,84 @@
                             <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                 Description {% if form.description.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
-                            {{ form.description }}
+                            <div class="border border-gray-300 rounded-md overflow-hidden">
+                                <div class="flex border-b border-gray-300 bg-gray-50">
+                                    <button type="button" class="tab-btn active px-4 py-2 text-sm font-medium text-gray-700 border-b-2 border-blue-500" data-target="description-write">Write</button>
+                                    <button type="button" class="tab-btn px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="description-preview">Preview</button>
+                                    <span class="ml-auto px-4 py-2 text-xs text-gray-400">Markdown supported</span>
+                                </div>
+                                <div id="description-write" class="tab-content">
+                                    {{ form.description }}
+                                </div>
+                                <div id="description-preview" class="tab-content hidden p-4 min-h-[150px] prose prose-sm max-w-none bg-white">
+                                    <p class="text-gray-400 italic">Nothing to preview</p>
+                                </div>
+                            </div>
                             {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="md:col-span-2">
                             <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                                 Comment
                             </label>
-                            {{ form.comment }}
+                            <div class="border border-gray-300 rounded-md overflow-hidden">
+                                <div class="flex border-b border-gray-300 bg-gray-50">
+                                    <button type="button" class="tab-btn active px-4 py-2 text-sm font-medium text-gray-700 border-b-2 border-blue-500" data-target="comment-write">Write</button>
+                                    <button type="button" class="tab-btn px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700" data-target="comment-preview">Preview</button>
+                                    <span class="ml-auto px-4 py-2 text-xs text-gray-400">Markdown supported</span>
+                                </div>
+                                <div id="comment-write" class="tab-content">
+                                    {{ form.comment }}
+                                </div>
+                                <div id="comment-preview" class="tab-content hidden p-4 min-h-[150px] prose prose-sm max-w-none bg-white">
+                                    <p class="text-gray-400 italic">Nothing to preview</p>
+                                </div>
+                            </div>
                             {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
                         </div>
                         <div class="md:col-span-2">
-                            <label for="{{ form.evidence_file.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Evidence File {% if form.evidence_file.field.required %}<span class="text-red-500">*</span>{% endif %}
                             </label>
                             {% if bad_interaction.has_evidence %}
                             <p class="text-sm text-gray-600 mb-2">Current file: {{ bad_interaction.get_evidence_filename }}</p>
                             {% endif %}
-                            {{ form.evidence_file }}
+
+                            <!-- Hidden file input -->
+                            <div class="hidden">{{ form.evidence_file }}</div>
+
+                            <!-- Drop zone -->
+                            <div id="drop-zone"
+                                 class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors duration-150"
+                                 tabindex="0">
+                                <div id="drop-zone-content">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-600">
+                                        <span class="font-medium text-blue-600">Click to upload</span>, drag & drop, or paste from clipboard
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-500">PDF, images, or documents</p>
+                                </div>
+
+                                <!-- File preview (hidden by default) -->
+                                <div id="file-preview" class="hidden">
+                                    <div id="image-preview-container" class="hidden">
+                                        <img id="image-preview" class="max-h-48 mx-auto rounded-lg shadow-sm" alt="Preview">
+                                    </div>
+                                    <div id="file-info-container" class="hidden flex items-center justify-center">
+                                        <svg class="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </div>
+                                    <p id="file-name" class="mt-2 text-sm font-medium text-gray-900"></p>
+                                    <p id="file-size" class="text-xs text-gray-500"></p>
+                                    <button type="button" id="remove-file" class="mt-2 text-sm text-red-600 hover:text-red-800">
+                                        Remove file
+                                    </button>
+                                </div>
+                            </div>
+
                             {% if form.evidence_file.errors %}<p class="mt-2 text-sm text-red-600">{{ form.evidence_file.errors.0 }}</p>{% endif %}
-                            <p class="mt-1 text-xs text-gray-500">Upload supporting evidence (PDF, image, document)</p>
                         </div>
                     </div>
                 </div>
@@ -155,10 +240,171 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Initialize Select2 for person dropdown
             $('#{{ form.person.id_for_label }}').select2({
                 placeholder: 'Search for a person...',
                 allowClear: true,
                 width: '100%'
+            });
+
+            // Markdown preview tab functionality
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.dataset.target;
+                    const container = this.closest('.border');
+                    const allTabs = container.querySelectorAll('.tab-content');
+                    const allBtns = container.querySelectorAll('.tab-btn');
+
+                    // Update button styles
+                    allBtns.forEach(b => {
+                        b.classList.remove('active', 'text-gray-700', 'border-b-2', 'border-blue-500');
+                        b.classList.add('text-gray-500');
+                    });
+                    this.classList.add('active', 'text-gray-700', 'border-b-2', 'border-blue-500');
+                    this.classList.remove('text-gray-500');
+
+                    // Show/hide content
+                    allTabs.forEach(tab => tab.classList.add('hidden'));
+                    document.getElementById(targetId).classList.remove('hidden');
+
+                    // Render markdown preview if switching to preview tab
+                    if (targetId.includes('preview')) {
+                        const writeTab = document.getElementById(targetId.replace('preview', 'write'));
+                        const textarea = writeTab.querySelector('textarea');
+                        const previewDiv = document.getElementById(targetId);
+
+                        if (textarea && textarea.value.trim()) {
+                            previewDiv.innerHTML = marked.parse(textarea.value);
+                        } else {
+                            previewDiv.innerHTML = '<p class="text-gray-400 italic">Nothing to preview</p>';
+                        }
+                    }
+                });
+            });
+
+            // File upload with drag & drop, paste, and preview
+            const dropZone = document.getElementById('drop-zone');
+            const dropZoneContent = document.getElementById('drop-zone-content');
+            const filePreview = document.getElementById('file-preview');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const fileInfoContainer = document.getElementById('file-info-container');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const removeFileBtn = document.getElementById('remove-file');
+            const fileInput = document.getElementById('{{ form.evidence_file.id_for_label }}');
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            function showFilePreview(file) {
+                dropZoneContent.classList.add('hidden');
+                filePreview.classList.remove('hidden');
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+
+                // Show image preview for image files
+                if (file.type.startsWith('image/')) {
+                    imagePreviewContainer.classList.remove('hidden');
+                    fileInfoContainer.classList.add('hidden');
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreviewContainer.classList.add('hidden');
+                    fileInfoContainer.classList.remove('hidden');
+                }
+            }
+
+            function resetFileInput() {
+                fileInput.value = '';
+                dropZoneContent.classList.remove('hidden');
+                filePreview.classList.add('hidden');
+                imagePreviewContainer.classList.add('hidden');
+                fileInfoContainer.classList.add('hidden');
+            }
+
+            function handleFiles(files) {
+                if (files && files.length > 0) {
+                    const file = files[0];
+                    // Create a DataTransfer to set the file input value
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    fileInput.files = dataTransfer.files;
+                    showFilePreview(file);
+                }
+            }
+
+            // Click to upload
+            dropZone.addEventListener('click', function(e) {
+                if (e.target !== removeFileBtn && !removeFileBtn.contains(e.target)) {
+                    fileInput.click();
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    showFilePreview(this.files[0]);
+                }
+            });
+
+            // Drag and drop
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.add('border-blue-500', 'bg-blue-50');
+            });
+
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.classList.remove('border-blue-500', 'bg-blue-50');
+                handleFiles(e.dataTransfer.files);
+            });
+
+            // Paste from clipboard
+            document.addEventListener('paste', function(e) {
+                // Only handle paste when drop zone or its children are focused
+                if (document.activeElement === dropZone || dropZone.contains(document.activeElement)) {
+                    const items = e.clipboardData.items;
+                    for (let i = 0; i < items.length; i++) {
+                        if (items[i].kind === 'file') {
+                            e.preventDefault();
+                            const file = items[i].getAsFile();
+                            handleFiles([file]);
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Keyboard support for drop zone
+            dropZone.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
+
+            // Remove file
+            removeFileBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                resetFileInput();
             });
         });
     </script>
