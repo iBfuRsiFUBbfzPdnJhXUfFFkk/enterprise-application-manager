@@ -221,74 +221,35 @@
         <div id="list-view" class="hidden">
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table id="documentTable" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="name">
-                                    <div class="flex items-center">
-                                        Name
-                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="uploaded">
-                                    <div class="flex items-center">
-                                        Uploaded
-                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="type">
-                                    <div class="flex items-center">
-                                        Type
-                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="size">
-                                    <div class="flex items-center">
-                                        Size
-                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="usage">
-                                    <div class="flex items-center">
-                                        Used In
-                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                                        </svg>
-                                    </div>
-                                </th>
-                                <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used In</th>
+                                <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" data-orderable="false">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for model in models %}
                             <tr class="doc-row hover:bg-gray-50 transition-colors duration-150 cursor-pointer"
-                                data-name="{{ model.name|default:'' }}"
-                                data-filename="{{ model.get_filename|default:'' }}"
-                                data-version="{{ model.version|default:'' }}"
                                 data-filetype="{{ model.get_file_extension|default:'' }}"
-                                data-uploaded="{{ model.uploaded_at|date:'Y-m-d H:i:s' }}"
-                                data-size="{{ model.get_file_size|default:0 }}"
-                                data-usage="{{ model.applications.count|default:0|add:model.evidence_for_bad_interactions.count|default:0|add:model.attachment_for_bad_interaction_updates.count|default:0|add:model.attachment_for_hr_incident_updates.count|default:0 }}"
                                 ondblclick="window.location.href='{% url 'document_detail' model_id=model.id %}'">
-                                <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
+                                <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;"
+                                    data-search="{{ model.name|default:'' }} {{ model.get_filename|default:'' }}">
                                     <div class="truncate" title="{{ model.name }}">
                                         {{ model.name }}
                                     </div>
                                 </td>
-                                <td class="px-3 py-3 text-sm text-gray-500 whitespace-nowrap">
-                                    <span title="{{ model.uploaded_at|date:'F d, Y g:i A' }}" class="cursor-help">
+                                <td class="px-3 py-3 text-sm text-gray-500 whitespace-nowrap" data-order="{{ model.uploaded_at|date:'Y-m-d H:i:s' }}">
+                                    <span title="{{ model.uploaded_at|date:'F d, Y g:i A' }}" class="cursor-help border-b border-dotted border-gray-400">
                                         {{ model.uploaded_at|timesince }} ago
                                     </span>
                                 </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm">
+                                <td class="px-3 py-3 whitespace-nowrap text-sm" data-order="{{ model.get_file_extension|default:'' }}"
+                                    data-search="{{ model.get_file_extension|default:'' }}">
                                     {% if model.get_file_extension %}
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         {{ model.get_file_extension }}
@@ -297,7 +258,7 @@
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500" data-order="{{ model.get_file_size|default:0 }}">
                                     {% if model.get_file_size %}
                                     <span class="text-xs">
                                         {% if model.get_file_size < 1024 %}
@@ -312,7 +273,7 @@
                                     <span class="text-gray-400">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="px-3 py-3 text-sm text-gray-500">
+                                <td class="px-3 py-3 text-sm text-gray-500" data-order="{{ model.applications.count|default:0|add:model.evidence_for_bad_interactions.count|default:0|add:model.attachment_for_bad_interaction_updates.count|default:0|add:model.attachment_for_hr_incident_updates.count|default:0 }}">
                                     {% with app_count=model.applications.count bad_int_count=model.evidence_for_bad_interactions.count bad_upd_count=model.attachment_for_bad_interaction_updates.count hr_upd_count=model.attachment_for_hr_incident_updates.count %}
                                     {% if app_count > 0 or bad_int_count > 0 or bad_upd_count > 0 or hr_upd_count > 0 %}
                                     <div class="flex flex-wrap gap-1">
@@ -358,33 +319,6 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Pagination Controls -->
-                <div id="pagination-controls" class="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <label for="page-size" class="text-sm text-gray-600">Show</label>
-                        <select id="page-size" class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="10">10</option>
-                            <option value="25" selected>25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                        <span class="text-sm text-gray-600">entries</span>
-                    </div>
-                    <div class="flex items-center space-x-1">
-                        <button id="prev-page" class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Previous
-                        </button>
-                        <div id="page-numbers" class="flex items-center space-x-1">
-                            <!-- Page numbers injected by JS -->
-                        </div>
-                        <button id="next-page" class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Next
-                        </button>
-                    </div>
-                    <div id="pagination-info" class="text-sm text-gray-600">
-                        <!-- Info injected by JS -->
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -400,7 +334,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
     const searchInput = document.getElementById('search');
     const filetypeFilter = document.getElementById('filetype-filter');
     const gridViewBtn = document.getElementById('grid-view-btn');
@@ -409,39 +343,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const listView = document.getElementById('list-view');
     const emptyState = document.getElementById('empty-state');
     const resultCount = document.getElementById('result-count');
-    const tableBody = document.querySelector('#list-view tbody');
-    const pageSizeSelect = document.getElementById('page-size');
-    const prevPageBtn = document.getElementById('prev-page');
-    const nextPageBtn = document.getElementById('next-page');
-    const pageNumbersDiv = document.getElementById('page-numbers');
-    const paginationInfo = document.getElementById('pagination-info');
 
-    // State
-    let currentPage = 1;
-    let pageSize = 25;
-    let currentSort = { column: null, direction: 'asc' };
-    let filteredItems = [];
+    // Initialize DataTables for list view
+    var table = $('#documentTable').DataTable({
+        pageLength: 25,
+        order: [[1, 'desc']],  // Sort by uploaded date descending by default
+        language: {
+            search: "",
+            searchPlaceholder: "Search documents...",
+            lengthMenu: "Show _MENU_ entries",
+            info: "Showing _START_ to _END_ of _TOTAL_ documents",
+            infoEmpty: "No documents found",
+            infoFiltered: "(filtered from _MAX_ total)",
+            paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous"
+            }
+        },
+        dom: '<"flex flex-wrap items-center justify-between gap-4 p-4"lf>rt<"flex flex-wrap items-center justify-between gap-4 p-4 border-t border-gray-200"ip>',
+        columnDefs: [
+            { orderable: false, targets: 5 }  // Disable sorting on Actions column
+        ]
+    });
 
-    // Collect all items
-    const allItems = [];
-    document.querySelectorAll('.doc-card').forEach((card, index) => {
-        const row = document.querySelectorAll('.doc-row')[index];
-        allItems.push({
+    // Collect all grid cards for filtering
+    const allCards = [];
+    document.querySelectorAll('.doc-card').forEach(card => {
+        allCards.push({
             card: card,
-            row: row,
             name: card.dataset.name.toLowerCase(),
             filename: card.dataset.filename.toLowerCase(),
             version: card.dataset.version.toLowerCase(),
-            filetype: card.dataset.filetype,
-            uploaded: row.dataset.uploaded || '',
-            size: parseInt(row.dataset.size) || 0,
-            usage: parseInt(row.dataset.usage) || 0
+            filetype: card.dataset.filetype
         });
     });
 
-    // Populate file type filter
+    // Populate file type filter from cards
     const filetypes = new Set();
-    allItems.forEach(item => {
+    allCards.forEach(item => {
         if (item.filetype) filetypes.add(item.filetype);
     });
     Array.from(filetypes).sort().forEach(type => {
@@ -451,200 +392,91 @@ document.addEventListener('DOMContentLoaded', function() {
         filetypeFilter.appendChild(option);
     });
 
-    // Sort function
-    function sortItems(items, column, direction) {
-        return [...items].sort((a, b) => {
-            let valA, valB;
-            switch (column) {
-                case 'name':
-                    valA = a.name;
-                    valB = b.name;
-                    break;
-                case 'uploaded':
-                    valA = a.uploaded;
-                    valB = b.uploaded;
-                    break;
-                case 'type':
-                    valA = a.filetype.toLowerCase();
-                    valB = b.filetype.toLowerCase();
-                    break;
-                case 'size':
-                    valA = a.size;
-                    valB = b.size;
-                    break;
-                case 'usage':
-                    valA = a.usage;
-                    valB = b.usage;
-                    break;
-                default:
-                    return 0;
-            }
-            if (valA < valB) return direction === 'asc' ? -1 : 1;
-            if (valA > valB) return direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
+    // Track current view state
+    let currentViewState = 'grid';
 
-    // Update sort icons
-    function updateSortIcons() {
-        document.querySelectorAll('th[data-sort]').forEach(th => {
-            const icon = th.querySelector('.sort-icon');
-            const column = th.dataset.sort;
-            if (column === currentSort.column) {
-                if (currentSort.direction === 'asc') {
-                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>';
-                } else {
-                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>';
-                }
-                icon.classList.remove('text-gray-400');
-                icon.classList.add('text-blue-600');
-            } else {
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>';
-                icon.classList.remove('text-blue-600');
-                icon.classList.add('text-gray-400');
-            }
-        });
-    }
-
-    // Render pagination
-    function renderPagination() {
-        const totalItems = filteredItems.length;
-        const totalPages = Math.ceil(totalItems / pageSize);
-        const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-        const endItem = Math.min(currentPage * pageSize, totalItems);
-
-        paginationInfo.textContent = `Showing ${startItem} to ${endItem} of ${totalItems} entries`;
-
-        prevPageBtn.disabled = currentPage === 1;
-        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-
-        pageNumbersDiv.innerHTML = '';
-        const maxPages = 5;
-        let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
-        let endPage = Math.min(totalPages, startPage + maxPages - 1);
-        if (endPage - startPage + 1 < maxPages) {
-            startPage = Math.max(1, endPage - maxPages + 1);
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            const btn = document.createElement('button');
-            btn.textContent = i;
-            btn.className = i === currentPage
-                ? 'px-3 py-1 text-sm border border-blue-500 bg-blue-500 text-white rounded-md'
-                : 'px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50';
-            btn.addEventListener('click', () => {
-                currentPage = i;
-                renderTable();
-            });
-            pageNumbersDiv.appendChild(btn);
-        }
-    }
-
-    // Render table rows
-    function renderTable() {
-        allItems.forEach(item => item.row.classList.add('hidden'));
-
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const pageItems = filteredItems.slice(start, end);
-
-        pageItems.forEach(item => {
-            tableBody.appendChild(item.row);
-            item.row.classList.remove('hidden');
-        });
-
-        renderPagination();
-    }
-
-    // Filter and sort
-    function filterAndSort() {
+    // Filter grid cards based on search and file type
+    function filterGridCards() {
         const searchTerm = searchInput.value.toLowerCase();
         const selectedFiletype = filetypeFilter.value;
+        let visibleCount = 0;
 
-        filteredItems = allItems.filter(item => {
+        allCards.forEach(item => {
             const matchesSearch = !searchTerm ||
                                 item.name.includes(searchTerm) ||
                                 item.filename.includes(searchTerm) ||
                                 item.version.includes(searchTerm);
             const matchesFiletype = !selectedFiletype || item.filetype === selectedFiletype;
-            return matchesSearch && matchesFiletype;
-        });
 
-        if (currentSort.column) {
-            filteredItems = sortItems(filteredItems, currentSort.column, currentSort.direction);
-        }
-
-        allItems.forEach(item => {
-            if (filteredItems.includes(item)) {
+            if (matchesSearch && matchesFiletype) {
                 item.card.classList.remove('hidden');
+                visibleCount++;
             } else {
                 item.card.classList.add('hidden');
             }
         });
 
-        resultCount.textContent = filteredItems.length;
-        currentPage = 1;
+        resultCount.textContent = visibleCount;
 
-        if (filteredItems.length === 0) {
+        // Show empty state if no results
+        if (visibleCount === 0) {
             emptyState.classList.remove('hidden');
             gridView.classList.add('hidden');
+        } else {
+            emptyState.classList.add('hidden');
+            gridView.classList.remove('hidden');
+        }
+    }
+
+    // Apply filters to DataTables
+    function filterDataTable() {
+        const searchTerm = searchInput.value;
+        const selectedFiletype = filetypeFilter.value;
+
+        // Apply search
+        table.search(searchTerm);
+
+        // Apply file type filter on column 2 (Type)
+        table.column(2).search(selectedFiletype);
+
+        table.draw();
+
+        // Update result count from DataTables info
+        const info = table.page.info();
+        resultCount.textContent = info.recordsDisplay;
+
+        // Show empty state if no results
+        if (info.recordsDisplay === 0) {
+            emptyState.classList.remove('hidden');
             listView.classList.add('hidden');
         } else {
             emptyState.classList.add('hidden');
-            const currentView = localStorage.getItem('eam_document_view') || 'grid';
-            if (currentView === 'grid') {
-                gridView.classList.remove('hidden');
-                listView.classList.add('hidden');
-            } else {
-                gridView.classList.add('hidden');
-                listView.classList.remove('hidden');
-            }
+            listView.classList.remove('hidden');
         }
-
-        renderTable();
     }
 
-    // Event listeners
-    searchInput.addEventListener('input', filterAndSort);
-    filetypeFilter.addEventListener('change', filterAndSort);
-
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.addEventListener('click', () => {
-            const column = th.dataset.sort;
-            if (currentSort.column === column) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.column = column;
-                currentSort.direction = 'asc';
-            }
-            updateSortIcons();
-            filterAndSort();
-        });
-    });
-
-    pageSizeSelect.addEventListener('change', () => {
-        pageSize = parseInt(pageSizeSelect.value);
-        currentPage = 1;
-        renderTable();
-    });
-
-    prevPageBtn.addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            renderTable();
+    // Event listeners for filters
+    searchInput.addEventListener('input', function() {
+        if (currentViewState === 'grid') {
+            filterGridCards();
+        } else {
+            filterDataTable();
         }
     });
 
-    nextPageBtn.addEventListener('click', () => {
-        const totalPages = Math.ceil(filteredItems.length / pageSize);
-        if (currentPage < totalPages) {
-            currentPage++;
-            renderTable();
+    filetypeFilter.addEventListener('change', function() {
+        if (currentViewState === 'grid') {
+            filterGridCards();
+        } else {
+            filterDataTable();
         }
     });
 
     // View toggle
     function setView(view) {
+        currentViewState = view;
+        localStorage.setItem('eam_document_view', view);
+
         if (view === 'grid') {
             gridView.classList.remove('hidden');
             listView.classList.add('hidden');
@@ -652,6 +484,9 @@ document.addEventListener('DOMContentLoaded', function() {
             gridViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
             listViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
             listViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+            emptyState.classList.add('hidden');
+            // Re-apply filters for grid
+            filterGridCards();
         } else {
             gridView.classList.add('hidden');
             listView.classList.remove('hidden');
@@ -659,18 +494,63 @@ document.addEventListener('DOMContentLoaded', function() {
             listViewBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
             gridViewBtn.classList.remove('bg-blue-100', 'text-blue-700');
             gridViewBtn.classList.add('text-gray-600', 'hover:bg-gray-100');
+            emptyState.classList.add('hidden');
+            // Re-apply filters for DataTable
+            filterDataTable();
         }
-        localStorage.setItem('eam_document_view', view);
     }
 
     gridViewBtn.addEventListener('click', () => setView('grid'));
     listViewBtn.addEventListener('click', () => setView('list'));
 
-    // Initialize
-    filteredItems = [...allItems];
-    const savedView = localStorage.getItem('eam_document_view') || 'grid';
-    setView(savedView);
-    renderTable();
+    // Initialize view
+    currentViewState = localStorage.getItem('eam_document_view') || 'grid';
+    setView(currentViewState);
 });
 </script>
+
+<style>
+    /* DataTables styling overrides */
+    #documentTable_wrapper .dataTables_filter input {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.5rem 0.75rem;
+        margin-left: 0.5rem;
+    }
+    #documentTable_wrapper .dataTables_length select {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.25rem 2rem 0.25rem 0.5rem;
+    }
+    #documentTable_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.25rem 0.75rem;
+        margin: 0 0.125rem;
+        border-radius: 0.375rem;
+        border: 1px solid #d1d5db;
+    }
+    #documentTable_wrapper .dataTables_paginate .paginate_button.current {
+        background: #3b82f6 !important;
+        color: white !important;
+        border-color: #3b82f6;
+    }
+    #documentTable_wrapper .dataTables_paginate .paginate_button:hover:not(.current):not(.disabled) {
+        background: #f3f4f6 !important;
+        color: #1f2937 !important;
+        border-color: #d1d5db;
+    }
+    #documentTable_wrapper .dataTables_paginate .paginate_button.disabled {
+        color: #9ca3af;
+        cursor: not-allowed;
+    }
+    /* Sort icons */
+    table.dataTable thead th.sorting:after,
+    table.dataTable thead th.sorting_asc:after,
+    table.dataTable thead th.sorting_desc:after {
+        opacity: 0.5;
+    }
+    table.dataTable thead th.sorting_asc:after,
+    table.dataTable thead th.sorting_desc:after {
+        opacity: 1;
+    }
+</style>
 {% endblock %}

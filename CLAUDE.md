@@ -178,6 +178,10 @@ docker compose exec web pip freeze > requirements.txt
 
 **Note:** The Docker image includes full LDAP support. Python dependencies are installed during the Docker build process from `requirements.txt`.
 
+### Tailwind CSS (Development)
+
+**IMPORTANT:** During development, we use Tailwind CSS via CDN - there is no need to build Tailwind CSS or run `collectstatic`. All Tailwind utility classes are available automatically via the CDN. Do NOT run `npm run build:css` or `collectstatic` during development - this slows down the development workflow.
+
 ### Testing
 
 Run a specific test:
@@ -335,6 +339,43 @@ class MyModelForm(BaseModelForm):
             'date_field': DateInput(attrs={'type': 'date'}),  # Classes added automatically
         }
 ```
+
+### Page Layout Patterns
+
+**IMPORTANT: Full-Width Pages**
+
+Pages should use full width - do NOT use `max-w-7xl` or similar width constraints on content containers. Use padding (`px-4 sm:px-6 lg:px-8`) for spacing from edges.
+
+**Base Form Styling Override**
+
+The base template (`base_authenticated.html`) has global CSS that makes all forms use flexbox with `items-start`:
+```css
+form {
+    @apply flex flex-col items-start content-center flex-nowrap justify-start;
+}
+```
+
+This causes form children to shrink to content width instead of stretching full width. To make forms and their children span full width, add these inline styles:
+
+```html
+<!-- Form with full-width children -->
+<form method="post" style="width: 100%; align-items: stretch;">
+    <!-- Content container -->
+    <div style="width: 100%">
+        <!-- content -->
+    </div>
+
+    <!-- Full-width button -->
+    <button type="submit" style="width: 100%" class="flex items-center justify-center ...">
+        Button Text
+    </button>
+</form>
+```
+
+Key points:
+- Add `style="width: 100%; align-items: stretch;"` to forms that need full-width content
+- Add `style="width: 100%"` to child containers within the form
+- For full-width buttons, use `style="width: 100%"` and change `inline-flex` to `flex` with `justify-center`
 
 ### GitLab Integration
 
