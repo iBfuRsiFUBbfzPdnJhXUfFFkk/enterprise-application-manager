@@ -27,6 +27,13 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
         db_index=True,
         help_text='SHA-256 hash of file contents for duplicate detection'
     )
+    image_hash = models.CharField(
+        max_length=64,
+        null=True,
+        blank=True,
+        db_index=True,
+        help_text='Perceptual hash (dhash) for similar image detection'
+    )
 
     def _calculate_file_hash(self):
         """Calculate SHA-256 hash of file contents."""
@@ -42,12 +49,32 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
         except Exception:
             return None
 
+    def _calculate_image_hash(self):
+        """Calculate perceptual hash for images."""
+        if not self.file:
+            return None
+        try:
+            from core.utilities.image_similarity import compute_dhash, is_image_file
+            filename = self.file.name if self.file else ''
+            if not is_image_file(filename):
+                return None
+            return compute_dhash(self.file)
+        except Exception:
+            return None
+
+    @property
+    def is_image(self):
+        """Check if this document is an image file."""
+        from core.utilities.image_similarity import is_image_file
+        return is_image_file(self.file.name if self.file else '')
+
     def save(self, *args, **kwargs):
         # Strip EXIF data from images before saving
         if self.file and hasattr(self.file, 'seek'):
             self.file = strip_exif_from_file(self.file)
-            # Calculate hash after EXIF stripping
+            # Calculate hashes after EXIF stripping
             self.file_hash = self._calculate_file_hash()
+            self.image_hash = self._calculate_image_hash()
         super().save(*args, **kwargs)
 
     def get_duplicates(self):
@@ -55,6 +82,26 @@ class Document(AbstractBaseModel, AbstractComment, AbstractName, AbstractVersion
         if not self.file_hash:
             return Document.objects.none()
         return Document.objects.filter(file_hash=self.file_hash).exclude(pk=self.pk)
+
+    def get_similar_images(self, threshold: int = 20):
+        """
+        Find similar images based on perceptual hash.
+        threshold: max Hamming distance (lower = stricter, 0-256 range for 16x16 hash)
+        """
+        if not self.image_hash:
+            return []
+        from core.utilities.image_similarity import hamming_distance, similarity_percentage
+        similar = []
+        for doc in Document.objects.filter(image_hash__isnull=False).exclude(pk=self.pk):
+            distance = hamming_distance(self.image_hash, doc.image_hash)
+            if 0 <= distance <= threshold:
+                similarity = similarity_percentage(self.image_hash, doc.image_hash)
+                similar.append({
+                    'document': doc,
+                    'distance': distance,
+                    'similarity': similarity
+                })
+        return sorted(similar, key=lambda x: x['distance'])
 
     @property
     def has_file(self):

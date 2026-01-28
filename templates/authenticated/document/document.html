@@ -17,6 +17,13 @@
                         </svg>
                         Dedup Files
                     </a>
+                    <a href="{% url 'document_similar_images' %}"
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                        <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Similar Images
+                    </a>
                     <form action="{% url 'document_rehash' %}" method="post" onsubmit="return confirm('Recalculate hashes for all documents?');">
                         {% csrf_token %}
                         <button type="submit"
@@ -217,11 +224,46 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Used In</th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="name">
+                                    <div class="flex items-center">
+                                        Name
+                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="uploaded">
+                                    <div class="flex items-center">
+                                        Uploaded
+                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="type">
+                                    <div class="flex items-center">
+                                        Type
+                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="size">
+                                    <div class="flex items-center">
+                                        Size
+                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
+                                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none" data-sort="usage">
+                                    <div class="flex items-center">
+                                        Used In
+                                        <svg class="sort-icon ml-1 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                        </svg>
+                                    </div>
+                                </th>
                                 <th scope="col" class="px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -232,6 +274,9 @@
                                 data-filename="{{ model.get_filename|default:'' }}"
                                 data-version="{{ model.version|default:'' }}"
                                 data-filetype="{{ model.get_file_extension|default:'' }}"
+                                data-uploaded="{{ model.uploaded_at|date:'Y-m-d H:i:s' }}"
+                                data-size="{{ model.get_file_size|default:0 }}"
+                                data-usage="{{ model.applications.count|default:0|add:model.evidence_for_bad_interactions.count|default:0|add:model.attachment_for_bad_interaction_updates.count|default:0|add:model.attachment_for_hr_incident_updates.count|default:0 }}"
                                 ondblclick="window.location.href='{% url 'document_detail' model_id=model.id %}'">
                                 <td class="px-3 py-3 text-sm font-medium text-gray-900" style="max-width: 250px;">
                                     <div class="truncate" title="{{ model.name }}">
@@ -313,6 +358,33 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination Controls -->
+                <div id="pagination-controls" class="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <label for="page-size" class="text-sm text-gray-600">Show</label>
+                        <select id="page-size" class="border border-gray-300 rounded-md text-sm px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span class="text-sm text-gray-600">entries</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <button id="prev-page" class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Previous
+                        </button>
+                        <div id="page-numbers" class="flex items-center space-x-1">
+                            <!-- Page numbers injected by JS -->
+                        </div>
+                        <button id="next-page" class="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                            Next
+                        </button>
+                    </div>
+                    <div id="pagination-info" class="text-sm text-gray-600">
+                        <!-- Info injected by JS -->
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -337,6 +409,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const listView = document.getElementById('list-view');
     const emptyState = document.getElementById('empty-state');
     const resultCount = document.getElementById('result-count');
+    const tableBody = document.querySelector('#list-view tbody');
+    const pageSizeSelect = document.getElementById('page-size');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageNumbersDiv = document.getElementById('page-numbers');
+    const paginationInfo = document.getElementById('pagination-info');
+
+    // State
+    let currentPage = 1;
+    let pageSize = 25;
+    let currentSort = { column: null, direction: 'asc' };
+    let filteredItems = [];
 
     // Collect all items
     const allItems = [];
@@ -348,7 +432,10 @@ document.addEventListener('DOMContentLoaded', function() {
             name: card.dataset.name.toLowerCase(),
             filename: card.dataset.filename.toLowerCase(),
             version: card.dataset.version.toLowerCase(),
-            filetype: card.dataset.filetype
+            filetype: card.dataset.filetype,
+            uploaded: row.dataset.uploaded || '',
+            size: parseInt(row.dataset.size) || 0,
+            usage: parseInt(row.dataset.usage) || 0
         });
     });
 
@@ -364,44 +451,146 @@ document.addEventListener('DOMContentLoaded', function() {
         filetypeFilter.appendChild(option);
     });
 
-    // Filter function
-    function filterItems() {
+    // Sort function
+    function sortItems(items, column, direction) {
+        return [...items].sort((a, b) => {
+            let valA, valB;
+            switch (column) {
+                case 'name':
+                    valA = a.name;
+                    valB = b.name;
+                    break;
+                case 'uploaded':
+                    valA = a.uploaded;
+                    valB = b.uploaded;
+                    break;
+                case 'type':
+                    valA = a.filetype.toLowerCase();
+                    valB = b.filetype.toLowerCase();
+                    break;
+                case 'size':
+                    valA = a.size;
+                    valB = b.size;
+                    break;
+                case 'usage':
+                    valA = a.usage;
+                    valB = b.usage;
+                    break;
+                default:
+                    return 0;
+            }
+            if (valA < valB) return direction === 'asc' ? -1 : 1;
+            if (valA > valB) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+
+    // Update sort icons
+    function updateSortIcons() {
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            const icon = th.querySelector('.sort-icon');
+            const column = th.dataset.sort;
+            if (column === currentSort.column) {
+                if (currentSort.direction === 'asc') {
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>';
+                } else {
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>';
+                }
+                icon.classList.remove('text-gray-400');
+                icon.classList.add('text-blue-600');
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>';
+                icon.classList.remove('text-blue-600');
+                icon.classList.add('text-gray-400');
+            }
+        });
+    }
+
+    // Render pagination
+    function renderPagination() {
+        const totalItems = filteredItems.length;
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+        const endItem = Math.min(currentPage * pageSize, totalItems);
+
+        paginationInfo.textContent = `Showing ${startItem} to ${endItem} of ${totalItems} entries`;
+
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+        pageNumbersDiv.innerHTML = '';
+        const maxPages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+        let endPage = Math.min(totalPages, startPage + maxPages - 1);
+        if (endPage - startPage + 1 < maxPages) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className = i === currentPage
+                ? 'px-3 py-1 text-sm border border-blue-500 bg-blue-500 text-white rounded-md'
+                : 'px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50';
+            btn.addEventListener('click', () => {
+                currentPage = i;
+                renderTable();
+            });
+            pageNumbersDiv.appendChild(btn);
+        }
+    }
+
+    // Render table rows
+    function renderTable() {
+        allItems.forEach(item => item.row.classList.add('hidden'));
+
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageItems = filteredItems.slice(start, end);
+
+        pageItems.forEach(item => {
+            tableBody.appendChild(item.row);
+            item.row.classList.remove('hidden');
+        });
+
+        renderPagination();
+    }
+
+    // Filter and sort
+    function filterAndSort() {
         const searchTerm = searchInput.value.toLowerCase();
         const selectedFiletype = filetypeFilter.value;
 
-        let visibleCount = 0;
-
-        allItems.forEach(item => {
+        filteredItems = allItems.filter(item => {
             const matchesSearch = !searchTerm ||
                                 item.name.includes(searchTerm) ||
                                 item.filename.includes(searchTerm) ||
                                 item.version.includes(searchTerm);
-
             const matchesFiletype = !selectedFiletype || item.filetype === selectedFiletype;
+            return matchesSearch && matchesFiletype;
+        });
 
-            const isVisible = matchesSearch && matchesFiletype;
+        if (currentSort.column) {
+            filteredItems = sortItems(filteredItems, currentSort.column, currentSort.direction);
+        }
 
-            if (isVisible) {
+        allItems.forEach(item => {
+            if (filteredItems.includes(item)) {
                 item.card.classList.remove('hidden');
-                item.row.classList.remove('hidden');
-                visibleCount++;
             } else {
                 item.card.classList.add('hidden');
-                item.row.classList.add('hidden');
             }
         });
 
-        // Update result count
-        resultCount.textContent = visibleCount;
+        resultCount.textContent = filteredItems.length;
+        currentPage = 1;
 
-        // Show/hide empty state
-        if (visibleCount === 0) {
+        if (filteredItems.length === 0) {
             emptyState.classList.remove('hidden');
             gridView.classList.add('hidden');
             listView.classList.add('hidden');
         } else {
             emptyState.classList.add('hidden');
-            // Restore current view
             const currentView = localStorage.getItem('eam_document_view') || 'grid';
             if (currentView === 'grid') {
                 gridView.classList.remove('hidden');
@@ -411,11 +600,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 listView.classList.remove('hidden');
             }
         }
+
+        renderTable();
     }
 
-    // Event listeners for filtering
-    searchInput.addEventListener('input', filterItems);
-    filetypeFilter.addEventListener('change', filterItems);
+    // Event listeners
+    searchInput.addEventListener('input', filterAndSort);
+    filetypeFilter.addEventListener('change', filterAndSort);
+
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const column = th.dataset.sort;
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'asc';
+            }
+            updateSortIcons();
+            filterAndSort();
+        });
+    });
+
+    pageSizeSelect.addEventListener('change', () => {
+        pageSize = parseInt(pageSizeSelect.value);
+        currentPage = 1;
+        renderTable();
+    });
+
+    prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+        }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredItems.length / pageSize);
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderTable();
+        }
+    });
 
     // View toggle
     function setView(view) {
@@ -440,9 +666,11 @@ document.addEventListener('DOMContentLoaded', function() {
     gridViewBtn.addEventListener('click', () => setView('grid'));
     listViewBtn.addEventListener('click', () => setView('list'));
 
-    // Restore saved view preference
+    // Initialize
+    filteredItems = [...allItems];
     const savedView = localStorage.getItem('eam_document_view') || 'grid';
     setView(savedView);
+    renderTable();
 });
 </script>
 {% endblock %}

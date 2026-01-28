@@ -1,0 +1,174 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'document' %}" class="mr-4 text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Similar Images</h1>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Found {{ total_groups }} group(s) with {{ total_similar }} similar image(s)
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <form method="get" class="flex items-center space-x-2">
+                        <label for="threshold" class="text-sm text-gray-600">Sensitivity:</label>
+                        <select name="threshold" id="threshold" onchange="this.form.submit()"
+                                class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="10" {% if threshold == 10 %}selected{% endif %}>Very Strict (10)</option>
+                            <option value="15" {% if threshold == 15 %}selected{% endif %}>Strict (15)</option>
+                            <option value="20" {% if threshold == 20 %}selected{% endif %}>Normal (20)</option>
+                            <option value="25" {% if threshold == 25 %}selected{% endif %}>Relaxed (25)</option>
+                            <option value="35" {% if threshold == 35 %}selected{% endif %}>Very Relaxed (35)</option>
+                            <option value="50" {% if threshold == 50 %}selected{% endif %}>Loose (50)</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {% if not similar_groups %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+            <svg class="mx-auto h-12 w-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <h3 class="mt-2 text-lg font-medium text-gray-900">No Similar Images Found</h3>
+            <p class="mt-1 text-sm text-gray-500">All images are unique at this sensitivity level. Try a more relaxed threshold.</p>
+            <a href="{% url 'document' %}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                Back to Documents
+            </a>
+        </div>
+        {% endif %}
+
+        {% for group in similar_groups %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    Similar Group: {{ group.count }} images
+                </h2>
+            </div>
+
+            <form method="post" action="{% url 'document_merge_duplicates' %}" onsubmit="return validateMergeForm(this);">
+                {% csrf_token %}
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-6">
+                    {% for item in group.images %}
+                    <div class="relative group">
+                        <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-400 transition-colors">
+                            {% if item.document.get_file_url %}
+                            <img src="{{ item.document.get_file_url }}"
+                                 alt="{{ item.document.name }}"
+                                 class="w-full h-full object-cover">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            {% endif %}
+
+                            <!-- Similarity badge -->
+                            <div class="absolute top-2 right-2">
+                                {% if item.similarity >= 95 %}
+                                <span class="px-2 py-1 text-xs font-bold rounded bg-red-500 text-white">{{ item.similarity|floatformat:0 }}%</span>
+                                {% elif item.similarity >= 85 %}
+                                <span class="px-2 py-1 text-xs font-bold rounded bg-orange-500 text-white">{{ item.similarity|floatformat:0 }}%</span>
+                                {% elif item.similarity >= 75 %}
+                                <span class="px-2 py-1 text-xs font-bold rounded bg-yellow-500 text-white">{{ item.similarity|floatformat:0 }}%</span>
+                                {% else %}
+                                <span class="px-2 py-1 text-xs font-bold rounded bg-gray-500 text-white">{{ item.similarity|floatformat:0 }}%</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mt-2 px-1">
+                            <a href="{% url 'document_detail' model_id=item.document.id %}" class="text-sm font-medium text-gray-900 hover:text-blue-600 truncate block" title="{{ item.document.name }}">
+                                {{ item.document.name|truncatechars:20 }}
+                            </a>
+                            <p class="text-xs text-gray-500" title="{{ item.document.uploaded_at|date:'F d, Y g:i A' }}">
+                                {{ item.document.uploaded_at|timesince }} ago
+                            </p>
+                            {% if item.document.get_file_size %}
+                            <p class="text-xs text-gray-400">{{ item.document.get_file_size|filesizeformat }}</p>
+                            {% endif %}
+
+                            <!-- Keep/Delete controls -->
+                            <div class="mt-2 flex items-center space-x-3">
+                                <label class="flex items-center cursor-pointer" title="Keep this image">
+                                    <input type="radio" name="keep_id" value="{{ item.document.id }}"
+                                           class="h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500"
+                                           {% if forloop.first %}checked{% endif %}>
+                                    <span class="ml-1 text-xs text-green-600 font-medium">Keep</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer" title="Delete this image">
+                                    <input type="checkbox" name="delete_ids" value="{{ item.document.id }}"
+                                           class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                    <span class="ml-1 text-xs text-red-600 font-medium">Delete</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                    <button type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Merge Selected
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function validateMergeForm(form) {
+    const keepId = form.querySelector('input[name="keep_id"]:checked');
+    const deleteCheckboxes = form.querySelectorAll('input[name="delete_ids"]:checked');
+
+    if (!keepId) {
+        alert('Please select an image to keep.');
+        return false;
+    }
+
+    if (deleteCheckboxes.length === 0) {
+        alert('Please select at least one image to delete.');
+        return false;
+    }
+
+    for (const cb of deleteCheckboxes) {
+        if (cb.value === keepId.value) {
+            alert('You cannot delete the image you selected to keep.');
+            return false;
+        }
+    }
+
+    const deleteCount = deleteCheckboxes.length;
+    return confirm(`Delete ${deleteCount} image(s) and move their relations to the kept image?`);
+}
+
+// Auto-uncheck delete when keep is selected
+document.querySelectorAll('input[name="keep_id"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const form = this.closest('form');
+        const deleteCheckbox = form.querySelector(`input[name="delete_ids"][value="${this.value}"]`);
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = false;
+        }
+    });
+});
+</script>
+{% endblock %}
