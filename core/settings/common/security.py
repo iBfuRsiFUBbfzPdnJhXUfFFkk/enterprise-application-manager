@@ -1,3 +1,4 @@
+import socket
 from json import loads
 
 from core.settings.common.environment import env
@@ -5,15 +6,28 @@ from core.settings.common.environment import env
 SECRET_KEY: str = env(var='DJANGO_SECRET_KEY')
 ALLOWED_HOSTS: list[str] = loads(s=env(default='["127.0.0.1","localhost"]', var='ALLOWED_HOSTS'))
 
+# Get hostname for dynamic CSRF origins
+_hostname = socket.gethostname().split('.')[0].lower()
+
 # CSRF Trusted Origins for HTTPS access
-# Base origins that are always trusted
+# Includes all supported hostname variants with the default port (50478)
 CSRF_TRUSTED_ORIGINS: list[str] = [
+    # Localhost variants
     'https://localhost',
+    'https://localhost:50478',
     'https://127.0.0.1',
+    'https://127.0.0.1:50478',
+    # Hostname variants (mDNS, .dev, .test)
+    f'https://{_hostname}.local',
+    f'https://{_hostname}.local:50478',
+    f'https://{_hostname}.dev',
+    f'https://{_hostname}.dev:50478',
+    f'https://{_hostname}.test',
+    f'https://{_hostname}.test:50478',
 ]
 
-# Add extra origins from environment variable (e.g., for .local domain access)
-# Format: comma-separated list of URLs like "https://hostname.local:50478,https://other-host:8443"
+# Add extra origins from environment variable (e.g., for custom domains or ports)
+# Format: comma-separated list of URLs like "https://custom-domain.com,https://other-host:8443"
 csrf_extra = env(default='', var='CSRF_TRUSTED_ORIGINS_EXTRA')
 if csrf_extra:
     CSRF_TRUSTED_ORIGINS.extend([origin.strip() for origin in csrf_extra.split(',') if origin.strip()])

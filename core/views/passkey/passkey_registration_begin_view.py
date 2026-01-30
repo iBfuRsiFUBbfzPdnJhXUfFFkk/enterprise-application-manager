@@ -14,6 +14,7 @@ from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 
 from core.models.passkey_challenge import CHALLENGE_TYPE_REGISTRATION, PasskeyChallenge
 from core.models.user_passkey import UserPasskey
+from core.utilities.webauthn import get_webauthn_rp_id
 
 
 @login_required
@@ -31,8 +32,11 @@ def passkey_registration_begin_view(request: HttpRequest) -> JsonResponse:
         if not request.session.session_key:
             request.session.create()
 
-        # Get list of existing credentials to exclude
-        existing_passkeys = UserPasskey.objects.filter(user=request.user)
+        # Get dynamic RP_ID based on current hostname
+        rp_id = get_webauthn_rp_id(request)
+
+        # Get list of existing credentials to exclude (only for current RP_ID)
+        existing_passkeys = UserPasskey.objects.filter(user=request.user, rp_id=rp_id)
         exclude_credentials = [
             {'id': base64url_to_bytes(passkey.credential_id), 'type': 'public-key'}
             for passkey in existing_passkeys
@@ -40,7 +44,7 @@ def passkey_registration_begin_view(request: HttpRequest) -> JsonResponse:
 
         # Generate registration options
         options = generate_registration_options(
-            rp_id=settings.WEBAUTHN_RP_ID,
+            rp_id=rp_id,
             rp_name=settings.WEBAUTHN_RP_NAME,
             user_id=str(request.user.id).encode('utf-8'),
             user_name=request.user.username,

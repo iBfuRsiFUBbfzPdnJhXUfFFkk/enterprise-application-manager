@@ -20,6 +20,7 @@ class UserPasskey(AbstractBaseModel):
     backup_eligible: bool = models.BooleanField(null=True, blank=True, default=False)
     backup_state: bool = models.BooleanField(null=True, blank=True, default=False)
     user_verified: bool = models.BooleanField(null=True, blank=True, default=False)
+    rp_id: str = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     last_used_at = models.DateTimeField(null=True, blank=True)
 

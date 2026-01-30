@@ -1324,6 +1324,10 @@ DNS.1 = localhost
 DNS.2 = $Hostname
 DNS.3 = $Hostname.local
 DNS.4 = *.$Hostname.local
+DNS.5 = $Hostname.dev
+DNS.6 = *.$Hostname.dev
+DNS.7 = $Hostname.test
+DNS.8 = *.$Hostname.test
 IP.1 = 127.0.0.1
 IP.2 = ::1
 "@
@@ -1402,6 +1406,8 @@ IP.2 = ::1
     Write-Host "  - 127.0.0.1"
     Write-Host "  - $Hostname"
     Write-Host "  - $Hostname.local"
+    Write-Host "  - $Hostname.dev"
+    Write-Host "  - $Hostname.test"
     if ($LocalIP) {
         Write-Host "  - $LocalIP"
     }
@@ -1909,7 +1915,12 @@ function Show-OpenBrowser {
     Write-Host "  1) https://localhost:$WebPort"
     Write-Host "  2) https://127.0.0.1:$WebPort"
     Write-Host "  3) https://${networkIP}:$WebPort (network IP)"
-    Write-Host "  4) https://${hostname}.local:$WebPort (network .local domain)"
+    Write-Host "  4) https://${hostname}.local:$WebPort (mDNS)"
+    Write-Host "  5) https://${hostname}.dev:$WebPort"
+    Write-Host "  6) https://${hostname}.test:$WebPort"
+    Write-Host ""
+    Write-Host "  Note: Passkeys are domain-specific. A passkey registered"
+    Write-Host "        on localhost won't work on ${hostname}.local"
     Write-Host ""
     Write-Host "  0) Back"
     Write-Host "  q) Exit script"
@@ -1926,6 +1937,8 @@ function Show-OpenBrowser {
         '2' { $url = "https://127.0.0.1:$WebPort" }
         '3' { $url = "https://${networkIP}:$WebPort" }
         '4' { $url = "https://${hostname}.local:$WebPort" }
+        '5' { $url = "https://${hostname}.dev:$WebPort" }
+        '6' { $url = "https://${hostname}.test:$WebPort" }
         '0' { return }
         { $_ -in 'q', 'Q' } {
             Clear-Host

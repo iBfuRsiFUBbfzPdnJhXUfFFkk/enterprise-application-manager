@@ -11,6 +11,7 @@ from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 
 from core.models.passkey_challenge import CHALLENGE_TYPE_AUTHENTICATION, PasskeyChallenge
 from core.models.user_passkey import UserPasskey
+from core.utilities.webauthn import get_webauthn_rp_id, get_webauthn_origin
 
 
 @require_http_methods(['POST'])
@@ -69,12 +70,23 @@ def passkey_authentication_complete_view(request: HttpRequest) -> JsonResponse:
             type=data['type'],
         )
 
+        # Get dynamic RP_ID and origin based on current hostname
+        rp_id = get_webauthn_rp_id(request)
+        origin = get_webauthn_origin(request)
+
+        # Verify the passkey was registered on this domain
+        if passkey.rp_id and passkey.rp_id != rp_id:
+            return JsonResponse(
+                {'success': False, 'error': f'Passkey was registered on {passkey.rp_id}, not {rp_id}'},
+                status=400,
+            )
+
         # Verify the authentication response
         verification = verify_authentication_response(
             credential=credential,
             expected_challenge=base64url_to_bytes(challenge.challenge),
-            expected_rp_id=settings.WEBAUTHN_RP_ID,
-            expected_origin=settings.WEBAUTHN_ORIGIN,
+            expected_rp_id=rp_id,
+            expected_origin=origin,
             credential_public_key=base64url_to_bytes(passkey.public_key),
             credential_current_sign_count=passkey.sign_count,
         )

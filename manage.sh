@@ -1194,6 +1194,10 @@ DNS.1 = localhost
 DNS.2 = ${HOSTNAME}
 DNS.3 = ${HOSTNAME}.local
 DNS.4 = *.${HOSTNAME}.local
+DNS.5 = ${HOSTNAME}.dev
+DNS.6 = *.${HOSTNAME}.dev
+DNS.7 = ${HOSTNAME}.test
+DNS.8 = *.${HOSTNAME}.test
 IP.1 = 127.0.0.1
 IP.2 = ::1
 EOF
@@ -1205,28 +1209,31 @@ EOF
 
     # Generate private key
     print_info "Generating private key..."
-    if ! openssl genrsa -out "${CERTS_DIR}/privkey.pem" 2048 2>&1 | grep -v "^Generating"; then
+    openssl genrsa -out "${CERTS_DIR}/privkey.pem" 2048 2>/dev/null
+    if [ ! -f "${CERTS_DIR}/privkey.pem" ]; then
         print_error "Failed to generate private key"
         return 1
     fi
 
     # Generate certificate signing request
     print_info "Generating certificate signing request..."
-    if ! openssl req -new -key "${CERTS_DIR}/privkey.pem" \
+    openssl req -new -key "${CERTS_DIR}/privkey.pem" \
         -out "${CERTS_DIR}/cert.csr" \
-        -config "${CERTS_DIR}/openssl.cnf" 2>&1 | grep -v "^..*"; then
+        -config "${CERTS_DIR}/openssl.cnf" 2>/dev/null
+    if [ ! -f "${CERTS_DIR}/cert.csr" ]; then
         print_error "Failed to generate certificate signing request"
         return 1
     fi
 
     # Generate self-signed certificate (valid for 365 days)
     print_info "Generating self-signed certificate (valid for 365 days)..."
-    if ! openssl x509 -req -days 365 \
+    openssl x509 -req -days 365 \
         -in "${CERTS_DIR}/cert.csr" \
         -signkey "${CERTS_DIR}/privkey.pem" \
         -out "${CERTS_DIR}/fullchain.pem" \
         -extensions v3_req \
-        -extfile "${CERTS_DIR}/openssl.cnf" 2>&1 | grep -v "^..*"; then
+        -extfile "${CERTS_DIR}/openssl.cnf" 2>/dev/null
+    if [ ! -f "${CERTS_DIR}/fullchain.pem" ]; then
         print_error "Failed to generate self-signed certificate"
         rm -f "${CERTS_DIR}/cert.csr"
         return 1
@@ -1251,6 +1258,8 @@ EOF
     echo "  - 127.0.0.1"
     echo "  - ${HOSTNAME}"
     echo "  - ${HOSTNAME}.local"
+    echo "  - ${HOSTNAME}.dev"
+    echo "  - ${HOSTNAME}.test"
     if [ -n "$LOCAL_IP" ]; then
         echo "  - ${LOCAL_IP}"
     fi
@@ -1664,7 +1673,12 @@ open_browser() {
     echo "  1) https://localhost:${WEB_PORT}"
     echo "  2) https://127.0.0.1:${WEB_PORT}"
     echo "  3) https://${NETWORK_IP}:${WEB_PORT} (network IP)"
-    echo "  4) https://${HOSTNAME}.local:${WEB_PORT} (network .local domain)"
+    echo "  4) https://${HOSTNAME}.local:${WEB_PORT} (mDNS)"
+    echo "  5) https://${HOSTNAME}.dev:${WEB_PORT}"
+    echo "  6) https://${HOSTNAME}.test:${WEB_PORT}"
+    echo ""
+    echo "  Note: Passkeys are domain-specific. A passkey registered"
+    echo "        on localhost won't work on ${HOSTNAME}.local"
     echo ""
     echo "  0) Back"
     echo "  q) Exit script"
@@ -1687,6 +1701,12 @@ open_browser() {
             ;;
         4)
             url="https://${HOSTNAME}.local:${WEB_PORT}"
+            ;;
+        5)
+            url="https://${HOSTNAME}.dev:${WEB_PORT}"
+            ;;
+        6)
+            url="https://${HOSTNAME}.test:${WEB_PORT}"
             ;;
         0)
             return

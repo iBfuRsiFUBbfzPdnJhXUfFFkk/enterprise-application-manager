@@ -13,6 +13,7 @@ from webauthn.helpers import base64url_to_bytes, bytes_to_base64url
 
 from core.models.passkey_challenge import CHALLENGE_TYPE_REGISTRATION, PasskeyChallenge
 from core.models.user_passkey import UserPasskey
+from core.utilities.webauthn import get_webauthn_rp_id, get_webauthn_origin
 
 
 @login_required
@@ -63,15 +64,19 @@ def passkey_registration_complete_view(request: HttpRequest) -> JsonResponse:
             type=data['type'],
         )
 
+        # Get dynamic RP_ID and origin based on current hostname
+        rp_id = get_webauthn_rp_id(request)
+        origin = get_webauthn_origin(request)
+
         # Verify the registration response
         verification = verify_registration_response(
             credential=credential,
             expected_challenge=base64url_to_bytes(challenge.challenge),
-            expected_rp_id=settings.WEBAUTHN_RP_ID,
-            expected_origin=settings.WEBAUTHN_ORIGIN,
+            expected_rp_id=rp_id,
+            expected_origin=origin,
         )
 
-        # Create UserPasskey record
+        # Create UserPasskey record with rp_id to track which domain it was registered on
         passkey = UserPasskey.objects.create(
             user=request.user,
             name=passkey_name,
@@ -84,6 +89,7 @@ def passkey_registration_complete_view(request: HttpRequest) -> JsonResponse:
             backup_eligible=verification.credential_backed_up,
             backup_state=verification.credential_backed_up,
             user_verified=verification.user_verified,
+            rp_id=rp_id,
         )
 
         # Mark challenge as used

@@ -1,19 +1,25 @@
 from core.settings.common.environment import env
 
 # WebAuthn / Passkey Configuration
+#
+# MULTI-HOSTNAME SUPPORT:
+# The RP_ID and origin are now dynamically determined from the request hostname.
+# This allows passkeys to work on multiple hostnames (localhost, hostname.local, etc.)
+#
+# IMPORTANT: Passkeys are domain-specific due to WebAuthn spec constraints.
+# A passkey registered on localhost will NOT work on hostname.local.
+# Users must register separate passkeys for each domain they use.
 
 # Relying Party (RP) Name - displayed to users during passkey registration
 WEBAUTHN_RP_NAME: str = env(var='WEBAUTHN_RP_NAME', default='Enterprise Application Manager')
 
-# Relying Party ID - must match the domain (without port)
-# For localhost development: 'localhost'
-# For production: 'yourdomain.com'
-WEBAUTHN_RP_ID: str = env(var='WEBAUTHN_RP_ID', default='localhost')
+# Default Relying Party ID (for reference only - actual RP_ID is derived from request)
+# The RP_ID is extracted from the request hostname (without port)
+WEBAUTHN_DEFAULT_RP_ID: str = env(var='WEBAUTHN_RP_ID', default='localhost')
 
-# Expected origin(s) for WebAuthn ceremonies
-# For local development: http://localhost:8000 or https://localhost
-# For production: https://yourdomain.com
-WEBAUTHN_ORIGIN: str = env(var='WEBAUTHN_ORIGIN', default='http://localhost:8000')
+# Default origin (for reference only - actual origin is derived from request)
+# The origin is constructed from request scheme + host
+WEBAUTHN_DEFAULT_ORIGIN: str = env(var='WEBAUTHN_ORIGIN', default='http://localhost:8000')
 
 # Challenge timeout (in milliseconds) - default 5 minutes
 WEBAUTHN_CHALLENGE_TIMEOUT_MS: int = 300000  # 5 minutes
