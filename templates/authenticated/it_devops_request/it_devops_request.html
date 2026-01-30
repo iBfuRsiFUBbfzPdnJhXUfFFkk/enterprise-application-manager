@@ -67,6 +67,15 @@
                         <option value="low">Low</option>
                     </select>
                 </div>
+
+                <!-- Show Completed Toggle -->
+                <div class="flex items-end">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="show-completed" class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-700">Show completed</span>
+                    </label>
+                </div>
             </div>
 
             <!-- View Toggle and Result Count -->
@@ -278,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search');
     const statusFilter = document.getElementById('status-filter');
     const priorityFilter = document.getElementById('priority-filter');
+    const showCompletedToggle = document.getElementById('show-completed');
     const gridViewBtn = document.getElementById('grid-view-btn');
     const listViewBtn = document.getElementById('list-view-btn');
     const gridView = document.getElementById('grid-view');
@@ -308,6 +318,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchTerm = searchInput.value.toLowerCase();
         const statusValue = statusFilter.value.toLowerCase();
         const priorityValue = priorityFilter.value.toLowerCase();
+        const showCompleted = showCompletedToggle.checked;
 
         const gridCards = document.querySelectorAll('.request-card');
         const listRows = document.querySelectorAll('.request-row');
@@ -324,8 +335,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const matchesSearch = documentId.includes(searchTerm) || name.includes(searchTerm) || description.includes(searchTerm);
             const matchesStatus = !statusValue || status === statusValue;
             const matchesPriority = !priorityValue || priority === priorityValue;
+            const matchesCompleted = showCompleted || status !== 'completed';
 
-            if (matchesSearch && matchesStatus && matchesPriority) {
+            if (matchesSearch && matchesStatus && matchesPriority && matchesCompleted) {
                 card.classList.remove('hidden');
                 visibleCount++;
             } else {
@@ -344,8 +356,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const matchesSearch = documentId.includes(searchTerm) || name.includes(searchTerm) || description.includes(searchTerm);
             const matchesStatus = !statusValue || status === statusValue;
             const matchesPriority = !priorityValue || priority === priorityValue;
+            const matchesCompleted = showCompleted || status !== 'completed';
 
-            if (matchesSearch && matchesStatus && matchesPriority) {
+            if (matchesSearch && matchesStatus && matchesPriority && matchesCompleted) {
                 row.classList.remove('hidden');
             } else {
                 row.classList.add('hidden');
@@ -359,6 +372,10 @@ document.addEventListener('DOMContentLoaded', function() {
     searchInput.addEventListener('input', filterRequests);
     statusFilter.addEventListener('change', filterRequests);
     priorityFilter.addEventListener('change', filterRequests);
+    showCompletedToggle.addEventListener('change', filterRequests);
+
+    // Run filter on page load to hide completed by default
+    filterRequests();
 });
 </script>
 {% endblock %}

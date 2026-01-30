@@ -68,4 +68,4 @@ class ITDevOpsRequest(AbstractBaseModel, AbstractComment, AbstractName):
             return "Untitled Request"
 
     class Meta:
-        ordering = ["-date_requested", "-id"]
+        ordering = ["-id"]  # Newest first (by creation order)

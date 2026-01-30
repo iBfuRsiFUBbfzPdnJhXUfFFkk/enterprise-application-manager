@@ -62,9 +62,20 @@
                         class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Cancel
                 </button>
+                <button type="button" id="saveAndAddAnotherLink"
+                        class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700">
+                    <span id="saveAndAddAnotherText">Save & Add Another</span>
+                    <span id="saveAndAddAnotherSpinner" class="hidden">
+                        <svg class="animate-spin h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                    </span>
+                </button>
                 <button type="submit" id="saveLinkModal"
                         class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
-                    <span id="saveLinkText">Save Link</span>
+                    <span id="saveLinkText">Save & Close</span>
                     <span id="saveLinkSpinner" class="hidden">
                         <svg class="animate-spin h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -90,6 +101,9 @@
     const saveButton = document.getElementById('saveLinkModal');
     const saveText = document.getElementById('saveLinkText');
     const saveSpinner = document.getElementById('saveLinkSpinner');
+    const saveAndAddAnotherButton = document.getElementById('saveAndAddAnotherLink');
+    const saveAndAddAnotherText = document.getElementById('saveAndAddAnotherText');
+    const saveAndAddAnotherSpinner = document.getElementById('saveAndAddAnotherSpinner');
 
     // Callback to be set by the page using this modal
     window.linkModalCallback = null;
@@ -100,6 +114,7 @@
         modal.classList.remove('hidden');
         form.reset();
         clearErrors();
+        document.getElementById('link_name').focus();
     };
 
     // Close modal function
@@ -145,15 +160,21 @@
         }
     });
 
-    // Form submission
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // Save link function (reusable for both buttons)
+    async function saveLink(closeAfterSave) {
         clearErrors();
 
+        // Determine which button's loading state to show
+        const button = closeAfterSave ? saveButton : saveAndAddAnotherButton;
+        const text = closeAfterSave ? saveText : saveAndAddAnotherText;
+        const spinner = closeAfterSave ? saveSpinner : saveAndAddAnotherSpinner;
+
         // Show loading state
+        button.disabled = true;
         saveButton.disabled = true;
-        saveText.classList.add('hidden');
-        saveSpinner.classList.remove('hidden');
+        saveAndAddAnotherButton.disabled = true;
+        text.classList.add('hidden');
+        spinner.classList.remove('hidden');
 
         try {
             const formData = {
@@ -179,7 +200,26 @@
                 if (window.linkModalCallback) {
                     window.linkModalCallback(data.link);
                 }
-                closeLinkModal();
+
+                if (closeAfterSave) {
+                    closeLinkModal();
+                } else {
+                    // Reset form but keep modal open for another entry
+                    form.reset();
+                    clearErrors();
+                    document.getElementById('link_name').focus();
+
+                    // Show brief success message
+                    const formError = document.getElementById('link_form_error');
+                    formError.textContent = '✓ Link added! Add another or click "Save & Close".';
+                    formError.classList.remove('hidden', 'text-red-600');
+                    formError.classList.add('text-green-600');
+                    setTimeout(() => {
+                        formError.classList.add('hidden');
+                        formError.classList.remove('text-green-600');
+                        formError.classList.add('text-red-600');
+                    }, 3000);
+                }
             } else {
                 // Show validation errors
                 if (data.errors) {
@@ -202,9 +242,22 @@
         } finally {
             // Reset loading state
             saveButton.disabled = false;
-            saveText.classList.remove('hidden');
-            saveSpinner.classList.add('hidden');
+            saveAndAddAnotherButton.disabled = false;
+            text.classList.remove('hidden');
+            spinner.classList.add('hidden');
         }
+    }
+
+    // Form submission (Save & Close)
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        await saveLink(true);
+    });
+
+    // Save & Add Another button
+    saveAndAddAnotherButton.addEventListener('click', async function(e) {
+        e.preventDefault();
+        await saveLink(false);
     });
 
     // Helper function to get CSRF token

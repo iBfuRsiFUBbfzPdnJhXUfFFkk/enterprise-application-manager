@@ -62,6 +62,45 @@
                 </div>
                 {% endif %}
 
+                <!-- Ask AI Helper -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg overflow-hidden w-full">
+                    <button type="button" id="ask-ai-toggle" class="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-purple-100 transition-colors duration-150">
+                        <div class="flex items-center">
+                            <svg class="h-5 w-5 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-semibold text-purple-900">Need help writing this request?</h3>
+                                <p class="text-xs text-purple-600">Copy a prompt to use with AI assistants</p>
+                            </div>
+                        </div>
+                        <svg id="ask-ai-chevron" class="h-5 w-5 text-purple-500 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div id="ask-ai-content" class="hidden px-6 pb-6">
+                        <div class="bg-white rounded-lg border border-purple-200 p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Prompt to copy</span>
+                                <button type="button" id="copy-ai-prompt" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 transition-colors duration-150">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span id="copy-btn-text">Copy</span>
+                                </button>
+                            </div>
+                            <textarea id="ai-prompt-text" readonly rows="8" class="w-full px-3 py-2 text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-md font-mono resize-none focus:outline-none focus:ring-2 focus:ring-purple-500">I need to make a request to my IT department for [describe what you need here].
+
+Give me a title, description, justification, expected outcome, additional notes, and supporting/related links (each having a URL, title, and description of the link).
+
+Format the response so I can easily copy each section into a form.</textarea>
+                            <p class="mt-2 text-xs text-gray-500">
+                                Replace <code class="bg-gray-100 px-1 rounded">[describe what you need here]</code> with your specific request, then paste into ChatGPT, Claude, or another AI assistant.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Basic Information -->
                 <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
                     <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -318,6 +357,40 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Ask AI Toggle
+    const askAiToggle = document.getElementById('ask-ai-toggle');
+    const askAiContent = document.getElementById('ask-ai-content');
+    const askAiChevron = document.getElementById('ask-ai-chevron');
+
+    if (askAiToggle) {
+        askAiToggle.addEventListener('click', function() {
+            askAiContent.classList.toggle('hidden');
+            askAiChevron.classList.toggle('rotate-180');
+        });
+    }
+
+    // Copy AI Prompt
+    const copyAiPromptBtn = document.getElementById('copy-ai-prompt');
+    const aiPromptText = document.getElementById('ai-prompt-text');
+    const copyBtnText = document.getElementById('copy-btn-text');
+
+    if (copyAiPromptBtn && aiPromptText) {
+        copyAiPromptBtn.addEventListener('click', function() {
+            aiPromptText.select();
+            aiPromptText.setSelectionRange(0, 99999); // For mobile
+            navigator.clipboard.writeText(aiPromptText.value).then(function() {
+                copyBtnText.textContent = 'Copied!';
+                copyAiPromptBtn.classList.remove('text-purple-700', 'bg-purple-100', 'hover:bg-purple-200');
+                copyAiPromptBtn.classList.add('text-green-700', 'bg-green-100');
+                setTimeout(function() {
+                    copyBtnText.textContent = 'Copy';
+                    copyAiPromptBtn.classList.add('text-purple-700', 'bg-purple-100', 'hover:bg-purple-200');
+                    copyAiPromptBtn.classList.remove('text-green-700', 'bg-green-100');
+                }, 2000);
+            });
+        });
+    }
+
     // Select Me button for requester
     const selectMeBtn = document.getElementById('select-me-btn-requester');
     if (selectMeBtn) {
