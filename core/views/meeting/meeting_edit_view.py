@@ -15,7 +15,13 @@ def meeting_edit_view(request: HttpRequest, model_id: int) -> HttpResponse:
     if request.method == 'POST':
         form = MeetingForm(request.POST, instance=meeting)
         if form.is_valid():
-            form.save()
+            meeting = form.save()
+
+            # Ensure organizer is in attendees
+            if meeting.organizer:
+                if not meeting.attendees.filter(pk=meeting.organizer.pk).exists():
+                    meeting.attendees.add(meeting.organizer)
+
             return redirect(to='meeting_detail', model_id=meeting.id)
     else:
         form = MeetingForm(instance=meeting)
