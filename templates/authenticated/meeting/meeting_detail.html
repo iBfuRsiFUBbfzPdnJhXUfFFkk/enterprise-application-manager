@@ -139,47 +139,44 @@
                             <span class="font-semibold text-green-600" id="attendance-count">{{ meeting.actual_attendees.count }}</span> / {{ meeting.attendees.count }} present
                         </div>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">Click to mark someone as absent</p>
+                    <p class="mt-1 text-xs text-gray-500">Click a row to toggle attendance</p>
                 </div>
-                <div class="px-6 py-6">
+                <div class="px-6 py-4">
                     {% if meeting.attendees.all %}
-                    <ul class="space-y-2" id="attendance-list">
+                    <ul class="space-y-1" id="attendance-list">
                         {% for attendee in meeting.attendees.all %}
-                        <li class="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
-                            data-attendee-id="{{ attendee.id }}">
-                            <div class="flex items-center text-sm text-gray-900">
-                                <svg class="h-5 w-5 text-gray-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                                </svg>
+                        <li class="attendance-row flex items-center justify-between py-2 px-3 rounded-lg cursor-pointer transition-all
+                            {% if attendee in meeting.actual_attendees.all %}
+                                bg-green-50 border border-green-200 hover:bg-green-100
+                            {% else %}
+                                bg-red-50 border border-red-200 hover:bg-red-100
+                            {% endif %}"
+                            data-attendee-id="{{ attendee.id }}"
+                            data-present="{% if attendee in meeting.actual_attendees.all %}true{% else %}false{% endif %}"
+                            onclick="toggleAttendance({{ meeting.id }}, {{ attendee.id }}, this)">
+                            <div class="flex items-center text-sm font-medium
+                                {% if attendee in meeting.actual_attendees.all %}text-green-900{% else %}text-red-900{% endif %}">
+                                <!-- Status icon -->
+                                <span class="icon-present {% if attendee not in meeting.actual_attendees.all %}hidden{% endif %}">
+                                    <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </span>
+                                <span class="icon-absent {% if attendee in meeting.actual_attendees.all %}hidden{% endif %}">
+                                    <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </span>
                                 {{ attendee.full_name_for_human }}
                             </div>
-                            <button type="button"
-                                    onclick="toggleAttendance({{ meeting.id }}, {{ attendee.id }}, this)"
-                                    class="attendance-btn inline-flex items-center px-3 py-1 text-xs font-medium rounded-md transition-colors
-                                    {% if attendee in meeting.actual_attendees.all %}
-                                        bg-green-100 text-green-800 hover:bg-red-100 hover:text-red-800
-                                    {% else %}
-                                        bg-red-100 text-red-800 hover:bg-green-100 hover:text-green-800
-                                    {% endif %}"
-                                    data-present="{% if attendee in meeting.actual_attendees.all %}true{% else %}false{% endif %}">
+                            <span class="status-text text-xs font-semibold px-2 py-1 rounded
                                 {% if attendee in meeting.actual_attendees.all %}
-                                <svg class="w-4 h-4 mr-1 icon-present" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                <svg class="w-4 h-4 mr-1 icon-absent hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                                <span class="status-text">Present</span>
+                                    bg-green-200 text-green-800
                                 {% else %}
-                                <svg class="w-4 h-4 mr-1 icon-present hidden" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                <svg class="w-4 h-4 mr-1 icon-absent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                                <span class="status-text">Absent</span>
-                                {% endif %}
-                            </button>
+                                    bg-red-200 text-red-800
+                                {% endif %}">
+                                {% if attendee in meeting.actual_attendees.all %}Present{% else %}Absent{% endif %}
+                            </span>
                         </li>
                         {% endfor %}
                     </ul>
@@ -582,7 +579,7 @@ function switchTab(tabName) {
 }
 
 // Toggle attendance via AJAX to preserve scroll position
-function toggleAttendance(meetingId, personId, button) {
+function toggleAttendance(meetingId, personId, row) {
     const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
     fetch(`/authenticated/meeting/${meetingId}/toggle-attendance/${personId}/`, {
@@ -596,25 +593,34 @@ function toggleAttendance(meetingId, personId, button) {
     .then(data => {
         if (data.success) {
             const isPresent = data.is_present;
-            const statusText = button.querySelector('.status-text');
-            const iconPresent = button.querySelector('.icon-present');
-            const iconAbsent = button.querySelector('.icon-absent');
+            const statusText = row.querySelector('.status-text');
+            const iconPresent = row.querySelector('.icon-present');
+            const iconAbsent = row.querySelector('.icon-absent');
+            const nameDiv = row.querySelector('div.flex');
 
-            // Update button state
-            button.dataset.present = isPresent ? 'true' : 'false';
+            // Update row state
+            row.dataset.present = isPresent ? 'true' : 'false';
             statusText.textContent = isPresent ? 'Present' : 'Absent';
 
-            // Toggle icons
+            // Toggle row styling
             if (isPresent) {
+                row.classList.remove('bg-red-50', 'border-red-200', 'hover:bg-red-100');
+                row.classList.add('bg-green-50', 'border-green-200', 'hover:bg-green-100');
+                nameDiv.classList.remove('text-red-900');
+                nameDiv.classList.add('text-green-900');
+                statusText.classList.remove('bg-red-200', 'text-red-800');
+                statusText.classList.add('bg-green-200', 'text-green-800');
                 iconPresent.classList.remove('hidden');
                 iconAbsent.classList.add('hidden');
-                button.classList.remove('bg-red-100', 'text-red-800', 'hover:bg-green-100', 'hover:text-green-800');
-                button.classList.add('bg-green-100', 'text-green-800', 'hover:bg-red-100', 'hover:text-red-800');
             } else {
+                row.classList.remove('bg-green-50', 'border-green-200', 'hover:bg-green-100');
+                row.classList.add('bg-red-50', 'border-red-200', 'hover:bg-red-100');
+                nameDiv.classList.remove('text-green-900');
+                nameDiv.classList.add('text-red-900');
+                statusText.classList.remove('bg-green-200', 'text-green-800');
+                statusText.classList.add('bg-red-200', 'text-red-800');
                 iconPresent.classList.add('hidden');
                 iconAbsent.classList.remove('hidden');
-                button.classList.remove('bg-green-100', 'text-green-800', 'hover:bg-red-100', 'hover:text-red-800');
-                button.classList.add('bg-red-100', 'text-red-800', 'hover:bg-green-100', 'hover:text-green-800');
             }
 
             // Update attendance count

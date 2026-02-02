@@ -27,6 +27,10 @@ def meeting_add_view(request: HttpRequest) -> HttpResponse:
                 if not meeting.attendees.filter(pk=person.pk).exists():
                     meeting.attendees.add(person)
 
+            # Mark all attendees as present by default
+            for attendee in meeting.attendees.all():
+                meeting.actual_attendees.add(attendee)
+
             return redirect(to='meeting_detail', model_id=meeting.id)
     else:
         # Pre-select current user as organizer if they have a Person mapping
