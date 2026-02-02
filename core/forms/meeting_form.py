@@ -1,16 +1,12 @@
-from django.forms import DateTimeInput, Textarea
+from django.forms import DateTimeInput, SelectMultiple, Textarea
 
 from core.forms.common.base_model_form import BaseModelForm
 from core.forms.common.base_model_form_meta import BaseModelFormMeta
-from core.forms.common.generic_multiple_choice_field import generic_multiple_choice_field
 from core.models.meeting import Meeting
 from core.models.person import Person
 
 
 class MeetingForm(BaseModelForm):
-    attendees = generic_multiple_choice_field(
-        queryset=Person.objects.all().order_by('name_last', 'name_first')
-    )
 
     class Meta(BaseModelFormMeta):
         model = Meeting
@@ -43,4 +39,14 @@ class MeetingForm(BaseModelForm):
             'agenda': Textarea(attrs={'rows': 4}),
             'minutes': Textarea(attrs={'rows': 8}),
             'comment': Textarea(attrs={'rows': 2}),
+            'attendees': SelectMultiple(),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['attendees'].queryset = Person.objects.all().order_by(
+            'name_last', 'name_first'
+        )
+        self.fields['organizer'].queryset = Person.objects.all().order_by(
+            'name_last', 'name_first'
+        )
