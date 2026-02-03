@@ -16,30 +16,31 @@ from core.models.user_bookmark import UserBookmark
 def link_create_ajax_view(request: HttpRequest) -> JsonResponse:
     """
     AJAX endpoint for creating a new link from a modal.
-    Automatically bookmarks the link for the current user.
+    Optionally bookmarks the link for the current user if create_bookmark is True.
     Optionally accepts folder_id to specify which folder to add bookmark to.
     Returns JSON with the newly created link data or validation errors.
     """
     try:
         data = json.loads(request.body)
-        folder_id = data.pop('folder_id', None)  # Extract folder_id
+        folder_id = data.pop('folder_id', None)
+        create_bookmark = data.pop('create_bookmark', False)
 
         form = LinkForm(data)
 
         if form.is_valid():
             link = form.save()
 
-            # Create bookmark with optional folder
-            folder = None
-            if folder_id:
-                folder = BookmarkFolder.objects.get(id=folder_id, user=request.user)
+            if create_bookmark:
+                folder = None
+                if folder_id:
+                    folder = BookmarkFolder.objects.get(id=folder_id, user=request.user)
 
-            UserBookmark.objects.create(
-                user=request.user,
-                link=link,
-                folder=folder,
-                order=0,
-            )
+                UserBookmark.objects.create(
+                    user=request.user,
+                    link=link,
+                    folder=folder,
+                    order=0,
+                )
 
             return JsonResponse({
                 'success': True,
