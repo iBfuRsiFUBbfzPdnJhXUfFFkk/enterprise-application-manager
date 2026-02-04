@@ -13,6 +13,13 @@ class ITDevOpsRequestForm(BaseModelForm):
         widget=SelectMultiple()
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set defaults for new instances only
+        if not self.instance.pk:
+            self.fields['status'].initial = 'draft'
+            self.fields['priority'].initial = 'low'
+
     class Meta(BaseModelFormMeta):
         model = ITDevOpsRequest
         widgets = {
