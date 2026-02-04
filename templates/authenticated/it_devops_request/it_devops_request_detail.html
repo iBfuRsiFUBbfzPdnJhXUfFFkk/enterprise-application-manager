@@ -328,7 +328,7 @@
                                             </span>
                                             {% endif %}
                                         </p>
-                                        <p class="text-xs text-gray-500">{{ update.datetime_created|date:"Y-m-d H:i" }}</p>
+                                        <p class="text-xs text-gray-500 cursor-help" title="{{ update.datetime_created|date:'Y-m-d H:i' }}">{{ update.datetime_created|timesince }} ago</p>
                                     </div>
                                     <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap">{{ update.comment }}</p>
                                 </div>
@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${update.author}
                             ${internalBadge}
                         </p>
-                        <p class="text-xs text-gray-500">${update.datetime_created}</p>
+                        <p class="text-xs text-gray-500 cursor-help" title="${update.datetime_created}">Just now</p>
                     </div>
                     <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap">${update.comment}</p>
                 </div>
