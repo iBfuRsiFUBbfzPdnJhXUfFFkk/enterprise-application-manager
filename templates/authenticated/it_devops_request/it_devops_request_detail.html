@@ -237,6 +237,20 @@
             </div>
             {% endif %}
 
+            <!-- Additional Notes -->
+            {% if comment_html %}
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
+                </div>
+                <div class="px-6 py-6">
+                    <div class="prose prose-sm max-w-none">
+                        {{ comment_html|safe }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
             <!-- Related Links -->
             {% if request.links.all %}
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -431,20 +445,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Additional Notes -->
-            {% if comment_html %}
-            <div class="bg-white shadow-md rounded-lg overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
-                </div>
-                <div class="px-6 py-6">
-                    <div class="prose prose-sm max-w-none">
-                        {{ comment_html|safe }}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>
