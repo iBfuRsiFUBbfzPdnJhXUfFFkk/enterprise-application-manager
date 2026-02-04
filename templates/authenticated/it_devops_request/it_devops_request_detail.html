@@ -1,6 +1,25 @@
 {% extends 'authenticated/base_authenticated.html' %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+    /* Markdown preview styling */
+    .markdown-preview {
+        min-height: 80px;
+    }
+    .markdown-preview p { margin-bottom: 0.5rem; }
+    .markdown-preview ul, .markdown-preview ol { margin-left: 1.5rem; margin-bottom: 0.5rem; }
+    .markdown-preview ul { list-style-type: disc; }
+    .markdown-preview ol { list-style-type: decimal; }
+    .markdown-preview code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.875rem; }
+    .markdown-preview pre { background-color: #f3f4f6; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; margin-bottom: 0.5rem; }
+    .markdown-preview pre code { background-color: transparent; padding: 0; }
+    .markdown-preview blockquote { border-left: 4px solid #d1d5db; padding-left: 1rem; margin-left: 0; color: #6b7280; }
+    .markdown-preview h1, .markdown-preview h2, .markdown-preview h3 { font-weight: 600; margin-bottom: 0.5rem; }
+    .markdown-preview a { color: #2563eb; text-decoration: underline; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
@@ -279,14 +298,24 @@
                 <div class="px-6 py-6">
                     <!-- Add Update Form -->
                     <div class="mb-6 pb-6 border-b border-gray-200">
-                        <h3 class="text-sm font-medium text-gray-700 mb-3">Add Update</h3>
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-medium text-gray-700">Add Update</h3>
+                            <div class="flex rounded-md shadow-sm" role="group">
+                                <button type="button" id="add-raw-btn" onclick="toggleAddPreview('raw')" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-l-md border border-blue-600">Raw</button>
+                                <button type="button" id="add-preview-btn" onclick="toggleAddPreview('preview')" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white rounded-r-md border border-gray-300 hover:bg-gray-50">Preview</button>
+                            </div>
+                        </div>
                         <form id="add-update-form" style="width: 100%; align-items: stretch;">
                             {% csrf_token %}
                             <div class="space-y-3" style="width: 100%;">
-                                <textarea id="update-comment"
-                                          rows="3"
-                                          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                          placeholder="Enter update details..."></textarea>
+                                <div id="add-raw-container">
+                                    <textarea id="update-comment"
+                                              rows="3"
+                                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                              placeholder="Enter update details... (Markdown supported)"></textarea>
+                                    <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, - lists, [links](url)</p>
+                                </div>
+                                <div id="add-preview-container" class="hidden w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 markdown-preview min-h-[80px]"></div>
                                 <div class="flex items-center justify-between">
                                     <label class="flex items-center">
                                         <input type="checkbox" id="update-internal" class="rounded text-blue-600 mr-2">
@@ -345,7 +374,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap" id="update-comment-{{ update.id }}">{{ update.comment }}</p>
+                                    <div class="mt-1 text-sm text-gray-600 markdown-preview markdown-content" id="update-comment-{{ update.id }}" data-raw="{{ update.comment|escapejs }}"></div>
                                 </div>
                             </div>
                             {% endfor %}
@@ -387,13 +416,23 @@
             </div>
             <div class="sm:flex sm:items-start">
                 <div class="w-full mt-3 text-center sm:mt-0 sm:text-left">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Edit Update</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Edit Update</h3>
+                        <div class="flex rounded-md shadow-sm" role="group">
+                            <button type="button" id="edit-raw-btn" onclick="toggleEditPreview('raw')" class="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-l-md border border-blue-600">Raw</button>
+                            <button type="button" id="edit-preview-btn" onclick="toggleEditPreview('preview')" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white rounded-r-md border border-gray-300 hover:bg-gray-50">Preview</button>
+                        </div>
+                    </div>
                     <form id="edit-update-form" style="width: 100%; align-items: stretch;">
                         <input type="hidden" id="edit-update-id">
                         <div class="space-y-4" style="width: 100%;">
                             <div>
                                 <label for="edit-update-comment" class="block text-sm font-medium text-gray-700 mb-2">Comment</label>
-                                <textarea id="edit-update-comment" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter update details..."></textarea>
+                                <div id="edit-raw-container">
+                                    <textarea id="edit-update-comment" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter update details... (Markdown supported)"></textarea>
+                                    <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, - lists, [links](url)</p>
+                                </div>
+                                <div id="edit-preview-container" class="hidden w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 markdown-preview min-h-[100px]"></div>
                             </div>
                             <div>
                                 <label class="flex items-center">
@@ -418,7 +457,71 @@
     </div>
 </div>
 
+<!-- Markdown Parser -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
+// Render markdown for all existing updates on page load
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.markdown-content').forEach(function(el) {
+        const rawContent = el.dataset.raw;
+        if (rawContent) {
+            el.innerHTML = marked.parse(rawContent);
+        }
+    });
+});
+
+// Toggle functions for Add Update form
+function toggleAddPreview(mode) {
+    const rawContainer = document.getElementById('add-raw-container');
+    const previewContainer = document.getElementById('add-preview-container');
+    const rawBtn = document.getElementById('add-raw-btn');
+    const previewBtn = document.getElementById('add-preview-btn');
+    const textarea = document.getElementById('update-comment');
+
+    if (mode === 'preview') {
+        rawContainer.classList.add('hidden');
+        previewContainer.classList.remove('hidden');
+        previewContainer.innerHTML = marked.parse(textarea.value || '*No content*');
+        rawBtn.classList.remove('text-white', 'bg-blue-600', 'border-blue-600');
+        rawBtn.classList.add('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        previewBtn.classList.remove('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        previewBtn.classList.add('text-white', 'bg-blue-600', 'border-blue-600');
+    } else {
+        rawContainer.classList.remove('hidden');
+        previewContainer.classList.add('hidden');
+        previewBtn.classList.remove('text-white', 'bg-blue-600', 'border-blue-600');
+        previewBtn.classList.add('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        rawBtn.classList.remove('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        rawBtn.classList.add('text-white', 'bg-blue-600', 'border-blue-600');
+    }
+}
+
+// Toggle functions for Edit Update modal
+function toggleEditPreview(mode) {
+    const rawContainer = document.getElementById('edit-raw-container');
+    const previewContainer = document.getElementById('edit-preview-container');
+    const rawBtn = document.getElementById('edit-raw-btn');
+    const previewBtn = document.getElementById('edit-preview-btn');
+    const textarea = document.getElementById('edit-update-comment');
+
+    if (mode === 'preview') {
+        rawContainer.classList.add('hidden');
+        previewContainer.classList.remove('hidden');
+        previewContainer.innerHTML = marked.parse(textarea.value || '*No content*');
+        rawBtn.classList.remove('text-white', 'bg-blue-600', 'border-blue-600');
+        rawBtn.classList.add('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        previewBtn.classList.remove('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        previewBtn.classList.add('text-white', 'bg-blue-600', 'border-blue-600');
+    } else {
+        rawContainer.classList.remove('hidden');
+        previewContainer.classList.add('hidden');
+        previewBtn.classList.remove('text-white', 'bg-blue-600', 'border-blue-600');
+        previewBtn.classList.add('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        rawBtn.classList.remove('text-gray-700', 'bg-white', 'border-gray-300', 'hover:bg-gray-50');
+        rawBtn.classList.add('text-white', 'bg-blue-600', 'border-blue-600');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('add-update-form');
     const commentTextarea = document.getElementById('update-comment');
@@ -519,7 +622,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </button>
                         </div>
                     </div>
-                    <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap" id="update-comment-${update.id}">${update.comment}</p>
+                    <div class="mt-1 text-sm text-gray-600 markdown-preview" id="update-comment-${update.id}" data-raw="${update.comment.replace(/"/g, '&quot;')}">${marked.parse(update.comment)}</div>
                 </div>
             </div>
         `;
@@ -546,6 +649,8 @@ function openEditModal(updateId, comment, isInternal) {
     document.getElementById('edit-update-comment').value = comment;
     document.getElementById('edit-update-internal').checked = isInternal;
     document.getElementById('edit-update-error').classList.add('hidden');
+    // Reset to raw view
+    toggleEditPreview('raw');
     document.getElementById('edit-update-modal').classList.remove('hidden');
 }
 
@@ -619,13 +724,53 @@ document.getElementById('edit-update-form').addEventListener('submit', function(
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update the comment text in DOM
+            // Update the comment markdown in DOM
             const commentEl = document.getElementById(`update-comment-${updateId}`);
             if (commentEl) {
-                commentEl.textContent = data.update.comment;
+                commentEl.innerHTML = marked.parse(data.update.comment);
+                commentEl.dataset.raw = data.update.comment;
             }
-            // Reload page to reflect internal note styling changes
-            location.reload();
+
+            // Update internal note styling
+            const updateItem = document.querySelector(`.update-item[data-update-id="${updateId}"]`);
+            if (updateItem) {
+                const iconContainer = updateItem.querySelector('.h-8.w-8');
+                const svgIcon = updateItem.querySelector('.h-4.w-4');
+
+                if (data.update.is_internal_note) {
+                    updateItem.classList.add('bg-red-50', 'p-3', 'rounded-lg', 'border', 'border-red-100');
+                    if (iconContainer) {
+                        iconContainer.classList.remove('bg-blue-100');
+                        iconContainer.classList.add('bg-red-100');
+                    }
+                    if (svgIcon) {
+                        svgIcon.classList.remove('text-blue-600');
+                        svgIcon.classList.add('text-red-600');
+                    }
+                    // Add internal badge if not present
+                    const authorP = updateItem.querySelector('.text-sm.font-medium.text-gray-900');
+                    if (authorP && !authorP.querySelector('.bg-gray-100')) {
+                        authorP.insertAdjacentHTML('beforeend', '<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Internal</span>');
+                    }
+                } else {
+                    updateItem.classList.remove('bg-red-50', 'p-3', 'rounded-lg', 'border', 'border-red-100');
+                    if (iconContainer) {
+                        iconContainer.classList.remove('bg-red-100');
+                        iconContainer.classList.add('bg-blue-100');
+                    }
+                    if (svgIcon) {
+                        svgIcon.classList.remove('text-red-600');
+                        svgIcon.classList.add('text-blue-600');
+                    }
+                    // Remove internal badge if present
+                    const internalBadge = updateItem.querySelector('.bg-gray-100.text-gray-800');
+                    if (internalBadge) {
+                        internalBadge.remove();
+                    }
+                }
+            }
+
+            closeEditModal();
         } else {
             errorDiv.textContent = data.error;
             errorDiv.classList.remove('hidden');
