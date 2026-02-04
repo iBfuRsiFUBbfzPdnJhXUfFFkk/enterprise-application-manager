@@ -632,6 +632,18 @@ document.addEventListener('DOMContentLoaded', function() {
             width: '100%'
         });
 
+        $('#id_application').select2({
+            placeholder: 'Search for an application...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#id_project').select2({
+            placeholder: 'Search for a project...',
+            allowClear: true,
+            width: '100%'
+        });
+
         // Update Select Me button to work with Select2
         const selectMeBtn = document.getElementById('select-me-btn-requester');
         if (selectMeBtn) {
