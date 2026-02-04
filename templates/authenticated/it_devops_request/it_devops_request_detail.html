@@ -328,7 +328,10 @@
                                             </span>
                                             {% endif %}
                                         </p>
-                                        <p class="text-xs text-gray-500 cursor-help" title="{{ update.datetime_created|date:'Y-m-d H:i' }}">{{ update.datetime_created|timesince }} ago</p>
+                                        <span class="relative group">
+                                            <span class="text-xs text-gray-500 cursor-help">{{ update.datetime_created|timesince }} ago</span>
+                                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">{{ update.datetime_created|date:'Y-m-d H:i' }}</span>
+                                        </span>
                                     </div>
                                     <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap">{{ update.comment }}</p>
                                 </div>
@@ -439,7 +442,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${update.author}
                             ${internalBadge}
                         </p>
-                        <p class="text-xs text-gray-500 cursor-help" title="${update.datetime_created}">Just now</p>
+                        <span class="relative group">
+                            <span class="text-xs text-gray-500 cursor-help">Just now</span>
+                            <span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">${update.datetime_created}</span>
+                        </span>
                     </div>
                     <p class="mt-1 text-sm text-gray-600 whitespace-pre-wrap">${update.comment}</p>
                 </div>
