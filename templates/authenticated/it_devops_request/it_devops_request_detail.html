@@ -316,6 +316,21 @@
                                     <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, - lists, [links](url)</p>
                                 </div>
                                 <div id="add-preview-container" class="hidden w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 markdown-preview min-h-[80px]"></div>
+                                <!-- File Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
+                                    <div class="flex items-center space-x-2">
+                                        <label class="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                            </svg>
+                                            Attach Files
+                                            <input type="file" id="update-documents" name="documents" multiple class="hidden">
+                                        </label>
+                                        <span id="file-count" class="text-sm text-gray-500"></span>
+                                    </div>
+                                    <div id="file-list" class="mt-2 space-y-1"></div>
+                                </div>
                                 <div class="flex items-center justify-between">
                                     <label class="flex items-center">
                                         <input type="checkbox" id="update-internal" class="rounded text-blue-600 mr-2">
@@ -375,6 +390,18 @@
                                         </div>
                                     </div>
                                     <div class="mt-1 text-sm text-gray-600 markdown-preview markdown-content" id="update-comment-{{ update.id }}" data-raw="{{ update.comment|escapejs }}"></div>
+                                    {% if update.documents.exists %}
+                                    <div class="mt-2 flex flex-wrap gap-2" id="update-documents-{{ update.id }}">
+                                        {% for doc in update.documents.all %}
+                                        <a href="{{ doc.get_file_url }}" target="_blank" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded border border-blue-200 hover:bg-blue-100">
+                                            <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                            </svg>
+                                            {{ doc.name }}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endfor %}
@@ -526,9 +553,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('add-update-form');
     const commentTextarea = document.getElementById('update-comment');
     const internalCheckbox = document.getElementById('update-internal');
+    const fileInput = document.getElementById('update-documents');
+    const fileCountSpan = document.getElementById('file-count');
+    const fileListDiv = document.getElementById('file-list');
     const errorDiv = document.getElementById('update-error');
     const successDiv = document.getElementById('update-success');
     const updatesList = document.getElementById('updates-list');
+
+    // File input change handler
+    fileInput.addEventListener('change', function() {
+        const files = this.files;
+        if (files.length > 0) {
+            fileCountSpan.textContent = `${files.length} file(s) selected`;
+            fileListDiv.innerHTML = '';
+            for (let i = 0; i < files.length; i++) {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'text-xs text-gray-600 flex items-center';
+                fileDiv.innerHTML = `
+                    <svg class="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    ${files[i].name}
+                `;
+                fileListDiv.appendChild(fileDiv);
+            }
+        } else {
+            fileCountSpan.textContent = '';
+            fileListDiv.innerHTML = '';
+        }
+    });
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -542,17 +595,24 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get CSRF token
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+        // Use FormData to support file uploads
+        const formData = new FormData();
+        formData.append('comment', comment);
+        formData.append('is_internal_note', internalCheckbox.checked ? 'true' : 'false');
+
+        // Add files
+        const files = fileInput.files;
+        for (let i = 0; i < files.length; i++) {
+            formData.append('documents', files[i]);
+        }
+
         // Submit via AJAX
         fetch('{% url "it_devops_request_update_add" model_id=request.id %}', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify({
-                comment: comment,
-                is_internal_note: internalCheckbox.checked
-            })
+            body: formData
         })
         .then(response => response.json())
         .then(data => {
@@ -560,6 +620,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Clear form
                 commentTextarea.value = '';
                 internalCheckbox.checked = false;
+                fileInput.value = '';
+                fileCountSpan.textContent = '';
+                fileListDiv.innerHTML = '';
 
                 // Show success message
                 showSuccess('Update added successfully');
@@ -589,6 +652,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const containerClass = update.is_internal_note ? 'update-item flex bg-red-50 p-3 rounded-lg border border-red-100' : 'update-item flex';
         const iconBgClass = update.is_internal_note ? 'bg-red-100' : 'bg-blue-100';
         const iconColorClass = update.is_internal_note ? 'text-red-600' : 'text-blue-600';
+
+        // Build documents HTML
+        let documentsHtml = '';
+        if (update.documents && update.documents.length > 0) {
+            documentsHtml = '<div class="mt-2 flex flex-wrap gap-2" id="update-documents-' + update.id + '">';
+            update.documents.forEach(doc => {
+                documentsHtml += `
+                    <a href="${doc.url}" target="_blank" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded border border-blue-200 hover:bg-blue-100">
+                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                        </svg>
+                        ${doc.name}
+                    </a>
+                `;
+            });
+            documentsHtml += '</div>';
+        }
 
         return `
             <div class="${containerClass}" data-update-id="${update.id}">
@@ -623,6 +703,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div class="mt-1 text-sm text-gray-600 markdown-preview" id="update-comment-${update.id}" data-raw="${update.comment.replace(/"/g, '&quot;')}">${marked.parse(update.comment)}</div>
+                    ${documentsHtml}
                 </div>
             </div>
         `;

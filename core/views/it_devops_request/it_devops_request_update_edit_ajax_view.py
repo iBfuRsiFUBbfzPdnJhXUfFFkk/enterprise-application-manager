@@ -23,6 +23,13 @@ def it_devops_request_update_edit_ajax_view(request: HttpRequest, update_id: int
         update.is_internal_note = is_internal
         update.save()
 
+        documents_data = [{
+            "id": doc.id,
+            "name": doc.name,
+            "url": doc.get_file_url(),
+            "extension": doc.get_file_extension(),
+        } for doc in update.documents.all()]
+
         response_data = {
             "success": True,
             "update": {
@@ -31,6 +38,7 @@ def it_devops_request_update_edit_ajax_view(request: HttpRequest, update_id: int
                 "comment": update.comment,
                 "datetime_created": update.datetime_created.strftime("%Y-%m-%d %H:%M"),
                 "is_internal_note": update.is_internal_note,
+                "documents": documents_data,
             }
         }
 

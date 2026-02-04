@@ -15,6 +15,9 @@ class ITDevOpsRequestUpdate(AbstractBaseModel, AbstractComment):
     datetime_created = DateTimeField(auto_now_add=True)
     is_internal_note = models.BooleanField(null=True, blank=True, default=False)
 
+    # Attachments
+    documents = models.ManyToManyField("Document", blank=True, related_name="it_devops_request_updates")
+
     def __str__(self):
         if self.it_devops_request and self.person_author:
             return f"Update by {self.person_author} on {self.it_devops_request.document_id or 'Request'}"
