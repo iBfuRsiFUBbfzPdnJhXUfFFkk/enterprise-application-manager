@@ -316,18 +316,23 @@
                                     <p class="mt-1 text-xs text-gray-500">Supports Markdown: **bold**, *italic*, `code`, - lists, [links](url)</p>
                                 </div>
                                 <div id="add-preview-container" class="hidden w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 markdown-preview min-h-[80px]"></div>
-                                <!-- File Upload -->
+                                <!-- File Upload with Drag & Drop -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Attachments</label>
-                                    <div class="flex items-center space-x-2">
-                                        <label class="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                            <svg class="h-4 w-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+                                    <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                                        <div class="flex flex-col items-center justify-center space-y-2">
+                                            <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                             </svg>
-                                            Attach Files
-                                            <input type="file" id="update-documents" name="documents" multiple class="hidden">
-                                        </label>
-                                        <span id="file-count" class="text-sm text-gray-500"></span>
+                                            <div class="text-sm text-gray-600">
+                                                <label class="cursor-pointer text-blue-600 hover:text-blue-700 font-medium">
+                                                    Click to upload
+                                                    <input type="file" id="update-documents" name="documents" multiple class="hidden">
+                                                </label>
+                                                <span class="text-gray-500">, drag & drop, or paste</span>
+                                            </div>
+                                            <p class="text-xs text-gray-400">Any file type supported</p>
+                                        </div>
                                     </div>
                                     <div id="file-list" class="mt-2 space-y-1"></div>
                                 </div>
@@ -554,32 +559,119 @@ document.addEventListener('DOMContentLoaded', function() {
     const commentTextarea = document.getElementById('update-comment');
     const internalCheckbox = document.getElementById('update-internal');
     const fileInput = document.getElementById('update-documents');
-    const fileCountSpan = document.getElementById('file-count');
+    const dropZone = document.getElementById('drop-zone');
     const fileListDiv = document.getElementById('file-list');
     const errorDiv = document.getElementById('update-error');
     const successDiv = document.getElementById('update-success');
     const updatesList = document.getElementById('updates-list');
 
-    // File input change handler
-    fileInput.addEventListener('change', function() {
-        const files = this.files;
-        if (files.length > 0) {
-            fileCountSpan.textContent = `${files.length} file(s) selected`;
-            fileListDiv.innerHTML = '';
-            for (let i = 0; i < files.length; i++) {
-                const fileDiv = document.createElement('div');
-                fileDiv.className = 'text-xs text-gray-600 flex items-center';
-                fileDiv.innerHTML = `
+    // Store selected files (allows adding from multiple sources)
+    let selectedFiles = [];
+
+    // Render file list UI
+    function renderFileList() {
+        fileListDiv.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+            const fileDiv = document.createElement('div');
+            fileDiv.className = 'text-xs text-gray-600 flex items-center justify-between bg-gray-50 px-2 py-1 rounded';
+            fileDiv.innerHTML = `
+                <div class="flex items-center">
                     <svg class="h-3 w-3 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
-                    ${files[i].name}
-                `;
-                fileListDiv.appendChild(fileDiv);
+                    <span class="truncate max-w-xs">${file.name}</span>
+                    <span class="text-gray-400 ml-1">(${formatFileSize(file.size)})</span>
+                </div>
+                <button type="button" data-index="${index}" class="remove-file ml-2 text-red-500 hover:text-red-700">
+                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            `;
+            fileListDiv.appendChild(fileDiv);
+        });
+
+        // Add click handlers for remove buttons
+        fileListDiv.querySelectorAll('.remove-file').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                selectedFiles.splice(index, 1);
+                renderFileList();
+            });
+        });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function addFiles(files) {
+        for (let i = 0; i < files.length; i++) {
+            // Check for duplicates by name and size
+            const exists = selectedFiles.some(f => f.name === files[i].name && f.size === files[i].size);
+            if (!exists) {
+                selectedFiles.push(files[i]);
             }
-        } else {
-            fileCountSpan.textContent = '';
-            fileListDiv.innerHTML = '';
+        }
+        renderFileList();
+    }
+
+    // File input change handler
+    fileInput.addEventListener('change', function() {
+        addFiles(this.files);
+        this.value = ''; // Reset so same file can be selected again
+    });
+
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.add('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-blue-500', 'bg-blue-50');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-blue-500', 'bg-blue-50');
+        if (e.dataTransfer.files.length > 0) {
+            addFiles(e.dataTransfer.files);
+        }
+    });
+
+    // Paste handler (on the form or textarea)
+    form.addEventListener('paste', function(e) {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+
+        const files = [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].kind === 'file') {
+                const file = items[i].getAsFile();
+                if (file) {
+                    // Generate a name for pasted images
+                    let fileName = file.name;
+                    if (fileName === 'image.png' || !fileName) {
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        fileName = `pasted-${timestamp}.${file.type.split('/')[1] || 'png'}`;
+                    }
+                    // Create a new file with the generated name
+                    const renamedFile = new File([file], fileName, { type: file.type });
+                    files.push(renamedFile);
+                }
+            }
+        }
+        if (files.length > 0) {
+            addFiles(files);
         }
     });
 
@@ -600,10 +692,9 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('comment', comment);
         formData.append('is_internal_note', internalCheckbox.checked ? 'true' : 'false');
 
-        // Add files
-        const files = fileInput.files;
-        for (let i = 0; i < files.length; i++) {
-            formData.append('documents', files[i]);
+        // Add files from our selectedFiles array
+        for (let i = 0; i < selectedFiles.length; i++) {
+            formData.append('documents', selectedFiles[i]);
         }
 
         // Submit via AJAX
@@ -621,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 commentTextarea.value = '';
                 internalCheckbox.checked = false;
                 fileInput.value = '';
-                fileCountSpan.textContent = '';
+                selectedFiles = [];
                 fileListDiv.innerHTML = '';
 
                 // Show success message
