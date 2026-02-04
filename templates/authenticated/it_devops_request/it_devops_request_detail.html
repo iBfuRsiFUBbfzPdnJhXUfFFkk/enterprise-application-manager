@@ -396,13 +396,28 @@
                                     </div>
                                     <div class="mt-1 text-sm text-gray-600 markdown-preview markdown-content" id="update-comment-{{ update.id }}" data-raw="{{ update.comment|escapejs }}"></div>
                                     {% if update.documents.exists %}
-                                    <div class="mt-2 flex flex-wrap gap-2" id="update-documents-{{ update.id }}">
+                                    <div class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" id="update-documents-{{ update.id }}">
                                         {% for doc in update.documents.all %}
-                                        <a href="{{ doc.get_file_url }}" target="_blank" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded border border-blue-200 hover:bg-blue-100">
-                                            <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-                                            </svg>
-                                            {{ doc.name }}
+                                        <a href="{% url 'document_detail' model_id=doc.id %}" class="group block p-2 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                                            {% if doc.is_image and doc.has_thumbnail %}
+                                            <div class="aspect-square mb-2 rounded overflow-hidden bg-gray-100">
+                                                <img src="{{ doc.get_thumbnail_url }}" alt="{{ doc.name }}" class="w-full h-full object-cover">
+                                            </div>
+                                            {% elif doc.is_image %}
+                                            <div class="aspect-square mb-2 rounded overflow-hidden bg-gray-100">
+                                                <img src="{{ doc.get_file_url }}" alt="{{ doc.name }}" class="w-full h-full object-cover">
+                                            </div>
+                                            {% else %}
+                                            <div class="aspect-square mb-2 rounded bg-gray-100 flex items-center justify-center">
+                                                <div class="text-center">
+                                                    <svg class="h-8 w-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                    </svg>
+                                                    <span class="text-xs font-medium text-gray-500 mt-1">{{ doc.get_file_extension }}</span>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            <p class="text-xs text-gray-700 truncate group-hover:text-blue-700" title="{{ doc.name }}">{{ doc.name }}</p>
                                         </a>
                                         {% endfor %}
                                     </div>
@@ -744,17 +759,35 @@ document.addEventListener('DOMContentLoaded', function() {
         const iconBgClass = update.is_internal_note ? 'bg-red-100' : 'bg-blue-100';
         const iconColorClass = update.is_internal_note ? 'text-red-600' : 'text-blue-600';
 
-        // Build documents HTML
+        // Build documents HTML with previews
         let documentsHtml = '';
         if (update.documents && update.documents.length > 0) {
-            documentsHtml = '<div class="mt-2 flex flex-wrap gap-2" id="update-documents-' + update.id + '">';
+            documentsHtml = '<div class="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" id="update-documents-' + update.id + '">';
             update.documents.forEach(doc => {
+                let previewHtml;
+                if (doc.is_image) {
+                    const imgSrc = doc.thumbnail_url || doc.url;
+                    previewHtml = `
+                        <div class="aspect-square mb-2 rounded overflow-hidden bg-gray-100">
+                            <img src="${imgSrc}" alt="${doc.name}" class="w-full h-full object-cover">
+                        </div>
+                    `;
+                } else {
+                    previewHtml = `
+                        <div class="aspect-square mb-2 rounded bg-gray-100 flex items-center justify-center">
+                            <div class="text-center">
+                                <svg class="h-8 w-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span class="text-xs font-medium text-gray-500 mt-1">${doc.extension || 'FILE'}</span>
+                            </div>
+                        </div>
+                    `;
+                }
                 documentsHtml += `
-                    <a href="${doc.url}" target="_blank" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-700 bg-blue-50 rounded border border-blue-200 hover:bg-blue-100">
-                        <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
-                        </svg>
-                        ${doc.name}
+                    <a href="${doc.detail_url}" class="group block p-2 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors">
+                        ${previewHtml}
+                        <p class="text-xs text-gray-700 truncate group-hover:text-blue-700" title="${doc.name}">${doc.name}</p>
                     </a>
                 `;
             });

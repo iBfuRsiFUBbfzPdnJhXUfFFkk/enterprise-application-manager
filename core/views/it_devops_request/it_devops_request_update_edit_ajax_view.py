@@ -1,6 +1,7 @@
 import json
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from core.models.it_devops_request_update import ITDevOpsRequestUpdate
@@ -27,7 +28,10 @@ def it_devops_request_update_edit_ajax_view(request: HttpRequest, update_id: int
             "id": doc.id,
             "name": doc.name,
             "url": doc.get_file_url(),
+            "detail_url": reverse("document_detail", kwargs={"model_id": doc.id}),
             "extension": doc.get_file_extension(),
+            "is_image": doc.is_image,
+            "thumbnail_url": doc.get_thumbnail_url(),
         } for doc in update.documents.all()]
 
         response_data = {
