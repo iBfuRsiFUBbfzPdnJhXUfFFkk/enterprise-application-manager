@@ -310,7 +310,7 @@
                     <div id="updates-list" class="space-y-4">
                         {% if updates %}
                             {% for update in updates %}
-                            <div class="flex {% if update.is_internal_note %}bg-red-50 p-3 rounded-lg border border-red-100{% endif %}">
+                            <div class="update-item flex {% if update.is_internal_note %}bg-red-50 p-3 rounded-lg border border-red-100{% endif %}" data-update-id="{{ update.id }}">
                                 <div class="flex-shrink-0">
                                     <div class="h-8 w-8 rounded-full {% if update.is_internal_note %}bg-red-100{% else %}bg-blue-100{% endif %} flex items-center justify-center">
                                         <svg class="h-4 w-4 {% if update.is_internal_note %}text-red-600{% else %}text-blue-600{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,12 +483,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const internalBadge = update.is_internal_note
             ? '<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">Internal</span>'
             : '';
-        const containerClass = update.is_internal_note ? 'flex bg-red-50 p-3 rounded-lg border border-red-100' : 'flex';
+        const containerClass = update.is_internal_note ? 'update-item flex bg-red-50 p-3 rounded-lg border border-red-100' : 'update-item flex';
         const iconBgClass = update.is_internal_note ? 'bg-red-100' : 'bg-blue-100';
         const iconColorClass = update.is_internal_note ? 'text-red-600' : 'text-blue-600';
 
         return `
-            <div class="${containerClass}">
+            <div class="${containerClass}" data-update-id="${update.id}">
                 <div class="flex-shrink-0">
                     <div class="h-8 w-8 rounded-full ${iconBgClass} flex items-center justify-center">
                         <svg class="h-4 w-4 ${iconColorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,13 +571,13 @@ function deleteUpdate(updateId, buttonElement) {
     .then(data => {
         if (data.success) {
             // Remove the update element from DOM
-            const updateElement = buttonElement.closest('.flex');
+            const updateElement = buttonElement.closest('.update-item');
             if (updateElement) {
                 updateElement.remove();
             }
             // Check if no updates left
             const updatesList = document.getElementById('updates-list');
-            if (updatesList && updatesList.querySelectorAll('.flex').length === 0) {
+            if (updatesList && updatesList.querySelectorAll('.update-item').length === 0) {
                 updatesList.innerHTML = '<p class="text-sm text-gray-500 italic">No updates yet. Add the first update above.</p>';
             }
         } else {
