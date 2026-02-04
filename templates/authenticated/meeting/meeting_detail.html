@@ -1,4 +1,37 @@
 {% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* Select2 styling for assignee dropdown */
+    .select2-container--default .select2-selection--single {
+        height: 42px;
+        padding: 6px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px;
+        padding-left: 0;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px;
+    }
+    .select2-dropdown {
+        border-color: #d1d5db;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #3b82f6;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -631,5 +664,19 @@ function toggleAttendance(meetingId, personId, row) {
         console.error('Error toggling attendance:', error);
     });
 }
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Select2 for assignee dropdown in action item form
+        $('#id_assignee').select2({
+            placeholder: 'Search for an assignee...',
+            allowClear: true,
+            width: '100%'
+        });
+    });
 </script>
 {% endblock %}
