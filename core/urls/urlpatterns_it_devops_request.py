@@ -6,6 +6,8 @@ from core.views.it_devops_request.it_devops_request_edit_view import it_devops_r
 from core.views.it_devops_request.it_devops_request_export_docx_view import it_devops_request_export_docx_view
 from core.views.it_devops_request.it_devops_request_export_pdf_view import it_devops_request_export_pdf_view
 from core.views.it_devops_request.it_devops_request_update_add_ajax_view import it_devops_request_update_add_ajax_view
+from core.views.it_devops_request.it_devops_request_update_delete_ajax_view import it_devops_request_update_delete_ajax_view
+from core.views.it_devops_request.it_devops_request_update_edit_ajax_view import it_devops_request_update_edit_ajax_view
 from core.views.it_devops_request.it_devops_request_view import it_devops_request_view
 
 
@@ -17,4 +19,6 @@ urlpatterns_it_devops_request: list[URLPattern | URLResolver] = [
     path("it-devops-request/export/docx/", it_devops_request_export_docx_view, name="it_devops_request_export_docx"),
     path("it-devops-request/export/pdf/", it_devops_request_export_pdf_view, name="it_devops_request_export_pdf"),
     path("it-devops-request/<int:model_id>/update/add/", it_devops_request_update_add_ajax_view, name="it_devops_request_update_add"),
+    path("it-devops-request/update/<int:update_id>/edit/", it_devops_request_update_edit_ajax_view, name="it_devops_request_update_edit"),
+    path("it-devops-request/update/<int:update_id>/delete/", it_devops_request_update_delete_ajax_view, name="it_devops_request_update_delete"),
 ]
