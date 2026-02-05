@@ -14,6 +14,7 @@ from core.urls.urlpatterns_api import urlpatterns_api
 from core.urls.urlpatterns_api_resources import urlpatterns_api_resources
 from core.urls.urlpatterns_application import urlpatterns_application
 from core.urls.urlpatterns_application_group import urlpatterns_application_group
+from core.urls.urlpatterns_approval import urlpatterns_approval
 from core.urls.urlpatterns_bad_interaction import urlpatterns_bad_interaction
 from core.urls.urlpatterns_billing_code import urlpatterns_billing_code
 from core.urls.urlpatterns_calendar import urlpatterns_calendar
@@ -105,6 +106,7 @@ urlpatterns_authenticated: list[URLPattern | URLResolver] = [
     *urlpatterns_api_resources,
     *urlpatterns_application,
     *urlpatterns_application_group,
+    *urlpatterns_approval,
     *urlpatterns_bad_interaction,
     *urlpatterns_billing_code,
     *urlpatterns_calendar,

@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.contrib.contenttypes.models import ContentType
 
 from core.models.application_pin import ApplicationPin
+from core.models.approval import Approval
+from core.models.approval_update import ApprovalUpdate
 from core.models.comment import Comment
 from core.models.competitor import Competitor
 from core.models.it_devops_request import ITDevOpsRequest
@@ -28,6 +30,66 @@ class ApplicationPinAdmin(admin.ModelAdmin):
         }),
         ('Timestamps', {
             'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(Approval)
+class ApprovalAdmin(admin.ModelAdmin):
+    list_display = ('document_id', 'name', 'status', 'person_requester', 'date_requested', 'date_expiration')
+    list_filter = ('status', 'date_requested', 'date_expiration')
+    search_fields = ('document_id', 'name', 'description', 'reference_number')
+    ordering = ('-date_requested', '-id')
+    readonly_fields = ('document_id', 'created', 'modified')
+    filter_horizontal = ('approvers', 'documents', 'links')
+
+    fieldsets = (
+        ('Document Information', {
+            'fields': ('document_id', 'name')
+        }),
+        ('Status', {
+            'fields': ('status', 'reference_number')
+        }),
+        ('People', {
+            'fields': ('person_requester', 'approvers')
+        }),
+        ('Related Entities', {
+            'fields': ('application', 'project')
+        }),
+        ('Description', {
+            'fields': ('description',)
+        }),
+        ('Timeline', {
+            'fields': ('date_requested', 'date_approved', 'date_expiration')
+        }),
+        ('Attachments & Links', {
+            'fields': ('documents', 'links')
+        }),
+        ('Additional', {
+            'fields': ('comment',)
+        }),
+        ('Timestamps', {
+            'fields': ('created', 'modified'),
+            'classes': ('collapse',)
+        }),
+    )
+
+
+@admin.register(ApprovalUpdate)
+class ApprovalUpdateAdmin(admin.ModelAdmin):
+    list_display = ('approval', 'person_author', 'datetime_created', 'is_internal_note')
+    list_filter = ('is_internal_note', 'datetime_created')
+    search_fields = ('approval__document_id', 'approval__name', 'comment')
+    ordering = ('-datetime_created', '-id')
+    readonly_fields = ('datetime_created', 'created', 'modified')
+
+    fieldsets = (
+        (None, {
+            'fields': ('approval', 'person_author', 'comment', 'is_internal_note')
+        }),
+        ('Timestamps', {
+            'fields': ('datetime_created', 'created', 'modified'),
             'classes': ('collapse',)
         }),
     )

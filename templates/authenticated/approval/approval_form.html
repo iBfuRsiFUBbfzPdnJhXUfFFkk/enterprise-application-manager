@@ -1,0 +1,527 @@
+{% extends 'authenticated/base_authenticated.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 42px;
+        padding: 6px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px;
+        padding-left: 0;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px;
+    }
+    .select2-dropdown {
+        border-color: #d1d5db;
+        border-radius: 0.375rem;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #3b82f6;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'authenticated/common/components/link_modal.html' %}
+{% include 'authenticated/common/components/document_modal.html' %}
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6">
+        <div class="mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center">
+                <a href="{% url 'approval' %}" class="mr-4 text-gray-400 hover:text-gray-600 transition-colors duration-150">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">{% if form.instance.pk %}Edit{% else %}Create{% endif %} Approval</h1>
+                    <p class="mt-1 text-sm text-gray-500">{% if form.instance.pk %}Update approval details{% else %}Record a new approval{% endif %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <form method="POST" class="w-full">
+            {% csrf_token %}
+
+            <div class="space-y-6 w-full">
+                <!-- Document ID -->
+                {% if form.instance.pk and form.instance.document_id %}
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Document ID:</strong> <span class="font-mono font-bold">{{ form.instance.document_id }}</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">
+                                A unique document ID will be automatically generated when you save this approval
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Basic Information -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Basic Information</h2>
+                        <p class="mt-1 text-sm text-gray-500">Approval title and status</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 gap-6">
+                        <div>
+                            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Approval Title {% if form.name.field.required %}<span class="text-red-500">*</span>{% endif %}
+                            </label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<p class="mt-2 text-sm text-red-600">{{ form.name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Status
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}<p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ form.reference_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                    External Reference #
+                                </label>
+                                {{ form.reference_number }}
+                                <p class="mt-1 text-xs text-gray-500">External reference number (optional)</p>
+                                {% if form.reference_number.errors %}<p class="mt-2 text-sm text-red-600">{{ form.reference_number.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- People -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">People</h2>
+                        <p class="mt-1 text-sm text-gray-500">Who requested and who approved</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="{{ form.person_requester.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                    Requester {% if form.person_requester.field.required %}<span class="text-red-500">*</span>{% endif %}
+                                </label>
+                                {% if current_user_person_id %}
+                                <button type="button" id="select-me-btn-requester" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 transition-colors duration-150">
+                                    <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    Select Me
+                                </button>
+                                {% endif %}
+                            </div>
+                            {{ form.person_requester }}
+                            {% if form.person_requester.errors %}<p class="mt-2 text-sm text-red-600">{{ form.person_requester.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.approvers.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Approvers
+                            </label>
+                            {{ form.approvers }}
+                            <p class="mt-1 text-xs text-gray-500">People who granted or denied the approval (select multiple)</p>
+                            {% if form.approvers.errors %}<p class="mt-2 text-sm text-red-600">{{ form.approvers.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Entities -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Entities</h2>
+                        <p class="mt-1 text-sm text-gray-500">Link to application or project (optional)</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="{{ form.application.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Application
+                            </label>
+                            {{ form.application }}
+                            {% if form.application.errors %}<p class="mt-2 text-sm text-red-600">{{ form.application.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.project.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Project
+                            </label>
+                            {{ form.project }}
+                            {% if form.project.errors %}<p class="mt-2 text-sm text-red-600">{{ form.project.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Approval Details</h2>
+                        <p class="mt-1 text-sm text-gray-500">What was approved (Markdown supported)</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Description
+                            </label>
+                            {{ form.description }}
+                            <p class="mt-1 text-xs text-gray-500">Describe what was approved, the scope, and any conditions.</p>
+                            {% if form.description.errors %}<p class="mt-2 text-sm text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
+                        <p class="mt-1 text-sm text-gray-500">Important dates for this approval</p>
+                    </div>
+                    <div class="px-6 py-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="{{ form.date_requested.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Requested
+                            </label>
+                            {{ form.date_requested }}
+                            {% if form.date_requested.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_requested.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_approved.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Date Decision Made
+                            </label>
+                            {{ form.date_approved }}
+                            <p class="mt-1 text-xs text-gray-500">When was the approval decision made?</p>
+                            {% if form.date_approved.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_approved.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ form.date_expiration.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                Expiration Date
+                            </label>
+                            {{ form.date_expiration }}
+                            <p class="mt-1 text-xs text-gray-500">When does this approval expire? (optional)</p>
+                            {% if form.date_expiration.errors %}<p class="mt-2 text-sm text-red-600">{{ form.date_expiration.errors.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="bg-white shadow-md rounded-lg w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 rounded-t-lg">
+                        <h2 class="text-lg font-semibold text-gray-900">Related Links</h2>
+                        <p class="mt-1 text-sm text-gray-500">Reference links and resources for this approval</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Links</label>
+                            <button type="button" id="open-link-modal-btn" class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 transition-colors duration-150">
+                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Add New Link
+                            </button>
+                        </div>
+                        <div id="links-chips" class="flex flex-wrap gap-2 mb-3"></div>
+                        <div class="relative" id="links-dropdown-container">
+                            <input type="text" id="links-search" placeholder="Search links..."
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   autocomplete="off">
+                            <div id="links-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <div class="hidden">{{ form.links }}</div>
+                        <p class="mt-2 text-xs text-gray-500">Search and select links.</p>
+                        {% if form.links.errors %}<p class="mt-2 text-sm text-red-600">{{ form.links.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="bg-white shadow-md rounded-lg w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 rounded-t-lg">
+                        <h2 class="text-lg font-semibold text-gray-900">Supporting Documents</h2>
+                        <p class="mt-1 text-sm text-gray-500">Documents supporting this approval</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-medium text-gray-700">Documents</label>
+                            <button type="button" id="open-document-modal-btn"
+                                    class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                Upload New
+                            </button>
+                        </div>
+                        <div id="documents-chips" class="flex flex-wrap gap-2 mb-3"></div>
+                        <div class="relative" id="documents-dropdown-container">
+                            <input type="text" id="documents-search" placeholder="Search documents..."
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   autocomplete="off">
+                            <div id="documents-dropdown" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto"></div>
+                        </div>
+                        <div class="hidden">{{ form.documents }}</div>
+                        <p class="mt-2 text-xs text-gray-500">Search and select existing documents or upload new ones.</p>
+                        {% if form.documents.errors %}<p class="mt-2 text-sm text-red-600">{{ form.documents.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Additional Notes -->
+                <div class="bg-white shadow-md rounded-lg overflow-hidden w-full">
+                    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
+                        <p class="mt-1 text-sm text-gray-500">Any other relevant information</p>
+                    </div>
+                    <div class="px-6 py-6">
+                        <label for="{{ form.comment.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Comments
+                        </label>
+                        {{ form.comment }}
+                        {% if form.comment.errors %}<p class="mt-2 text-sm text-red-600">{{ form.comment.errors.0 }}</p>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Spacer for sticky footer -->
+                <div class="h-20"></div>
+            </div>
+
+            <!-- Sticky Form Actions -->
+            <div class="fixed bottom-[28px] left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+                <div class="px-4 sm:px-6 lg:px-8 py-4">
+                    <div class="flex items-center justify-between">
+                        <a href="{% url 'approval' %}"
+                           class="flex-1 mr-4 px-6 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150 text-center">
+                            Cancel
+                        </a>
+                        <button type="submit"
+                                class="flex-1 ml-4 px-6 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150">
+                            {% if form.instance.pk %}Update Approval{% else %}Create Approval{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Searchable Dropdown with Chips Component
+    function initSearchableDropdown(config) {
+        const hiddenSelect = document.getElementById(config.selectId);
+        const searchInput = document.getElementById(config.searchId);
+        const dropdown = document.getElementById(config.dropdownId);
+        const chipsContainer = document.getElementById(config.chipsId);
+
+        if (!hiddenSelect || !searchInput || !dropdown || !chipsContainer) return;
+
+        let allOptions = [];
+        Array.from(hiddenSelect.options).forEach(opt => {
+            allOptions.push({ id: opt.value, text: opt.text, selected: opt.selected });
+        });
+
+        function renderChips() {
+            chipsContainer.innerHTML = '';
+            allOptions.filter(opt => opt.selected).forEach(opt => {
+                const chip = document.createElement('span');
+                chip.className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800';
+                chip.innerHTML = `
+                    <span class="max-w-xs truncate">${opt.text}</span>
+                    <button type="button" data-id="${opt.id}" class="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-600 focus:outline-none">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                `;
+                chip.querySelector('button').addEventListener('click', function() {
+                    toggleSelection(this.dataset.id, false);
+                });
+                chipsContainer.appendChild(chip);
+            });
+        }
+
+        function renderDropdown(filter = '') {
+            dropdown.innerHTML = '';
+            const filterLower = filter.toLowerCase();
+            const filtered = allOptions.filter(opt =>
+                !opt.selected && opt.text.toLowerCase().includes(filterLower)
+            );
+
+            if (filtered.length === 0) {
+                dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500 text-sm">No results found</div>';
+                return;
+            }
+
+            filtered.forEach(opt => {
+                const item = document.createElement('div');
+                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm';
+                item.textContent = opt.text;
+                item.dataset.id = opt.id;
+                item.addEventListener('click', function() {
+                    toggleSelection(this.dataset.id, true);
+                    searchInput.value = '';
+                    dropdown.classList.add('hidden');
+                });
+                dropdown.appendChild(item);
+            });
+        }
+
+        function toggleSelection(id, selected) {
+            const opt = allOptions.find(o => o.id === id);
+            if (opt) opt.selected = selected;
+
+            Array.from(hiddenSelect.options).forEach(o => {
+                if (o.value === id) o.selected = selected;
+            });
+
+            renderChips();
+            renderDropdown(searchInput.value);
+        }
+
+        function addOption(id, text, selected = true) {
+            if (allOptions.find(o => o.id === String(id))) {
+                toggleSelection(String(id), selected);
+                return;
+            }
+
+            allOptions.push({ id: String(id), text: text, selected: selected });
+
+            const option = document.createElement('option');
+            option.value = id;
+            option.text = text;
+            option.selected = selected;
+            hiddenSelect.add(option);
+
+            renderChips();
+            renderDropdown(searchInput.value);
+        }
+
+        searchInput.addEventListener('focus', function() {
+            renderDropdown(this.value);
+            dropdown.classList.remove('hidden');
+        });
+
+        searchInput.addEventListener('input', function() {
+            renderDropdown(this.value);
+            dropdown.classList.remove('hidden');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        renderChips();
+
+        return { addOption };
+    }
+
+    // Initialize Links dropdown
+    const linksDropdown = initSearchableDropdown({
+        selectId: '{{ form.links.id_for_label }}',
+        searchId: 'links-search',
+        dropdownId: 'links-dropdown',
+        chipsId: 'links-chips'
+    });
+
+    // Initialize Documents dropdown
+    const documentsDropdown = initSearchableDropdown({
+        selectId: '{{ form.documents.id_for_label }}',
+        searchId: 'documents-search',
+        dropdownId: 'documents-dropdown',
+        chipsId: 'documents-chips'
+    });
+
+    // Link Modal Integration
+    const openLinkModalBtn = document.getElementById('open-link-modal-btn');
+    if (openLinkModalBtn && linksDropdown) {
+        openLinkModalBtn.addEventListener('click', function() {
+            window.openLinkModal(function(newLink) {
+                linksDropdown.addOption(newLink.id, newLink.name, true);
+            });
+        });
+    }
+
+    // Document Modal Integration
+    const openDocumentModalBtn = document.getElementById('open-document-modal-btn');
+    if (openDocumentModalBtn && documentsDropdown) {
+        openDocumentModalBtn.addEventListener('click', function() {
+            window.openDocumentModal(function(newDocument) {
+                const text = newDocument.name + ' v' + newDocument.version + ' (' + newDocument.blob_filename + ')';
+                documentsDropdown.addOption(newDocument.id, text, true);
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#id_person_requester').select2({
+            placeholder: 'Search for a requester...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#id_approvers').select2({
+            placeholder: 'Search for approvers...',
+            allowClear: true,
+            width: '100%',
+            multiple: true
+        });
+
+        $('#id_application').select2({
+            placeholder: 'Search for an application...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#id_project').select2({
+            placeholder: 'Search for a project...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        const selectMeBtn = document.getElementById('select-me-btn-requester');
+        if (selectMeBtn) {
+            selectMeBtn.addEventListener('click', function() {
+                const currentUserId = '{{ current_user_person_id }}';
+                if (currentUserId) {
+                    $('#id_person_requester').val(currentUserId).trigger('change');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
