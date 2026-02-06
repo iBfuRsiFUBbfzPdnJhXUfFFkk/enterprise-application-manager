@@ -21,6 +21,7 @@ def proposal_detail_view(request: HttpRequest, model_id: int) -> HttpResponse:
             "attachments",
             "links",
             "updates__person_author",
+            "updates__documents",
         ).get(id=model_id)
     except Proposal.DoesNotExist:
         return generic_500(request=request)

@@ -6,6 +6,8 @@ from core.views.proposal.proposal_edit_view import proposal_edit_view
 from core.views.proposal.proposal_export_docx_view import proposal_export_docx_view
 from core.views.proposal.proposal_export_pdf_view import proposal_export_pdf_view
 from core.views.proposal.proposal_update_add_ajax_view import proposal_update_add_ajax_view
+from core.views.proposal.proposal_update_delete_ajax_view import proposal_update_delete_ajax_view
+from core.views.proposal.proposal_update_edit_ajax_view import proposal_update_edit_ajax_view
 from core.views.proposal.proposal_view import proposal_view
 
 
@@ -17,4 +19,6 @@ urlpatterns_proposal: list[URLPattern | URLResolver] = [
     path("proposal/export/docx/", proposal_export_docx_view, name="proposal_export_docx"),
     path("proposal/export/pdf/", proposal_export_pdf_view, name="proposal_export_pdf"),
     path("proposal/<int:model_id>/update/add/", proposal_update_add_ajax_view, name="proposal_update_add"),
+    path("proposal/update/<int:update_id>/edit/", proposal_update_edit_ajax_view, name="proposal_update_edit"),
+    path("proposal/update/<int:update_id>/delete/", proposal_update_delete_ajax_view, name="proposal_update_delete"),
 ]

@@ -25,6 +25,10 @@ class ProposalUpdate(AbstractBaseModel, AbstractComment):
     datetime_created = DateTimeField(auto_now_add=True)
     is_internal_note = models.BooleanField(null=True, blank=True, default=False)
 
+    documents = models.ManyToManyField(
+        "Document", blank=True, related_name="proposal_updates"
+    )
+
     def __str__(self):
         if self.proposal and self.person_author:
             return f"Update by {self.person_author} on {self.proposal.document_id or 'Proposal'}"

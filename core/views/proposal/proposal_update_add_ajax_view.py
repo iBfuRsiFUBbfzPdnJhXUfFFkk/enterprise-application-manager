@@ -1,9 +1,11 @@
 import json
-from typing import Any, Mapping
+from typing import Any
 
 from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
+from core.models.document import Document
 from core.models.proposal import Proposal
 from core.models.proposal_update import ProposalUpdate
 from core.utilities.get_user_from_request import get_user_from_request
@@ -15,9 +17,16 @@ def proposal_update_add_ajax_view(request: HttpRequest, model_id: int) -> HttpRe
     try:
         proposal = Proposal.objects.get(id=model_id)
 
-        data = json.loads(request.body)
-        comment_text = data.get("comment", "").strip()
-        is_internal = data.get("is_internal_note", False)
+        content_type = request.content_type or ''
+        if 'multipart/form-data' in content_type:
+            comment_text = request.POST.get("comment", "").strip()
+            is_internal = request.POST.get("is_internal_note") == "true"
+            files = request.FILES.getlist("documents")
+        else:
+            data = json.loads(request.body)
+            comment_text = data.get("comment", "").strip()
+            is_internal = data.get("is_internal_note", False)
+            files = []
 
         if not comment_text:
             return JsonResponse({"success": False, "error": "Comment text is required"}, status=400)
@@ -37,14 +46,33 @@ def proposal_update_add_ajax_view(request: HttpRequest, model_id: int) -> HttpRe
             is_internal_note=is_internal,
         )
 
-        response_data: Mapping[str, Any] = {
+        documents_data = []
+        for uploaded_file in files:
+            doc = Document.objects.create(
+                name=uploaded_file.name,
+                file=uploaded_file,
+                version="1.0",
+            )
+            update.documents.add(doc)
+            documents_data.append({
+                "id": doc.id,
+                "name": doc.name,
+                "url": doc.get_file_url(),
+                "detail_url": reverse("document_detail", kwargs={"model_id": doc.id}),
+                "extension": doc.get_file_extension(),
+                "is_image": doc.is_image,
+                "thumbnail_url": doc.get_thumbnail_url(),
+            })
+
+        response_data: dict[str, Any] = {
             "success": True,
             "update": {
                 "id": update.id,
                 "author": str(person),
                 "comment": update.comment,
-                "datetime_created": update.datetime_created.strftime("%Y-%m-%d %H:%M:%S"),
+                "datetime_created": update.datetime_created.strftime("%Y-%m-%d %H:%M"),
                 "is_internal_note": update.is_internal_note,
+                "documents": documents_data,
             }
         }
 
