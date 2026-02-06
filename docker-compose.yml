@@ -2,7 +2,6 @@ services:
   # MinIO S3-compatible object storage
   minio:
     image: minio/minio:latest
-    container_name: enterprise-app-minio
     command: server /data --console-address ":9001"
     ports:
       - "9004:9000"   # MinIO S3 API (external port 9004)
@@ -18,15 +17,12 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
-    networks:
-      - enterprise-network
 
   # Django web application
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: enterprise-app-web
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./data/db.sqlite3:/app/db.sqlite3  # Database persistence (must be before .:/app)
@@ -71,13 +67,10 @@ services:
     depends_on:
       minio:
         condition: service_healthy
-    networks:
-      - enterprise-network
 
   # nginx reverse proxy with SSL
   nginx:
     image: nginx:alpine
-    container_name: enterprise-app-nginx
     ports:
       - "50478:443"   # HTTPS on port 50478
     volumes:
@@ -88,9 +81,3 @@ services:
     depends_on:
       web:
         condition: service_healthy
-    networks:
-      - enterprise-network
-
-networks:
-  enterprise-network:
-    driver: bridge
