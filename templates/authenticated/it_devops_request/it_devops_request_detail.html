@@ -474,6 +474,46 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Ticket Submission Helper -->
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Ticket Submission Helper</h2>
+                </div>
+                <div class="px-6 py-6 space-y-4">
+                    <!-- Title Row -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500 mb-1">Title</label>
+                        <div class="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-md px-4 py-3">
+                            <span class="text-sm text-gray-900 break-all mr-3" id="ticket-title">{{ request.name }}</span>
+                            <button type="button"
+                                    onclick="copyToClipboard(document.getElementById('ticket-title').textContent.trim(), this)"
+                                    class="flex-shrink-0 inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                <span>Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Description Row -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500 mb-1">Description</label>
+                        <div class="flex items-start justify-between bg-gray-50 border border-gray-200 rounded-md px-4 py-3">
+                            <pre class="text-sm text-gray-900 whitespace-pre-wrap break-all mr-3 font-sans" id="ticket-description">PLEASE SEE ATTACHED DOCUMENT FOR MORE INFORMATION
+{{ request.description }}</pre>
+                            <button type="button"
+                                    onclick="copyToClipboard(document.getElementById('ticket-description').textContent.trim(), this)"
+                                    class="flex-shrink-0 inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors mt-0.5">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                </svg>
+                                <span>Copy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -556,6 +596,27 @@
 <!-- Markdown Parser -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
+// Copy to clipboard with visual feedback
+function copyToClipboard(text, buttonElement) {
+    navigator.clipboard.writeText(text).then(function() {
+        const spanEl = buttonElement.querySelector('span');
+        const svgEl = buttonElement.querySelector('svg');
+        const originalText = spanEl.textContent;
+
+        svgEl.classList.add('hidden');
+        spanEl.textContent = 'Copied!';
+        buttonElement.classList.add('text-green-700', 'border-green-300', 'bg-green-50');
+        buttonElement.classList.remove('text-gray-700', 'border-gray-300', 'bg-white');
+
+        setTimeout(function() {
+            svgEl.classList.remove('hidden');
+            spanEl.textContent = originalText;
+            buttonElement.classList.remove('text-green-700', 'border-green-300', 'bg-green-50');
+            buttonElement.classList.add('text-gray-700', 'border-gray-300', 'bg-white');
+        }, 2000);
+    });
+}
+
 // Render markdown for all existing updates on page load
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.markdown-content').forEach(function(el) {
