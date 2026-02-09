@@ -78,6 +78,35 @@
 
     <!-- Main Content -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6 space-y-4">
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-md shadow-sm">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800">{{ message }}</p>
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <button type="button" class="inline-flex text-green-400 hover:text-green-600 focus:outline-none" onclick="this.parentElement.parentElement.parentElement.remove()">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="space-y-6">
             <!-- Request Overview -->
             <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -449,6 +478,26 @@
     </div>
 </div>
 
+<!-- Sticky Complete Button -->
+{% if request.status != 'completed' %}
+<div class="h-20"></div>
+<form method="post" action="{% url 'it_devops_request_complete' model_id=request.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="date_completed" id="complete-date-input">
+    <div class="fixed bottom-[28px] left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40">
+        <div class="px-4 sm:px-6 lg:px-8 py-4">
+            <button type="submit"
+                    class="w-full flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Mark as Complete
+            </button>
+        </div>
+    </div>
+</form>
+{% endif %}
+
 <!-- Edit Update Modal -->
 <div id="edit-update-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
@@ -515,6 +564,16 @@ document.addEventListener('DOMContentLoaded', function() {
             el.innerHTML = marked.parse(rawContent);
         }
     });
+
+    // Populate the hidden complete-date input with the client's local date
+    const completeDateInput = document.getElementById('complete-date-input');
+    if (completeDateInput) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        completeDateInput.value = `${year}-${month}-${day}`;
+    }
 });
 
 // Toggle functions for Add Update form
